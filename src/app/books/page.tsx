@@ -1,1 +1,5 @@
-export { default } from "../page";
+import { BooksView } from "@/components/books/books-view";
+
+export default function BooksPage() {
+  return <BooksView />;
+}
