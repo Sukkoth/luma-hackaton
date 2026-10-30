@@ -1,59 +1,197 @@
-import { FileText, Folder, Plus, Search } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Bookmark,
+  Folder,
+  MoreHorizontal,
+} from "lucide-react";
+import { TopNavbar } from "@/components/callivio/top-navbar";
+
+type NoteItem = {
+  id: string;
+  title: string;
+  passage: string;
+  excerpt: string;
+  planRef?: string;
+  folder: string;
+  date: string;
+};
+
+const SAMPLE_NOTES: ReadonlyArray<NoteItem> = [
+  {
+    id: "note-1",
+    title: "No Condemnation & Life in the Spirit",
+    passage: "Romans 8:1–11",
+    excerpt:
+      "Paul contrasts life according to the flesh with life according to the Spirit. The law of the Spirit of life has set us free from the law of sin and death. Meditated on how our mind set on the Spirit brings life and peace.",
+    planRef: "Bible in a Year • Day 212",
+    folder: "Plan Reflections",
+    date: "Nov 17, 2025",
+  },
+  {
+    id: "note-2",
+    title: "The Word Made Flesh & Grace upon Grace",
+    passage: "John 1:1–18",
+    excerpt:
+      "In the beginning was the Word, and the Word was with God, and the Word was God. He came into the world he made, and the darkness has not overcome it. Full of grace and truth.",
+    planRef: "The Four Gospels • Day 1",
+    folder: "Plan Reflections",
+    date: "Nov 12, 2025",
+  },
+  {
+    id: "note-3",
+    title: "Jesus the Exact Imprint of God's Nature",
+    passage: "Hebrews 1:1–4",
+    excerpt:
+      "God spoke through prophets in many portions, but in these last days He has spoken to us by His Son, whom He appointed heir of all things, through whom also He made the universe.",
+    planRef: "Book of Hebrews • Day 1",
+    folder: "Theology",
+    date: "Nov 08, 2025",
+  },
+  {
+    id: "note-4",
+    title: "The Lord is My Shepherd: Contentment & Provision",
+    passage: "Psalm 23:1–6",
+    excerpt:
+      "I shall not want. He makes me lie down in green pastures, leads me beside still waters. Even through the darkest valley, I will fear no evil for You are with me; Your rod and staff comfort me.",
+    folder: "Devotional",
+    date: "Oct 29, 2025",
+  },
+];
 
 export default function NotesPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Notes & Journals
-          </h1>
-          <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-            Keep study notes, reflections, and link them to plan sections.
-          </p>
-        </div>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-500">
-          <Plus className="h-4 w-4" />
-          <span>New Note</span>
-        </button>
-      </div>
+    <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
+      {/* Top Navbar */}
+      <TopNavbar userName="James" />
 
-      <div className="mt-8 grid gap-6 md:grid-cols-4">
-        {/* Folders sidebar */}
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="flex items-center justify-between text-xs font-semibold text-zinc-500 uppercase">
-            <span>Folders</span>
-            <button className="text-blue-600 hover:underline dark:text-blue-400">
-              + Add
+      <main className="mt-4 space-y-4">
+        {/* Top Header & New Note Action Banner */}
+        <section className="glass-panel flex flex-col justify-between gap-4 rounded-[28px] p-6 sm:flex-row sm:items-center sm:p-7">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+                Personal Journal
+              </span>
+              <span className="text-[12px] text-[#777777]">
+                Linked to Active Tracker
+              </span>
+            </div>
+            <h1 className="mt-2 text-[26px] font-normal tracking-tight text-black sm:text-[30px]">
+              Notes & Journals
+            </h1>
+            <p className="mt-1 text-[13px] text-[#666666]">
+              Keep study reflections, prayer journals, and link thoughts to your
+              Bible reading plan sections.
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85"
+            >
+              <Plus className="h-4 w-4" />
+              <span>New Note</span>
             </button>
           </div>
-          <div className="mt-3 space-y-1">
-            <button className="flex w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
-              <Folder className="h-4 w-4" />
-              <span>All Notes</span>
-            </button>
-          </div>
-        </div>
+        </section>
 
-        {/* Notes list placeholder */}
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-xs md:col-span-3 dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
-            <div className="flex items-center gap-2 text-sm text-zinc-500">
-              <Search className="h-4 w-4" />
-              <span>Search notes...</span>
+        {/* Notes Explorer Section */}
+        <section className="glass-panel rounded-[28px] p-6 sm:p-7">
+          {/* Toolbar: Folder tabs and Search */}
+          <div className="flex flex-col gap-4 border-b border-black/[0.04] pb-5 md:flex-row md:items-center md:justify-between">
+            {/* Folder Filter Tiles */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs backdrop-blur-md"
+              >
+                All Notes (4)
+              </button>
+              <button
+                type="button"
+                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black"
+              >
+                Plan Reflections (2)
+              </button>
+              <button
+                type="button"
+                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black"
+              >
+                Theology (1)
+              </button>
+              <button
+                type="button"
+                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black"
+              >
+                Devotional (1)
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888]" />
+              <input
+                type="text"
+                placeholder="Search notes..."
+                className="w-full rounded-[12px] border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden"
+              />
             </div>
           </div>
-          <div className="py-12 text-center text-sm text-zinc-500">
-            <FileText className="mx-auto h-8 w-8 text-zinc-400" />
-            <p className="mt-2 font-medium text-zinc-800 dark:text-zinc-200">
-              No notes yet
-            </p>
-            <p className="text-xs">
-              Create your first note or link reflections from plan readings.
-            </p>
+
+          {/* Notes Cards Grid */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {SAMPLE_NOTES.map((note) => (
+              <div
+                key={note.id}
+                className="group flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="rounded-[6px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6]">
+                      {note.passage}
+                    </span>
+                    <span className="text-[11px] text-[#888888]">
+                      {note.date}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-3 text-[17px] font-medium tracking-tight text-black group-hover:text-[#6894BC]">
+                    {note.title}
+                  </h3>
+                  <p className="mt-1.5 line-clamp-3 text-[13px] leading-relaxed font-normal text-[#666666]">
+                    {note.excerpt}
+                  </p>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[11px] text-[#777777]">
+                  <span className="flex items-center gap-1.5">
+                    {note.planRef ? (
+                      <>
+                        <Bookmark className="h-3 w-3 text-[#82ADD4]" />
+                        <span>{note.planRef}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Folder className="h-3 w-3 text-[#888888]" />
+                        <span>{note.folder}</span>
+                      </>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Note actions"
+                    className="flex h-7 w-7 items-center justify-center rounded-[8px] text-[#888888] hover:bg-black/5 hover:text-black"
+                  >
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
