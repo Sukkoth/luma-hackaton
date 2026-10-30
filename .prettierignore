@@ -5,3 +5,5 @@ build
 coverage
 dist
 bun.lock
+test-results
+playwright-report
