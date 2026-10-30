@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Urbanist";
+  src: url("/fonts/Urbanist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-gradient:
+    radial-gradient(
+      circle at 65% 25%,
+      rgba(195, 224, 248, 0.45) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(215, 235, 252, 0.35) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      rgba(205, 230, 250, 0.25) 0%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, #f5f7fa 0%, #eceef3 100%);
+  --ink: #000000;
+  --ink-muted: #555555;
+  --ink-faint: #888888;
+  --hero-blue: #75a2d2;
+  --neon-yellow: #ddfd2c;
+  --font-urbanist: "Urbanist", system-ui, -apple-system, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-hero-blue: var(--hero-blue);
+  --color-neon-yellow: var(--neon-yellow);
+  --font-urbanist: var(--font-urbanist);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-urbanist), "Urbanist", system-ui, sans-serif;
+  font-optical-sizing: auto;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism utility helpers */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 4px 24px -2px rgba(0, 0, 0, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.glass-hero {
+  background: linear-gradient(135deg, #8fb6de 0%, #74a2d3 45%, #598ec6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 12px 36px -8px rgba(89, 142, 198, 0.32),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45);
 }
