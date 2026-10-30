@@ -9,7 +9,10 @@ test.describe("App smoke tests", () => {
   test("main navigation routes load properly", async ({ page }) => {
     const routes = [
       { path: "/plans", heading: "Bible Plans" },
-      { path: "/plans/templates/sample-plan", heading: "Plan Template:" },
+      {
+        path: "/plans/templates/the_four_gospels_30",
+        heading: "The Four Gospels",
+      },
       { path: "/plans/sample-instance", heading: "Plan Progress:" },
       { path: "/insights", heading: "Insights & Analytics" },
       { path: "/notes", heading: "Notes & Journals" },
@@ -20,6 +23,23 @@ test.describe("App smoke tests", () => {
       await page.goto(route.path);
       await expect(page.locator("h1")).toContainText(route.heading);
     }
+  });
+
+  test("plan catalog displays plans and filters correctly", async ({
+    page,
+  }) => {
+    await page.goto("/plans");
+    await expect(page.getByText("Plan Catalog (29)")).toBeVisible();
+    await expect(page.getByText("The Four Gospels")).toBeVisible();
+    await expect(page.getByText("Bible in One Year")).toBeVisible();
+
+    // Test search filter
+    const searchInput = page.getByPlaceholder(
+      "Search plans by title or keywords..."
+    );
+    await searchInput.fill("Hebrews");
+    await expect(page.getByText("Book of Hebrews")).toBeVisible();
+    await expect(page.getByText("Bible in One Year")).not.toBeVisible();
   });
 
   test("Better Auth healthcheck returns ok", async ({ request }) => {
