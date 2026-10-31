@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
-import { Navbar } from "@/components/navigation/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const urbanist = localFont({
+  src: "./fonts/Urbanist-Variable.woff2",
+  variable: "--font-urbanist",
+  display: "swap",
+  weight: "100 900",
 });
 
 export const metadata: Metadata = {
@@ -27,17 +23,32 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${urbanist.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-        <Suspense
-          fallback={
-            <header className="h-14 border-b border-zinc-200 dark:border-zinc-800" />
-          }
-        >
-          <Navbar />
-        </Suspense>
-        <main className="flex-1">{children}</main>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('scripture-theme');
+                  var isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-full font-[family-name:var(--font-urbanist)] antialiased transition-colors duration-200">
+        <ThemeProvider defaultTheme="system">
+          <main className="flex-1">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );
