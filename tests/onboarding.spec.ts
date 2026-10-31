@@ -158,6 +158,10 @@ test.describe("Onboarding Experience via New User E2E", () => {
     await expect(page).toHaveURL("/home");
     await expect(page.getByText(`Hello, ${newUser.givenName}!`)).toBeVisible();
     await expect(page.getByText("Bible Progress")).toBeVisible();
+    await expect(page.getByText("0%").first()).toBeVisible();
+    await expect(page.getByText(/0 of \d+/)).toBeVisible();
+    await expect(page.getByText("No Active Reading Plans")).toBeVisible();
+    await expect(page.getByText("Freeze Shields")).toBeVisible();
 
     // 7. Verification that visiting /onboarding now redirects back to /home
     await page.goto("/onboarding");
