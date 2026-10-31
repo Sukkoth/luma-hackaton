@@ -47,7 +47,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-full font-[family-name:var(--font-urbanist)] antialiased transition-colors duration-200"
+        className="min-h-full font-urbanist antialiased transition-colors duration-200"
       >
         <ThemeProvider defaultTheme="system">
           <main className="flex-1">{children}</main>

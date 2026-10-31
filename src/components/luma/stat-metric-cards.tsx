@@ -39,13 +39,13 @@ export function StatMetricCards({
       {metrics.map((item) => (
         <div
           key={item.title}
-          className="glass-panel flex flex-col justify-between rounded-[24px] p-5 transition-colors duration-150 hover:bg-white/75 dark:hover:bg-white/[0.08]"
+          className="glass-panel flex flex-col justify-between rounded-3xl p-5 transition-colors duration-150 hover:bg-white/75 dark:hover:bg-white/8"
         >
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
               {item.title}
             </span>
-            <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+            <span className="rounded-full bg-black/4 px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
               {item.badge}
             </span>
           </div>

@@ -67,18 +67,18 @@ export function ActivityBarChart({
           <button
             type="button"
             aria-label="Export chart"
-            className="glass-pill flex h-8 w-8 items-center justify-center rounded-full text-black/70 shadow-2xs transition-colors hover:bg-white hover:text-black dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
+            className="glass-pill flex size-8 items-center justify-center rounded-full text-black/70 shadow-2xs transition-colors hover:bg-white hover:text-black dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
           >
-            <Download className="h-3.5 w-3.5 stroke-[1.75]" />
+            <Download className="size-3.5" strokeWidth={1.75} />
           </button>
           <button
             type="button"
             aria-label="Select date range"
-            className="glass-pill flex h-8 w-8 items-center justify-center rounded-full text-black/70 shadow-2xs transition-colors hover:bg-white hover:text-black dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
+            className="glass-pill flex size-8 items-center justify-center rounded-full text-black/70 shadow-2xs transition-colors hover:bg-white hover:text-black dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
           >
-            <Calendar className="h-3.5 w-3.5 stroke-[1.75]" />
+            <Calendar className="size-3.5" strokeWidth={1.75} />
           </button>
-          <div className="hidden border-l border-black/[0.06] pl-3 text-right sm:block dark:border-white/[0.08]">
+          <div className="hidden border-l border-black/6 pl-3 text-right sm:block dark:border-white/8">
             <span className="block text-[10px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
               Total Chapters
             </span>
@@ -103,7 +103,7 @@ export function ActivityBarChart({
       </div>
 
       {/* Bar Chart Area */}
-      <div className="relative mt-4 min-h-[140px] w-full flex-1">
+      <div className="relative mt-4 min-h-35 w-full flex-1">
         <div className="flex h-full items-end justify-between gap-2 px-2 sm:gap-4">
           {barData.map((bar, idx) => (
             <div
@@ -113,20 +113,20 @@ export function ActivityBarChart({
               {/* Neon Yellow Tag above Peak Bar */}
               {bar.isPeak && (
                 <div className="absolute -top-7 z-10 flex flex-col items-center">
-                  <span className="rounded-[4px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black shadow-xs">
+                  <span className="rounded-sm bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black shadow-xs">
                     {bar.value}
                   </span>
-                  <div className="mt-0.5 h-1 w-1 rounded-full bg-[#DDFD2C]" />
+                  <div className="mt-0.5 size-1 rounded-full bg-[#DDFD2C]" />
                 </div>
               )}
 
               {/* The Vertical Bar */}
               <div
                 style={{ height: `${bar.height}%` }}
-                className={`w-full max-w-[28px] rounded-t-[6px] transition-all ${
+                className={`w-full max-w-7 rounded-t-md transition-all ${
                   bar.isPeak
-                    ? "bg-gradient-to-t from-[#DDFD2C] to-[#F1FFAE] shadow-xs"
-                    : "bg-[#E6ECF2]/65 hover:bg-[#D5DFE8] dark:bg-white/[0.08] dark:hover:bg-white/[0.14]"
+                    ? "bg-linear-to-t from-[#DDFD2C] to-[#F1FFAE] shadow-xs"
+                    : "bg-[#E6ECF2]/65 hover:bg-[#D5DFE8] dark:bg-white/8 dark:hover:bg-white/[0.14]"
                 }`}
               />
             </div>
@@ -135,7 +135,7 @@ export function ActivityBarChart({
       </div>
 
       {/* Timeline markers along bottom */}
-      <div className="mt-4 flex justify-between border-t border-black/[0.04] pt-3 text-[12px] font-normal text-[#888888] dark:border-white/[0.08] dark:text-[#9CA3AF]">
+      <div className="mt-4 flex justify-between border-t border-black/4 pt-3 text-[12px] font-normal text-[#888888] dark:border-white/8 dark:text-[#9CA3AF]">
         {barData.map((bar, idx) => (
           <span key={idx}>{bar.label}</span>
         ))}

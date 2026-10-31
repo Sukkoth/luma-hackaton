@@ -4,9 +4,9 @@ export function PillarsSection() {
   return (
     <section className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Pillar 1 */}
-      <div className="rounded-[20px] border border-black/[0.08] bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/[0.03]">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#82ADD4]/15 text-[#3b6d94] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
-          <Compass className="h-5 w-5" />
+      <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#3b6d94] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+          <Compass className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">
           Multi-Tracker Isolation
@@ -18,9 +18,9 @@ export function PillarsSection() {
       </div>
 
       {/* Pillar 2 */}
-      <div className="rounded-[20px] border border-black/[0.08] bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/[0.03]">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#DDFD2C]/20 text-black dark:bg-[#DDFD2C]/15 dark:text-[#DDFD2C]">
-          <Cpu className="h-5 w-5" />
+      <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-[#DDFD2C]/20 text-black dark:bg-[#DDFD2C]/15 dark:text-[#DDFD2C]">
+          <Cpu className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">
           AI Study Companion
@@ -32,9 +32,9 @@ export function PillarsSection() {
       </div>
 
       {/* Pillar 3 */}
-      <div className="rounded-[20px] border border-black/[0.08] bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/[0.03]">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-orange-500/15 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
-          <Flame className="h-5 w-5" />
+      <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-orange-500/15 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+          <Flame className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">
           Grace-Filled Streak Engine
@@ -46,9 +46,9 @@ export function PillarsSection() {
       </div>
 
       {/* Pillar 4 */}
-      <div className="rounded-[20px] border border-black/[0.08] bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/[0.03]">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
-          <Users className="h-5 w-5" />
+      <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
+          <Users className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">
           Cohort Reading Groups

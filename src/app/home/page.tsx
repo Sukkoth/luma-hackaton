@@ -186,7 +186,7 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[1400px] flex-col px-4 py-3 sm:px-6 md:px-8 md:py-4 lg:h-dvh">
+    <div className="mx-auto flex min-h-dvh max-w-350 flex-col px-4 py-3 sm:px-6 md:px-8 md:py-4 lg:h-dvh">
       {/* Top Navbar */}
       <TopNavbar userName={displayName} />
 

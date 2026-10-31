@@ -28,7 +28,7 @@ export function Navbar() {
           href="/"
           className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-zinc-100"
         >
-          <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <BookOpen className="size-6 text-blue-600 dark:text-blue-400" />
           <span>Bible Tracker</span>
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">
@@ -47,7 +47,7 @@ export function Navbar() {
                     : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="size-4" />
                 <span className="hidden sm:inline">{label}</span>
               </Link>
             );

@@ -79,7 +79,7 @@ export function CanonShowcaseSection({
     CANONS.find((c) => c.id === selectedCanonId) || CANONS[0]!;
 
   return (
-    <section className="mt-8 rounded-[24px] border border-black/[0.08] bg-white/60 p-6 shadow-xs backdrop-blur-md sm:p-10 dark:border-white/10 dark:bg-white/[0.02]">
+    <section className="mt-8 rounded-3xl border border-black/8 bg-white/60 p-6 shadow-xs backdrop-blur-md sm:p-10 dark:border-white/10 dark:bg-white/2">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <span className="text-[11px] font-medium tracking-[0.16em] text-[#82ADD4] uppercase">
@@ -95,7 +95,7 @@ export function CanonShowcaseSection({
         </div>
 
         {/* Canon Switcher Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-black/[0.06] bg-white/80 p-1.5 dark:border-white/10 dark:bg-white/[0.05]">
+        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-black/6 bg-white/80 p-1.5 dark:border-white/10 dark:bg-white/5">
           {CANONS.map((canon) => {
             const isSelected = canon.id === selectedCanonId;
             return (
@@ -103,7 +103,7 @@ export function CanonShowcaseSection({
                 key={canon.id}
                 type="button"
                 onClick={() => onSelectCanon({ canonId: canon.id })}
-                className={`rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all ${
+                className={`rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all ${
                   isSelected
                     ? "bg-black text-white shadow-xs dark:bg-[#DDFD2C] dark:text-black"
                     : "text-[#666666] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
@@ -117,9 +117,9 @@ export function CanonShowcaseSection({
       </div>
 
       {/* Selected Canon Detailed Showcase Card */}
-      <div className="mt-6 grid grid-cols-1 gap-6 rounded-[20px] border border-black/[0.06] bg-white/80 p-6 sm:grid-cols-3 dark:border-white/10 dark:bg-white/[0.03]">
+      <div className="mt-6 grid grid-cols-1 gap-6 rounded-[20px] border border-black/6 bg-white/80 p-6 sm:grid-cols-3 dark:border-white/10 dark:bg-white/3">
         <div className="sm:col-span-1">
-          <span className="rounded-[6px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+          <span className="rounded-md bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
             {selectedCanon.tradition}
           </span>
           <h3 className="mt-2 text-[22px] font-medium text-black dark:text-white">
@@ -140,7 +140,7 @@ export function CanonShowcaseSection({
           </div>
         </div>
 
-        <div className="sm:col-span-2 border-t border-black/[0.06] pt-4 sm:border-t-0 sm:border-l sm:pl-6 dark:border-white/[0.08]">
+        <div className="border-t border-black/6 pt-4 sm:col-span-2 sm:border-t-0 sm:border-l sm:pl-6 dark:border-white/8">
           <h4 className="text-[12px] font-medium tracking-wide text-black uppercase dark:text-white">
             Tradition Distinctives & Included Texts:
           </h4>
@@ -150,7 +150,7 @@ export function CanonShowcaseSection({
                 key={highlight}
                 className="flex items-start gap-2.5 text-[13px] text-[#555555] dark:text-[#A1A1AA]"
               >
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#82ADD4]" />
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#82ADD4]" />
                 <span>{highlight}</span>
               </li>
             ))}
@@ -159,14 +159,14 @@ export function CanonShowcaseSection({
           <div className="mt-6 flex items-center gap-3">
             <Link
               href="/signup"
-              className="inline-flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-2 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
               <span>Track This Canon</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="size-3.5" />
             </Link>
             <Link
               href="/books"
-              className="inline-flex items-center gap-1.5 rounded-[12px] border border-black/[0.08] bg-white px-4 py-2 text-[12px] font-medium text-black shadow-2xs hover:border-black/[0.16] dark:border-white/10 dark:bg-white/[0.05] dark:text-white"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-black/8 bg-white px-4 py-2 text-[12px] font-medium text-black shadow-2xs hover:border-black/16 dark:border-white/10 dark:bg-white/5 dark:text-white"
             >
               <span>View Books Grid</span>
             </Link>
