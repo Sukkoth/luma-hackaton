@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Bible Tracker Callivio Dashboard E2E", () => {
+test.describe("Bible Tracker Luma Dashboard E2E", () => {
   test("dashboard loads with top navbar, hero progress card, metric cards, activity chart, and distribution cards", async ({
     page,
   }) => {
@@ -130,6 +130,80 @@ test.describe("Bible Tracker Callivio Dashboard E2E", () => {
       await page.goto(route.path);
       await expect(page.locator("body")).toContainText(route.heading);
     }
+  });
+
+  test("auth pages (login, signup, forgot-password, reset-password) load and function as dummy UI", async ({
+    page,
+  }) => {
+    // 1. Login page
+    await page.goto("/login");
+    await expect(
+      page.getByRole("heading", { name: "Welcome back" })
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Google" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "GitHub" })).toBeVisible();
+    await expect(page.getByPlaceholder("james@example.com")).toBeVisible();
+    await expect(page.getByPlaceholder("••••••••")).toBeVisible();
+
+    // 2. SignUp page
+    await page.goto("/signup");
+    await expect(
+      page.getByRole("heading", { name: "Create an account" })
+    ).toBeVisible();
+    await expect(page.getByPlaceholder("James Aris")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Google" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "GitHub" })).toBeVisible();
+
+    // 3. Forgot password page
+    await page.goto("/forgot-password");
+    await expect(
+      page.getByRole("heading", { name: "Forgot password?" })
+    ).toBeVisible();
+    await page.getByPlaceholder("james@example.com").fill("test@example.com");
+    await page.getByRole("button", { name: "Send Reset Link" }).click();
+    await expect(page.getByText("Reset link sent")).toBeVisible();
+    await expect(page.getByText("Continue to Set New Password")).toBeVisible();
+
+    // 4. Reset password page
+    await page.goto("/reset-password");
+    await expect(
+      page.getByRole("heading", { name: "Set new password" })
+    ).toBeVisible();
+    await expect(
+      page.getByLabel("New Password", { exact: true })
+    ).toBeVisible();
+    await expect(page.getByLabel("Confirm New Password")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Update Password" })
+    ).toBeVisible();
+  });
+
+  test("dark theme toggle switches classes and persists in storage", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const themeToggle = page.getByRole("button", { name: "Toggle theme" });
+    await expect(themeToggle).toBeVisible();
+
+    // Click toggle to switch to dark mode
+    await themeToggle.click();
+    await expect(page.locator("html")).toHaveClass(/dark/);
+
+    // Verify localStorage persistence
+    const themeInStorage = await page.evaluate(() =>
+      window.localStorage.getItem("scripture-theme")
+    );
+    expect(themeInStorage).toBe("dark");
+
+    // Click toggle again to switch to light mode
+    await themeToggle.click();
+    await expect(page.locator("html")).not.toHaveClass(/dark/);
+
+    const updatedTheme = await page.evaluate(() =>
+      window.localStorage.getItem("scripture-theme")
+    );
+    expect(updatedTheme).toBe("light");
   });
 
   test("Better Auth healthcheck returns ok", async ({ request }) => {
