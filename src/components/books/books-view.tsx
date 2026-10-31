@@ -1,28 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Sparkles,
-  Calendar,
-  Search,
-  Check,
-  X,
-  Bookmark,
-  CheckCircle2,
-  Lock,
-  LogIn,
-} from "lucide-react";
+import { Search, X } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { BIBLE_BOOKS, type BibleBook } from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
+import { VerseOfTheDayBanner } from "./verse-of-the-day-banner";
+import { BookCard } from "./book-card";
+import { BookChaptersModal } from "./book-chapters-modal";
+import { BooksAuthModal } from "./books-auth-modal";
 
-type BooksViewProps = {
+type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
 };
 
-// Initial read chapters (default clean state with zero sample progress)
 const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {};
 
 const CATEGORY_FILTERS = [
@@ -39,9 +31,7 @@ const CATEGORY_FILTERS = [
   "General Epistles",
 ] as const;
 
-export function BooksView({
-  initialReadData = DEFAULT_READ_CHAPTERS,
-}: BooksViewProps) {
+export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
   const router = useRouter();
   const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,38 +73,37 @@ export function BooksView({
     bookId: string;
     chapter: number;
   }) => {
-    if (!session) {
+    if (!session?.user) {
       setShowAuthModal(true);
       return;
     }
 
     setReadChapters((prev) => {
       const current = prev[bookId] ?? [];
-      const hasRead = current.includes(chapter);
-      const nextChapters = hasRead
+      const updated = current.includes(chapter)
         ? current.filter((c) => c !== chapter)
-        : [...current, chapter].sort((a, b) => a - b);
-      return {
-        ...prev,
-        [bookId]: nextChapters,
-      };
+        : [...current, chapter];
+      return { ...prev, [bookId]: updated };
     });
   };
 
+  // Mark all chapters as read for active book
   const handleMarkAllChapters = ({ book }: { book: BibleBook }) => {
-    if (!session) {
+    if (!session?.user) {
       setShowAuthModal(true);
       return;
     }
 
+    const all = Array.from({ length: book.chapters }, (_, i) => i + 1);
     setReadChapters((prev) => ({
       ...prev,
-      [book.id]: Array.from({ length: book.chapters }, (_, i) => i + 1),
+      [book.id]: all,
     }));
   };
 
+  // Reset all chapters for active book
   const handleClearAllChapters = ({ bookId }: { bookId: string }) => {
-    if (!session) {
+    if (!session?.user) {
       setShowAuthModal(true);
       return;
     }
@@ -131,85 +120,11 @@ export function BooksView({
       <TopNavbar userName={session?.user?.name || "Reader"} />
 
       {/* Top Highlight Cards: Verse of the Day & Active Reading */}
-      <section className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Verse of the Day */}
-        <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-[#82ADD4]/20 text-[#6894BC]">
-                  <Sparkles className="h-3.5 w-3.5" />
-                </span>
-                <span className="text-[12px] font-medium tracking-wide text-[#555555] dark:text-[#9CA3AF]">
-                  Verse of the Day
-                </span>
-              </div>
-              <span className="rounded-[4px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-                Daily Light
-              </span>
-            </div>
-
-            <blockquote className="mt-4 text-[20px] leading-relaxed font-light text-black sm:text-[22px] dark:text-white">
-              &ldquo;Your word is a lamp to my feet and a light to my
-              path.&rdquo;
-            </blockquote>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px] text-[#777777] dark:border-white/[0.08] dark:text-[#9CA3AF]">
-            <span className="font-medium text-black dark:text-white">
-              Psalm 119:105
-            </span>
-            <span>English Standard Version</span>
-          </div>
-        </div>
-
-        {/* Today's Active Plan Reading */}
-        <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Calendar className="h-3.5 w-3.5 text-[#82ADD4]" />
-                <span>Today&apos;s Reading</span>
-              </span>
-              <Link
-                href="/plans"
-                className="text-[12px] font-medium text-[#6894BC] hover:underline"
-              >
-                View Plans
-              </Link>
-            </div>
-
-            <div className="mt-4 rounded-[16px] border border-white/90 bg-white/60 p-4 backdrop-blur-md dark:border-white/10 dark:bg-white/[0.04]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-[#82ADD4] text-white">
-                    <Bookmark className="h-3.5 w-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="text-[14px] font-medium text-black dark:text-white">
-                      Romans 8:1–39
-                    </h4>
-                    <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
-                      Bible in a Year • Day 212
-                    </p>
-                  </div>
-                </div>
-                <span className="rounded-[4px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-                  94%
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[12px] text-[#777777] dark:border-white/[0.08] dark:text-[#9CA3AF]">
-            <span>Bible Tracker Total</span>
-            <span className="font-light text-black dark:text-white">
-              {totalReadChapters} / {totalChaptersAcrossCanon} ch (
-              {canonPercentage}%)
-            </span>
-          </div>
-        </div>
-      </section>
+      <VerseOfTheDayBanner
+        totalReadChapters={totalReadChapters}
+        totalChaptersAcrossCanon={totalChaptersAcrossCanon}
+        canonPercentage={canonPercentage}
+      />
 
       {/* 66 Books Section */}
       <section className="glass-panel mt-4 rounded-[28px] p-6 sm:p-7">
@@ -251,7 +166,7 @@ export function BooksView({
           </div>
         </div>
 
-        {/* Category Filter Pills (Soft rounded rectangular tiles) */}
+        {/* Category Filter Pills */}
         <div className="mt-4 flex flex-wrap gap-2">
           {CATEGORY_FILTERS.map((cat) => {
             const isSelected = selectedCategory === cat;
@@ -276,63 +191,13 @@ export function BooksView({
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {filteredBooks.map((book) => {
             const readList = readChapters[book.id] ?? [];
-            const readCount = readList.length;
-            const isFullyRead = readCount === book.chapters;
-            const progressPercent = Math.round(
-              (readCount / book.chapters) * 100
-            );
-
             return (
-              <button
+              <BookCard
                 key={book.id}
-                type="button"
-                onClick={() => setActiveBook(book)}
-                className="group relative isolate flex flex-col justify-between rounded-[18px] border border-black/[0.08] bg-white/75 p-4 text-left shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/[0.18] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.18] dark:hover:bg-white/[0.08]"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
-                      {book.testament === "OT" ? "Old Test." : "New Test."}
-                    </span>
-                    {isFullyRead ? (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-2xs">
-                        <Check className="h-3 w-3 stroke-[2.5]" />
-                      </span>
-                    ) : readCount > 0 ? (
-                      <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[10px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/25 dark:text-[#82ADD4]">
-                        {progressPercent}%
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <h3 className="mt-2 text-[15px] font-medium tracking-tight text-black group-hover:text-[#6894BC] dark:text-white dark:group-hover:text-[#82ADD4]">
-                    {book.name}
-                  </h3>
-                  <p className="text-[11px] font-normal text-[#777777] dark:text-[#9CA3AF]">
-                    {book.category}
-                  </p>
-                </div>
-
-                <div className="mt-4">
-                  <div className="flex items-center justify-between text-[11px] text-[#777777] dark:text-[#9CA3AF]">
-                    <span>
-                      {readCount} / {book.chapters} ch
-                    </span>
-                  </div>
-
-                  {/* Micro Progress Track */}
-                  <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.08]">
-                    <div
-                      style={{ width: `${progressPercent}%` }}
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        isFullyRead
-                          ? "bg-[#DDFD2C]"
-                          : "bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
-                      }`}
-                    />
-                  </div>
-                </div>
-              </button>
+                book={book}
+                readCount={readList.length}
+                onSelect={({ book: selected }) => setActiveBook(selected)}
+              />
             );
           })}
         </div>
@@ -358,169 +223,22 @@ export function BooksView({
 
       {/* Chapter Selection Drawer / Modal */}
       {activeBook && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="chapter-dialog-title"
-          className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm duration-200"
-        >
-          <div className="glass-panel relative flex max-h-[85vh] w-full max-w-[580px] flex-col rounded-[30px] border border-white/90 bg-white/90 p-6 shadow-2xl backdrop-blur-2xl sm:p-7 dark:border-white/10 dark:bg-[#121215]/95">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-black/[0.06] pb-4 dark:border-white/[0.08]">
-              <div>
-                <span className="text-[11px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
-                  {activeBook.testament === "OT"
-                    ? "Old Testament"
-                    : "New Testament"}{" "}
-                  • {activeBook.category}
-                </span>
-                <h3
-                  id="chapter-dialog-title"
-                  className="mt-0.5 text-[24px] font-normal tracking-tight text-black dark:text-white"
-                >
-                  {activeBook.name}
-                </h3>
-                <p className="text-[13px] text-[#666666] dark:text-[#9CA3AF]">
-                  {readChapters[activeBook.id]?.length ?? 0} of{" "}
-                  {activeBook.chapters} chapters read
-                </p>
-              </div>
-
-              <button
-                type="button"
-                aria-label="Close chapter sheet"
-                onClick={() => setActiveBook(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-black/5 text-[#555555] transition-colors hover:bg-black/10 hover:text-black dark:bg-white/10 dark:text-[#9CA3AF] dark:hover:bg-white/20 dark:hover:text-white"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Quick Actions Bar */}
-            <div className="flex items-center justify-between py-3">
-              <span className="text-[12px] font-normal text-[#777777] dark:text-[#9CA3AF]">
-                Tap chapters to toggle
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleMarkAllChapters({ book: activeBook })}
-                  className="flex items-center gap-1.5 rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span>Mark All Read</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleClearAllChapters({ bookId: activeBook.id })
-                  }
-                  className="rounded-[12px] border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md transition-all hover:border-white/80 hover:bg-white hover:text-black dark:border-white/5 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:bg-white/10 dark:hover:text-white"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-
-            {/* Scrollable Chapter Grid */}
-            <div className="my-2 max-h-[46vh] overflow-y-auto pr-1">
-              <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
-                {Array.from(
-                  { length: activeBook.chapters },
-                  (_, i) => i + 1
-                ).map((ch) => {
-                  const isRead =
-                    readChapters[activeBook.id]?.includes(ch) ?? false;
-                  return (
-                    <button
-                      key={ch}
-                      type="button"
-                      aria-pressed={isRead}
-                      onClick={() =>
-                        handleToggleChapter({
-                          bookId: activeBook.id,
-                          chapter: ch,
-                        })
-                      }
-                      className={`flex h-10 items-center justify-center rounded-[11px] text-[13px] transition-all ${
-                        isRead
-                          ? "bg-[#82ADD4] font-medium text-white shadow-xs hover:bg-[#6894BC]"
-                          : "border border-black/[0.06] bg-white/60 font-normal text-black hover:border-black/20 hover:bg-white dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.1]"
-                      }`}
-                    >
-                      {ch}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="mt-4 flex items-center justify-between border-t border-black/[0.06] pt-4 dark:border-white/[0.08]">
-              <span className="text-[12px] text-[#777777] dark:text-[#9CA3AF]">
-                Progress:{" "}
-                <strong className="font-medium text-black dark:text-white">
-                  {Math.round(
-                    ((readChapters[activeBook.id]?.length ?? 0) /
-                      activeBook.chapters) *
-                      100
-                  )}
-                  %
-                </strong>
-              </span>
-              <button
-                type="button"
-                onClick={() => setActiveBook(null)}
-                className="rounded-[12px] bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/85"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
+        <BookChaptersModal
+          book={activeBook}
+          readChapters={readChapters[activeBook.id] ?? []}
+          onClose={() => setActiveBook(null)}
+          onToggleChapter={handleToggleChapter}
+          onMarkAll={handleMarkAllChapters}
+          onClearAll={handleClearAllChapters}
+        />
       )}
 
-      {/* Auth Guard Modal for Marking Chapters */}
-      {showAuthModal && (
-        <div
-          role="dialog"
-          aria-labelledby="books-auth-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-        >
-          <div className="glass-panel relative w-full max-w-sm rounded-[24px] border border-white/90 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#82ADD4]/20 text-[#507ea6] dark:bg-[#82ADD4]/30 dark:text-[#82ADD4]">
-              <Lock className="h-5 w-5" />
-            </div>
-            <h3
-              id="books-auth-title"
-              className="mt-3 text-[18px] font-medium text-black dark:text-white"
-            >
-              Sign In to Log Progress
-            </h3>
-            <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
-              Marking chapters as read and saving your scripture coverage
-              requires an account.
-            </p>
-            <div className="mt-5 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => router.push("/login?redirect=/books")}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-[12px] bg-black py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
-              >
-                <LogIn className="h-3.5 w-3.5" />
-                <span>Sign In</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAuthModal(false)}
-                className="rounded-[12px] border border-black/10 bg-black/5 px-4 py-2 text-[12px] font-medium text-black hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Auth Guard Modal */}
+      <BooksAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSignIn={() => router.push("/login?redirect=/books")}
+      />
     </div>
   );
 }
