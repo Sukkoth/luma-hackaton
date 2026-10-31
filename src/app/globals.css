@@ -8,6 +8,8 @@
   font-display: swap;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --bg-gradient:
     radial-gradient(
@@ -26,6 +28,23 @@
       transparent 50%
     ),
     linear-gradient(180deg, #f5f7fa 0%, #eceef3 100%);
+  --bg-gradient-dark:
+    radial-gradient(
+      circle at 65% 25%,
+      rgba(50, 50, 56, 0.4) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(42, 42, 48, 0.35) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      rgba(36, 36, 42, 0.3) 0%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, #16161b 0%, #0e0e12 100%);
   --ink: #000000;
   --ink-muted: #555555;
   --ink-faint: #888888;
@@ -55,7 +74,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Glassmorphism utility helpers */
+html.dark {
+  color-scheme: dark;
+  background-color: #0e0e12;
+}
+
+html.dark body {
+  background: var(--bg-gradient-dark);
+  background-attachment: fixed;
+  color: #ffffff;
+}
+
+/* Glassmorphism utility helpers - Light Mode */
 .glass-panel {
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(20px);
@@ -79,4 +109,32 @@ body {
   box-shadow:
     0 12px 36px -8px rgba(89, 142, 198, 0.32),
     inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+/* Glassmorphism utility helpers - Dark Mode */
+html.dark .glass-panel {
+  background: rgba(24, 24, 29, 0.76);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 8px 32px -4px rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(255, 255, 255, 0.02);
+}
+
+html.dark .glass-pill {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e4e4e7;
+}
+
+html.dark .glass-hero {
+  background: linear-gradient(135deg, #8fb6de 0%, #74a2d3 45%, #598ec6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 16px 40px -8px rgba(0, 0, 0, 0.7),
+    0 8px 24px -4px rgba(89, 142, 198, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
