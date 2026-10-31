@@ -1,11 +1,52 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  index,
+  customType,
+} from "drizzle-orm/pg-core";
+
+type EmailVerifiedAtData = Date | boolean | string | null | undefined;
+
+export const emailVerifiedAtTimestamp = customType<{
+  data: EmailVerifiedAtData;
+  driverData: string | null;
+}>({
+  dataType() {
+    return "timestamp";
+  },
+  toDriver(val: EmailVerifiedAtData) {
+    if (!val) {
+      return null;
+    }
+    if (val === true) {
+      return new Date().toISOString();
+    }
+    if (val instanceof Date) {
+      return val.toISOString();
+    }
+    return new Date(val).toISOString();
+  },
+  fromDriver(val: unknown) {
+    if (!val) {
+      return null;
+    }
+    if (val instanceof Date) {
+      return val;
+    }
+    if (typeof val === "string") {
+      return new Date(val);
+    }
+    return null;
+  },
+});
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
+  emailVerifiedAt: emailVerifiedAtTimestamp("email_verified_at"),
   image: text("image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")

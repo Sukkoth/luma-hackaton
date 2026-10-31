@@ -1,187 +1,283 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Bible Tracker Luma Dashboard E2E", () => {
-  test("dashboard loads with top navbar, hero progress card, metric cards, activity chart, and distribution cards", async ({
+test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
+  // Generate unique test user credentials for isolation
+  const testId = Date.now();
+  const testUser = {
+    fullName: `Marcus Aurelius ${testId}`,
+    givenName: "Marcus",
+    familyName: `Aurelius ${testId}`,
+    email: `marcus_${testId}@example.com`,
+    password: "Password123!",
+  };
+
+  test("unauthenticated users are redirected from protected routes to login", async ({
     page,
   }) => {
-    await page.goto("/");
+    // 1. Dashboard / Overview at /home is protected
+    await page.goto("/home");
+    await expect(page).toHaveURL(/\/login\?redirect=\/home/);
+    await expect(
+      page.getByRole("heading", { name: "Welcome back" })
+    ).toBeVisible();
 
-    // Verify Top Navbar Brand and Navigation
-    await expect(page.getByText("Scripture.")).toBeVisible();
-    const nav = page.getByRole("navigation", { name: "Main Navigation" });
-    await expect(nav.getByText("Overview")).toBeVisible();
-    await expect(nav.getByText("Bible Books")).toBeVisible();
-    await expect(nav.getByText("Plans")).toBeVisible();
-    await expect(nav.getByText("Insights")).toBeVisible();
-    await expect(nav.getByText("Notes")).toBeVisible();
+    // 2. Insights
+    await page.goto("/insights");
+    await expect(page).toHaveURL(/\/login\?redirect=\/insights/);
 
-    // Verify Hero Progress Card (Left Column)
-    await expect(page.getByText("Hello, James!")).toBeVisible();
-    await expect(page.getByText("Bible Progress")).toBeVisible();
-    await expect(page.getByText("443 of 1189")).toBeVisible();
-    await expect(page.getByText("Old Test.")).toBeVisible();
-    await expect(page.getByText("New Test.")).toBeVisible();
-    await expect(page.getByText("Remaining")).toBeVisible();
-    await expect(page.getByText("1 108")).toBeVisible();
-    await expect(page.getByText("chapters", { exact: true })).toBeVisible();
+    // 3. Notes
+    await page.goto("/notes");
+    await expect(page).toHaveURL(/\/login\?redirect=\/notes/);
 
-    // Verify Stat Metric Cards (Right Column Top)
-    await expect(page.getByText("Chapters Read")).toBeVisible();
-    await expect(page.getByText("10.8k")).toBeVisible();
-    await expect(page.getByText("Avg Reading Time")).toBeVisible();
-    await expect(page.getByText("30m")).toBeVisible();
-    await expect(page.getByText("Verses Meditated")).toBeVisible();
-    await expect(page.getByText("10.7k")).toBeVisible();
-    await expect(page.getByText("Consistency Rating")).toBeVisible();
-    await expect(page.getByText("4.8/5")).toBeVisible();
+    // 4. Settings
+    await page.goto("/settings");
+    await expect(page).toHaveURL(/\/login\?redirect=\/settings/);
 
-    // Verify Activity Bar Chart
-    await expect(page.getByText("Reading Activity")).toBeVisible();
-    await expect(page.getByText("654")).toBeVisible();
-
-    // Verify Scripture Distribution & Active Plans
-    await expect(page.getByText("Scripture Distribution")).toBeVisible();
-    await expect(page.getByText("Pentateuch & Law")).toBeVisible();
-    await expect(page.getByText("Active Plans Status")).toBeVisible();
-    await expect(page.getByText("Bible in a Year")).toBeVisible();
+    // 5. Active Plan Instance
+    await page.goto("/plans/sample-instance");
+    await expect(page).toHaveURL(/\/login\?redirect=\/plans\/sample-instance/);
   });
 
-  test("books page loads with 66 books, filters, and interactive chapter modal", async ({
+  test("public routes and landing page are accessible without logging in", async ({
     page,
   }) => {
-    await page.goto("/books");
+    // 1. Landing Page is public at root /
+    await page.goto("/");
+    await expect(page).toHaveURL("/");
+    await expect(
+      page.getByRole("heading", { name: /Read Deeply\. Track Faithfully\./i })
+    ).toBeVisible();
+    await expect(page.getByText("Start Reading for Free")).toBeVisible();
 
-    // Verify header and highlights
+    // Verify unauthenticated top nav does NOT show Overview, Insights, Notes, or Settings
+    const guestNav = page.getByRole("navigation", { name: "Main Navigation" });
+    await expect(
+      guestNav.getByRole("link", { name: "Overview" })
+    ).not.toBeVisible();
+    await expect(
+      guestNav.getByRole("link", { name: "Insights" })
+    ).not.toBeVisible();
+    await expect(
+      guestNav.getByRole("link", { name: "Notes" })
+    ).not.toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Settings/i })
+    ).not.toBeVisible();
+
+    // But DOES show Bible Books and Plans
+    await expect(
+      guestNav.getByRole("link", { name: "Bible Books" })
+    ).toBeVisible();
+    await expect(guestNav.getByRole("link", { name: "Plans" })).toBeVisible();
+    await expect(
+      page.locator("header").getByRole("link", { name: "Sign In" })
+    ).toBeVisible();
+
+    // 2. Plans Catalog is public
+    await page.goto("/plans");
+    await expect(
+      page.getByText("Bible Plans Catalog • Curated Journeys")
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Explore Structured Scripture Plans" })
+    ).toBeVisible();
+    await expect(page.getByText("Resume Reading")).not.toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "The Four Gospels", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Sign In to Start Plan" })
+    ).toBeVisible();
+
+    // 3. Plan Blueprint Template is public
+    await page.goto("/plans/templates/the_four_gospels_30");
+    await expect(
+      page.getByRole("heading", { name: "The Four Gospels" })
+    ).toBeVisible();
+
+    // 4. Books page is public to browse
+    await page.goto("/books");
     await expect(page.getByText("Verse of the Day")).toBeVisible();
-    await expect(page.getByText("Psalm 119:105")).toBeVisible();
     await expect(page.getByText("All Books")).toBeVisible();
     await expect(page.getByText("Genesis")).toBeVisible();
     await expect(page.getByText("Matthew")).toBeVisible();
+  });
 
-    // Test search filter
-    const searchInput = page.getByPlaceholder("Search books...");
-    await searchInput.fill("Romans");
+  test("unauthenticated users are guarded when attempting protected actions", async ({
+    page,
+  }) => {
+    // 1. On Plan Blueprint, clicking 'Create & Start Plan' prompts to sign in
+    await page.goto("/plans/templates/the_four_gospels_30");
+    await page.getByRole("button", { name: "Create & Start Plan" }).click();
     await expect(
-      page.getByRole("heading", { name: "Romans", exact: true })
+      page.getByRole("dialog", { name: "Sign In to Start Plan" })
     ).toBeVisible();
-    await expect(page.getByText("Genesis")).not.toBeVisible();
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await expect(
+      page.getByRole("dialog", { name: "Sign In to Start Plan" })
+    ).not.toBeVisible();
 
-    // Open Romans chapter modal
+    // 2. On Books page, clicking a chapter to mark as read prompts to sign in
+    await page.goto("/books");
     await page
       .getByRole("button", { name: /Romans Pauline Epistles/i })
       .click();
     await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByText("8 of 16 chapters read")).toBeVisible();
 
-    // Toggle chapter 9
+    // Clicking chapter 9 prompts auth modal
+    const ch9Button = page.getByRole("button", { name: "9", exact: true });
+    await ch9Button.click();
+    await expect(
+      page.getByRole("dialog", { name: "Sign In to Log Progress" })
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await expect(
+      page.getByRole("dialog", { name: "Sign In to Log Progress" })
+    ).not.toBeVisible();
+  });
+
+  test("social OAuth buttons display coming soon notice while retaining UI", async ({
+    page,
+  }) => {
+    // Login page
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Google" }).click();
+    await expect(
+      page.getByText(/Google authentication will be enabled soon/i)
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "GitHub" }).click();
+    await expect(
+      page.getByText(/GitHub authentication will be enabled soon/i)
+    ).toBeVisible();
+
+    // Signup page
+    await page.goto("/signup");
+    await page.getByRole("button", { name: "Google" }).click();
+    await expect(
+      page.getByText(/Google authentication will be enabled soon/i)
+    ).toBeVisible();
+  });
+
+  test("full user registration, onboarding flow with canon selection, and authenticated dashboard access", async ({
+    page,
+  }) => {
+    // 1. Register new user
+    await page.goto("/signup");
+    await page.getByLabel("Full Name").fill(testUser.fullName);
+    await page.getByLabel("Email address").fill(testUser.email);
+    await page.locator("#signup-password").fill(testUser.password);
+    await page.getByRole("checkbox", { name: /agree/i }).check();
+    await page.getByRole("button", { name: "Create Account" }).click();
+
+    // 2. Verify redirect to /onboarding for new users
+    await page.waitForURL("/onboarding", { timeout: 10000 });
+    await expect(page).toHaveURL("/onboarding");
+    await expect(page.getByText("Onboarding")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Read Scripture With Peace Daily" })
+    ).toBeVisible();
+
+    // Test carousel pagination
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "Walk With Guided Reading Plans" })
+    ).toBeVisible();
+
+    // Skip to setup
+    await page.getByRole("button", { name: "Skip to Setup" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Set Up Your Reading Tracker" })
+    ).toBeVisible();
+
+    // Verify Default Canon is Standard 66 books and other canons are hidden
+    await expect(page.getByText("Standard 66 Books")).toBeVisible();
+    await expect(page.getByText("Catholic Canon (73 Books)")).not.toBeVisible();
+
+    // Click "Change" to expand canon list
+    await page.getByRole("button", { name: "Change" }).click();
+    await expect(page.getByText("Catholic Canon (73 Books)")).toBeVisible();
+    await expect(
+      page.getByText("Eastern Orthodox Canon (78 Books)")
+    ).toBeVisible();
+    await expect(
+      page.getByText("Ethiopian Orthodox Tewahedo (81 Books)")
+    ).toBeVisible();
+
+    // Select Catholic Canon
+    await page
+      .getByRole("button", { name: /Catholic Canon \(73 Books\)/i })
+      .click();
+    await expect(page.getByText("Catholic Canon (73 Books)")).toBeVisible();
+
+    // Submit uncontrolled tracker form
+    await page
+      .getByRole("button", { name: "Complete Onboarding & Begin" })
+      .click();
+
+    // 3. Verified redirect to Overview/Dashboard at /home
+    await page.waitForURL("/home", { timeout: 10000 });
+    await expect(page).toHaveURL("/home");
+    await expect(page.getByText(`Hello, ${testUser.givenName}!`)).toBeVisible();
+    await expect(page.getByText("Bible Progress")).toBeVisible();
+
+    // Verify visiting /onboarding now redirects back to /home since onboarding is complete
+    await page.goto("/onboarding");
+    await page.waitForURL("/home", { timeout: 10000 });
+    await expect(page).toHaveURL("/home");
+
+    // Verify authenticated user visiting root / is automatically navigated to /home
+    await page.goto("/");
+    await page.waitForURL("/home", { timeout: 10000 });
+    await expect(page).toHaveURL("/home");
+
+    // Verify authenticated user can see Overview, Insights, Notes, and Settings in top nav
+    const authNav = page.getByRole("navigation", { name: "Main Navigation" });
+    await expect(authNav.getByRole("link", { name: "Overview" })).toBeVisible();
+    await expect(authNav.getByRole("link", { name: "Insights" })).toBeVisible();
+    await expect(authNav.getByRole("link", { name: "Notes" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Settings/i })).toBeVisible();
+
+    // 3. Verify user can access Settings and view their profile
+    await page.goto("/settings");
+    await expect(page).toHaveURL("/settings");
+    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+    await expect(page.getByText(testUser.fullName)).toBeVisible();
+    await expect(page.getByText(testUser.email)).toBeVisible();
+    await expect(page.getByText("Active Member")).toBeVisible();
+
+    // 4. Verify user can now mark chapters on Books page
+    await page.goto("/books");
+    await page
+      .getByRole("button", { name: /Romans Pauline Epistles/i })
+      .click();
     const ch9Button = page.getByRole("button", { name: "9", exact: true });
     await expect(ch9Button).toHaveAttribute("aria-pressed", "false");
     await ch9Button.click();
     await expect(ch9Button).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByText("9 of 16 chapters read")).toBeVisible();
-
-    // Close modal
+    await expect(page.getByText("1 of 16 chapters read")).toBeVisible();
     await page.getByRole("button", { name: "Done" }).click();
-    await expect(page.getByRole("dialog")).not.toBeVisible();
-  });
 
-  test("plans page loads with catalog, search, and switches to my plans tab", async ({
-    page,
-  }) => {
-    await page.goto("/plans");
+    // 5. Verify Sign Out
+    await page.goto("/settings");
+    await page.getByRole("button", { name: "Sign Out" }).click();
+    await page.waitForURL("/login", { timeout: 10000 });
+    await expect(page).toHaveURL("/login");
 
-    // Verify top highlights
-    await expect(page.getByText("Bible Plans • Active Reading")).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Bible in a Year", exact: true })
-    ).toBeVisible();
-
-    // Verify Catalog tab
-    await expect(page.getByText(/Plan Catalog \(\d+\)/)).toBeVisible();
-    await expect(page.getByText(/My Plans \(\d+\)/)).toBeVisible();
-
-    // Switch to My Plans tab
-    await page.getByRole("button", { name: /My Plans/i }).click();
-    await expect(page.getByText("The Four Gospels (30 Days)")).toBeVisible();
-    await expect(page.getByText("Checkoff Sections").first()).toBeVisible();
-
-    // Switch back to Catalog
-    await page.getByRole("button", { name: /Plan Catalog/i }).click();
-    const searchInput = page.getByPlaceholder("Search plans...");
-    await searchInput.fill("Hebrews");
-    await expect(page.getByText(/Book of Hebrews/i).first()).toBeVisible();
-  });
-
-  test("navigation routes load properly", async ({ page }) => {
-    const routes = [
-      { path: "/books", heading: "All Books" },
-      { path: "/plans", heading: "Bible Plans" },
-      {
-        path: "/plans/templates/the_four_gospels_30",
-        heading: "The Four Gospels",
-      },
-      { path: "/plans/sample-instance", heading: "Plan Progress:" },
-      { path: "/insights", heading: "Insights & Analytics" },
-      { path: "/notes", heading: "Notes & Journals" },
-      { path: "/settings", heading: "Settings" },
-    ];
-
-    for (const route of routes) {
-      await page.goto(route.path);
-      await expect(page.locator("body")).toContainText(route.heading);
-    }
-  });
-
-  test("auth pages (login, signup, forgot-password, reset-password) load and function as dummy UI", async ({
-    page,
-  }) => {
-    // 1. Login page
-    await page.goto("/login");
-    await expect(
-      page.getByRole("heading", { name: "Welcome back" })
-    ).toBeVisible();
-    await expect(page.getByRole("button", { name: "Google" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "GitHub" })).toBeVisible();
-    await expect(page.getByPlaceholder("james@example.com")).toBeVisible();
-    await expect(page.getByPlaceholder("••••••••")).toBeVisible();
-
-    // 2. SignUp page
-    await page.goto("/signup");
-    await expect(
-      page.getByRole("heading", { name: "Create an account" })
-    ).toBeVisible();
-    await expect(page.getByPlaceholder("James Aris")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Google" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "GitHub" })).toBeVisible();
-
-    // 3. Forgot password page
-    await page.goto("/forgot-password");
-    await expect(
-      page.getByRole("heading", { name: "Forgot password?" })
-    ).toBeVisible();
-    await page.getByPlaceholder("james@example.com").fill("test@example.com");
-    await page.getByRole("button", { name: "Send Reset Link" }).click();
-    await expect(page.getByText("Reset link sent")).toBeVisible();
-    await expect(page.getByText("Continue to Set New Password")).toBeVisible();
-
-    // 4. Reset password page
-    await page.goto("/reset-password");
-    await expect(
-      page.getByRole("heading", { name: "Set new password" })
-    ).toBeVisible();
-    await expect(
-      page.getByLabel("New Password", { exact: true })
-    ).toBeVisible();
-    await expect(page.getByLabel("Confirm New Password")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Update Password" })
-    ).toBeVisible();
+    // 6. Verify logging back in with email and password
+    await page.getByLabel("Email address").fill(testUser.email);
+    await page.locator("#login-password").fill(testUser.password);
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.waitForURL("/home", { timeout: 10000 });
+    await expect(page).toHaveURL("/home");
+    await expect(page.getByText(`Hello, ${testUser.givenName}!`)).toBeVisible();
   });
 
   test("dark theme toggle switches classes and persists in storage", async ({
     page,
   }) => {
-    await page.goto("/");
+    // Public books page
+    await page.goto("/books");
 
     const themeToggle = page.getByRole("button", { name: "Toggle theme" });
     await expect(themeToggle).toBeVisible();

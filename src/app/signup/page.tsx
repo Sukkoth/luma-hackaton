@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import * as v from "valibot";
 import {
   ArrowLeft,
   Mail,
@@ -9,233 +11,93 @@ import {
   User,
   Eye,
   EyeOff,
-  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Info,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { authClient } from "@/lib/auth-client";
+import { SignUpSchema } from "@/lib/schemas/auth";
+import { AuthShowcasePanel } from "@/components/auth/auth-showcase-panel";
 
-export default function SignUpPage() {
+function SignUpContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get("redirect") || "/onboarding";
+
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [oauthNotice, setOauthNotice] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMessage(null);
+    setOauthNotice(null);
+
+    const formData = new FormData(e.currentTarget);
+    const parsed = v.safeParse(SignUpSchema, {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      agreeTerms: formData.get("agreeTerms") === "on",
+    });
+
+    if (!parsed.success) {
+      setErrorMessage(
+        parsed.issues[0]?.message || "Invalid registration information."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const trimmedName = parsed.output.name;
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName)}&background=74a2d3&color=fff&size=128`;
+
+      const { error } = await authClient.signUp.email({
+        name: trimmedName,
+        email: parsed.output.email.toLowerCase(),
+        password: parsed.output.password,
+        image: avatarUrl,
+      });
+
+      if (error) {
+        setErrorMessage(
+          error.message || "Failed to create account. Please try again."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      router.push(redirectTarget);
+      router.refresh();
+    } catch {
+      setErrorMessage(
+        "An unexpected network error occurred. Please try again."
+      );
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex min-h-dvh w-full flex-col lg:flex-row">
       {/* LEFT SIDE: Full-Bleed Atmospheric Showcase */}
-      <section className="relative hidden w-full flex-col justify-between overflow-hidden bg-[#0D0D0F] p-10 text-white lg:flex lg:w-1/2 lg:p-14 xl:p-18 dark:bg-[#070708]">
-        {/* Full-bleed generative SVG architectural tapestry */}
-        <svg
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-          viewBox="0 0 900 1200"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          <defs>
-            <radialGradient
-              id="signupGlow"
-              cx="50%"
-              cy="45%"
-              r="65%"
-              fx="45%"
-              fy="40%"
-            >
-              <stop offset="0%" stopColor="#1E1E22" stopOpacity="0.45" />
-              <stop offset="55%" stopColor="#121215" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#070708" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="signupArc" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.28" />
-              <stop offset="45%" stopColor="#71717A" stopOpacity="0.14" />
-              <stop offset="75%" stopColor="#DDFD2C" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.01" />
-            </linearGradient>
-            <linearGradient
-              id="signupVertical"
-              x1="0%"
-              y1="0%"
-              x2="0%"
-              y2="100%"
-            >
-              <stop offset="0%" stopColor="#71717A" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#71717A" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Deep ambient light bloom */}
-          <rect width="900" height="1200" fill="url(#signupGlow)" />
-
-          {/* Canonical Sphere Coordinates (Full-bleed concentric geometry) */}
-          <g opacity="0.85">
-            <circle
-              cx="450"
-              cy="580"
-              r="160"
-              stroke="url(#signupArc)"
-              strokeWidth="1"
-            />
-            <circle
-              cx="450"
-              cy="580"
-              r="240"
-              stroke="url(#signupArc)"
-              strokeWidth="1.25"
-              strokeDasharray="3 9"
-            />
-            <circle
-              cx="450"
-              cy="580"
-              r="360"
-              stroke="url(#signupArc)"
-              strokeWidth="1"
-              opacity="0.6"
-            />
-            <circle
-              cx="450"
-              cy="580"
-              r="490"
-              stroke="url(#signupArc)"
-              strokeWidth="1.5"
-              strokeDasharray="8 12"
-              opacity="0.4"
-            />
-            <circle
-              cx="450"
-              cy="580"
-              r="640"
-              stroke="url(#signupArc)"
-              strokeWidth="1"
-              strokeDasharray="2 14"
-              opacity="0.35"
-            />
-            <circle
-              cx="450"
-              cy="580"
-              r="820"
-              stroke="url(#signupArc)"
-              strokeWidth="1"
-              opacity="0.2"
-            />
-
-            {/* Meridian guide axes */}
-            <line
-              x1="450"
-              y1="0"
-              x2="450"
-              y2="1200"
-              stroke="url(#signupVertical)"
-              strokeWidth="1"
-              strokeDasharray="4 8"
-              opacity="0.4"
-            />
-            <line
-              x1="0"
-              y1="580"
-              x2="900"
-              y2="580"
-              stroke="url(#signupArc)"
-              strokeWidth="1"
-              strokeDasharray="4 8"
-              opacity="0.25"
-            />
-            <line
-              x1="120"
-              y1="120"
-              x2="780"
-              y2="1040"
-              stroke="url(#signupArc)"
-              strokeWidth="0.75"
-              strokeDasharray="2 10"
-              opacity="0.2"
-            />
-            <line
-              x1="780"
-              y1="120"
-              x2="120"
-              y2="1040"
-              stroke="url(#signupArc)"
-              strokeWidth="0.75"
-              strokeDasharray="2 10"
-              opacity="0.2"
-            />
-
-            {/* Radiant Canonical Crosshairs and Node Markers */}
-            <circle cx="450" cy="580" r="4" fill="#DDFD2C" opacity="0.9" />
-            <circle cx="450" cy="340" r="3" fill="#FFFFFF" opacity="0.7" />
-            <circle cx="450" cy="820" r="3" fill="#71717A" opacity="0.7" />
-            <circle cx="210" cy="580" r="3" fill="#FFFFFF" opacity="0.6" />
-            <circle cx="690" cy="580" r="3" fill="#71717A" opacity="0.6" />
-
-            {/* Micro coordinate markers */}
-            <path
-              d="M445 580 H455 M450 575 V585"
-              stroke="#FFFFFF"
-              strokeWidth="1"
-              opacity="0.5"
-            />
-            <path
-              d="M445 130 H455 M450 125 V135"
-              stroke="#DDFD2C"
-              strokeWidth="1"
-              opacity="0.6"
-            />
-          </g>
-        </svg>
-
-        {/* Top Header Row with Navigation */}
-        <div className="relative z-10 flex items-center justify-between">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-[12px] border border-white/20 bg-white/10 px-3.5 py-1.5 text-[12px] font-normal text-white/90 shadow-2xs backdrop-blur-md transition-all hover:border-white/40 hover:bg-white/20 hover:text-white"
-          >
-            <ArrowLeft className="h-3.5 w-3.5 stroke-[1.75]" />
-            <span>Back to Dashboard</span>
-          </Link>
-
-          <span className="text-[14px] font-light tracking-wide text-white/80">
-            Scripture<span className="text-[#DDFD2C]">.</span>
-          </span>
-        </div>
-
-        {/* Center / Lower-middle: Monumental, Refined Typography */}
-        <div className="relative z-10 my-auto max-w-lg pt-12">
-          <span className="inline-block text-[11px] font-medium tracking-[0.2em] text-[#DDFD2C] uppercase">
-            GENESIS & COMMENCEMENT
-          </span>
-
-          <h2 className="mt-4 text-[38px] leading-[1.12] font-light tracking-tight text-white xl:text-[46px]">
+      <AuthShowcasePanel
+        badge="GENESIS & COMMENCEMENT"
+        quoteTitle={
+          <>
             Thy testimonies have I <br />
             taken as an heritage <br />
             <span className="font-normal text-white">for ever.</span>
-          </h2>
-
-          <div className="mt-6 flex items-center gap-3">
-            <span className="h-px w-8 bg-[#DDFD2C]/80" />
-            <span className="text-[13px] font-normal tracking-wide text-white/75">
-              Psalm 119:111
-            </span>
-          </div>
-
-          <p className="mt-6 max-w-md text-[14px] leading-relaxed font-light text-white/60">
-            Commence your structured journey through biblical wisdom with daily
-            chapter metrics, schedule safeguards, and canon coverage insight.
-          </p>
-        </div>
-
-        {/* Bottom Metadata Bar */}
-        <div className="relative z-10 flex items-center justify-between border-t border-white/10 pt-6 text-[12px] text-white/60">
-          <span>Begin Journey • Daily Tracker</span>
-          <span className="text-white/80">Daily Habit & Metrics</span>
-        </div>
-      </section>
+          </>
+        }
+        scriptureRef="Psalm 119:111"
+        description="Commence your structured journey through biblical wisdom with daily chapter metrics, schedule safeguards, and canon coverage insight."
+        footerLeft="Begin Journey • Daily Tracker"
+        footerRight="Daily Habit & Metrics"
+      />
 
       {/* RIGHT SIDE: Authentication Form Experience */}
       <section className="relative flex flex-1 flex-col justify-between p-6 sm:p-10 lg:p-14 xl:p-18">
@@ -243,16 +105,16 @@ export default function SignUpPage() {
         <div className="flex items-center justify-between lg:justify-end">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-[12px] border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-black/75 shadow-2xs backdrop-blur-md transition-all hover:border-white/90 hover:bg-white hover:text-black lg:hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-black/75 shadow-2xs backdrop-blur-md transition-all hover:border-white/90 hover:bg-white hover:text-black lg:hidden dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
           >
-            <ArrowLeft className="h-3.5 w-3.5 stroke-[1.75]" />
+            <ArrowLeft className="size-3.5" strokeWidth={1.75} />
             <span>Dashboard</span>
           </Link>
           <ThemeToggle />
         </div>
 
         {/* Centered Form Container */}
-        <div className="mx-auto my-auto w-full max-w-[420px] py-8">
+        <div className="m-auto w-full max-w-105 py-8">
           <div className="glass-panel w-full rounded-[28px] p-7 sm:p-9">
             {/* Header */}
             <div>
@@ -260,7 +122,7 @@ export default function SignUpPage() {
                 <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
                   Scripture<span className="text-[#82ADD4]">.</span>
                 </span>
-                <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+                <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
                   Register
                 </span>
               </div>
@@ -272,12 +134,23 @@ export default function SignUpPage() {
               </p>
             </div>
 
-            {submitted && (
-              <div className="mt-5 flex items-center gap-2 rounded-[14px] border border-black/[0.06] bg-[#DDFD2C]/15 p-3 text-[12px] font-normal text-black dark:border-white/10 dark:bg-[#DDFD2C]/10 dark:text-white">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-black dark:text-[#DDFD2C]" />
-                <span>
-                  Dummy demo account ready! You can now explore the app.
-                </span>
+            {errorMessage && (
+              <div
+                role="alert"
+                className="mt-5 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
+              >
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {oauthNotice && (
+              <div
+                role="status"
+                className="mt-5 flex items-center gap-2 rounded-[14px] border border-blue-500/20 bg-blue-500/10 p-3 text-[12px] font-normal text-blue-700 dark:border-blue-400/20 dark:bg-blue-950/30 dark:text-blue-300"
+              >
+                <Info className="size-4 shrink-0" />
+                <span>{oauthNotice}</span>
               </div>
             )}
 
@@ -285,10 +158,14 @@ export default function SignUpPage() {
             <div className="mt-6 grid grid-cols-2 gap-2.5">
               <button
                 type="button"
-                onClick={() => setSubmitted(true)}
-                className="flex items-center justify-center gap-2 rounded-[14px] border border-black/[0.08] bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/[0.16] hover:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:hover:border-white/20 dark:hover:bg-white/[0.08]"
+                onClick={() =>
+                  setOauthNotice(
+                    "Google authentication will be enabled soon. Please use email and password to sign up."
+                  )
+                }
+                className="flex items-center justify-center gap-2 rounded-[14px] border border-black/8 bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/16 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/8"
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
+                <svg className="size-4" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -311,11 +188,15 @@ export default function SignUpPage() {
 
               <button
                 type="button"
-                onClick={() => setSubmitted(true)}
-                className="flex items-center justify-center gap-2 rounded-[14px] border border-black/[0.08] bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/[0.16] hover:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:hover:border-white/20 dark:hover:bg-white/[0.08]"
+                onClick={() =>
+                  setOauthNotice(
+                    "GitHub authentication will be enabled soon. Please use email and password to sign up."
+                  )
+                }
+                className="flex items-center justify-center gap-2 rounded-[14px] border border-black/8 bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/16 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/8"
               >
                 <svg
-                  className="h-4 w-4 fill-current"
+                  className="size-4 fill-current"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
@@ -332,7 +213,7 @@ export default function SignUpPage() {
             {/* Divider */}
             <div className="relative my-6 text-center">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-black/[0.06] dark:border-white/[0.08]" />
+                <div className="w-full border-t border-black/6 dark:border-white/8" />
               </div>
               <span className="relative bg-white/70 px-3 text-[11px] font-normal text-[#888888] backdrop-blur-md dark:bg-[#16161b] dark:text-[#9CA3AF]">
                 Or register with email
@@ -349,15 +230,14 @@ export default function SignUpPage() {
                   Full Name
                 </label>
                 <div className="relative mt-1.5">
-                  <User className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                  <User className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                   <input
                     id="signup-name"
+                    name="name"
                     type="text"
                     required
                     placeholder="James Aris"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                    className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
                   />
                 </div>
               </div>
@@ -370,15 +250,14 @@ export default function SignUpPage() {
                   Email address
                 </label>
                 <div className="relative mt-1.5">
-                  <Mail className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                  <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                   <input
                     id="signup-email"
+                    name="email"
                     type="email"
                     required
                     placeholder="james@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                    className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
                   />
                 </div>
               </div>
@@ -396,15 +275,14 @@ export default function SignUpPage() {
                   </span>
                 </div>
                 <div className="relative mt-1.5">
-                  <Lock className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                  <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                   <input
                     id="signup-password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     required
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-10 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                    className="w-full rounded-[14px] border border-black/8 bg-white/70 px-10 py-2.5 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
                   />
                   <button
                     type="button"
@@ -415,9 +293,9 @@ export default function SignUpPage() {
                     className="absolute top-1/2 right-3.5 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="size-4" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="size-4" />
                     )}
                   </button>
                 </div>
@@ -427,11 +305,10 @@ export default function SignUpPage() {
               <div className="flex items-start gap-2 pt-1">
                 <input
                   id="agree-terms"
+                  name="agreeTerms"
                   type="checkbox"
                   required
-                  checked={agreeTerms}
-                  onChange={(e) => setAgreeTerms(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded-[4px] border-black/20 text-black accent-black focus:ring-black dark:accent-[#DDFD2C]"
+                  className="mt-0.5 size-4 rounded-sm border-black/20 text-black accent-black focus:ring-black dark:accent-[#DDFD2C]"
                 />
                 <label
                   htmlFor="agree-terms"
@@ -444,14 +321,18 @@ export default function SignUpPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="mt-2 flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                disabled={isLoading}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
               >
-                Create Account
+                {isLoading && <Loader2 className="size-4 animate-spin" />}
+                <span>
+                  {isLoading ? "Creating account..." : "Create Account"}
+                </span>
               </button>
             </form>
 
             {/* Footer switch to sign in */}
-            <div className="mt-6 border-t border-black/[0.04] pt-4 text-center text-[12px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
+            <div className="mt-6 border-t border-black/4 pt-4 text-center text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
               <span>Already have an account? </span>
               <Link
                 href="/login"
@@ -469,5 +350,19 @@ export default function SignUpPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-dvh items-center justify-center">
+          <Loader2 className="size-6 animate-spin text-[#82ADD4]" />
+        </div>
+      }
+    >
+      <SignUpContent />
+    </Suspense>
   );
 }

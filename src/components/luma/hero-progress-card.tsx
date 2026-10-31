@@ -9,17 +9,20 @@ type HeroProgressCardProps = {
   otChapters?: number;
   ntChapters?: number;
   remainingChapters?: number;
+  canonName?: string;
 };
 
 export function HeroProgressCard({
-  userName = "James",
-  readChapters = 443,
+  userName = "Reader",
+  readChapters = 0,
   totalChapters = 1189,
-  otChapters = 498,
-  ntChapters = 443,
-  remainingChapters = 167,
+  otChapters = 0,
+  ntChapters = 0,
+  remainingChapters = 1189,
+  canonName = "Standard 66 Books",
 }: HeroProgressCardProps) {
-  const percentage = Math.round((readChapters / totalChapters) * 100);
+  const percentage =
+    totalChapters > 0 ? Math.round((readChapters / totalChapters) * 100) : 0;
 
   // SVG circular calculations with a refined, slender stroke
   const radius = 96;
@@ -28,7 +31,7 @@ export function HeroProgressCard({
   const strokeDashoffset = arcLength * (1 - percentage / 100);
 
   return (
-    <div className="glass-hero relative flex shrink-0 flex-col justify-between overflow-hidden rounded-[32px] p-7 text-white lg:w-[380px]">
+    <div className="glass-hero relative flex shrink-0 flex-col justify-between overflow-hidden rounded-4xl p-7 text-white lg:w-95">
       {/* Top Header Row */}
       <div>
         <div className="flex items-start justify-between">
@@ -43,13 +46,13 @@ export function HeroProgressCard({
           <button
             type="button"
             aria-label="Minimize progress banner"
-            className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-white/80 transition-colors hover:bg-white/25 hover:text-white"
+            className="flex size-6 items-center justify-center rounded-full bg-white/15 text-white/80 transition-colors hover:bg-white/25 hover:text-white"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="size-3.5" />
           </button>
         </div>
         <p className="mt-1.5 text-[13px] leading-snug font-normal text-white/70">
-          Tracking scripture reading with active Protestant canon.
+          Tracking scripture reading with active {canonName}.
         </p>
       </div>
 
@@ -57,7 +60,7 @@ export function HeroProgressCard({
       <div className="my-auto flex flex-col items-center justify-center py-4">
         <div className="relative flex items-center justify-center">
           <svg
-            className="h-56 w-56 -rotate-90 transform overflow-visible"
+            className="size-56 -rotate-90 transform overflow-visible"
             viewBox="0 0 220 220"
           >
             {/* Background Track Arc - refined slender stroke */}
@@ -101,7 +104,7 @@ export function HeroProgressCard({
         <div className="mt-6 flex w-full items-center justify-between px-3 text-center">
           <div>
             <div className="flex items-center justify-center gap-1.5 text-[12px] font-normal text-white/80">
-              <span className="h-1.5 w-1.5 rounded-full border border-white/80 bg-transparent" />
+              <span className="size-1.5 rounded-full border border-white/80 bg-transparent" />
               <span>Old Test.</span>
             </div>
             <p className="mt-1 text-[22px] font-light text-white">
@@ -110,7 +113,7 @@ export function HeroProgressCard({
           </div>
           <div>
             <div className="flex items-center justify-center gap-1.5 text-[12px] font-normal text-white/80">
-              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+              <span className="size-1.5 rounded-full bg-white" />
               <span>New Test.</span>
             </div>
             <p className="mt-1 text-[22px] font-light text-white">
@@ -119,7 +122,7 @@ export function HeroProgressCard({
           </div>
           <div>
             <div className="flex items-center justify-center gap-1.5 text-[12px] font-normal text-white/80">
-              <span className="h-1.5 w-1.5 rounded-full border border-white/80 bg-transparent" />
+              <span className="size-1.5 rounded-full border border-white/80 bg-transparent" />
               <span>Remaining</span>
             </div>
             <p className="mt-1 text-[22px] font-light text-white">
@@ -134,12 +137,12 @@ export function HeroProgressCard({
         <div className="flex items-end justify-between">
           <div>
             <div className="flex items-center gap-1.5 text-[12px] font-normal text-white/80">
-              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+              <span className="size-1.5 rounded-full bg-white" />
               <span>Your Total Progress</span>
             </div>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-[54px] leading-none font-light tracking-tight text-white">
-                1 108
+                {readChapters.toLocaleString()}
               </span>
               <span className="text-[15px] font-normal text-white/75">
                 chapters
@@ -149,9 +152,9 @@ export function HeroProgressCard({
           <button
             type="button"
             aria-label="Share progress report"
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-white shadow-2xs backdrop-blur-sm transition-colors hover:bg-white/25"
+            className="flex size-9 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-white shadow-2xs backdrop-blur-sm transition-colors hover:bg-white/25"
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className="size-4" />
           </button>
         </div>
       </div>

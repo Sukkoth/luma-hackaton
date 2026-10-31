@@ -1,45 +1,51 @@
-type MetricItem = {
-  title: string;
-  badge: string;
-  value: string;
+type StatMetricCardsProps = {
+  chaptersRead?: number;
+  currentStreak?: number;
+  streakFreezesAvailable?: number;
+  longestStreak?: number;
 };
 
-const STAT_METRICS: ReadonlyArray<MetricItem> = [
-  {
-    title: "Chapters Read",
-    badge: "+12%",
-    value: "10.8k",
-  },
-  {
-    title: "Avg Reading Time",
-    badge: "+23%",
-    value: "30m",
-  },
-  {
-    title: "Verses Meditated",
-    badge: "+18%",
-    value: "10.7k",
-  },
-  {
-    title: "Consistency Rating",
-    badge: "+3.7%",
-    value: "4.8/5",
-  },
-];
+export function StatMetricCards({
+  chaptersRead = 0,
+  currentStreak = 0,
+  streakFreezesAvailable = 3,
+  longestStreak = 0,
+}: StatMetricCardsProps) {
+  const metrics = [
+    {
+      title: "Chapters Read",
+      badge: chaptersRead > 0 ? "Active" : "New",
+      value: chaptersRead.toLocaleString(),
+    },
+    {
+      title: "Current Streak",
+      badge: currentStreak > 0 ? "🔥 Streak" : "Day 0",
+      value: `${currentStreak}d`,
+    },
+    {
+      title: "Freeze Shields",
+      badge: "Shielded",
+      value: `${streakFreezesAvailable}`,
+    },
+    {
+      title: "Longest Streak",
+      badge: "Record",
+      value: `${longestStreak}d`,
+    },
+  ] as const;
 
-export function StatMetricCards() {
   return (
     <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-      {STAT_METRICS.map((item) => (
+      {metrics.map((item) => (
         <div
           key={item.title}
-          className="glass-panel flex flex-col justify-between rounded-[24px] p-5 transition-all hover:bg-white/75 dark:hover:bg-white/[0.08]"
+          className="glass-panel flex flex-col justify-between rounded-3xl p-5 transition-colors duration-150 hover:bg-white/75 dark:hover:bg-white/8"
         >
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
               {item.title}
             </span>
-            <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+            <span className="rounded-full bg-black/4 px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
               {item.badge}
             </span>
           </div>
