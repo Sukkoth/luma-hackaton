@@ -1,4 +1,7 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Plus, Search, Bookmark, Folder, MoreHorizontal } from "lucide-react";
+import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
 
 type NoteItem = {
@@ -53,11 +56,24 @@ const SAMPLE_NOTES: ReadonlyArray<NoteItem> = [
   },
 ];
 
-export default function NotesPage() {
+export const instant = false;
+
+export default async function NotesPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login?redirect=/notes");
+  }
+
+  const displayName =
+    session.user.name.split(" ")[0] || session.user.name || "Reader";
+
   return (
     <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName="James" />
+      <TopNavbar userName={displayName} />
 
       <main className="mt-4 space-y-4">
         {/* Top Header & New Note Action Banner */}
@@ -125,7 +141,7 @@ export default function NotesPage() {
 
             {/* Search Input */}
             <div className="relative w-full sm:w-64">
-              <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
               <input
                 type="text"
                 placeholder="Search notes..."
@@ -139,7 +155,7 @@ export default function NotesPage() {
             {SAMPLE_NOTES.map((note) => (
               <div
                 key={note.id}
-                className="group flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]"
+                className="group isolate flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/[0.18] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.18] dark:hover:bg-white/[0.07]"
               >
                 <div>
                   <div className="flex items-center justify-between">
