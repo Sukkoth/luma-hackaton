@@ -1,76 +1,10 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Flame, Trophy, TrendingUp, Clock, Award } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
-
-type Milestone = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  unlocked: boolean;
-  date?: string;
-  progressText: string;
-};
-
-const MILESTONES: ReadonlyArray<Milestone> = [
-  {
-    id: "gospels_complete",
-    title: "Gospel Pioneer",
-    description: "Read all 89 chapters of Matthew, Mark, Luke, and John.",
-    category: "New Testament",
-    unlocked: true,
-    date: "Unlocked Nov 14",
-    progressText: "89 / 89 chapters",
-  },
-  {
-    id: "torah_complete",
-    title: "Law & Covenant",
-    description:
-      "Completed the foundational books of Moses (Genesis & Exodus).",
-    category: "Old Testament",
-    unlocked: true,
-    date: "Unlocked Nov 02",
-    progressText: "90 / 90 chapters",
-  },
-  {
-    id: "forty_day_streak",
-    title: "Steadfast Devotion",
-    description: "Maintained a reading streak of 14 consecutive active days.",
-    category: "Daily Consistency",
-    unlocked: true,
-    date: "Active Streak",
-    progressText: "14 / 14 days",
-  },
-  {
-    id: "proverbs_mastery",
-    title: "Wisdom of Solomon",
-    description: "Read all 31 chapters of Proverbs across a calendar month.",
-    category: "Poetry & Wisdom",
-    unlocked: true,
-    date: "Unlocked Oct 28",
-    progressText: "31 / 31 chapters",
-  },
-  {
-    id: "centurion_milestone",
-    title: "Centurion Reader",
-    description:
-      "Reach 500 total unique chapters read across the entire Bible.",
-    category: "Milestones",
-    unlocked: false,
-    progressText: "443 / 500 chapters (88%)",
-  },
-  {
-    id: "epistles_deep_dive",
-    title: "Apostolic Letters",
-    description:
-      "Complete all Pauline and General Epistles from Romans to Jude.",
-    category: "New Testament",
-    unlocked: false,
-    progressText: "54 / 122 chapters (44%)",
-  },
-];
+import { InsightsKpiCards } from "@/components/insights/insights-kpi-cards";
+import { CanonCoverageSection } from "@/components/insights/canon-coverage-section";
+import { MilestonesSection } from "@/components/insights/milestones-section";
 
 export const instant = false;
 
@@ -83,334 +17,41 @@ export default async function InsightsPage() {
     redirect("/login?redirect=/insights");
   }
 
-  const displayName =
-    session.user.name.split(" ")[0] || session.user.name || "Reader";
+  const userFirstName = session.user.name.split(" ")[0] || "Reader";
 
   return (
     <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navbar */}
-      <TopNavbar userName={displayName} />
+      {/* Top Navigation */}
+      <TopNavbar userName={session.user.name} />
 
-      <main className="mt-4 space-y-4">
-        {/* Header Banner */}
-        <section className="glass-panel rounded-[28px] p-6 sm:p-7">
+      {/* Main Insights Content Layout */}
+      <main className="mt-4 space-y-6">
+        {/* Header Greeting & Tracker Status */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
+              Spiritual Metrics & Insights
+            </h1>
+            <p className="text-[13px] text-[#777777] dark:text-[#9CA3AF]">
+              Welcome back, {userFirstName}. Here is your reading trajectory and
+              scriptural milestones.
+            </p>
+          </div>
           <div className="flex items-center gap-2">
-            <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-              Analytics
-            </span>
-            <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
-              Scripture Tracker Intelligence
+            <span className="rounded-full bg-black/[0.04] px-3 py-1 text-[12px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+              Active: Personal Reading Tracker
             </span>
           </div>
-          <h1 className="mt-2 text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
-            Insights & Analytics
-          </h1>
-          <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
-            In-depth reading statistics, velocity, streaks, and canonical
-            coverage breakdown.
-          </p>
-        </section>
+        </div>
 
-        {/* Top Metric Cards - Luma Frosted Panels */}
-        <section className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-          <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-                <Flame className="h-3.5 w-3.5 text-[#C9856A]" />
-                <span>Reading Streak</span>
-              </span>
-              <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
-                Active
-              </span>
-            </div>
-            <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
-                14 Days
-              </span>
-              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                Personal best: 42 days
-              </p>
-            </div>
-          </div>
-
-          <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-                <TrendingUp className="h-3.5 w-3.5 text-[#82ADD4]" />
-                <span>Bible Complete</span>
-              </span>
-              <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
-                +4.2%
-              </span>
-            </div>
-            <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
-                37%
-              </span>
-              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                443 of 1,189 chapters
-              </p>
-            </div>
-          </div>
-
-          <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-                <Clock className="h-3.5 w-3.5 text-[#82ADD4]" />
-                <span>Meditation Time</span>
-              </span>
-              <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
-                +23%
-              </span>
-            </div>
-            <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
-                58.4h
-              </span>
-              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                Avg 28 mins per day
-              </p>
-            </div>
-          </div>
-
-          <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-                <Trophy className="h-3.5 w-3.5 text-[#C9A24B]" />
-                <span>Milestones</span>
-              </span>
-              <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
-                Level 4
-              </span>
-            </div>
-            <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
-                16 / 24
-              </span>
-              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                67% badges unlocked
-              </p>
-            </div>
-          </div>
-        </section>
+        {/* Highlight Stats Row */}
+        <InsightsKpiCards />
 
         {/* Section 1: Canonical Distribution & Velocity */}
-        <section className="glass-panel rounded-[28px] p-6 sm:p-7">
-          <div className="flex flex-col gap-1 border-b border-black/[0.04] pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.06]">
-            <div>
-              <h2 className="text-[18px] font-normal tracking-tight text-black dark:text-white">
-                Canon Coverage & Reading Velocity
-              </h2>
-              <p className="text-[13px] text-[#777777] dark:text-[#A1A1AA]">
-                Progress broken down by scripture sections for active tracker.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-[6px] bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
-                Protestant Standard 66
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black dark:text-white">
-                  Law & Pentateuch
-                </span>
-                <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
-                  100%
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                <span>Genesis to Deuteronomy</span>
-                <span className="font-light text-black dark:text-white">
-                  187 / 187 ch
-                </span>
-              </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
-                <div
-                  style={{ width: "100%" }}
-                  className="h-full rounded-full bg-[#DDFD2C]"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black dark:text-white">
-                  The Four Gospels
-                </span>
-                <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
-                  100%
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                <span>Matthew to John</span>
-                <span className="font-light text-black dark:text-white">
-                  89 / 89 ch
-                </span>
-              </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
-                <div
-                  style={{ width: "100%" }}
-                  className="h-full rounded-full bg-[#DDFD2C]"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black dark:text-white">
-                  Historical Books
-                </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
-                  50%
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                <span>Joshua to Esther</span>
-                <span className="font-light text-black dark:text-white">
-                  124 / 249 ch
-                </span>
-              </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
-                <div
-                  style={{ width: "50%" }}
-                  className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black dark:text-white">
-                  Poetry & Wisdom
-                </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
-                  31%
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                <span>Job to Song of Solomon</span>
-                <span className="font-light text-black dark:text-white">
-                  76 / 243 ch
-                </span>
-              </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
-                <div
-                  style={{ width: "31%" }}
-                  className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black dark:text-white">
-                  Epistles & Letters
-                </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
-                  44%
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                <span>Romans to Jude</span>
-                <span className="font-light text-black dark:text-white">
-                  54 / 122 ch
-                </span>
-              </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
-                <div
-                  style={{ width: "44%" }}
-                  className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black dark:text-white">
-                  Prophets & Apocalypse
-                </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
-                  22%
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
-                <span>Major/Minor & Revelation</span>
-                <span className="font-light text-black dark:text-white">
-                  68 / 307 ch
-                </span>
-              </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
-                <div
-                  style={{ width: "22%" }}
-                  className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+        <CanonCoverageSection />
 
         {/* Section 2: Milestones & Badges Grid */}
-        <section className="glass-panel rounded-[28px] p-6 sm:p-7">
-          <div className="flex items-center justify-between border-b border-black/[0.04] pb-4 dark:border-white/[0.06]">
-            <div>
-              <h2 className="text-[18px] font-normal tracking-tight text-black dark:text-white">
-                Reading Milestones & Badges
-              </h2>
-              <p className="text-[13px] text-[#777777] dark:text-[#A1A1AA]">
-                Achievements unlocked through consistent Bible reading.
-              </p>
-            </div>
-            <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-              16 Unlocked
-            </span>
-          </div>
-
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {MILESTONES.map((m) => (
-              <div
-                key={m.id}
-                className="flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-[6px] bg-black/[0.04] px-2 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
-                      {m.category}
-                    </span>
-                    {m.unlocked ? (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-2xs">
-                        <Award className="h-3 w-3 stroke-[2.5]" />
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-[#888888] dark:text-[#A1A1AA]">
-                        In Progress
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="mt-3 text-[16px] font-medium text-black dark:text-white">
-                    {m.title}
-                  </h3>
-                  <p className="mt-1 text-[12px] leading-snug text-[#666666] dark:text-[#9CA3AF]">
-                    {m.description}
-                  </p>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[11px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
-                  <span>{m.progressText}</span>
-                  {m.date && (
-                    <span className="font-medium text-black dark:text-white">
-                      {m.date}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <MilestonesSection />
       </main>
     </div>
   );
