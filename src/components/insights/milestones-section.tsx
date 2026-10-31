@@ -70,7 +70,7 @@ export const MILESTONES: ReadonlyArray<Milestone> = [
 export function MilestonesSection() {
   return (
     <section className="glass-panel rounded-[28px] p-6 sm:p-7">
-      <div className="flex items-center justify-between border-b border-black/[0.04] pb-4 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between border-b border-black/4 pb-4 dark:border-white/6">
         <div>
           <h2 className="text-[18px] font-normal tracking-tight text-black dark:text-white">
             Reading Milestones & Badges
@@ -79,7 +79,7 @@ export function MilestonesSection() {
             Achievements unlocked through consistent Bible reading.
           </p>
         </div>
-        <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+        <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
           16 Unlocked
         </span>
       </div>
@@ -88,16 +88,16 @@ export function MilestonesSection() {
         {MILESTONES.map((m) => (
           <div
             key={m.id}
-            className="flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]"
+            className="flex flex-col justify-between rounded-[20px] border border-black/8 bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md dark:border-white/8 dark:bg-white/4 dark:shadow-none dark:hover:border-white/16 dark:hover:bg-white/[0.07]"
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="rounded-[6px] bg-black/[0.04] px-2 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+                <span className="rounded-md bg-black/4 px-2 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
                   {m.category}
                 </span>
                 {m.unlocked ? (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-2xs">
-                    <Award className="h-3 w-3 stroke-[2.5]" />
+                  <span className="flex size-5 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-2xs">
+                    <Award className="size-3" strokeWidth={2.5} />
                   </span>
                 ) : (
                   <span className="text-[11px] text-[#888888] dark:text-[#A1A1AA]">
@@ -114,7 +114,7 @@ export function MilestonesSection() {
               </p>
             </div>
 
-            <div className="mt-4 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[11px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
+            <div className="mt-4 flex items-center justify-between border-t border-black/4 pt-3 text-[11px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
               <span>{m.progressText}</span>
               {m.date && (
                 <span className="font-medium text-black dark:text-white">

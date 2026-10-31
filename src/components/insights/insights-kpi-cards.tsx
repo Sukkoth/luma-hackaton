@@ -3,13 +3,13 @@ import { Flame, Trophy, TrendingUp, Clock } from "lucide-react";
 export function InsightsKpiCards() {
   return (
     <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
+      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <Flame className="h-3.5 w-3.5 text-orange-500" />
+            <Flame className="size-3.5 text-orange-500" />
             <span>Reading Streak</span>
           </span>
-          <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
+          <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
             Active
           </span>
         </div>
@@ -23,13 +23,13 @@ export function InsightsKpiCards() {
         </div>
       </div>
 
-      <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
+      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <TrendingUp className="h-3.5 w-3.5 text-[#82ADD4]" />
+            <TrendingUp className="size-3.5 text-[#82ADD4]" />
             <span>Bible Complete</span>
           </span>
-          <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+          <span className="rounded-full bg-black/4 px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
             +4.2%
           </span>
         </div>
@@ -43,13 +43,13 @@ export function InsightsKpiCards() {
         </div>
       </div>
 
-      <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
+      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <Clock className="h-3.5 w-3.5 text-[#82ADD4]" />
+            <Clock className="size-3.5 text-[#82ADD4]" />
             <span>Meditation Time</span>
           </span>
-          <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+          <span className="rounded-full bg-black/4 px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
             +23%
           </span>
         </div>
@@ -63,13 +63,13 @@ export function InsightsKpiCards() {
         </div>
       </div>
 
-      <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
+      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <Trophy className="h-3.5 w-3.5 text-[#C9A24B]" />
+            <Trophy className="size-3.5 text-[#C9A24B]" />
             <span>Milestones</span>
           </span>
-          <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
+          <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
             Level 4
           </span>
         </div>

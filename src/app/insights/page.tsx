@@ -20,7 +20,7 @@ export default async function InsightsPage() {
   const userFirstName = session.user.name.split(" ")[0] || "Reader";
 
   return (
-    <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
+    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navigation */}
       <TopNavbar userName={session.user.name} />
 
@@ -38,7 +38,7 @@ export default async function InsightsPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-black/[0.04] px-3 py-1 text-[12px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+            <span className="rounded-full bg-black/4 px-3 py-1 text-[12px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
               Active: Personal Reading Tracker
             </span>
           </div>
