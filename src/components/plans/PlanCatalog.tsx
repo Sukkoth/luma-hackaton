@@ -63,7 +63,7 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
       {/* Main Catalog & My Plans Section */}
       <section className="glass-panel rounded-[28px] p-6 sm:p-7">
         {/* Navigation Tabs and Search Bar */}
-        <div className="flex flex-col gap-4 border-b border-black/[0.04] pb-5 md:flex-row md:items-center md:justify-between dark:border-white/[0.06]">
+        <div className="flex flex-col gap-4 border-b border-black/4 pb-5 md:flex-row md:items-center md:justify-between dark:border-white/6">
           {/* Tab Switcher */}
           <div className="flex items-center gap-2">
             <button
@@ -72,10 +72,10 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
               className={`flex items-center gap-2 rounded-[14px] px-5 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "catalog"
                   ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
               }`}
             >
-              <Compass className="h-3.5 w-3.5" />
+              <Compass className="size-3.5" />
               <span>Plan Catalog ({READING_PLANS.length})</span>
             </button>
             <button
@@ -84,10 +84,10 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
               className={`flex items-center gap-2 rounded-[14px] px-5 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "my_plans"
                   ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
               }`}
             >
-              <Calendar className="h-3.5 w-3.5" />
+              <Calendar className="size-3.5" />
               <span>My Plans ({session ? activePlanInstances.length : 0})</span>
             </button>
           </div>
@@ -95,13 +95,13 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
           {/* Search Input */}
           {activeTab === "catalog" && (
             <div className="relative w-full sm:w-64">
-              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
               <input
                 type="text"
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-[12px] border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                className="w-full rounded-xl border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
               />
               {searchQuery && (
                 <button
@@ -109,7 +109,7 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
                   onClick={() => setSearchQuery("")}
                   className="absolute top-1/2 right-3 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="size-3" />
                 </button>
               )}
             </div>
@@ -142,7 +142,7 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
                     setSearchQuery("");
                     setSelectedFilter("All");
                   }}
-                  className="mt-3 rounded-[12px] border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                  className="mt-3 rounded-xl border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                 >
                   Reset Filters
                 </button>
@@ -152,8 +152,8 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
         ) : !session ? (
           /* Unauthenticated Prompt in My Plans Tab */
           <div className="py-16 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[16px] bg-black/[0.04] text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
-              <Lock className="h-6 w-6" />
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-black/4 text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+              <Lock className="size-6" />
             </div>
             <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
               Sign in to view your plans
@@ -164,17 +164,17 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
             </p>
             <Link
               href="/login?redirect=/plans"
-              className="mt-5 inline-flex items-center gap-1.5 rounded-[12px] bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
-              <LogIn className="h-4 w-4" />
+              <LogIn className="size-4" />
               <span>Sign In to Scripture</span>
             </Link>
           </div>
         ) : activePlanInstances.length === 0 ? (
           /* Authenticated User without Started Plans */
           <div className="py-16 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[16px] bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
-              <Calendar className="h-6 w-6" />
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+              <Calendar className="size-6" />
             </div>
             <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
               No active plans started yet
@@ -186,9 +186,9 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
             <button
               type="button"
               onClick={() => setActiveTab("catalog")}
-              className="mt-5 inline-flex items-center gap-1.5 rounded-[12px] bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
-              <Compass className="h-3.5 w-3.5" />
+              <Compass className="size-3.5" />
               <span>Browse Plan Catalog</span>
             </button>
           </div>
@@ -199,12 +199,12 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
               {activePlanInstances.map((instance) => (
                 <div
                   key={instance.id}
-                  className="isolate flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/[0.18] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.18] dark:hover:bg-white/[0.08]"
+                  className="isolate flex flex-col justify-between rounded-[20px] border border-black/8 bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/18 hover:bg-white hover:shadow-md dark:border-white/8 dark:bg-white/4 dark:shadow-none dark:hover:border-white/18 dark:hover:bg-white/8"
                 >
                   <div>
                     <div className="flex items-center justify-between">
                       <span
-                        className={`rounded-[6px] px-2 py-0.5 text-[11px] font-medium ${instance.statusColor}`}
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${instance.statusColor}`}
                       >
                         {instance.status}
                       </span>
@@ -234,26 +234,26 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
                           chapters
                         </span>
                       </div>
-                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/6">
                         <div
                           style={{ width: `${instance.progressPercent}%` }}
-                          className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#DDFD2C]"
+                          className="h-full rounded-full bg-linear-to-r from-[#82ADD4] to-[#DDFD2C]"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-black/[0.05] pt-4 dark:border-white/[0.06]">
+                  <div className="mt-5 flex items-center justify-between border-t border-black/5 pt-4 dark:border-white/6">
                     <span className="flex items-center gap-1 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-[#82ADD4]" />
+                      <CheckCircle2 className="size-3.5 text-[#82ADD4]" />
                       <span>Active Tracker</span>
                     </span>
                     <Link
                       href={`/plans/${instance.id}`}
-                      className="flex items-center gap-1.5 rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
+                      className="flex items-center gap-1.5 rounded-xl border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
                     >
                       <span>Checkoff Sections</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <ArrowRight className="size-3.5" />
                     </Link>
                   </div>
                 </div>

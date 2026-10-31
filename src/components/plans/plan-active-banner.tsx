@@ -37,10 +37,10 @@ export function PlanActiveBanner({
           <div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
+                <Bookmark className="size-3.5 text-[#82ADD4]" />
                 <span>Bible Plans Catalog • Curated Journeys</span>
               </span>
-              <span className="rounded-[4px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+              <span className="rounded-sm bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
                 {READING_PLANS.length} Curated Plans
               </span>
             </div>
@@ -57,15 +57,15 @@ export function PlanActiveBanner({
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/4 pt-3 text-[13px] dark:border-white/6">
             <span className="text-[#777777] dark:text-[#A1A1AA]">
               Sign in to activate plans & track daily checkoffs
             </span>
             <Link
               href="/login?redirect=/plans"
-              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
-              <LogIn className="h-3.5 w-3.5" />
+              <LogIn className="size-3.5" />
               <span>Sign In to Start Plan</span>
             </Link>
           </div>
@@ -76,10 +76,10 @@ export function PlanActiveBanner({
           <div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
+                <Bookmark className="size-3.5 text-[#82ADD4]" />
                 <span>Bible Plans • Active Reading</span>
               </span>
-              <span className="rounded-[4px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+              <span className="rounded-sm bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
                 {activePlanInstances[0]?.progressPercent}% Complete
               </span>
             </div>
@@ -103,25 +103,25 @@ export function PlanActiveBanner({
               </span>
             </div>
 
-            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
+            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/6">
               <div
                 style={{
                   width: `${activePlanInstances[0]?.progressPercent}%`,
                 }}
-                className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#DDFD2C]"
+                className="h-full rounded-full bg-linear-to-r from-[#82ADD4] to-[#DDFD2C]"
               />
             </div>
           </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
+          <div className="mt-5 flex items-center justify-between border-t border-black/4 pt-3 text-[13px] dark:border-white/6">
             <span className="text-[#777777] dark:text-[#A1A1AA]">
               {activePlanInstances[0]?.status}
             </span>
             <Link
               href={`/plans/${activePlanInstances[0]?.id}`}
-              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
-              <Play className="h-3 w-3 fill-current" />
+              <Play className="size-3 fill-current" />
               <span>Resume Reading</span>
             </Link>
           </div>
@@ -132,10 +132,10 @@ export function PlanActiveBanner({
           <div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
+                <Bookmark className="size-3.5 text-[#82ADD4]" />
                 <span>Bible Plans • Personal Reading</span>
               </span>
-              <span className="rounded-[4px] bg-black/[0.05] px-2 py-0.5 text-[11px] font-medium text-[#666666] dark:bg-white/[0.08] dark:text-[#A1A1AA]">
+              <span className="rounded-sm bg-black/5 px-2 py-0.5 text-[11px] font-medium text-[#666666] dark:bg-white/8 dark:text-[#A1A1AA]">
                 Ready to Start
               </span>
             </div>
@@ -152,16 +152,16 @@ export function PlanActiveBanner({
             </div>
           </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
+          <div className="mt-5 flex items-center justify-between border-t border-black/4 pt-3 text-[13px] dark:border-white/6">
             <span className="text-[#777777] dark:text-[#A1A1AA]">
               {READING_PLANS.length} curated blueprints available
             </span>
             <button
               type="button"
               onClick={onBrowseCatalog}
-              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
-              <Compass className="h-3.5 w-3.5" />
+              <Compass className="size-3.5" />
               <span>Browse Catalog</span>
             </button>
           </div>
@@ -175,7 +175,7 @@ export function PlanActiveBanner({
             <span className="text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
               Plans Overview
             </span>
-            <span className="rounded-full bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+            <span className="rounded-full bg-black/4 px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
               {activePlanInstances.length} Active
             </span>
           </div>
@@ -201,14 +201,14 @@ export function PlanActiveBanner({
               <span className="text-[#666666] dark:text-[#9CA3AF]">
                 Pacing Flexibility
               </span>
-              <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+              <span className="rounded-sm bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
                 Fixed & Self-Paced
               </span>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 border-t border-black/[0.04] pt-3 text-[12px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
+        <div className="mt-4 border-t border-black/4 pt-3 text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
           <span>Click any plan below to inspect blueprint</span>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { PlanCatalog } from "@/components/plans/PlanCatalog";
 
 export default function PlansPage() {
   return (
-    <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
+    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
       <TopNavbar userName="James" />
 
