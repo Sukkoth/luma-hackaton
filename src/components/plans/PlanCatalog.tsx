@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   X,
   Play,
+  Lock,
+  LogIn,
 } from "lucide-react";
 import {
   READING_PLANS,
@@ -22,6 +24,7 @@ import {
   PLAN_FILTERS,
   isPlanMatchingFilter,
 } from "@/data/readingPlans";
+import { useSession } from "@/lib/auth-client";
 
 type PlanCardProps = {
   plan: ReadingPlanTemplate;
@@ -32,7 +35,7 @@ function PlanCard({ plan }: PlanCardProps) {
     plan.id.startsWith("custom_") || plan.id.startsWith("imported_");
 
   return (
-    <div className="group relative flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]">
+    <div className="group relative isolate flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/[0.18] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.18] dark:hover:bg-white/[0.08]">
       <div>
         {/* Badges row */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -95,7 +98,6 @@ function PlanCard({ plan }: PlanCardProps) {
   );
 }
 
-// Mock active user plan instances
 type ActivePlanInstance = {
   id: string;
   templateId: string;
@@ -109,69 +111,22 @@ type ActivePlanInstance = {
   statusColor: string;
 };
 
-const ACTIVE_PLAN_INSTANCES: ReadonlyArray<ActivePlanInstance> = [
-  {
-    id: "bible-in-a-year",
-    templateId: "bible_in_a_year_chronological",
-    title: "Bible in a Year",
-    currentPassage: "Romans 8:1–39",
-    dayText: "Day 212 of 365",
-    progressPercent: 94,
-    readChapters: 1118,
-    totalChapters: 1189,
-    status: "On Track",
-    statusColor: "bg-[#DDFD2C] text-black",
-  },
-  {
-    id: "the-four-gospels",
-    templateId: "the_four_gospels_30",
-    title: "The Four Gospels (30 Days)",
-    currentPassage: "John 14–17",
-    dayText: "Day 22 of 30",
-    progressPercent: 73,
-    readChapters: 65,
-    totalChapters: 89,
-    status: "On Track",
-    statusColor: "bg-[#DDFD2C] text-black",
-  },
-  {
-    id: "psalms-proverbs",
-    templateId: "psalms_and_proverbs_summer",
-    title: "Psalms & Proverbs",
-    currentPassage: "Psalm 46–48",
-    dayText: "Day 45 of 90",
-    progressPercent: 42,
-    readChapters: 76,
-    totalChapters: 181,
-    status: "Rest Buffer",
-    statusColor:
-      "bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]",
-  },
-  {
-    id: "epistles-of-paul",
-    templateId: "pauline_epistles_deep_dive",
-    title: "Epistles of Paul",
-    currentPassage: "Galatians 3–4",
-    dayText: "Self-Paced Pace",
-    progressPercent: 18,
-    readChapters: 18,
-    totalChapters: 100,
-    status: "Flexible",
-    statusColor:
-      "bg-black/[0.04] text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]",
-  },
-];
+// Initial state has zero sample finished progress
+const EMPTY_PLAN_INSTANCES: ReadonlyArray<ActivePlanInstance> = [];
 
 type PlanCatalogProps = {
   initialTab?: "catalog" | "my_plans";
 };
 
 export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<"catalog" | "my_plans">(
     initialTab
   );
   const [selectedFilter, setSelectedFilter] = useState<PlanFilterType>("All");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const activePlanInstances = EMPTY_PLAN_INSTANCES;
 
   const filteredPlans = READING_PLANS.filter((plan) => {
     const matchesFilter = isPlanMatchingFilter(plan, selectedFilter);
@@ -187,59 +142,142 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
     <div className="space-y-4">
       {/* Top Highlights Row */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Active Plan in Progress Banner */}
-        <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
-                <span>Bible Plans • Active Reading</span>
-              </span>
-              <span className="rounded-[4px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-                94% Complete
-              </span>
-            </div>
+        {!session ? (
+          /* Public Unauthenticated Catalog Discovery Banner */
+          <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
+                  <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
+                  <span>Bible Plans Catalog • Curated Journeys</span>
+                </span>
+                <span className="rounded-[4px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+                  {READING_PLANS.length} Curated Plans
+                </span>
+              </div>
 
-            <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-              <div>
-                <h3 className="text-[22px] font-light tracking-tight text-black sm:text-[24px] dark:text-white">
-                  Bible in a Year
-                </h3>
-                <p className="text-[13px] text-[#666666] dark:text-[#9CA3AF]">
-                  Today:{" "}
-                  <span className="font-medium text-black dark:text-white">
-                    Romans 8:1–39
-                  </span>{" "}
-                  • Day 212 of 365
+              <div className="mt-4">
+                <h2 className="text-[22px] font-normal tracking-tight text-black sm:text-[24px] dark:text-white">
+                  Explore Structured Scripture Plans
+                </h2>
+                <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-[#666666] dark:text-[#9CA3AF]">
+                  From 7-day topical deep-dives to comprehensive year-long
+                  canonical schedules across 4 Christian traditions. Preview
+                  reading outlines freely or sign in to begin your journey.
                 </p>
               </div>
-              <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
-                1 118 / 1 189 chapters read
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
+              <span className="text-[#777777] dark:text-[#A1A1AA]">
+                Sign in to activate plans & track daily checkoffs
               </span>
-            </div>
-
-            {/* Micro Progress Track */}
-            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
-              <div
-                style={{ width: "94%" }}
-                className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#DDFD2C]"
-              />
+              <Link
+                href="/login?redirect=/plans"
+                className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                <span>Sign In to Start Plan</span>
+              </Link>
             </div>
           </div>
+        ) : activePlanInstances.length > 0 ? (
+          /* Active Plan in Progress Banner for User with Active Plans */
+          <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
+                  <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
+                  <span>Bible Plans • Active Reading</span>
+                </span>
+                <span className="rounded-[4px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+                  {activePlanInstances[0]?.progressPercent}% Complete
+                </span>
+              </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
-            <span className="text-[#777777] dark:text-[#A1A1AA]">
-              Rest days buffer: 135 chapters ahead
-            </span>
-            <Link
-              href="/plans/sample-instance"
-              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
-            >
-              <Play className="h-3 w-3 fill-current" />
-              <span>Resume Reading</span>
-            </Link>
+              <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                <div>
+                  <h3 className="text-[22px] font-light tracking-tight text-black sm:text-[24px] dark:text-white">
+                    {activePlanInstances[0]?.title}
+                  </h3>
+                  <p className="text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+                    Today:{" "}
+                    <span className="font-medium text-black dark:text-white">
+                      {activePlanInstances[0]?.currentPassage}
+                    </span>{" "}
+                    • {activePlanInstances[0]?.dayText}
+                  </p>
+                </div>
+                <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+                  {activePlanInstances[0]?.readChapters} /{" "}
+                  {activePlanInstances[0]?.totalChapters} chapters read
+                </span>
+              </div>
+
+              <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
+                <div
+                  style={{
+                    width: `${activePlanInstances[0]?.progressPercent}%`,
+                  }}
+                  className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#DDFD2C]"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
+              <span className="text-[#777777] dark:text-[#A1A1AA]">
+                {activePlanInstances[0]?.status}
+              </span>
+              <Link
+                href={`/plans/${activePlanInstances[0]?.id}`}
+                className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              >
+                <Play className="h-3 w-3 fill-current" />
+                <span>Resume Reading</span>
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Authenticated User without Active Plans */
+          <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
+                  <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
+                  <span>Bible Plans • Personal Reading</span>
+                </span>
+                <span className="rounded-[4px] bg-black/[0.05] px-2 py-0.5 text-[11px] font-medium text-[#666666] dark:bg-white/[0.08] dark:text-[#A1A1AA]">
+                  Ready to Start
+                </span>
+              </div>
+
+              <div className="mt-4">
+                <h2 className="text-[22px] font-normal tracking-tight text-black sm:text-[24px] dark:text-white">
+                  Start Your First Reading Plan
+                </h2>
+                <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-[#666666] dark:text-[#9CA3AF]">
+                  You don&apos;t have any active plans running yet. Select any
+                  curriculum from the catalog below and click &ldquo;Create &
+                  Start Plan&rdquo; to begin your daily scheduled readings.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
+              <span className="text-[#777777] dark:text-[#A1A1AA]">
+                {READING_PLANS.length} curated blueprints available
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("catalog")}
+                className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              >
+                <Compass className="h-3.5 w-3.5" />
+                <span>Browse Catalog</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Quick Plans Stats Card */}
         <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6">
@@ -249,7 +287,7 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
                 Plans Overview
               </span>
               <span className="rounded-full bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
-                4 Active
+                {activePlanInstances.length} Active
               </span>
             </div>
 
@@ -264,25 +302,25 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
               </div>
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-[#666666] dark:text-[#9CA3AF]">
-                  Chapters Read This Week
+                  Christian Traditions
                 </span>
                 <span className="text-[18px] font-light text-black dark:text-white">
-                  31
+                  4 Canons
                 </span>
               </div>
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-[#666666] dark:text-[#9CA3AF]">
-                  Consistency Streak
+                  Pacing Flexibility
                 </span>
-                <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
-                  14 days
+                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+                  Fixed & Self-Paced
                 </span>
               </div>
             </div>
           </div>
 
           <div className="mt-4 border-t border-black/[0.04] pt-3 text-[12px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
-            <span>Switch tabs below to inspect active plans</span>
+            <span>Click any plan below to inspect blueprint</span>
           </div>
         </div>
       </section>
@@ -315,14 +353,14 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
               }`}
             >
               <Calendar className="h-3.5 w-3.5" />
-              <span>My Plans ({ACTIVE_PLAN_INSTANCES.length})</span>
+              <span>My Plans ({session ? activePlanInstances.length : 0})</span>
             </button>
           </div>
 
           {/* Search Input */}
           {activeTab === "catalog" && (
             <div className="relative w-full sm:w-64">
-              <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
               <input
                 type="text"
                 placeholder="Search plans..."
@@ -392,14 +430,57 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
               </div>
             )}
           </div>
+        ) : !session ? (
+          /* Unauthenticated Prompt in My Plans Tab */
+          <div className="py-16 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[16px] bg-black/[0.04] text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+              <Lock className="h-6 w-6" />
+            </div>
+            <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+              Sign in to view your plans
+            </h3>
+            <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              Active schedules, daily checklists, and section checkoffs are
+              saved to your account.
+            </p>
+            <Link
+              href="/login?redirect=/plans"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-[12px] bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+            >
+              <LogIn className="h-4 w-4" />
+              <span>Sign In to Scripture</span>
+            </Link>
+          </div>
+        ) : activePlanInstances.length === 0 ? (
+          /* Authenticated User without Started Plans */
+          <div className="py-16 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[16px] bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+              <Calendar className="h-6 w-6" />
+            </div>
+            <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+              No active plans started yet
+            </h3>
+            <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              Browse the catalog and click &ldquo;Create & Start Plan&rdquo; on
+              any plan to begin your daily scheduled readings.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveTab("catalog")}
+              className="mt-5 inline-flex items-center gap-1.5 rounded-[12px] bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+            >
+              <Compass className="h-3.5 w-3.5" />
+              <span>Browse Plan Catalog</span>
+            </button>
+          </div>
         ) : (
-          /* My Plans Tab */
+          /* Render Active User Plans if Any Exist */
           <div className="mt-6">
             <div className="grid gap-4 sm:grid-cols-2">
-              {ACTIVE_PLAN_INSTANCES.map((instance) => (
+              {activePlanInstances.map((instance) => (
                 <div
                   key={instance.id}
-                  className="flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]"
+                  className="isolate flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/[0.18] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.18] dark:hover:bg-white/[0.08]"
                 >
                   <div>
                     <div className="flex items-center justify-between">

@@ -9,10 +9,10 @@ import {
   Sparkles,
   Calendar,
   Bookmark,
-  ArrowRight,
 } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { getReadingPlanById } from "@/data/readingPlans";
+import { StartPlanAction } from "@/components/plans/start-plan-action";
 
 type PlanTemplateDetailContentParams = {
   params: Promise<{ id: string }>;
@@ -128,13 +128,7 @@ async function PlanTemplateDetailContent({
                   tracker association.
                 </p>
               </div>
-              <Link
-                href={`/plans/${plan.id}-instance`}
-                className="mt-3 flex items-center justify-center gap-1.5 rounded-[12px] bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 sm:mt-0 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
-              >
-                <span>Create & Start Plan</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+              <StartPlanAction planId={plan.id} />
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">

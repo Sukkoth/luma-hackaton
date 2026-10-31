@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   Calendar,
@@ -10,27 +11,19 @@ import {
   X,
   Bookmark,
   CheckCircle2,
+  Lock,
+  LogIn,
 } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { BIBLE_BOOKS, type BibleBook } from "@/data/bibleData";
+import { useSession } from "@/lib/auth-client";
 
 type BooksViewProps = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
 };
 
-// Initial realistic read chapters sample for initial state
-const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {
-  gen: Array.from({ length: 50 }, (_, i) => i + 1), // Genesis complete
-  exo: Array.from({ length: 20 }, (_, i) => i + 1), // Exodus 1-20
-  psa: Array.from({ length: 45 }, (_, i) => i + 1), // Psalms 1-45
-  pro: Array.from({ length: 31 }, (_, i) => i + 1), // Proverbs complete
-  mat: Array.from({ length: 28 }, (_, i) => i + 1), // Matthew complete
-  mrk: Array.from({ length: 16 }, (_, i) => i + 1), // Mark complete
-  luk: Array.from({ length: 24 }, (_, i) => i + 1), // Luke complete
-  jhn: Array.from({ length: 21 }, (_, i) => i + 1), // John complete
-  act: Array.from({ length: 14 }, (_, i) => i + 1), // Acts 1-14
-  rom: Array.from({ length: 8 }, (_, i) => i + 1), // Romans 1-8
-};
+// Initial read chapters (default clean state with zero sample progress)
+const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {};
 
 const CATEGORY_FILTERS = [
   "All",
@@ -49,11 +42,14 @@ const CATEGORY_FILTERS = [
 export function BooksView({
   initialReadData = DEFAULT_READ_CHAPTERS,
 }: BooksViewProps) {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [readChapters, setReadChapters] =
     useState<Record<string, ReadonlyArray<number>>>(initialReadData);
   const [activeBook, setActiveBook] = useState<BibleBook | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Filter books
   const filteredBooks = BIBLE_BOOKS.filter((book) => {
@@ -79,7 +75,7 @@ export function BooksView({
     (totalReadChapters / totalChaptersAcrossCanon) * 100
   );
 
-  // Handle chapter toggle for active book
+  // Handle chapter toggle for active book - requires authentication
   const handleToggleChapter = ({
     bookId,
     chapter,
@@ -87,6 +83,11 @@ export function BooksView({
     bookId: string;
     chapter: number;
   }) => {
+    if (!session) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setReadChapters((prev) => {
       const current = prev[bookId] ?? [];
       const hasRead = current.includes(chapter);
@@ -101,6 +102,11 @@ export function BooksView({
   };
 
   const handleMarkAllChapters = ({ book }: { book: BibleBook }) => {
+    if (!session) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setReadChapters((prev) => ({
       ...prev,
       [book.id]: Array.from({ length: book.chapters }, (_, i) => i + 1),
@@ -108,6 +114,11 @@ export function BooksView({
   };
 
   const handleClearAllChapters = ({ bookId }: { bookId: string }) => {
+    if (!session) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setReadChapters((prev) => ({
       ...prev,
       [bookId]: [],
@@ -117,7 +128,7 @@ export function BooksView({
   return (
     <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName="James" />
+      <TopNavbar userName={session?.user?.name || "Reader"} />
 
       {/* Top Highlight Cards: Verse of the Day & Active Reading */}
       <section className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -220,7 +231,7 @@ export function BooksView({
 
           {/* Search Box */}
           <div className="relative w-full sm:w-64">
-            <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
             <input
               type="text"
               value={searchQuery}
@@ -276,7 +287,7 @@ export function BooksView({
                 key={book.id}
                 type="button"
                 onClick={() => setActiveBook(book)}
-                className="group relative flex flex-col justify-between rounded-[18px] border border-black/[0.08] bg-white/75 p-4 text-left shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.08]"
+                className="group relative isolate flex flex-col justify-between rounded-[18px] border border-black/[0.08] bg-white/75 p-4 text-left shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/[0.18] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.18] dark:hover:bg-white/[0.08]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -463,6 +474,48 @@ export function BooksView({
                 className="rounded-[12px] bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/85"
               >
                 Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auth Guard Modal for Marking Chapters */}
+      {showAuthModal && (
+        <div
+          role="dialog"
+          aria-labelledby="books-auth-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+        >
+          <div className="glass-panel relative w-full max-w-sm rounded-[24px] border border-white/90 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#82ADD4]/20 text-[#507ea6] dark:bg-[#82ADD4]/30 dark:text-[#82ADD4]">
+              <Lock className="h-5 w-5" />
+            </div>
+            <h3
+              id="books-auth-title"
+              className="mt-3 text-[18px] font-medium text-black dark:text-white"
+            >
+              Sign In to Log Progress
+            </h3>
+            <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              Marking chapters as read and saving your scripture coverage
+              requires an account.
+            </p>
+            <div className="mt-5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => router.push("/login?redirect=/books")}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-[12px] bg-black py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                <span>Sign In</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(false)}
+                className="rounded-[12px] border border-black/10 bg-black/5 px-4 py-2 text-[12px] font-medium text-black hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+              >
+                Cancel
               </button>
             </div>
           </div>

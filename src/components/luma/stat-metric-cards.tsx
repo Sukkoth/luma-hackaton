@@ -33,7 +33,7 @@ export function StatMetricCards() {
       {STAT_METRICS.map((item) => (
         <div
           key={item.title}
-          className="glass-panel flex flex-col justify-between rounded-[24px] p-5 transition-all hover:bg-white/75 dark:hover:bg-white/[0.08]"
+          className="glass-panel flex flex-col justify-between rounded-[24px] p-5 transition-colors duration-150 hover:bg-white/75 dark:hover:bg-white/[0.08]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">

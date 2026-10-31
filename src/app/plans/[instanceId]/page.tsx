@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   ArrowLeft,
   Clock,
@@ -7,19 +9,32 @@ import {
   CheckCircle2,
   Bookmark,
 } from "lucide-react";
+import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
 
 type PlanInstanceContentParams = {
   params: Promise<{ instanceId: string }>;
 };
 
+export const instant = false;
+
 async function PlanInstanceContent({ params }: PlanInstanceContentParams) {
   const { instanceId } = await params;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect(`/login?redirect=/plans/${instanceId}`);
+  }
+
+  const displayName =
+    session.user.name.split(" ")[0] || session.user.name || "Reader";
 
   return (
     <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName="James" />
+      <TopNavbar userName={displayName} />
 
       <main className="mt-4 space-y-4">
         {/* Back navigation */}
