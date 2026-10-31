@@ -100,9 +100,9 @@ export function OnboardingShowcase({
           <button
             type="button"
             onClick={onPrev}
-            className="inline-flex items-center gap-1.5 rounded-[14px] border border-black/[0.08] bg-white/70 px-4 py-2.5 text-[13px] font-normal text-black hover:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white"
+            className="inline-flex items-center gap-1.5 rounded-[14px] border border-black/8 bg-white/70 px-4 py-2.5 text-[13px] font-normal text-black hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft className="size-3.5" />
             <span>Back</span>
           </button>
         ) : (
@@ -119,7 +119,7 @@ export function OnboardingShowcase({
               ? "Continue to Setup"
               : "Next"}
           </span>
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="size-3.5" />
         </button>
       </div>
     </div>

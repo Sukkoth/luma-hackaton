@@ -12,7 +12,7 @@ type Props = {
 
 export function OnboardingHeroIllustration({ slideId }: Props) {
   return (
-    <div className="relative mx-auto flex w-full max-w-[420px] items-center justify-center overflow-visible py-2">
+    <div className="relative mx-auto flex w-full max-w-105 items-center justify-center overflow-visible py-2">
       <svg
         viewBox="0 0 380 270"
         fill="none"
@@ -23,24 +23,14 @@ export function OnboardingHeroIllustration({ slideId }: Props) {
         <defs>
           {/* Subtle Ambient Radial Aura */}
           <radialGradient id="heroCoreGlow" cx="50%" cy="50%" r="50%">
-            <stop
-              offset="0%"
-              stopColor="#82ADD4"
-              className="dark:stop-[#82ADD4]"
-              stopOpacity="0.22"
-            />
+            <stop offset="0%" stopColor="#82ADD4" stopOpacity="0.22" />
             <stop offset="60%" stopColor="#82ADD4" stopOpacity="0.06" />
             <stop offset="100%" stopColor="#82ADD4" stopOpacity="0" />
           </radialGradient>
 
           {/* Warm Flame & Gold Glow */}
           <radialGradient id="flameAmberGlow" cx="50%" cy="50%" r="50%">
-            <stop
-              offset="0%"
-              stopColor="#DDFD2C"
-              className="dark:stop-[#DDFD2C]"
-              stopOpacity="0.32"
-            />
+            <stop offset="0%" stopColor="#DDFD2C" stopOpacity="0.32" />
             <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
           </radialGradient>

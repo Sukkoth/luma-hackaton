@@ -63,18 +63,18 @@ export function OnboardingView({ userName = "Reader" }: Props) {
     <div className="flex min-h-dvh w-full items-center justify-center p-4 sm:p-6 md:p-10">
       {/* Background ambient bloom */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#82ADD4]/10 blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full bg-[#DDFD2C]/10 blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 size-96 rounded-full bg-[#82ADD4]/10 blur-3xl" />
+        <div className="absolute right-1/4 bottom-1/4 size-96 rounded-full bg-[#DDFD2C]/10 blur-3xl" />
       </div>
 
-      <div className="glass-panel relative z-10 w-full max-w-[620px] rounded-[32px] p-6 shadow-2xl backdrop-blur-xl sm:p-10 dark:border-white/10 dark:bg-[#121216]/80">
+      <div className="glass-panel relative z-10 w-full max-w-155 rounded-4xl p-6 shadow-2xl backdrop-blur-xl sm:p-10 dark:border-white/10 dark:bg-[#121216]/80">
         {/* Brand bar */}
-        <div className="flex items-center justify-between border-b border-black/[0.06] pb-4 dark:border-white/[0.08]">
+        <div className="flex items-center justify-between border-b border-black/6 pb-4 dark:border-white/8">
           <div className="flex items-center gap-2">
             <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
               Scripture<span className="text-[#82ADD4]">.</span>
             </span>
-            <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+            <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
               Onboarding
             </span>
           </div>
@@ -123,7 +123,7 @@ export function OnboardingView({ userName = "Reader" }: Props) {
                 role="alert"
                 className="mt-4 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
               >
-                <AlertCircle className="h-4 w-4 shrink-0" />
+                <AlertCircle className="size-4 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
