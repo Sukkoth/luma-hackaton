@@ -15,7 +15,7 @@ export function BookCard({ book, readCount, onSelect }: Props) {
     <button
       type="button"
       onClick={() => onSelect({ book })}
-      className="group relative isolate flex flex-col justify-between rounded-[18px] border border-black/[0.08] bg-white/75 p-4 text-left shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/[0.18] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.18] dark:hover:bg-white/[0.08]"
+      className="group relative isolate flex flex-col justify-between rounded-[18px] border border-black/8 bg-white/75 p-4 text-left shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/18 hover:bg-white hover:shadow-md dark:border-white/8 dark:bg-white/4 dark:shadow-none dark:hover:border-white/18 dark:hover:bg-white/8"
     >
       <div>
         <div className="flex items-center justify-between">
@@ -23,11 +23,11 @@ export function BookCard({ book, readCount, onSelect }: Props) {
             {book.testament === "OT" ? "Old Test." : "New Test."}
           </span>
           {isFullyRead ? (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-2xs">
-              <Check className="h-3 w-3 stroke-[2.5]" />
+            <span className="flex size-5 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-2xs">
+              <Check className="size-3" strokeWidth={2.5} />
             </span>
           ) : readCount > 0 ? (
-            <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[10px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/25 dark:text-[#82ADD4]">
+            <span className="rounded-sm bg-[#82ADD4]/15 px-1.5 py-0.5 text-[10px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/25 dark:text-[#82ADD4]">
               {progressPercent}%
             </span>
           ) : null}
@@ -49,13 +49,13 @@ export function BookCard({ book, readCount, onSelect }: Props) {
         </div>
 
         {/* Micro Progress Track */}
-        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.08]">
+        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/8">
           <div
             style={{ width: `${progressPercent}%` }}
             className={`h-full rounded-full transition-all duration-500 ${
               isFullyRead
                 ? "bg-[#DDFD2C]"
-                : "bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
+                : "bg-linear-to-r from-[#82ADD4] to-[#6894BC]"
             }`}
           />
         </div>

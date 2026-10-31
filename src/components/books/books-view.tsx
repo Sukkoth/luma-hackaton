@@ -115,7 +115,7 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
   };
 
   return (
-    <div className="mx-auto min-h-screen max-w-[1400px] px-4 py-3 sm:px-6 md:px-8 md:py-4">
+    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
       <TopNavbar userName={session?.user?.name || "Reader"} />
 
@@ -129,13 +129,13 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
       {/* 66 Books Section */}
       <section className="glass-panel mt-4 rounded-[28px] p-6 sm:p-7">
         {/* Header & Controls Toolbar */}
-        <div className="flex flex-col gap-4 border-b border-black/[0.04] pb-5 md:flex-row md:items-center md:justify-between dark:border-white/[0.08]">
+        <div className="flex flex-col gap-4 border-b border-black/4 pb-5 md:flex-row md:items-center md:justify-between dark:border-white/8">
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-[20px] font-normal tracking-tight text-black dark:text-white">
                 All Books
               </h2>
-              <span className="rounded-full bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
+              <span className="rounded-full bg-black/4 px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
                 {filteredBooks.length} Books
               </span>
             </div>
@@ -146,13 +146,13 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
 
           {/* Search Box */}
           <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search books..."
-              className="w-full rounded-[12px] border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-[#6B7280] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+              className="w-full rounded-xl border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/4 dark:text-white dark:placeholder:text-[#6B7280] dark:focus:border-white/20 dark:focus:bg-white/8"
             />
             {searchQuery && (
               <button
@@ -160,7 +160,7 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
                 onClick={() => setSearchQuery("")}
                 className="absolute top-1/2 right-3 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
               >
-                <X className="h-3 w-3" />
+                <X className="size-3" />
               </button>
             )}
           </div>
@@ -175,10 +175,10 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`rounded-[12px] px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
+                className={`rounded-xl px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
                   isSelected
                     ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                    : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/[0.04] dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                    : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
                 }`}
               >
                 {cat}
@@ -213,7 +213,7 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
                 setSearchQuery("");
                 setSelectedCategory("All");
               }}
-              className="mt-3 rounded-[12px] border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white"
+              className="mt-3 rounded-xl border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white"
             >
               Reset Filters
             </button>
