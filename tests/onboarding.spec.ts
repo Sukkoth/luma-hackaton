@@ -1,7 +1,10 @@
+import fs from "node:fs";
 import { test, expect } from "@playwright/test";
 import { eq } from "drizzle-orm";
 
-process.loadEnvFile?.();
+if (fs.existsSync(".env")) {
+  process.loadEnvFile?.();
+}
 
 import { db } from "../src/db";
 import { readingTrackers, userSettings, user } from "../src/db/schema";
