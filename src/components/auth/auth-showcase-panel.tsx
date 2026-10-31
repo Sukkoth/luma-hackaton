@@ -27,7 +27,7 @@ export function AuthShowcasePanel({
     <section className="relative hidden w-full flex-col justify-between overflow-hidden bg-[#0D0D0F] p-10 text-white lg:flex lg:w-1/2 lg:p-14 xl:p-18 dark:bg-[#070708]">
       {/* Generative SVG architectural tapestry */}
       <svg
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 size-full object-cover"
         viewBox="0 0 900 1200"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -210,9 +210,9 @@ export function AuthShowcasePanel({
       <div className="relative z-10 flex items-center justify-between">
         <Link
           href={backHref}
-          className="inline-flex items-center gap-2 rounded-[12px] border border-white/20 bg-white/10 px-3.5 py-1.5 text-[12px] font-normal text-white/90 shadow-2xs backdrop-blur-md transition-all hover:border-white/40 hover:bg-white/20 hover:text-white"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-1.5 text-[12px] font-normal text-white/90 shadow-2xs backdrop-blur-md transition-all hover:border-white/40 hover:bg-white/20 hover:text-white"
         >
-          <ArrowLeft className="h-3.5 w-3.5 stroke-[1.75]" />
+          <ArrowLeft className="size-3.5" strokeWidth={1.75} />
           <span>{backLabel}</span>
         </Link>
 
@@ -229,7 +229,7 @@ export function AuthShowcasePanel({
           </span>
         )}
 
-        <h2 className="mt-4 text-[38px] leading-[1.12] font-light tracking-tight text-white xl:text-[46px]">
+        <h2 className="leading-[1.12] mt-4 text-[38px] font-light tracking-tight text-white xl:text-[46px]">
           {quoteTitle}
         </h2>
 

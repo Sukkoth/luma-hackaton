@@ -97,9 +97,9 @@ function LoginContent() {
           <div className="lg:hidden">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 rounded-[12px] border border-black/[0.08] bg-white/70 px-3 py-1.5 text-[12px] font-normal text-black backdrop-blur-md dark:border-white/10 dark:bg-white/[0.05] dark:text-white"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-black/8 bg-white/70 px-3 py-1.5 text-[12px] font-normal text-black backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-white"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
+              <ArrowLeft className="size-3.5" />
               <span>Back</span>
             </Link>
           </div>
@@ -108,13 +108,13 @@ function LoginContent() {
         </div>
 
         {/* Center: Clean Login Form */}
-        <div className="mx-auto my-auto w-full max-w-[390px] py-8">
+        <div className="m-auto w-full max-w-97.5 py-8">
           <div className="text-left">
             <div className="inline-flex items-center gap-2">
               <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
                 Scripture<span className="text-[#82ADD4]">.</span>
               </span>
-              <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+              <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
                 Sign In
               </span>
             </div>
@@ -131,7 +131,7 @@ function LoginContent() {
               role="alert"
               className="mt-5 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
             >
-              <AlertCircle className="h-4 w-4 shrink-0" />
+              <AlertCircle className="size-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -141,7 +141,7 @@ function LoginContent() {
               role="status"
               className="mt-5 flex items-center gap-2 rounded-[14px] border border-blue-500/20 bg-blue-500/10 p-3 text-[12px] font-normal text-blue-700 dark:border-blue-400/20 dark:bg-blue-950/30 dark:text-blue-300"
             >
-              <Info className="h-4 w-4 shrink-0" />
+              <Info className="size-4 shrink-0" />
               <span>{oauthNotice}</span>
             </div>
           )}
@@ -155,9 +155,9 @@ function LoginContent() {
                   "Google authentication will be enabled soon. Please use email and password to sign in."
                 )
               }
-              className="flex items-center justify-center gap-2 rounded-[14px] border border-black/[0.08] bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/[0.16] hover:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:hover:border-white/20 dark:hover:bg-white/[0.08]"
+              className="flex items-center justify-center gap-2 rounded-[14px] border border-black/8 bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/16 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/8"
             >
-              <svg className="h-4 w-4" viewBox="0 0 24 24">
+              <svg className="size-4" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -185,10 +185,10 @@ function LoginContent() {
                   "GitHub authentication will be enabled soon. Please use email and password to sign in."
                 )
               }
-              className="flex items-center justify-center gap-2 rounded-[14px] border border-black/[0.08] bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/[0.16] hover:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:hover:border-white/20 dark:hover:bg-white/[0.08]"
+              className="flex items-center justify-center gap-2 rounded-[14px] border border-black/8 bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/16 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/8"
             >
               <svg
-                className="h-4 w-4 fill-current"
+                className="size-4 fill-current"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
               >
@@ -205,7 +205,7 @@ function LoginContent() {
           {/* Divider */}
           <div className="relative my-6 text-center">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-black/[0.06] dark:border-white/[0.08]" />
+              <div className="w-full border-t border-black/6 dark:border-white/8" />
             </div>
             <span className="relative bg-white/70 px-3 text-[11px] font-normal text-[#888888] backdrop-blur-md dark:bg-[#16161b] dark:text-[#9CA3AF]">
               Or continue with email
@@ -222,14 +222,14 @@ function LoginContent() {
                 Email address
               </label>
               <div className="relative mt-1.5">
-                <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                 <input
                   id="login-email"
                   name="email"
                   type="email"
                   required
                   placeholder="james@example.com"
-                  className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                  className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
                 />
               </div>
             </div>
@@ -250,14 +250,14 @@ function LoginContent() {
                 </Link>
               </div>
               <div className="relative mt-1.5">
-                <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                 <input
                   id="login-password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
-                  className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-10 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                  className="w-full rounded-[14px] border border-black/8 bg-white/70 px-10 py-2.5 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
                 />
                 <button
                   type="button"
@@ -266,9 +266,9 @@ function LoginContent() {
                   className="absolute top-1/2 right-3.5 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="size-4" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="size-4" />
                   )}
                 </button>
               </div>
@@ -281,7 +281,7 @@ function LoginContent() {
                 name="rememberMe"
                 type="checkbox"
                 defaultChecked
-                className="h-4 w-4 rounded-[4px] border-black/20 text-black accent-black focus:ring-black dark:accent-[#DDFD2C]"
+                className="size-4 rounded-sm border-black/20 text-black accent-black focus:ring-black dark:accent-[#DDFD2C]"
               />
               <label
                 htmlFor="remember-me"
@@ -297,13 +297,13 @@ function LoginContent() {
               disabled={isLoading}
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isLoading && <Loader2 className="size-4 animate-spin" />}
               <span>{isLoading ? "Signing in..." : "Sign In"}</span>
             </button>
           </form>
 
           {/* Footer switch to sign up */}
-          <div className="mt-6 border-t border-black/[0.04] pt-4 text-center text-[12px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
+          <div className="mt-6 border-t border-black/4 pt-4 text-center text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
             <span>Don&apos;t have an account? </span>
             <Link
               href="/signup"
@@ -328,7 +328,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-dvh items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-[#82ADD4]" />
+          <Loader2 className="size-6 animate-spin text-[#82ADD4]" />
         </div>
       }
     >

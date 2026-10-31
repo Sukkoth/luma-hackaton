@@ -64,16 +64,16 @@ export default function ResetPasswordPage() {
         <div className="flex items-center justify-between lg:justify-end">
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 rounded-[12px] border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-black/75 shadow-2xs backdrop-blur-md transition-all hover:border-white/90 hover:bg-white hover:text-black lg:hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-black/75 shadow-2xs backdrop-blur-md transition-all hover:border-white/90 hover:bg-white hover:text-black lg:hidden dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
           >
-            <ArrowLeft className="h-3.5 w-3.5 stroke-[1.75]" />
+            <ArrowLeft className="size-3.5" strokeWidth={1.75} />
             <span>Sign In</span>
           </Link>
           <ThemeToggle />
         </div>
 
         {/* Centered Form Container */}
-        <div className="mx-auto my-auto w-full max-w-[420px] py-8">
+        <div className="m-auto w-full max-w-105 py-8">
           <div className="glass-panel w-full rounded-[28px] p-7 sm:p-9">
             {/* Header */}
             <div>
@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
                 <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
                   Scripture<span className="text-[#82ADD4]">.</span>
                 </span>
-                <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+                <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
                   Security
                 </span>
               </div>
@@ -98,16 +98,16 @@ export default function ResetPasswordPage() {
                 role="alert"
                 className="mt-4 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
               >
-                <AlertCircle className="h-4 w-4 shrink-0" />
+                <AlertCircle className="size-4 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {submitted ? (
               <div className="mt-6 space-y-4">
-                <div className="rounded-[18px] border border-black/[0.06] bg-[#DDFD2C]/15 p-5 text-center dark:border-white/10 dark:bg-[#DDFD2C]/10">
-                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-xs">
-                    <CheckCircle2 className="h-5 w-5" />
+                <div className="rounded-[18px] border border-black/6 bg-[#DDFD2C]/15 p-5 text-center dark:border-white/10 dark:bg-[#DDFD2C]/10">
+                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-xs">
+                    <CheckCircle2 className="size-5" />
                   </div>
                   <h3 className="mt-3 text-[15px] font-medium text-black dark:text-white">
                     Password updated
@@ -135,14 +135,14 @@ export default function ResetPasswordPage() {
                     New Password
                   </label>
                   <div className="relative mt-1.5">
-                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                     <input
                       id="new-password"
                       name="password"
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-10 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                      className="w-full rounded-[14px] border border-black/8 bg-white/70 px-10 py-2.5 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
                     />
                     <button
                       type="button"
@@ -153,9 +153,9 @@ export default function ResetPasswordPage() {
                       className="absolute top-1/2 right-3.5 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="size-4" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="size-4" />
                       )}
                     </button>
                   </div>
@@ -169,14 +169,14 @@ export default function ResetPasswordPage() {
                     Confirm New Password
                   </label>
                   <div className="relative mt-1.5">
-                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                     <input
                       id="confirm-password"
                       name="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
+                      className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
                     />
                   </div>
                 </div>
@@ -184,11 +184,11 @@ export default function ResetPasswordPage() {
                 {/* Password Criteria Checks */}
                 <div className="space-y-1.5 pt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                   <div className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
+                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
                     <span>At least 8 characters long</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
+                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
                     <span>Must match confirmation password</span>
                   </div>
                 </div>
@@ -203,7 +203,7 @@ export default function ResetPasswordPage() {
             )}
 
             {/* Footer switch to sign in */}
-            <div className="mt-6 border-t border-black/[0.04] pt-4 text-center text-[12px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
+            <div className="mt-6 border-t border-black/4 pt-4 text-center text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
               <Link
                 href="/login"
                 className="font-medium text-black transition-colors hover:underline dark:text-white"
