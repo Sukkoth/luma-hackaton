@@ -1,4 +1,4 @@
-import { TopNavbar } from "@/components/callivio/top-navbar";
+import { TopNavbar } from "@/components/luma/top-navbar";
 import { PlanCatalog } from "@/components/plans/PlanCatalog";
 
 export default function PlansPage() {

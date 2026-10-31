@@ -1,11 +1,5 @@
-import {
-  Plus,
-  Search,
-  Bookmark,
-  Folder,
-  MoreHorizontal,
-} from "lucide-react";
-import { TopNavbar } from "@/components/callivio/top-navbar";
+import { Plus, Search, Bookmark, Folder, MoreHorizontal } from "lucide-react";
+import { TopNavbar } from "@/components/luma/top-navbar";
 
 type NoteItem = {
   id: string;
@@ -73,14 +67,14 @@ export default function NotesPage() {
               <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
                 Personal Journal
               </span>
-              <span className="text-[12px] text-[#777777]">
+              <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
                 Linked to Active Tracker
               </span>
             </div>
-            <h1 className="mt-2 text-[26px] font-normal tracking-tight text-black sm:text-[30px]">
+            <h1 className="mt-2 text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
               Notes & Journals
             </h1>
-            <p className="mt-1 text-[13px] text-[#666666]">
+            <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
               Keep study reflections, prayer journals, and link thoughts to your
               Bible reading plan sections.
             </p>
@@ -89,7 +83,7 @@ export default function NotesPage() {
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85"
+              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
               <Plus className="h-4 w-4" />
               <span>New Note</span>
@@ -100,30 +94,30 @@ export default function NotesPage() {
         {/* Notes Explorer Section */}
         <section className="glass-panel rounded-[28px] p-6 sm:p-7">
           {/* Toolbar: Folder tabs and Search */}
-          <div className="flex flex-col gap-4 border-b border-black/[0.04] pb-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4 border-b border-black/[0.04] pb-5 md:flex-row md:items-center md:justify-between dark:border-white/[0.06]">
             {/* Folder Filter Tiles */}
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className="rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs backdrop-blur-md"
+                className="rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs backdrop-blur-md dark:border-white/15 dark:bg-white/10 dark:text-white"
               >
                 All Notes (4)
               </button>
               <button
                 type="button"
-                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black"
+                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
               >
                 Plan Reflections (2)
               </button>
               <button
                 type="button"
-                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black"
+                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
               >
                 Theology (1)
               </button>
               <button
                 type="button"
-                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black"
+                className="rounded-[12px] border border-white/50 bg-white/35 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
               >
                 Devotional (1)
               </button>
@@ -131,11 +125,11 @@ export default function NotesPage() {
 
             {/* Search Input */}
             <div className="relative w-full sm:w-64">
-              <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888]" />
+              <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
               <input
                 type="text"
                 placeholder="Search notes..."
-                className="w-full rounded-[12px] border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden"
+                className="w-full rounded-[12px] border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
               />
             </div>
           </div>
@@ -145,27 +139,27 @@ export default function NotesPage() {
             {SAMPLE_NOTES.map((note) => (
               <div
                 key={note.id}
-                className="group flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md"
+                className="group flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="rounded-[6px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6]">
+                    <span className="rounded-[6px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
                       {note.passage}
                     </span>
-                    <span className="text-[11px] text-[#888888]">
+                    <span className="text-[11px] text-[#888888] dark:text-[#A1A1AA]">
                       {note.date}
                     </span>
                   </div>
 
-                  <h3 className="mt-3 text-[17px] font-medium tracking-tight text-black group-hover:text-[#6894BC]">
+                  <h3 className="mt-3 text-[17px] font-medium tracking-tight text-black group-hover:text-[#6894BC] dark:text-white dark:group-hover:text-[#82ADD4]">
                     {note.title}
                   </h3>
-                  <p className="mt-1.5 line-clamp-3 text-[13px] leading-relaxed font-normal text-[#666666]">
+                  <p className="mt-1.5 line-clamp-3 text-[13px] leading-relaxed font-normal text-[#666666] dark:text-[#9CA3AF]">
                     {note.excerpt}
                   </p>
                 </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[11px] text-[#777777]">
+                <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[11px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
                   <span className="flex items-center gap-1.5">
                     {note.planRef ? (
                       <>
@@ -174,7 +168,7 @@ export default function NotesPage() {
                       </>
                     ) : (
                       <>
-                        <Folder className="h-3 w-3 text-[#888888]" />
+                        <Folder className="h-3 w-3 text-[#888888] dark:text-[#9CA3AF]" />
                         <span>{note.folder}</span>
                       </>
                     )}
@@ -182,7 +176,7 @@ export default function NotesPage() {
                   <button
                     type="button"
                     aria-label="Note actions"
-                    className="flex h-7 w-7 items-center justify-center rounded-[8px] text-[#888888] hover:bg-black/5 hover:text-black"
+                    className="flex h-7 w-7 items-center justify-center rounded-[8px] text-[#888888] hover:bg-black/5 hover:text-black dark:text-[#A1A1AA] dark:hover:bg-white/10 dark:hover:text-white"
                   >
                     <MoreHorizontal className="h-3.5 w-3.5" />
                   </button>

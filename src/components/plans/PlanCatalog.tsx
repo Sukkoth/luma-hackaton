@@ -32,16 +32,16 @@ function PlanCard({ plan }: PlanCardProps) {
     plan.id.startsWith("custom_") || plan.id.startsWith("imported_");
 
   return (
-    <div className="group relative flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md">
+    <div className="group relative flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-black/[0.16] hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]">
       <div>
         {/* Badges row */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="rounded-[6px] bg-black/[0.04] px-2 py-0.5 text-[11px] font-medium text-[#555555]">
+          <span className="rounded-[6px] bg-black/[0.04] px-2 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
             {plan.category}
           </span>
           {plan.canonCompatibility &&
             plan.canonCompatibility !== "protestant" && (
-              <span className="inline-flex items-center gap-1 rounded-[6px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6]">
+              <span className="inline-flex items-center gap-1 rounded-[6px] bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
                 <Bookmark className="h-3 w-3" />
                 <span>{plan.canonCompatibility.replace("_", " ")}</span>
               </span>
@@ -54,38 +54,38 @@ function PlanCard({ plan }: PlanCardProps) {
         </div>
 
         {/* Title & description */}
-        <h3 className="mt-3 text-[17px] font-medium tracking-tight text-black transition-colors group-hover:text-[#6894BC]">
+        <h3 className="mt-3 text-[17px] font-medium tracking-tight text-black transition-colors group-hover:text-[#6894BC] dark:text-white dark:group-hover:text-[#82ADD4]">
           {plan.title}
         </h3>
-        <p className="mt-1 line-clamp-2 text-[13px] leading-snug font-normal text-[#666666]">
+        <p className="mt-1 line-clamp-2 text-[13px] leading-snug font-normal text-[#666666] dark:text-[#9CA3AF]">
           {plan.subtitle || plan.description}
         </p>
 
         {/* Plan stats */}
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[12px] text-[#777777]">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
           <span className="flex items-center gap-1">
-            <BookOpen className="h-3.5 w-3.5 text-[#888888]" />
+            <BookOpen className="h-3.5 w-3.5 text-[#888888] dark:text-[#9CA3AF]" />
             <span>{plan.totalChapters} ch</span>
           </span>
           <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5 text-[#888888]" />
+            <Clock className="h-3.5 w-3.5 text-[#888888] dark:text-[#9CA3AF]" />
             <span>{plan.recommendedDays} days</span>
           </span>
           <span className="flex items-center gap-1">
-            <Sparkles className="h-3.5 w-3.5 text-[#888888]" />
+            <Sparkles className="h-3.5 w-3.5 text-[#888888] dark:text-[#9CA3AF]" />
             <span>~{plan.defaultDailyTarget} / day</span>
           </span>
         </div>
       </div>
 
       {/* Action Footer */}
-      <div className="mt-5 flex items-center justify-between border-t border-black/[0.05] pt-4">
-        <span className="text-[11px] font-normal text-[#888888]">
+      <div className="mt-5 flex items-center justify-between border-t border-black/[0.05] pt-4 dark:border-white/[0.06]">
+        <span className="text-[11px] font-normal text-[#888888] dark:text-[#A1A1AA]">
           {plan.allowSelfPaced ? "Self-Paced allowed" : "Fixed schedule"}
         </span>
         <Link
           href={`/plans/templates/${plan.id}`}
-          className="flex items-center gap-1.5 rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white"
+          className="flex items-center gap-1.5 rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
         >
           <span>View Details</span>
           <ArrowRight className="h-3.5 w-3.5" />
@@ -144,7 +144,8 @@ const ACTIVE_PLAN_INSTANCES: ReadonlyArray<ActivePlanInstance> = [
     readChapters: 76,
     totalChapters: 181,
     status: "Rest Buffer",
-    statusColor: "bg-[#82ADD4]/15 text-[#507ea6]",
+    statusColor:
+      "bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]",
   },
   {
     id: "epistles-of-paul",
@@ -156,7 +157,8 @@ const ACTIVE_PLAN_INSTANCES: ReadonlyArray<ActivePlanInstance> = [
     readChapters: 18,
     totalChapters: 100,
     status: "Flexible",
-    statusColor: "bg-black/[0.04] text-[#555555]",
+    statusColor:
+      "bg-black/[0.04] text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]",
   },
 ];
 
@@ -189,7 +191,7 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
         <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555]">
+              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
                 <Bookmark className="h-3.5 w-3.5 text-[#82ADD4]" />
                 <span>Bible Plans • Active Reading</span>
               </span>
@@ -200,22 +202,24 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
 
             <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
               <div>
-                <h3 className="text-[22px] font-light tracking-tight text-black sm:text-[24px]">
+                <h3 className="text-[22px] font-light tracking-tight text-black sm:text-[24px] dark:text-white">
                   Bible in a Year
                 </h3>
-                <p className="text-[13px] text-[#666666]">
+                <p className="text-[13px] text-[#666666] dark:text-[#9CA3AF]">
                   Today:{" "}
-                  <span className="font-medium text-black">Romans 8:1–39</span>{" "}
+                  <span className="font-medium text-black dark:text-white">
+                    Romans 8:1–39
+                  </span>{" "}
                   • Day 212 of 365
                 </p>
               </div>
-              <span className="text-[12px] text-[#777777]">
+              <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
                 1 118 / 1 189 chapters read
               </span>
             </div>
 
             {/* Micro Progress Track */}
-            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
               <div
                 style={{ width: "94%" }}
                 className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#DDFD2C]"
@@ -223,13 +227,13 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
             </div>
           </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px]">
-            <span className="text-[#777777]">
+          <div className="mt-5 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[13px] dark:border-white/[0.06]">
+            <span className="text-[#777777] dark:text-[#A1A1AA]">
               Rest days buffer: 135 chapters ahead
             </span>
             <Link
               href="/plans/sample-instance"
-              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80"
+              className="flex items-center gap-1.5 rounded-[12px] bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
               <Play className="h-3 w-3 fill-current" />
               <span>Resume Reading</span>
@@ -241,27 +245,35 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
         <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-[12px] font-medium text-[#555555]">
+              <span className="text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
                 Plans Overview
               </span>
-              <span className="rounded-full bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555]">
+              <span className="rounded-full bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
                 4 Active
               </span>
             </div>
 
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between text-[13px]">
-                <span className="text-[#666666]">Total Catalog Templates</span>
-                <span className="text-[18px] font-light text-black">
+                <span className="text-[#666666] dark:text-[#9CA3AF]">
+                  Total Catalog Templates
+                </span>
+                <span className="text-[18px] font-light text-black dark:text-white">
                   {READING_PLANS.length}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[13px]">
-                <span className="text-[#666666]">Chapters Read This Week</span>
-                <span className="text-[18px] font-light text-black">31</span>
+                <span className="text-[#666666] dark:text-[#9CA3AF]">
+                  Chapters Read This Week
+                </span>
+                <span className="text-[18px] font-light text-black dark:text-white">
+                  31
+                </span>
               </div>
               <div className="flex items-center justify-between text-[13px]">
-                <span className="text-[#666666]">Consistency Streak</span>
+                <span className="text-[#666666] dark:text-[#9CA3AF]">
+                  Consistency Streak
+                </span>
                 <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
                   14 days
                 </span>
@@ -269,7 +281,7 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
             </div>
           </div>
 
-          <div className="mt-4 border-t border-black/[0.04] pt-3 text-[12px] text-[#777777]">
+          <div className="mt-4 border-t border-black/[0.04] pt-3 text-[12px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
             <span>Switch tabs below to inspect active plans</span>
           </div>
         </div>
@@ -278,16 +290,16 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
       {/* Main Catalog & My Plans Section */}
       <section className="glass-panel rounded-[28px] p-6 sm:p-7">
         {/* Navigation Tabs and Search Bar */}
-        <div className="flex flex-col gap-4 border-b border-black/[0.04] pb-5 md:flex-row md:items-center md:justify-between">
-          {/* Tab Switcher - Callivio soft-rectangular tiles */}
+        <div className="flex flex-col gap-4 border-b border-black/[0.04] pb-5 md:flex-row md:items-center md:justify-between dark:border-white/[0.06]">
+          {/* Tab Switcher - Luma soft-rectangular tiles */}
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab("catalog")}
               className={`flex items-center gap-2 rounded-[14px] px-5 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "catalog"
-                  ? "border border-white/90 bg-white font-medium text-black shadow-xs"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black"
+                  ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
+                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
               }`}
             >
               <Compass className="h-3.5 w-3.5" />
@@ -298,8 +310,8 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
               onClick={() => setActiveTab("my_plans")}
               className={`flex items-center gap-2 rounded-[14px] px-5 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "my_plans"
-                  ? "border border-white/90 bg-white font-medium text-black shadow-xs"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black"
+                  ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
+                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
               }`}
             >
               <Calendar className="h-3.5 w-3.5" />
@@ -310,19 +322,19 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
           {/* Search Input */}
           {activeTab === "catalog" && (
             <div className="relative w-full sm:w-64">
-              <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888]" />
+              <Search className="absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
               <input
                 type="text"
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-[12px] border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden"
+                className="w-full rounded-[12px] border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[#888888] hover:text-black"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -345,8 +357,8 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
                     onClick={() => setSelectedFilter(f.id)}
                     className={`rounded-[12px] px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
                       isSelected
-                        ? "border border-white/90 bg-white font-medium text-black shadow-xs"
-                        : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black"
+                        ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
+                        : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/[0.08] dark:hover:text-white"
                     }`}
                   >
                     {f.label}
@@ -363,7 +375,7 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
                 ))}
               </div>
             ) : (
-              <div className="py-16 text-center text-[#777777]">
+              <div className="py-16 text-center text-[#777777] dark:text-[#A1A1AA]">
                 <p className="text-[15px] font-normal">
                   No reading plans match &ldquo;{searchQuery}&rdquo;.
                 </p>
@@ -373,7 +385,7 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
                     setSearchQuery("");
                     setSelectedFilter("All");
                   }}
-                  className="mt-3 rounded-[12px] border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white"
+                  className="mt-3 rounded-[12px] border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                 >
                   Reset Filters
                 </button>
@@ -387,7 +399,7 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
               {ACTIVE_PLAN_INSTANCES.map((instance) => (
                 <div
                   key={instance.id}
-                  className="flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md"
+                  className="flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]"
                 >
                   <div>
                     <div className="flex items-center justify-between">
@@ -396,33 +408,33 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
                       >
                         {instance.status}
                       </span>
-                      <span className="text-[12px] font-medium text-black">
+                      <span className="text-[12px] font-medium text-black dark:text-white">
                         {instance.progressPercent}%
                       </span>
                     </div>
 
-                    <h3 className="mt-3 text-[18px] font-medium tracking-tight text-black">
+                    <h3 className="mt-3 text-[18px] font-medium tracking-tight text-black dark:text-white">
                       {instance.title}
                     </h3>
-                    <p className="mt-1 text-[13px] text-[#666666]">
+                    <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
                       Passage:{" "}
-                      <strong className="font-medium text-black">
+                      <strong className="font-medium text-black dark:text-white">
                         {instance.currentPassage}
                       </strong>
                     </p>
-                    <p className="text-[12px] text-[#888888]">
+                    <p className="text-[12px] text-[#888888] dark:text-[#A1A1AA]">
                       {instance.dayText}
                     </p>
 
                     {/* Progress Bar */}
                     <div className="mt-4">
-                      <div className="flex justify-between text-[11px] text-[#777777]">
+                      <div className="flex justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                         <span>
                           {instance.readChapters} / {instance.totalChapters}{" "}
                           chapters
                         </span>
                       </div>
-                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
                         <div
                           style={{ width: `${instance.progressPercent}%` }}
                           className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#DDFD2C]"
@@ -431,14 +443,14 @@ export function PlanCatalog({ initialTab = "catalog" }: PlanCatalogProps) {
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-black/[0.05] pt-4">
-                    <span className="flex items-center gap-1 text-[12px] text-[#777777]">
+                  <div className="mt-5 flex items-center justify-between border-t border-black/[0.05] pt-4 dark:border-white/[0.06]">
+                    <span className="flex items-center gap-1 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
                       <CheckCircle2 className="h-3.5 w-3.5 text-[#82ADD4]" />
                       <span>Active Tracker</span>
                     </span>
                     <Link
                       href={`/plans/${instance.id}`}
-                      className="flex items-center gap-1.5 rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white"
+                      className="flex items-center gap-1.5 rounded-[12px] border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
                     >
                       <span>Checkoff Sections</span>
                       <ArrowRight className="h-3.5 w-3.5" />

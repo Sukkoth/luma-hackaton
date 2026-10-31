@@ -54,7 +54,7 @@ export function HeroProgressCard({
       </div>
 
       {/* Circular Progress Gauge Section */}
-      <div className="my-6 flex flex-col items-center justify-center">
+      <div className="my-auto flex flex-col items-center justify-center py-4">
         <div className="relative flex items-center justify-center">
           <svg
             className="h-56 w-56 -rotate-90 transform overflow-visible"

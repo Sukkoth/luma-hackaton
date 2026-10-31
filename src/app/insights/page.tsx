@@ -1,5 +1,5 @@
 import { Flame, Trophy, TrendingUp, Clock, Award } from "lucide-react";
-import { TopNavbar } from "@/components/callivio/top-navbar";
+import { TopNavbar } from "@/components/luma/top-navbar";
 
 type Milestone = {
   id: string;
@@ -82,23 +82,24 @@ export default function InsightsPage() {
             <span className="rounded-[6px] bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
               Analytics
             </span>
-            <span className="text-[12px] text-[#777777]">
+            <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
               Scripture Tracker Intelligence
             </span>
           </div>
-          <h1 className="mt-2 text-[26px] font-normal tracking-tight text-black sm:text-[30px]">
+          <h1 className="mt-2 text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
             Insights & Analytics
           </h1>
-          <p className="mt-1 text-[13px] text-[#666666]">
-            In-depth reading statistics, velocity, streaks, and canonical coverage breakdown.
+          <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+            In-depth reading statistics, velocity, streaks, and canonical
+            coverage breakdown.
           </p>
         </section>
 
-        {/* Top Metric Cards - Callivio Frosted Panels */}
+        {/* Top Metric Cards - Luma Frosted Panels */}
         <section className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
           <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555]">
+              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
                 <Flame className="h-3.5 w-3.5 text-[#C9856A]" />
                 <span>Reading Streak</span>
               </span>
@@ -107,10 +108,10 @@ export default function InsightsPage() {
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px]">
+              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
                 14 Days
               </span>
-              <p className="mt-1 text-[11px] text-[#777777]">
+              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 Personal best: 42 days
               </p>
             </div>
@@ -118,19 +119,19 @@ export default function InsightsPage() {
 
           <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555]">
+              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
                 <TrendingUp className="h-3.5 w-3.5 text-[#82ADD4]" />
                 <span>Bible Complete</span>
               </span>
-              <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555]">
+              <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
                 +4.2%
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px]">
+              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
                 37%
               </span>
-              <p className="mt-1 text-[11px] text-[#777777]">
+              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 443 of 1,189 chapters
               </p>
             </div>
@@ -138,19 +139,19 @@ export default function InsightsPage() {
 
           <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555]">
+              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
                 <Clock className="h-3.5 w-3.5 text-[#82ADD4]" />
                 <span>Meditation Time</span>
               </span>
-              <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555]">
+              <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
                 +23%
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px]">
+              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
                 58.4h
               </span>
-              <p className="mt-1 text-[11px] text-[#777777]">
+              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 Avg 28 mins per day
               </p>
             </div>
@@ -158,7 +159,7 @@ export default function InsightsPage() {
 
           <div className="glass-panel flex flex-col justify-between rounded-[24px] p-5">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555]">
+              <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
                 <Trophy className="h-3.5 w-3.5 text-[#C9A24B]" />
                 <span>Milestones</span>
               </span>
@@ -167,10 +168,10 @@ export default function InsightsPage() {
               </span>
             </div>
             <div className="mt-3">
-              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px]">
+              <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
                 16 / 24
               </span>
-              <p className="mt-1 text-[11px] text-[#777777]">
+              <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 67% badges unlocked
               </p>
             </div>
@@ -179,37 +180,39 @@ export default function InsightsPage() {
 
         {/* Section 1: Canonical Distribution & Velocity */}
         <section className="glass-panel rounded-[28px] p-6 sm:p-7">
-          <div className="flex flex-col gap-1 border-b border-black/[0.04] pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1 border-b border-black/[0.04] pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.06]">
             <div>
-              <h2 className="text-[18px] font-normal tracking-tight text-black">
+              <h2 className="text-[18px] font-normal tracking-tight text-black dark:text-white">
                 Canon Coverage & Reading Velocity
               </h2>
-              <p className="text-[13px] text-[#777777]">
+              <p className="text-[13px] text-[#777777] dark:text-[#A1A1AA]">
                 Progress broken down by scripture sections for active tracker.
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="rounded-[6px] bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555]">
+              <span className="rounded-[6px] bg-black/[0.04] px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
                 Protestant Standard 66
               </span>
             </div>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md">
+            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black">
+                <span className="text-[13px] font-medium text-black dark:text-white">
                   Law & Pentateuch
                 </span>
                 <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
                   100%
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777]">
+              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 <span>Genesis to Deuteronomy</span>
-                <span className="font-light text-black">187 / 187 ch</span>
+                <span className="font-light text-black dark:text-white">
+                  187 / 187 ch
+                </span>
               </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
                 <div
                   style={{ width: "100%" }}
                   className="h-full rounded-full bg-[#DDFD2C]"
@@ -217,20 +220,22 @@ export default function InsightsPage() {
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md">
+            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black">
+                <span className="text-[13px] font-medium text-black dark:text-white">
                   The Four Gospels
                 </span>
                 <span className="rounded-[4px] bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
                   100%
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777]">
+              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 <span>Matthew to John</span>
-                <span className="font-light text-black">89 / 89 ch</span>
+                <span className="font-light text-black dark:text-white">
+                  89 / 89 ch
+                </span>
               </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
                 <div
                   style={{ width: "100%" }}
                   className="h-full rounded-full bg-[#DDFD2C]"
@@ -238,20 +243,22 @@ export default function InsightsPage() {
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md">
+            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black">
+                <span className="text-[13px] font-medium text-black dark:text-white">
                   Historical Books
                 </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6]">
+                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
                   50%
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777]">
+              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 <span>Joshua to Esther</span>
-                <span className="font-light text-black">124 / 249 ch</span>
+                <span className="font-light text-black dark:text-white">
+                  124 / 249 ch
+                </span>
               </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
                 <div
                   style={{ width: "50%" }}
                   className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
@@ -259,20 +266,22 @@ export default function InsightsPage() {
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md">
+            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black">
+                <span className="text-[13px] font-medium text-black dark:text-white">
                   Poetry & Wisdom
                 </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6]">
+                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
                   31%
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777]">
+              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 <span>Job to Song of Solomon</span>
-                <span className="font-light text-black">76 / 243 ch</span>
+                <span className="font-light text-black dark:text-white">
+                  76 / 243 ch
+                </span>
               </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
                 <div
                   style={{ width: "31%" }}
                   className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
@@ -280,20 +289,22 @@ export default function InsightsPage() {
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md">
+            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black">
+                <span className="text-[13px] font-medium text-black dark:text-white">
                   Epistles & Letters
                 </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6]">
+                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
                   44%
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777]">
+              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 <span>Romans to Jude</span>
-                <span className="font-light text-black">54 / 122 ch</span>
+                <span className="font-light text-black dark:text-white">
+                  54 / 122 ch
+                </span>
               </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
                 <div
                   style={{ width: "44%" }}
                   className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
@@ -301,20 +312,22 @@ export default function InsightsPage() {
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md">
+            <div className="rounded-[20px] border border-black/[0.08] bg-white/75 p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-black">
+                <span className="text-[13px] font-medium text-black dark:text-white">
                   Prophets & Apocalypse
                 </span>
-                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6]">
+                <span className="rounded-[4px] bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
                   22%
                 </span>
               </div>
-              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777]">
+              <div className="mt-3 flex items-baseline justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                 <span>Major/Minor & Revelation</span>
-                <span className="font-light text-black">68 / 307 ch</span>
+                <span className="font-light text-black dark:text-white">
+                  68 / 307 ch
+                </span>
               </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05]">
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.05] dark:bg-white/[0.06]">
                 <div
                   style={{ width: "22%" }}
                   className="h-full rounded-full bg-gradient-to-r from-[#82ADD4] to-[#6894BC]"
@@ -326,12 +339,12 @@ export default function InsightsPage() {
 
         {/* Section 2: Milestones & Badges Grid */}
         <section className="glass-panel rounded-[28px] p-6 sm:p-7">
-          <div className="flex items-center justify-between border-b border-black/[0.04] pb-4">
+          <div className="flex items-center justify-between border-b border-black/[0.04] pb-4 dark:border-white/[0.06]">
             <div>
-              <h2 className="text-[18px] font-normal tracking-tight text-black">
+              <h2 className="text-[18px] font-normal tracking-tight text-black dark:text-white">
                 Reading Milestones & Badges
               </h2>
-              <p className="text-[13px] text-[#777777]">
+              <p className="text-[13px] text-[#777777] dark:text-[#A1A1AA]">
                 Achievements unlocked through consistent Bible reading.
               </p>
             </div>
@@ -344,11 +357,11 @@ export default function InsightsPage() {
             {MILESTONES.map((m) => (
               <div
                 key={m.id}
-                className="flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md"
+                className="flex flex-col justify-between rounded-[20px] border border-black/[0.08] bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md transition-all hover:bg-white hover:shadow-md dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none dark:hover:border-white/[0.16] dark:hover:bg-white/[0.07]"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="rounded-[6px] bg-black/[0.04] px-2 py-0.5 text-[11px] font-medium text-[#555555]">
+                    <span className="rounded-[6px] bg-black/[0.04] px-2 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/[0.06] dark:text-[#9CA3AF]">
                       {m.category}
                     </span>
                     {m.unlocked ? (
@@ -356,24 +369,26 @@ export default function InsightsPage() {
                         <Award className="h-3 w-3 stroke-[2.5]" />
                       </span>
                     ) : (
-                      <span className="text-[11px] text-[#888888]">
+                      <span className="text-[11px] text-[#888888] dark:text-[#A1A1AA]">
                         In Progress
                       </span>
                     )}
                   </div>
 
-                  <h3 className="mt-3 text-[16px] font-medium text-black">
+                  <h3 className="mt-3 text-[16px] font-medium text-black dark:text-white">
                     {m.title}
                   </h3>
-                  <p className="mt-1 text-[12px] leading-snug text-[#666666]">
+                  <p className="mt-1 text-[12px] leading-snug text-[#666666] dark:text-[#9CA3AF]">
                     {m.description}
                   </p>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[11px] text-[#777777]">
+                <div className="mt-4 flex items-center justify-between border-t border-black/[0.04] pt-3 text-[11px] text-[#777777] dark:border-white/[0.06] dark:text-[#A1A1AA]">
                   <span>{m.progressText}</span>
                   {m.date && (
-                    <span className="font-medium text-black">{m.date}</span>
+                    <span className="font-medium text-black dark:text-white">
+                      {m.date}
+                    </span>
                   )}
                 </div>
               </div>
