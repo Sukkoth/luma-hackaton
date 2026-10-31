@@ -16,7 +16,7 @@ concurrency:
 
 env:
   BETTER_AUTH_SECRET: "ci-dummy-secret-at-least-32-chars-long-123456"
-  BETTER_AUTH_URL: "http://localhost:3000"
+  BETTER_AUTH_URL: "http://localhost:4040"
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/luma_db"
 
 jobs:
