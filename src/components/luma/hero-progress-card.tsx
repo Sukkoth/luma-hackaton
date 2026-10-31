@@ -9,17 +9,20 @@ type HeroProgressCardProps = {
   otChapters?: number;
   ntChapters?: number;
   remainingChapters?: number;
+  canonName?: string;
 };
 
 export function HeroProgressCard({
-  userName = "James",
-  readChapters = 443,
+  userName = "Reader",
+  readChapters = 0,
   totalChapters = 1189,
-  otChapters = 498,
-  ntChapters = 443,
-  remainingChapters = 167,
+  otChapters = 0,
+  ntChapters = 0,
+  remainingChapters = 1189,
+  canonName = "Standard 66 Books",
 }: HeroProgressCardProps) {
-  const percentage = Math.round((readChapters / totalChapters) * 100);
+  const percentage =
+    totalChapters > 0 ? Math.round((readChapters / totalChapters) * 100) : 0;
 
   // SVG circular calculations with a refined, slender stroke
   const radius = 96;
@@ -49,7 +52,7 @@ export function HeroProgressCard({
           </button>
         </div>
         <p className="mt-1.5 text-[13px] leading-snug font-normal text-white/70">
-          Tracking scripture reading with active Protestant canon.
+          Tracking scripture reading with active {canonName}.
         </p>
       </div>
 
@@ -139,7 +142,7 @@ export function HeroProgressCard({
             </div>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-[54px] leading-none font-light tracking-tight text-white">
-                1 108
+                {readChapters.toLocaleString()}
               </span>
               <span className="text-[15px] font-normal text-white/75">
                 chapters

@@ -2,23 +2,52 @@
 
 import { Download, Calendar } from "lucide-react";
 
-export function ActivityBarChart() {
-  // Timeline bars with the prominent peak highlighted in neon yellow (#DDFD2C)
-  const barData = [
-    { label: "Nov 1", height: 38, isPeak: false },
-    { label: "Nov 3", height: 50, isPeak: false },
-    { label: "Nov 5", height: 44, isPeak: false },
-    { label: "Nov 8", height: 58, isPeak: false },
-    { label: "Nov 10", height: 46, isPeak: false },
-    { label: "Nov 12", height: 65, isPeak: false },
-    { label: "Nov 15", height: 55, isPeak: false },
-    { label: "Nov 17", height: 96, isPeak: true, value: "654" }, // The peak bar
-    { label: "Nov 19", height: 62, isPeak: false },
-    { label: "Nov 22", height: 48, isPeak: false },
-    { label: "Nov 24", height: 54, isPeak: false },
-    { label: "Nov 26", height: 60, isPeak: false },
-    { label: "Nov 29", height: 42, isPeak: false },
-  ];
+export type DailyActivity = {
+  dayLabel: string;
+  dateLabel: string;
+  count: number;
+};
+
+type ActivityBarChartProps = {
+  totalChapters?: number;
+  activity?: ReadonlyArray<DailyActivity>;
+};
+
+export function ActivityBarChart({
+  totalChapters = 0,
+  activity = [],
+}: ActivityBarChartProps) {
+  // If activity is empty or not provided, generate past 7 days with 0 counts
+  const data =
+    activity.length > 0
+      ? activity
+      : [
+          { dayLabel: "Mon", dateLabel: "Mon", count: 0 },
+          { dayLabel: "Tue", dateLabel: "Tue", count: 0 },
+          { dayLabel: "Wed", dateLabel: "Wed", count: 0 },
+          { dayLabel: "Thu", dateLabel: "Thu", count: 0 },
+          { dayLabel: "Fri", dateLabel: "Fri", count: 0 },
+          { dayLabel: "Sat", dateLabel: "Sat", count: 0 },
+          { dayLabel: "Sun", dateLabel: "Sun", count: 0 },
+        ];
+
+  const maxCount = Math.max(...data.map((d) => d.count), 1);
+  const peakIndex =
+    maxCount > 0 ? data.findIndex((d) => d.count === maxCount) : -1;
+
+  const barData = data.map((item, idx) => {
+    const isPeak = idx === peakIndex && item.count > 0;
+    // Scale height from 6% minimum to 95% maximum
+    const height =
+      item.count > 0 ? Math.round((item.count / maxCount) * 85) + 10 : 6;
+    return {
+      label: item.dayLabel,
+      dateLabel: item.dateLabel,
+      height,
+      isPeak,
+      value: item.count.toString(),
+    };
+  });
 
   return (
     <div className="glass-panel relative flex flex-1 flex-col justify-between rounded-[28px] p-5 sm:p-6">
@@ -54,7 +83,7 @@ export function ActivityBarChart() {
               Total Chapters
             </span>
             <span className="mt-0.5 text-[24px] font-light tracking-tight text-black dark:text-white">
-              10 832
+              {totalChapters.toLocaleString()}
             </span>
           </div>
         </div>
@@ -63,10 +92,14 @@ export function ActivityBarChart() {
       {/* Date indicators row */}
       <div className="mt-2.5 flex items-center gap-2 text-[12px] font-normal text-[#888888] dark:text-[#9CA3AF]">
         <span className="font-medium text-black/80 dark:text-white/90">
-          2025
+          Last 7 Days
         </span>
         <span>•</span>
-        <span>November</span>
+        <span>
+          {totalChapters > 0
+            ? `${totalChapters} chapters logged`
+            : "No activity recorded yet"}
+        </span>
       </div>
 
       {/* Bar Chart Area */}
@@ -103,10 +136,9 @@ export function ActivityBarChart() {
 
       {/* Timeline markers along bottom */}
       <div className="mt-4 flex justify-between border-t border-black/[0.04] pt-3 text-[12px] font-normal text-[#888888] dark:border-white/[0.08] dark:text-[#9CA3AF]">
-        <span>Nov 8</span>
-        <span>Nov 15</span>
-        <span>Nov 22</span>
-        <span>Nov 29</span>
+        {barData.map((bar, idx) => (
+          <span key={idx}>{bar.label}</span>
+        ))}
       </div>
     </div>
   );
