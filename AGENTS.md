@@ -27,6 +27,7 @@ These override everything else in this file when in conflict.
 5. **Touch only what you must.** Every changed line must trace to the request. No drive-by refactors, reformatting, or "while I was in there" cleanups.
 6. **Never use `any`.** See section 5.
 7. **Never claim done without running verification.** See section 4.
+8. **Never `useState` for forms.** Use uncontrolled inputs (`FormData`, native `name` attributes) and Valibot schemas for validation. See section 6.
 
 ---
 
@@ -176,8 +177,9 @@ If a check cannot be run, say so explicitly and say which one.
 
 ### Forms and events
 
-- Prefer uncontrolled inputs or form libraries already in the repo for large forms. Controlled inputs re-render on every keystroke.
-- Type event handlers precisely (`React.ChangeEvent<HTMLInputElement>`), not `any`.
+- **Never use `useState` to handle forms.** Use uncontrolled inputs with native `name` attributes and extract values via `new FormData(e.currentTarget)`. Controlled inputs re-render on every keystroke and storing form input values in component state is strictly forbidden.
+- **Valibot for all form validation.** Always define a Valibot schema (e.g. in `src/lib/schemas/`) and validate form submissions at the boundary with `v.safeParse(Schema, ...)`.
+- Type event handlers precisely (`React.FormEvent<HTMLFormElement>`, `React.ChangeEvent<HTMLInputElement>`), not `any`.
 
 ### Error handling
 
