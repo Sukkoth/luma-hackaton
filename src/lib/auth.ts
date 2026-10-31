@@ -13,6 +13,11 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
+  user: {
+    fields: {
+      emailVerified: "emailVerifiedAt",
+    },
+  },
   emailAndPassword: {
     enabled: true,
   },

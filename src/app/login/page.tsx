@@ -1,20 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import * as v from "valibot";
+import {
+  ArrowLeft,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Loader2,
+  Info,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { authClient } from "@/lib/auth-client";
+import { LoginSchema } from "@/lib/schemas/auth";
 
-export default function LoginPage() {
+function LoginContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get("redirect") || "/home";
+
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [oauthNotice, setOauthNotice] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMessage(null);
+    setOauthNotice(null);
+
+    const formData = new FormData(e.currentTarget);
+    const parsed = v.safeParse(LoginSchema, {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      rememberMe: formData.get("rememberMe") === "on",
+    });
+
+    if (!parsed.success) {
+      setErrorMessage(parsed.issues[0]?.message || "Invalid credentials.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await authClient.signIn.email({
+        email: parsed.output.email.toLowerCase(),
+        password: parsed.output.password,
+        rememberMe: parsed.output.rememberMe,
+      });
+
+      if (error) {
+        setErrorMessage(
+          error.message ||
+            "Invalid email or password. Please verify your credentials."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      router.push(redirectTarget);
+      router.refresh();
+    } catch {
+      setErrorMessage(
+        "An unexpected network error occurred. Please try again."
+      );
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -266,10 +322,23 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {submitted && (
-            <div className="mt-5 flex items-center gap-2 rounded-[14px] border border-black/[0.06] bg-[#DDFD2C]/15 p-3 text-[12px] font-normal text-black dark:border-white/10 dark:bg-[#DDFD2C]/10 dark:text-white">
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-black dark:text-[#DDFD2C]" />
-              <span>Dummy demo credentials validated.</span>
+          {errorMessage && (
+            <div
+              role="alert"
+              className="mt-5 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {oauthNotice && (
+            <div
+              role="status"
+              className="mt-5 flex items-center gap-2 rounded-[14px] border border-blue-500/20 bg-blue-500/10 p-3 text-[12px] font-normal text-blue-700 dark:border-blue-400/20 dark:bg-blue-950/30 dark:text-blue-300"
+            >
+              <Info className="h-4 w-4 shrink-0" />
+              <span>{oauthNotice}</span>
             </div>
           )}
 
@@ -277,7 +346,11 @@ export default function LoginPage() {
           <div className="mt-6 grid grid-cols-2 gap-2.5">
             <button
               type="button"
-              onClick={() => setSubmitted(true)}
+              onClick={() =>
+                setOauthNotice(
+                  "Google authentication will be enabled soon. Please use email and password to sign in."
+                )
+              }
               className="flex items-center justify-center gap-2 rounded-[14px] border border-black/[0.08] bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/[0.16] hover:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:hover:border-white/20 dark:hover:bg-white/[0.08]"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -303,7 +376,11 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => setSubmitted(true)}
+              onClick={() =>
+                setOauthNotice(
+                  "GitHub authentication will be enabled soon. Please use email and password to sign in."
+                )
+              }
               className="flex items-center justify-center gap-2 rounded-[14px] border border-black/[0.08] bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/[0.16] hover:bg-white dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:hover:border-white/20 dark:hover:bg-white/[0.08]"
             >
               <svg
@@ -341,14 +418,13 @@ export default function LoginPage() {
                 Email address
               </label>
               <div className="relative mt-1.5">
-                <Mail className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                 <input
                   id="login-email"
+                  name="email"
                   type="email"
                   required
                   placeholder="james@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
                 />
               </div>
@@ -370,14 +446,13 @@ export default function LoginPage() {
                 </Link>
               </div>
               <div className="relative mt-1.5">
-                <Lock className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                 <input
                   id="login-password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-10 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
                 />
                 <button
@@ -399,9 +474,9 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 pt-1">
               <input
                 id="remember-me"
+                name="rememberMe"
                 type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                defaultChecked
                 className="h-4 w-4 rounded-[4px] border-black/20 text-black accent-black focus:ring-black dark:accent-[#DDFD2C]"
               />
               <label
@@ -415,9 +490,11 @@ export default function LoginPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="mt-2 flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              disabled={isLoading}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
             >
-              Sign In
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              <span>{isLoading ? "Signing in..." : "Sign In"}</span>
             </button>
           </form>
 
@@ -439,5 +516,19 @@ export default function LoginPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-dvh items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-[#82ADD4]" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

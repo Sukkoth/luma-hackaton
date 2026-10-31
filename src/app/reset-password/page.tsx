@@ -2,24 +2,40 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import * as v from "valibot";
+import {
+  ArrowLeft,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { ResetPasswordSchema } from "@/lib/schemas/auth";
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage(null);
+
+    const formData = new FormData(e.currentTarget);
+    const parsed = v.safeParse(ResetPasswordSchema, {
+      password: formData.get("password"),
+      confirmPassword: formData.get("confirmPassword"),
+    });
+
+    if (!parsed.success) {
+      setErrorMessage(parsed.issues[0]?.message || "Invalid passwords.");
+      return;
+    }
+
     setSubmitted(true);
   };
-
-  const hasMinLength = password.length >= 8;
-  const hasMixedChars =
-    /[a-zA-Z]/.test(password) &&
-    (/[0-9]/.test(password) || password.length === 0);
 
   return (
     <div className="flex min-h-dvh w-full flex-col lg:flex-row">
@@ -233,6 +249,16 @@ export default function ResetPasswordPage() {
               </p>
             </div>
 
+            {errorMessage && (
+              <div
+                role="alert"
+                className="mt-4 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             {submitted ? (
               <div className="mt-6 space-y-4">
                 <div className="rounded-[18px] border border-black/[0.06] bg-[#DDFD2C]/15 p-5 text-center dark:border-white/10 dark:bg-[#DDFD2C]/10">
@@ -265,14 +291,13 @@ export default function ResetPasswordPage() {
                     New Password
                   </label>
                   <div className="relative mt-1.5">
-                    <Lock className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                     <input
                       id="new-password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
                       className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-10 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
                     />
                     <button
@@ -300,14 +325,13 @@ export default function ResetPasswordPage() {
                     Confirm New Password
                   </label>
                   <div className="relative mt-1.5">
-                    <Lock className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                     <input
                       id="confirm-password"
+                      name="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
                       className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
                     />
                   </div>
@@ -316,24 +340,12 @@ export default function ResetPasswordPage() {
                 {/* Password Criteria Checks */}
                 <div className="space-y-1.5 pt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                   <div className="flex items-center gap-1.5">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        hasMinLength
-                          ? "bg-black dark:bg-[#DDFD2C]"
-                          : "bg-black/20 dark:bg-white/20"
-                      }`}
-                    />
+                    <span className="h-1.5 w-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
                     <span>At least 8 characters long</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        hasMixedChars
-                          ? "bg-black dark:bg-[#DDFD2C]"
-                          : "bg-black/20 dark:bg-white/20"
-                      }`}
-                    />
-                    <span>Contains letters and numbers</span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
+                    <span>Must match confirmation password</span>
                   </div>
                 </div>
 

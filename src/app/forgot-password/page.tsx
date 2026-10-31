@@ -2,16 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, CheckCircle2, ArrowRight } from "lucide-react";
+import * as v from "valibot";
+import {
+  ArrowLeft,
+  Mail,
+  CheckCircle2,
+  ArrowRight,
+  AlertCircle,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { ForgotPasswordSchema } from "@/lib/schemas/auth";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMessage(null);
+
+    const formData = new FormData(e.currentTarget);
+    const parsed = v.safeParse(ForgotPasswordSchema, {
+      email: formData.get("email"),
+    });
+
+    if (!parsed.success) {
+      setErrorMessage(parsed.issues[0]?.message || "Invalid email address.");
+      return;
+    }
+
+    setSubmittedEmail(parsed.output.email);
   };
 
   return (
@@ -228,7 +248,17 @@ export default function ForgotPasswordPage() {
               </p>
             </div>
 
-            {submitted ? (
+            {errorMessage && (
+              <div
+                role="alert"
+                className="mt-4 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {submittedEmail ? (
               <div className="mt-6 space-y-4">
                 <div className="rounded-[18px] border border-black/[0.06] bg-[#DDFD2C]/15 p-5 text-center dark:border-white/10 dark:bg-[#DDFD2C]/10">
                   <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-xs">
@@ -240,7 +270,7 @@ export default function ForgotPasswordPage() {
                   <p className="mt-1 text-[12px] leading-relaxed text-[#666666] dark:text-[#9CA3AF]">
                     We sent instructions to{" "}
                     <strong className="font-medium text-black dark:text-white">
-                      {email || "your email"}
+                      {submittedEmail}
                     </strong>
                     . Please check your inbox and spam folder.
                   </p>
@@ -265,14 +295,13 @@ export default function ForgotPasswordPage() {
                     Email address
                   </label>
                   <div className="relative mt-1.5">
-                    <Mail className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
                     <input
                       id="forgot-email"
+                      name="email"
                       type="email"
                       required
                       placeholder="james@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full rounded-[14px] border border-black/[0.08] bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/[0.08]"
                     />
                   </div>

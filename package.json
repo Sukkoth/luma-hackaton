@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 4040",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 4040",
     "lint": "bun lint",
     "format": "bun fmt",
     "format:check": "bun fmt --check",
@@ -23,7 +23,8 @@
     "next": "16.4.3",
     "postgres": "^4.0.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "valibot": "^1.5.0"
   },
   "devDependencies": {
     "@better-auth/cli": "^1.4.22",
