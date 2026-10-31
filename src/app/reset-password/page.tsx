@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ResetPasswordSchema } from "@/lib/schemas/auth";
+import { AuthShowcasePanel } from "@/components/auth/auth-showcase-panel";
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,179 +41,22 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-dvh w-full flex-col lg:flex-row">
       {/* LEFT SIDE: Full-Bleed Atmospheric Showcase */}
-      <section className="relative hidden w-full flex-col justify-between overflow-hidden bg-[#0D0D0F] p-10 text-white lg:flex lg:w-1/2 lg:p-14 xl:p-18 dark:bg-[#070708]">
-        {/* Full-bleed generative SVG architectural tapestry */}
-        <svg
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-          viewBox="0 0 900 1200"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          <defs>
-            <radialGradient
-              id="resetGlow"
-              cx="45%"
-              cy="40%"
-              r="60%"
-              fx="40%"
-              fy="35%"
-            >
-              <stop offset="0%" stopColor="#1E1E22" stopOpacity="0.45" />
-              <stop offset="55%" stopColor="#121215" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#070708" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="resetArc" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.28" />
-              <stop offset="45%" stopColor="#71717A" stopOpacity="0.14" />
-              <stop offset="75%" stopColor="#DDFD2C" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.01" />
-            </linearGradient>
-            <linearGradient
-              id="resetVertical"
-              x1="0%"
-              y1="0%"
-              x2="0%"
-              y2="100%"
-            >
-              <stop offset="0%" stopColor="#71717A" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#71717A" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Deep ambient light bloom */}
-          <rect width="900" height="1200" fill="url(#resetGlow)" />
-
-          {/* Canonical Horizon Arcs */}
-          <g opacity="0.85">
-            <circle
-              cx="450"
-              cy="540"
-              r="140"
-              stroke="url(#resetArc)"
-              strokeWidth="1"
-            />
-            <circle
-              cx="450"
-              cy="540"
-              r="220"
-              stroke="url(#resetArc)"
-              strokeWidth="1.25"
-              strokeDasharray="3 9"
-            />
-            <circle
-              cx="450"
-              cy="540"
-              r="330"
-              stroke="url(#resetArc)"
-              strokeWidth="1"
-              opacity="0.6"
-            />
-            <circle
-              cx="450"
-              cy="540"
-              r="460"
-              stroke="url(#resetArc)"
-              strokeWidth="1.5"
-              strokeDasharray="8 12"
-              opacity="0.4"
-            />
-            <circle
-              cx="450"
-              cy="540"
-              r="610"
-              stroke="url(#resetArc)"
-              strokeWidth="1"
-              strokeDasharray="2 14"
-              opacity="0.35"
-            />
-            <circle
-              cx="450"
-              cy="540"
-              r="780"
-              stroke="url(#resetArc)"
-              strokeWidth="1"
-              opacity="0.2"
-            />
-
-            {/* Meridian intersecting guide axes */}
-            <line
-              x1="450"
-              y1="0"
-              x2="450"
-              y2="1200"
-              stroke="url(#resetVertical)"
-              strokeWidth="1"
-              strokeDasharray="4 8"
-              opacity="0.4"
-            />
-            <line
-              x1="0"
-              y1="540"
-              x2="900"
-              y2="540"
-              stroke="url(#resetArc)"
-              strokeWidth="1"
-              strokeDasharray="4 8"
-              opacity="0.25"
-            />
-
-            {/* Radiant Canonical Crosshairs and Node Markers */}
-            <circle cx="450" cy="540" r="4" fill="#DDFD2C" opacity="0.9" />
-            <circle cx="450" cy="320" r="3" fill="#FFFFFF" opacity="0.7" />
-            <circle cx="450" cy="760" r="3" fill="#71717A" opacity="0.7" />
-            <circle cx="230" cy="540" r="3" fill="#FFFFFF" opacity="0.6" />
-            <circle cx="670" cy="540" r="3" fill="#71717A" opacity="0.6" />
-          </g>
-        </svg>
-
-        {/* Top Header Row with Navigation */}
-        <div className="relative z-10 flex items-center justify-between">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 rounded-[12px] border border-white/20 bg-white/10 px-3.5 py-1.5 text-[12px] font-normal text-white/90 shadow-2xs backdrop-blur-md transition-all hover:border-white/40 hover:bg-white/20 hover:text-white"
-          >
-            <ArrowLeft className="h-3.5 w-3.5 stroke-[1.75]" />
-            <span>Back to Sign In</span>
-          </Link>
-
-          <span className="text-[14px] font-light tracking-wide text-white/80">
-            Scripture<span className="text-[#DDFD2C]">.</span>
-          </span>
-        </div>
-
-        {/* Center / Lower-middle: Monumental, Refined Typography */}
-        <div className="relative z-10 my-auto max-w-lg pt-12">
-          <span className="inline-block text-[11px] font-medium tracking-[0.2em] text-[#DDFD2C] uppercase">
-            CONFIRMATION & STRENGTH
-          </span>
-
-          <h2 className="mt-4 text-[38px] leading-[1.12] font-light tracking-tight text-white xl:text-[46px]">
+      <AuthShowcasePanel
+        backHref="/login"
+        backLabel="Back to Sign In"
+        badge="CONFIRMATION & STRENGTH"
+        quoteTitle={
+          <>
             Create in me a clean <br />
             heart, O God; and renew <br />
             <span className="font-normal text-white">a right spirit.</span>
-          </h2>
-
-          <div className="mt-6 flex items-center gap-3">
-            <span className="h-px w-8 bg-[#DDFD2C]/80" />
-            <span className="text-[13px] font-normal tracking-wide text-white/75">
-              Psalm 51:10
-            </span>
-          </div>
-
-          <p className="mt-6 max-w-md text-[14px] leading-relaxed font-light text-white/60">
-            Establish a strong, updated credential to protect your saved
-            meditations, chapter bookmarks, and personalized reading plans.
-          </p>
-        </div>
-
-        {/* Bottom Metadata Bar */}
-        <div className="relative z-10 flex items-center justify-between border-t border-white/10 pt-6 text-[12px] text-white/60">
-          <span>Security Renewal • Strong Encryption</span>
-          <span className="text-white/80">Safe Credentials</span>
-        </div>
-      </section>
+          </>
+        }
+        scriptureRef="Psalm 51:10"
+        description="Establish a strong, updated credential to protect your saved meditations, chapter bookmarks, and personalized reading plans."
+        footerLeft="Security Renewal • Strong Encryption"
+        footerRight="Safe Credentials"
+      />
 
       {/* RIGHT SIDE: Authentication Form Experience */}
       <section className="relative flex flex-1 flex-col justify-between p-6 sm:p-10 lg:p-14 xl:p-18">

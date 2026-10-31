@@ -17,6 +17,7 @@ import {
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { LoginSchema } from "@/lib/schemas/auth";
+import { AuthShowcasePanel } from "@/components/auth/auth-showcase-panel";
 
 function LoginContent() {
   const router = useRouter();
@@ -76,215 +77,18 @@ function LoginContent() {
   return (
     <div className="flex min-h-dvh w-full flex-col lg:flex-row">
       {/* LEFT SIDE: Full-Bleed Atmospheric Showcase */}
-      <section className="relative hidden w-full flex-col justify-between overflow-hidden bg-[#0D0D0F] p-10 text-white lg:flex lg:w-1/2 lg:p-14 xl:p-18 dark:bg-[#070708]">
-        {/* Full-bleed generative SVG architectural tapestry */}
-        <svg
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-          viewBox="0 0 900 1200"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          <defs>
-            <radialGradient
-              id="bgGlow"
-              cx="45%"
-              cy="40%"
-              r="60%"
-              fx="40%"
-              fy="35%"
-            >
-              <stop offset="0%" stopColor="#1E1E22" stopOpacity="0.45" />
-              <stop offset="55%" stopColor="#121215" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#070708" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.28" />
-              <stop offset="45%" stopColor="#71717A" stopOpacity="0.14" />
-              <stop offset="75%" stopColor="#DDFD2C" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.01" />
-            </linearGradient>
-            <linearGradient id="verticalBeam" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#71717A" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#71717A" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Deep ambient light bloom */}
-          <rect width="900" height="1200" fill="url(#bgGlow)" />
-
-          {/* Canonical Sphere Coordinates (Full-bleed concentric geometry) */}
-          <g opacity="0.85">
-            {/* Massive sweeping astronomical/canonical horizon arcs */}
-            <circle
-              cx="450"
-              cy="550"
-              r="140"
-              stroke="url(#arcGrad)"
-              strokeWidth="1"
-            />
-            <circle
-              cx="450"
-              cy="550"
-              r="220"
-              stroke="url(#arcGrad)"
-              strokeWidth="1.25"
-              strokeDasharray="3 9"
-            />
-            <circle
-              cx="450"
-              cy="550"
-              r="320"
-              stroke="url(#arcGrad)"
-              strokeWidth="1"
-              opacity="0.6"
-            />
-            <circle
-              cx="450"
-              cy="550"
-              r="440"
-              stroke="url(#arcGrad)"
-              strokeWidth="1.5"
-              strokeDasharray="8 12"
-              opacity="0.4"
-            />
-            <circle
-              cx="450"
-              cy="550"
-              r="580"
-              stroke="url(#arcGrad)"
-              strokeWidth="1"
-              strokeDasharray="2 14"
-              opacity="0.35"
-            />
-            <circle
-              cx="450"
-              cy="550"
-              r="740"
-              stroke="url(#arcGrad)"
-              strokeWidth="1"
-              opacity="0.2"
-            />
-            <circle
-              cx="450"
-              cy="550"
-              r="920"
-              stroke="url(#arcGrad)"
-              strokeWidth="1"
-              strokeDasharray="4 18"
-              opacity="0.15"
-            />
-
-            {/* Meridian intersecting guide axes */}
-            <line
-              x1="450"
-              y1="0"
-              x2="450"
-              y2="1200"
-              stroke="url(#verticalBeam)"
-              strokeWidth="1"
-              strokeDasharray="4 8"
-              opacity="0.4"
-            />
-            <line
-              x1="0"
-              y1="550"
-              x2="900"
-              y2="550"
-              stroke="url(#arcGrad)"
-              strokeWidth="1"
-              strokeDasharray="4 8"
-              opacity="0.25"
-            />
-            <line
-              x1="120"
-              y1="120"
-              x2="780"
-              y2="980"
-              stroke="url(#arcGrad)"
-              strokeWidth="0.75"
-              strokeDasharray="2 10"
-              opacity="0.2"
-            />
-            <line
-              x1="780"
-              y1="120"
-              x2="120"
-              y2="980"
-              stroke="url(#arcGrad)"
-              strokeWidth="0.75"
-              strokeDasharray="2 10"
-              opacity="0.2"
-            />
-
-            {/* Radiant Canonical Crosshairs and Node Markers */}
-            <circle cx="450" cy="550" r="4" fill="#DDFD2C" opacity="0.9" />
-            <circle cx="450" cy="330" r="3" fill="#FFFFFF" opacity="0.7" />
-            <circle cx="450" cy="770" r="3" fill="#71717A" opacity="0.7" />
-            <circle cx="230" cy="550" r="3" fill="#FFFFFF" opacity="0.6" />
-            <circle cx="670" cy="550" r="3" fill="#71717A" opacity="0.6" />
-
-            {/* Micro coordinate markers */}
-            <path
-              d="M445 550 H455 M450 545 V555"
-              stroke="#FFFFFF"
-              strokeWidth="1"
-              opacity="0.5"
-            />
-            <path
-              d="M445 110 H455 M450 105 V115"
-              stroke="#DDFD2C"
-              strokeWidth="1"
-              opacity="0.6"
-            />
-            <path
-              d="M445 990 H455 M450 985 V995"
-              stroke="#71717A"
-              strokeWidth="1"
-              opacity="0.5"
-            />
-          </g>
-        </svg>
-
-        {/* Top Header Row with Navigation */}
-        <div className="relative z-10 flex items-center justify-between">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-[12px] border border-white/20 bg-white/10 px-3.5 py-1.5 text-[12px] font-normal text-white/90 shadow-2xs backdrop-blur-md transition-all hover:border-white/40 hover:bg-white/20 hover:text-white"
-          >
-            <ArrowLeft className="h-3.5 w-3.5 stroke-[1.75]" />
-            <span>Back to Dashboard</span>
-          </Link>
-
-          <span className="text-[14px] font-light tracking-wide text-white/80">
-            Scripture<span className="text-[#DDFD2C]">.</span>
-          </span>
-        </div>
-
-        {/* Center / Lower-middle: Monumental, Refined Typography */}
-        <div className="relative z-10 my-auto max-w-lg pt-12">
-          <span className="inline-block text-[11px] font-medium tracking-[0.2em] text-[#DDFD2C] uppercase">
-            CANONICAL READING SANCTUARY
-          </span>
-
-          <h2 className="mt-4 text-[38px] leading-[1.12] font-light tracking-tight text-white xl:text-[46px]">
+      <AuthShowcasePanel
+        quoteTitle={
+          <>
             Your word is a lamp <br />
             to my feet and a light <br />
             <span className="font-normal text-white">unto my path.</span>
-          </h2>
-
-          <p className="mt-6 text-[13px] font-light tracking-wide text-white/70">
-            PSALM 119:105
-          </p>
-        </div>
-
-        {/* Bottom Status Row */}
-        <div className="relative z-10 flex items-center justify-between border-t border-white/10 pt-6 text-[12px] text-white/60">
-          <span>Daily Reading Sanctuary</span>
-          <span>1 189 Chapters</span>
-        </div>
-      </section>
+          </>
+        }
+        scriptureRef="PSALM 119:105"
+        footerLeft="Daily Reading Sanctuary"
+        footerRight="1 189 Chapters"
+      />
 
       {/* RIGHT SIDE: Authentication Form */}
       <section className="relative flex w-full flex-1 flex-col justify-between px-6 py-8 sm:px-12 md:px-16 lg:w-1/2 lg:p-14 xl:p-20">
