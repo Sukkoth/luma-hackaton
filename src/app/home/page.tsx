@@ -27,6 +27,7 @@ import {
   type DistributionBreakdown,
   type ActivePlanSummary,
 } from "@/components/luma/distribution-cards";
+import { syncUserStreak } from "@/lib/streak-service";
 
 export const instant = false;
 
@@ -69,12 +70,25 @@ async function getHomeMetrics({
   const canon = (tracker?.canon || "protestant") as BibleCanon;
   const canonStats = getCanonTestamentChapters(canon);
 
-  // 2. Query tracker completed chapters
-  const progress = tracker
-    ? await db.query.trackerChapterProgress.findMany({
-        where: eq(trackerChapterProgress.trackerId, tracker.id),
-      })
-    : [];
+  // 2. Parallelize independent queries: tracker progress, recent reading logs, and active plans
+  const [progress, recentLogs, activeEnrolledPlans] = await Promise.all([
+    tracker
+      ? db.query.trackerChapterProgress.findMany({
+          where: eq(trackerChapterProgress.trackerId, tracker.id),
+        })
+      : Promise.resolve([]),
+    db.query.readingLogs.findMany({
+      where: eq(readingLogs.userId, userId),
+      orderBy: (readingLogs, { desc }) => [desc(readingLogs.loggedAt)],
+      limit: 100,
+    }),
+    db.query.planInstances.findMany({
+      where: and(
+        eq(planInstances.userId, userId),
+        eq(planInstances.status, "active")
+      ),
+    }),
+  ]);
 
   let readOt = 0;
   let readNt = 0;
@@ -106,13 +120,6 @@ async function getHomeMetrics({
     }
   }
 
-  // 3. Query reading logs for past 7 days activity
-  const recentLogs = await db.query.readingLogs.findMany({
-    where: eq(readingLogs.userId, userId),
-    orderBy: (readingLogs, { desc }) => [desc(readingLogs.loggedAt)],
-    limit: 100,
-  });
-
   const now = new Date();
   const past7Days: DailyActivity[] = [];
   for (let i = 6; i >= 0; i--) {
@@ -126,14 +133,6 @@ async function getHomeMetrics({
     }).length;
     past7Days.push({ dayLabel, dateLabel: dateStr, count });
   }
-
-  // 4. Query active enrolled plans
-  const activeEnrolledPlans = await db.query.planInstances.findMany({
-    where: and(
-      eq(planInstances.userId, userId),
-      eq(planInstances.status, "active")
-    ),
-  });
 
   const activePlans: ActivePlanSummary[] = activeEnrolledPlans.map((p) => {
     return {
@@ -180,15 +179,20 @@ export default async function HomePage() {
   const displayName =
     session.user.name.split(" ")[0] || session.user.name || "Reader";
 
-  const metrics = await getHomeMetrics({
-    userId: session.user.id,
-    activeTrackerId: settings.activeTrackerId,
-  });
+  const [metrics, streak] = await Promise.all([
+    getHomeMetrics({
+      userId: session.user.id,
+      activeTrackerId: settings.activeTrackerId,
+    }),
+    syncUserStreak({
+      userId: session.user.id,
+    }),
+  ]);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-350 flex-col px-4 py-3 sm:px-6 md:px-8 md:py-4 lg:h-dvh">
       {/* Top Navbar */}
-      <TopNavbar userName={displayName} />
+      <TopNavbar userName={displayName} streak={streak} />
 
       {/* Main Dashboard Layout */}
       <main className="mt-3 flex flex-1 flex-col gap-3.5 pb-1 lg:flex-row lg:items-stretch lg:overflow-hidden">
@@ -207,9 +211,10 @@ export default async function HomePage() {
         <div className="flex flex-1 flex-col justify-between gap-3.5 lg:overflow-hidden">
           <StatMetricCards
             chaptersRead={metrics.readChapters}
-            currentStreak={settings.currentStreak}
-            streakFreezesAvailable={settings.streakFreezesAvailable}
-            longestStreak={settings.longestStreak}
+            currentStreak={streak.currentStreak}
+            streakFreezesAvailable={streak.availableFreezes}
+            longestStreak={streak.longestStreak}
+            isFreezeUnlocked={streak.isFreezeUnlocked}
           />
           <ActivityBarChart
             totalChapters={metrics.readChapters}

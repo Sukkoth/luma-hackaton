@@ -1,18 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, LogIn, ArrowRight } from "lucide-react";
+import { Settings, LogIn, ArrowRight, Flame, Shield } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useSession } from "@/lib/auth-client";
+import {
+  StreakDetailModal,
+  type StreakData,
+} from "@/components/streak/streak-detail-modal";
 
 type TopNavbarProps = {
   userName?: string;
+  streak?: StreakData;
 };
 
-export function TopNavbar({ userName = "James" }: TopNavbarProps) {
+export function TopNavbar({ userName = "James", streak }: TopNavbarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [isStreakOpen, setIsStreakOpen] = useState(false);
   const effectiveUserName = session?.user?.name || userName;
 
   // When unauthenticated, user should not see Overview, Insights, Notes, or Settings
@@ -67,8 +74,39 @@ export function TopNavbar({ userName = "James" }: TopNavbarProps) {
         })}
       </nav>
 
-      {/* Right controls: Theme Toggle and Auth / Settings button */}
+      {/* Right controls: Streak button, Theme Toggle, and Auth / Settings button */}
       <div className="flex items-center gap-2">
+        {session && streak && (
+          <button
+            type="button"
+            onClick={() => setIsStreakOpen(true)}
+            aria-label={`Current streak: ${streak.currentStreak} days`}
+            data-testid="streak-navbar-button"
+            className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[12px] font-medium shadow-2xs backdrop-blur-md transition-all ${
+              streak.isTodayCompleted
+                ? "border-[#b5d31f]/50 bg-[#DDFD2C]/25 text-black hover:bg-[#DDFD2C]/35 dark:border-[#DDFD2C]/30 dark:bg-[#DDFD2C]/15 dark:text-[#DDFD2C]"
+                : "border-black/10 bg-white/40 text-black/75 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
+            }`}
+          >
+            <Flame
+              className={`size-3.5 ${
+                streak.isTodayCompleted
+                  ? "fill-[#9db814] text-[#8aa30f] dark:fill-[#DDFD2C] dark:text-[#DDFD2C]"
+                  : "text-[#8aa30f] dark:text-[#DDFD2C]"
+              }`}
+            />
+            <span className="font-semibold">{streak.currentStreak}</span>
+            {streak.isFreezeUnlocked ? (
+              <span
+                className="flex items-center gap-0.5 text-[10px] text-[#507ea6] dark:text-[#82ADD4]"
+                title={`${streak.availableFreezes} freeze shields available`}
+              >
+                <Shield className="size-3" />
+                <span>{streak.availableFreezes}</span>
+              </span>
+            ) : null}
+          </button>
+        )}
         <ThemeToggle />
         {session ? (
           <Link
@@ -102,6 +140,14 @@ export function TopNavbar({ userName = "James" }: TopNavbarProps) {
           </div>
         )}
       </div>
+
+      {streak && (
+        <StreakDetailModal
+          isOpen={isStreakOpen}
+          onClose={() => setIsStreakOpen(false)}
+          streak={streak}
+        />
+      )}
     </header>
   );
 }

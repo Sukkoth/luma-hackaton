@@ -183,7 +183,7 @@ test.describe("Onboarding Experience via New User E2E", () => {
       });
       expect(settings).toBeDefined();
       expect(settings?.hasCompletedOnboarding).toBe(true);
-      expect(settings?.streakFreezesAvailable).toBe(3);
+      expect(settings?.streakFreezesAvailable).toBe(0);
 
       const tracker = await db.query.readingTrackers.findFirst({
         where: eq(readingTrackers.userId, createdUser.id),

@@ -1,18 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { BIBLE_BOOKS, type BibleBook } from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
+import {
+  toggleChapterAction,
+  markAllChaptersAction,
+  clearAllChaptersAction,
+} from "@/actions/chapters";
 import { VerseOfTheDayBanner } from "./verse-of-the-day-banner";
 import { BookCard } from "./book-card";
 import { BookChaptersModal } from "./book-chapters-modal";
 import { BooksAuthModal } from "./books-auth-modal";
+import type { StreakData } from "@/components/streak/streak-detail-modal";
 
 type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
+  activeTrackerId?: string | null;
+  userName?: string | null;
+  streak?: StreakData;
 };
 
 const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {};
@@ -31,9 +40,15 @@ const CATEGORY_FILTERS = [
   "General Epistles",
 ] as const;
 
-export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
+export function BooksView({
+  initialReadData = DEFAULT_READ_CHAPTERS,
+  activeTrackerId = null,
+  userName = null,
+  streak,
+}: Props) {
   const router = useRouter();
   const { data: session } = useSession();
+  const [, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [readChapters, setReadChapters] =
@@ -65,59 +80,117 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
     (totalReadChapters / totalChaptersAcrossCanon) * 100
   );
 
-  // Handle chapter toggle for active book - requires authentication
+  // Handle chapter toggle for active book - requires authenticated active tracker
   const handleToggleChapter = ({
     bookId,
+    bookName,
     chapter,
   }: {
     bookId: string;
+    bookName: string;
     chapter: number;
   }) => {
-    if (!session?.user) {
+    if (!activeTrackerId) {
       setShowAuthModal(true);
       return;
     }
 
-    setReadChapters((prev) => {
-      const current = prev[bookId] ?? [];
-      const updated = current.includes(chapter)
-        ? current.filter((c) => c !== chapter)
-        : [...current, chapter];
-      return { ...prev, [bookId]: updated };
+    const current = readChapters[bookId] ?? [];
+    const isAdding = !current.includes(chapter);
+    const updated = isAdding
+      ? [...current, chapter]
+      : current.filter((c) => c !== chapter);
+
+    setReadChapters((prev) => ({
+      ...prev,
+      [bookId]: updated,
+    }));
+
+    startTransition(async () => {
+      const result = await toggleChapterAction({
+        trackerId: activeTrackerId,
+        bookId,
+        bookName,
+        chapter,
+      });
+
+      if (!result.success) {
+        setReadChapters((prev) => ({
+          ...prev,
+          [bookId]: current,
+        }));
+      }
     });
   };
 
   // Mark all chapters as read for active book
   const handleMarkAllChapters = ({ book }: { book: BibleBook }) => {
-    if (!session?.user) {
+    if (!activeTrackerId) {
       setShowAuthModal(true);
       return;
     }
 
+    const current = readChapters[book.id] ?? [];
     const all = Array.from({ length: book.chapters }, (_, i) => i + 1);
+
     setReadChapters((prev) => ({
       ...prev,
       [book.id]: all,
     }));
+
+    startTransition(async () => {
+      const result = await markAllChaptersAction({
+        trackerId: activeTrackerId,
+        bookId: book.id,
+        bookName: book.name,
+        totalChapters: book.chapters,
+      });
+
+      if (!result.success) {
+        setReadChapters((prev) => ({
+          ...prev,
+          [book.id]: current,
+        }));
+      }
+    });
   };
 
   // Reset all chapters for active book
   const handleClearAllChapters = ({ bookId }: { bookId: string }) => {
-    if (!session?.user) {
+    if (!activeTrackerId) {
       setShowAuthModal(true);
       return;
     }
+
+    const current = readChapters[bookId] ?? [];
 
     setReadChapters((prev) => ({
       ...prev,
       [bookId]: [],
     }));
+
+    startTransition(async () => {
+      const result = await clearAllChaptersAction({
+        trackerId: activeTrackerId,
+        bookId,
+      });
+
+      if (!result.success) {
+        setReadChapters((prev) => ({
+          ...prev,
+          [bookId]: current,
+        }));
+      }
+    });
   };
 
   return (
     <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName={session?.user?.name || "Reader"} />
+      <TopNavbar
+        userName={userName || session?.user?.name || "Reader"}
+        streak={streak}
+      />
 
       {/* Top Highlight Cards: Verse of the Day & Active Reading */}
       <VerseOfTheDayBanner
