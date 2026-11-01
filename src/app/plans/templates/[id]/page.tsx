@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -10,9 +11,12 @@ import {
   Calendar,
   Bookmark,
 } from "lucide-react";
+import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { getReadingPlanById } from "@/data/readingPlans";
 import { StartPlanAction } from "@/components/plans/start-plan-action";
+import { getUserTrackersData } from "@/actions/trackers";
+import { syncUserStreak } from "@/lib/streak-service";
 
 type PlanTemplateDetailContentParams = {
   params: Promise<{ id: string }>;
@@ -28,10 +32,28 @@ async function PlanTemplateDetailContent({
     notFound();
   }
 
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const [trackersData, streak] = session
+    ? await Promise.all([
+        getUserTrackersData({ userId: session.user.id }),
+        syncUserStreak({ userId: session.user.id }),
+      ])
+    : [{ trackers: [], activeTracker: null }, undefined];
+
+  const displayName = session?.user?.name || "Reader";
+
   return (
     <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName="James" />
+      <TopNavbar
+        userName={displayName}
+        streak={streak}
+        trackers={trackersData.trackers}
+        activeTrackerId={trackersData.activeTracker?.id}
+      />
 
       <main className="mt-4 space-y-4">
         {/* Breadcrumb / Back button */}

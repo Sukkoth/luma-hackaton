@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
+import { getUserTrackersData } from "@/actions/trackers";
+import { syncUserStreak } from "@/lib/streak-service";
 
 type PlanInstanceContentParams = {
   params: Promise<{ instanceId: string }>;
@@ -28,13 +30,23 @@ async function PlanInstanceContent({ params }: PlanInstanceContentParams) {
     redirect(`/login?redirect=/plans/${instanceId}`);
   }
 
+  const [trackersData, streak] = await Promise.all([
+    getUserTrackersData({ userId: session.user.id }),
+    syncUserStreak({ userId: session.user.id }),
+  ]);
+
   const displayName =
     session.user.name.split(" ")[0] || session.user.name || "Reader";
 
   return (
     <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName={displayName} />
+      <TopNavbar
+        userName={displayName}
+        streak={streak}
+        trackers={trackersData.trackers}
+        activeTrackerId={trackersData.activeTracker?.id}
+      />
 
       <main className="mt-4 space-y-4">
         {/* Back navigation */}

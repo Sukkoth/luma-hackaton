@@ -4,7 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
-import { BIBLE_BOOKS, type BibleBook } from "@/data/bibleData";
+import {
+  type BibleCanon,
+  getBibleBooks,
+  getCanonTestamentChapters,
+  type BibleBook,
+} from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
 import {
   toggleChapterAction,
@@ -16,33 +21,26 @@ import { BookCard } from "./book-card";
 import { BookChaptersModal } from "./book-chapters-modal";
 import { BooksAuthModal } from "./books-auth-modal";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
+import type { UserTrackerSummary } from "@/actions/trackers";
 
 type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
   activeTrackerId?: string | null;
+  trackerName?: string | null;
+  canon?: BibleCanon;
+  trackers?: ReadonlyArray<UserTrackerSummary>;
   userName?: string | null;
   streak?: StreakData;
 };
 
 const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {};
 
-const CATEGORY_FILTERS = [
-  "All",
-  "Old Testament",
-  "New Testament",
-  "Law",
-  "History",
-  "Poetry & Wisdom",
-  "Major Prophets",
-  "Minor Prophets",
-  "Gospels",
-  "Pauline Epistles",
-  "General Epistles",
-] as const;
-
 export function BooksView({
   initialReadData = DEFAULT_READ_CHAPTERS,
   activeTrackerId = null,
+  trackerName = null,
+  canon = "protestant",
+  trackers,
   userName = null,
   streak,
 }: Props) {
@@ -56,8 +54,22 @@ export function BooksView({
   const [activeBook, setActiveBook] = useState<BibleBook | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const canonBooks = getBibleBooks(canon);
+  const canonStats = getCanonTestamentChapters(canon);
+
+  // Dynamically compute category filters based on books present in this canon
+  const availableCategories = Array.from(
+    new Set(canonBooks.map((b) => b.category))
+  );
+  const categoryFilters = [
+    "All",
+    "Old Testament",
+    "New Testament",
+    ...availableCategories,
+  ];
+
   // Filter books
-  const filteredBooks = BIBLE_BOOKS.filter((book) => {
+  const filteredBooks = canonBooks.filter((book) => {
     const matchesSearch =
       book.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.id.toLowerCase().includes(searchQuery.toLowerCase());
@@ -71,7 +83,7 @@ export function BooksView({
   });
 
   // Calculate totals
-  const totalChaptersAcrossCanon = 1189;
+  const totalChaptersAcrossCanon = canonStats.total;
   const totalReadChapters = Object.values(readChapters).reduce(
     (acc, chs) => acc + chs.length,
     0
@@ -190,6 +202,8 @@ export function BooksView({
       <TopNavbar
         userName={userName || session?.user?.name || "Reader"}
         streak={streak}
+        trackers={trackers}
+        activeTrackerId={activeTrackerId}
       />
 
       {/* Top Highlight Cards: Verse of the Day & Active Reading */}
@@ -199,7 +213,7 @@ export function BooksView({
         canonPercentage={canonPercentage}
       />
 
-      {/* 66 Books Section */}
+      {/* Books Section */}
       <section className="glass-panel mt-4 rounded-[28px] p-6 sm:p-7">
         {/* Header & Controls Toolbar */}
         <div className="flex flex-col gap-4 border-b border-black/4 pb-5 md:flex-row md:items-center md:justify-between dark:border-white/8">
@@ -211,6 +225,11 @@ export function BooksView({
               <span className="rounded-full bg-black/4 px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
                 {filteredBooks.length} Books
               </span>
+              {trackerName && (
+                <span className="hidden rounded-full bg-[#82ADD4]/15 px-2.5 py-0.5 text-[11px] font-medium text-[#507ea6] sm:inline-block dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                  {trackerName}
+                </span>
+              )}
             </div>
             <p className="mt-1 text-[13px] font-normal text-[#777777] dark:text-[#9CA3AF]">
               Tap any book to view chapters and toggle your reading progress.
@@ -241,7 +260,7 @@ export function BooksView({
 
         {/* Category Filter Pills */}
         <div className="mt-4 flex flex-wrap gap-2">
-          {CATEGORY_FILTERS.map((cat) => {
+          {categoryFilters.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
               <button

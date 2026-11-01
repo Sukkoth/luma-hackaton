@@ -5,7 +5,6 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import {
   userSettings,
-  readingTrackers,
   trackerChapterProgress,
   readingLogs,
   planInstances,
@@ -28,6 +27,10 @@ import {
   type ActivePlanSummary,
 } from "@/components/luma/distribution-cards";
 import { syncUserStreak } from "@/lib/streak-service";
+import {
+  getUserTrackersData,
+  type UserTrackerSummary,
+} from "@/actions/trackers";
 
 export const instant = false;
 
@@ -51,26 +54,14 @@ function formatCanonName({ canon }: FormatCanonParams): string {
 
 type GetHomeMetricsParams = {
   userId: string;
-  activeTrackerId?: string | null;
+  tracker: UserTrackerSummary | null;
 };
 
-async function getHomeMetrics({
-  userId,
-  activeTrackerId,
-}: GetHomeMetricsParams) {
-  // 1. Query active tracker
-  const tracker = activeTrackerId
-    ? await db.query.readingTrackers.findFirst({
-        where: eq(readingTrackers.id, activeTrackerId),
-      })
-    : await db.query.readingTrackers.findFirst({
-        where: eq(readingTrackers.userId, userId),
-      });
-
+async function getHomeMetrics({ userId, tracker }: GetHomeMetricsParams) {
   const canon = (tracker?.canon || "protestant") as BibleCanon;
   const canonStats = getCanonTestamentChapters(canon);
 
-  // 2. Parallelize independent queries: tracker progress, recent reading logs, and active plans
+  // Parallelize independent queries: tracker progress, recent reading logs, and active plans
   const [progress, recentLogs, activeEnrolledPlans] = await Promise.all([
     tracker
       ? db.query.trackerChapterProgress.findMany({
@@ -179,26 +170,36 @@ export default async function HomePage() {
   const displayName =
     session.user.name.split(" ")[0] || session.user.name || "Reader";
 
-  const [metrics, streak] = await Promise.all([
-    getHomeMetrics({
+  const [trackersData, streak] = await Promise.all([
+    getUserTrackersData({
       userId: session.user.id,
-      activeTrackerId: settings.activeTrackerId,
     }),
     syncUserStreak({
       userId: session.user.id,
     }),
   ]);
 
+  const metrics = await getHomeMetrics({
+    userId: session.user.id,
+    tracker: trackersData.activeTracker,
+  });
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-350 flex-col px-4 py-3 sm:px-6 md:px-8 md:py-4 lg:h-dvh">
       {/* Top Navbar */}
-      <TopNavbar userName={displayName} streak={streak} />
+      <TopNavbar
+        userName={displayName}
+        streak={streak}
+        trackers={trackersData.trackers}
+        activeTrackerId={trackersData.activeTracker?.id}
+      />
 
       {/* Main Dashboard Layout */}
       <main className="mt-3 flex flex-1 flex-col gap-3.5 pb-1 lg:flex-row lg:items-stretch lg:overflow-hidden">
         {/* Left Column: Hero Progress Card */}
         <HeroProgressCard
           userName={displayName}
+          trackerName={metrics.tracker?.name}
           readChapters={metrics.readChapters}
           totalChapters={metrics.totalChapters}
           otChapters={metrics.readOt}

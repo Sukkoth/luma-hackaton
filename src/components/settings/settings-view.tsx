@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { authClient } from "@/lib/auth-client";
+import type { UserTrackerSummary } from "@/actions/trackers";
+import type { StreakData } from "@/components/streak/streak-detail-modal";
 
 type SettingsUser = {
   id: string;
@@ -28,9 +30,17 @@ type SettingsUser = {
 
 type SettingsViewProps = {
   user: SettingsUser;
+  trackers?: ReadonlyArray<UserTrackerSummary>;
+  activeTrackerId?: string | null;
+  streak?: StreakData;
 };
 
-export function SettingsView({ user }: SettingsViewProps) {
+export function SettingsView({
+  user,
+  trackers,
+  activeTrackerId,
+  streak,
+}: SettingsViewProps) {
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -63,7 +73,12 @@ export function SettingsView({ user }: SettingsViewProps) {
   return (
     <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName={displayName} />
+      <TopNavbar
+        userName={displayName}
+        streak={streak}
+        trackers={trackers}
+        activeTrackerId={activeTrackerId}
+      />
 
       <main className="mt-4 space-y-4">
         {/* Settings Header */}

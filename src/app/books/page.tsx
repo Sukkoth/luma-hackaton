@@ -1,14 +1,12 @@
 import { headers } from "next/headers";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
-import {
-  userSettings,
-  readingTrackers,
-  trackerChapterProgress,
-} from "@/db/schema";
+import { trackerChapterProgress } from "@/db/schema";
 import { BooksView } from "@/components/books/books-view";
 import { syncUserStreak } from "@/lib/streak-service";
+import { getUserTrackersData } from "@/actions/trackers";
+import type { BibleCanon } from "@/data/bibleData";
 
 export const instant = false;
 
@@ -19,36 +17,30 @@ export default async function BooksPage() {
 
   if (!session) {
     return (
-      <BooksView initialReadData={{}} activeTrackerId={null} userName={null} />
+      <BooksView
+        initialReadData={{}}
+        activeTrackerId={null}
+        canon="protestant"
+        userName={null}
+      />
     );
   }
 
-  const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.userId, session.user.id),
-  });
-
-  const tracker = settings?.activeTrackerId
-    ? await db.query.readingTrackers.findFirst({
-        where: and(
-          eq(readingTrackers.id, settings.activeTrackerId),
-          eq(readingTrackers.userId, session.user.id)
-        ),
-      })
-    : await db.query.readingTrackers.findFirst({
-        where: eq(readingTrackers.userId, session.user.id),
-      });
-
-  const initialReadData: Record<string, number[]> = {};
-
-  const [progress, streak] = await Promise.all([
-    tracker
-      ? db.query.trackerChapterProgress.findMany({
-          where: eq(trackerChapterProgress.trackerId, tracker.id),
-        })
-      : Promise.resolve([]),
+  const [trackersData, streak] = await Promise.all([
+    getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
   ]);
 
+  const activeTracker = trackersData.activeTracker;
+  const canon = (activeTracker?.canon as BibleCanon) || "protestant";
+
+  const progress = activeTracker
+    ? await db.query.trackerChapterProgress.findMany({
+        where: eq(trackerChapterProgress.trackerId, activeTracker.id),
+      })
+    : [];
+
+  const initialReadData: Record<string, number[]> = {};
   for (const item of progress) {
     if (!initialReadData[item.bookId]) {
       initialReadData[item.bookId] = [];
@@ -61,8 +53,12 @@ export default async function BooksPage() {
 
   return (
     <BooksView
+      key={activeTracker?.id ?? "guest"}
       initialReadData={initialReadData}
-      activeTrackerId={tracker?.id ?? null}
+      activeTrackerId={activeTracker?.id ?? null}
+      trackerName={activeTracker?.name ?? null}
+      canon={canon}
+      trackers={trackersData.trackers}
       userName={displayName}
       streak={streak}
     />
