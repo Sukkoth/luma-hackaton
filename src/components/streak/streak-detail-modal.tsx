@@ -18,13 +18,13 @@ export type StreakData = {
 
 type Props = {
   isOpen: boolean;
-  onClose: () => void;
+  onCloseAction: () => void;
   streak: StreakData;
 };
 
 const NUM_WEEKS = 28; // ~7 months of continuous weekly activity columns
 
-export function StreakDetailModal({ isOpen, onClose, streak }: Props) {
+export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
   if (!isOpen) return null;
 
   const readingDatesSet = new Set(streak.readingDates ?? []);
@@ -183,7 +183,7 @@ export function StreakDetailModal({ isOpen, onClose, streak }: Props) {
           <button
             type="button"
             aria-label="Close streak dialog"
-            onClick={onClose}
+            onClick={onCloseAction}
             className="flex size-7.5 items-center justify-center rounded-xl bg-black/5 text-[#555555] transition-colors hover:bg-black/10 hover:text-black dark:bg-white/10 dark:text-[#9CA3AF] dark:hover:bg-white/20 dark:hover:text-white"
           >
             <X className="size-4" />
@@ -309,29 +309,29 @@ export function StreakDetailModal({ isOpen, onClose, streak }: Props) {
                 <span>Less</span>
                 <span
                   title="0 chapters"
-                  className="size-2.5 rounded-[2px] bg-black/5 dark:bg-[#181a1b] dark:border dark:border-white/5"
+                  className="size-2.5 rounded-xs bg-black/5 dark:bg-[#181a1b] dark:border dark:border-white/5"
                 />
                 <span
                   title="1 chapter"
-                  className="size-2.5 rounded-[2px] bg-[#DDFD2C]/35 border border-[#b8d617]/50 dark:bg-[#DDFD2C]/20 dark:border-[#DDFD2C]/30"
+                  className="size-2.5 rounded-xs bg-[#DDFD2C]/35 border border-[#b8d617]/50 dark:bg-[#DDFD2C]/20 dark:border-[#DDFD2C]/30"
                 />
                 <span
                   title="2-3 chapters"
-                  className="size-2.5 rounded-[2px] bg-[#DDFD2C]/65 border border-[#a2bf10]/65 dark:bg-[#DDFD2C]/45 dark:border-[#DDFD2C]/55"
+                  className="size-2.5 rounded-xs bg-[#DDFD2C]/65 border border-[#a2bf10]/65 dark:bg-[#DDFD2C]/45 dark:border-[#DDFD2C]/55"
                 />
                 <span
                   title="4-6 chapters"
-                  className="size-2.5 rounded-[2px] bg-[#c3e31c] border border-[#8fa80c] dark:bg-[#DDFD2C]/75 dark:border-[#DDFD2C]"
+                  className="size-2.5 rounded-xs bg-[#c3e31c] border border-[#8fa80c] dark:bg-[#DDFD2C]/75 dark:border-[#DDFD2C]"
                 />
                 <span
                   title="7+ chapters"
-                  className="size-2.5 rounded-[2px] bg-[#a4c210] border border-[#788f06] dark:bg-[#DDFD2C] dark:border-[#c6e625]"
+                  className="size-2.5 rounded-xs bg-[#a4c210] border border-[#788f06] dark:bg-[#DDFD2C] dark:border-[#c6e625]"
                 />
                 <span>More</span>
                 <span className="mx-1 opacity-40">•</span>
                 <span
                   title="Shielded with Freeze"
-                  className="size-2.5 rounded-[2px] bg-cyan-400 ring-1 ring-cyan-300"
+                  className="size-2.5 rounded-xs bg-cyan-400 ring-1 ring-cyan-300"
                 />
                 <span>Shield</span>
               </div>
@@ -339,7 +339,7 @@ export function StreakDetailModal({ isOpen, onClose, streak }: Props) {
 
             {/* Matrix Container - 100% full width unified grid */}
             <div
-              className="mt-2.5 grid w-full items-center gap-[2px] py-1 sm:gap-[3px]"
+              className="mt-2.5 grid w-full items-center gap-0.5 py-1 sm:gap-0.75"
               style={{
                 gridTemplateColumns: `auto repeat(${NUM_WEEKS}, minmax(0, 1fr))`,
                 gridTemplateRows: `14px repeat(7, minmax(0, 1fr))`,
@@ -388,7 +388,7 @@ export function StreakDetailModal({ isOpen, onClose, streak }: Props) {
                           gridColumnStart: col.weekIndex + 2,
                           gridRowStart: day.dayOfWeek + 2,
                         }}
-                        className="aspect-square w-full rounded-[2px] opacity-0"
+                        className="aspect-square w-full rounded-xs opacity-0"
                         aria-hidden="true"
                       />
                     );
@@ -425,7 +425,7 @@ export function StreakDetailModal({ isOpen, onClose, streak }: Props) {
                         gridColumnStart: col.weekIndex + 2,
                         gridRowStart: day.dayOfWeek + 2,
                       }}
-                      className={`aspect-square w-full rounded-[2px] transition-all hover:scale-125 sm:rounded-[2.5px] ${cellClass} ${
+                      className={`aspect-square w-full rounded-xs transition-all hover:scale-125 sm:rounded-[2.5px] ${cellClass} ${
                         day.isToday
                           ? "ring-1 ring-inset ring-black/20 dark:ring-inset dark:ring-white/25"
                           : ""
@@ -442,7 +442,7 @@ export function StreakDetailModal({ isOpen, onClose, streak }: Props) {
         <div className="border-t border-black/6 pt-2.5 text-right dark:border-white/8">
           <button
             type="button"
-            onClick={onClose}
+            onClick={onCloseAction}
             className="rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/85"
           >
             Done

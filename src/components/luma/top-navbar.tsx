@@ -166,7 +166,7 @@ export function TopNavbar({
       {streak && (
         <StreakDetailModal
           isOpen={isStreakOpen}
-          onClose={() => setIsStreakOpen(false)}
+          onCloseAction={() => setIsStreakOpen(false)}
           streak={streak}
         />
       )}
