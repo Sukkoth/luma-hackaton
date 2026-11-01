@@ -269,7 +269,7 @@ export function SettingsView({
           </section>
         </div>
 
-        {/* Section 3: Profile & Better Auth Account */}
+        {/* Section 3: Profile & Account */}
         <section className="glass-panel rounded-[28px] p-6 sm:p-7">
           <div className="flex items-center justify-between border-b border-black/4 pb-4 dark:border-white/6">
             <div className="flex items-center gap-2">
@@ -280,7 +280,7 @@ export function SettingsView({
             </div>
             <span className="flex items-center gap-1 text-[12px] font-normal text-[#555555] dark:text-[#9CA3AF]">
               <Shield className="size-3.5 text-[#82ADD4]" />
-              <span>Better Auth Protected</span>
+              <span>Secured</span>
             </span>
           </div>
 
