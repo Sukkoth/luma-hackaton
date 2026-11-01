@@ -1,7 +1,5 @@
 "use client";
 
-import { Download, Calendar } from "lucide-react";
-
 export type DailyActivity = {
   dayLabel: string;
   dateLabel: string;
@@ -62,30 +60,14 @@ export function ActivityBarChart({
           </p>
         </div>
 
-        {/* Action icons & total label */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Export chart"
-            className="glass-pill flex size-8 items-center justify-center rounded-full text-black/70 shadow-2xs transition-colors hover:bg-white hover:text-black dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
-          >
-            <Download className="size-3.5" strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            aria-label="Select date range"
-            className="glass-pill flex size-8 items-center justify-center rounded-full text-black/70 shadow-2xs transition-colors hover:bg-white hover:text-black dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white"
-          >
-            <Calendar className="size-3.5" strokeWidth={1.75} />
-          </button>
-          <div className="hidden border-l border-black/6 pl-3 text-right sm:block dark:border-white/8">
-            <span className="block text-[10px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
-              Total Chapters
-            </span>
-            <span className="mt-0.5 text-[24px] font-light tracking-tight text-black dark:text-white">
-              {totalChapters.toLocaleString()}
-            </span>
-          </div>
+        {/* Total label */}
+        <div className="text-right">
+          <span className="block text-[10px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
+            Total Chapters
+          </span>
+          <span className="mt-0.5 text-[24px] font-light tracking-tight text-black dark:text-white">
+            {totalChapters.toLocaleString()}
+          </span>
         </div>
       </div>
 

@@ -25,14 +25,14 @@ export function StatMetricCards({
       value: `${currentStreak}d`,
     },
     {
-      title: "Freeze Shields",
-      badge: isFreezeUnlocked ? "Shielded" : "Locked",
-      value: isFreezeUnlocked ? `${streakFreezesAvailable}` : "Locked",
-    },
-    {
       title: "Longest Streak",
       badge: "Record",
       value: `${longestStreak}d`,
+    },
+    {
+      title: "Freeze Shields",
+      badge: isFreezeUnlocked ? "Shielded" : "Locked",
+      value: isFreezeUnlocked ? `${streakFreezesAvailable}` : "Locked",
     },
   ] as const;
 

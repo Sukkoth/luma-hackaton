@@ -1,9 +1,8 @@
 "use client";
 
-import { Share2, X } from "lucide-react";
-
 type HeroProgressCardProps = {
   userName?: string;
+  trackerName?: string;
   readChapters?: number;
   totalChapters?: number;
   otChapters?: number;
@@ -14,6 +13,7 @@ type HeroProgressCardProps = {
 
 export function HeroProgressCard({
   userName = "Reader",
+  trackerName,
   readChapters = 0,
   totalChapters = 1189,
   otChapters = 0,
@@ -34,25 +34,18 @@ export function HeroProgressCard({
     <div className="glass-hero relative flex shrink-0 flex-col justify-between overflow-hidden rounded-4xl p-7 text-white lg:w-95">
       {/* Top Header Row */}
       <div>
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[17px] font-normal text-white/90">
-              Hello, {userName}!
-            </p>
-            <h2 className="mt-0.5 text-[26px] font-normal tracking-tight text-white">
-              Bible Progress
-            </h2>
-          </div>
-          <button
-            type="button"
-            aria-label="Minimize progress banner"
-            className="flex size-6 items-center justify-center rounded-full bg-white/15 text-white/80 transition-colors hover:bg-white/25 hover:text-white"
-          >
-            <X className="size-3.5" />
-          </button>
-        </div>
+        <p className="text-[17px] font-normal text-white/90">
+          Hello, {userName}!
+        </p>
+        <h2 className="mt-0.5 text-[26px] font-normal tracking-tight text-white">
+          Bible Progress
+        </h2>
         <p className="mt-1.5 text-[13px] leading-snug font-normal text-white/70">
-          Tracking scripture reading with active {canonName}.
+          Tracking{" "}
+          {trackerName
+            ? `"${trackerName}" with active `
+            : "scripture reading with active "}
+          {canonName}.
         </p>
       </div>
 
@@ -132,30 +125,21 @@ export function HeroProgressCard({
         </div>
       </div>
 
-      {/* Bottom Score & Share Section */}
+      {/* Bottom Progress Section */}
       <div className="mt-2 border-t border-white/20 pt-4">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="flex items-center gap-1.5 text-[12px] font-normal text-white/80">
-              <span className="size-1.5 rounded-full bg-white" />
-              <span>Your Total Progress</span>
-            </div>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-[54px] leading-none font-light tracking-tight text-white">
-                {readChapters.toLocaleString()}
-              </span>
-              <span className="text-[15px] font-normal text-white/75">
-                chapters
-              </span>
-            </div>
+        <div>
+          <div className="flex items-center gap-1.5 text-[12px] font-normal text-white/80">
+            <span className="size-1.5 rounded-full bg-white" />
+            <span>Your Total Progress</span>
           </div>
-          <button
-            type="button"
-            aria-label="Share progress report"
-            className="flex size-9 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-white shadow-2xs backdrop-blur-sm transition-colors hover:bg-white/25"
-          >
-            <Share2 className="size-4" />
-          </button>
+          <div className="mt-1 flex items-baseline gap-2">
+            <span className="text-[54px] leading-none font-light tracking-tight text-white">
+              {readChapters.toLocaleString()}
+            </span>
+            <span className="text-[15px] font-normal text-white/75">
+              chapters
+            </span>
+          </div>
         </div>
       </div>
     </div>

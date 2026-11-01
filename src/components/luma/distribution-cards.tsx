@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Maximize2, Bookmark } from "lucide-react";
+import { Bookmark } from "lucide-react";
 
 export type ActivePlanSummary = {
   id: string;
@@ -46,17 +46,10 @@ export function DistributionCards({
       {/* Left Card: Scripture Distribution */}
       <div className="glass-panel flex flex-col justify-between rounded-[28px] p-6">
         <div>
-          <div className="flex items-center justify-between">
+          <div>
             <h4 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
               Scripture Distribution
             </h4>
-            <button
-              type="button"
-              aria-label="Expand distribution"
-              className="text-[#888888] transition-colors hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
-            >
-              <Maximize2 className="size-3.5" />
-            </button>
           </div>
 
           {/* Breakdown items */}
