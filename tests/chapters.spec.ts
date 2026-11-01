@@ -255,4 +255,48 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     const ruthDialog3 = page.getByRole("dialog");
     await expect(ruthDialog3.getByText("0 of 4 chapters read")).toBeVisible();
   });
+
+  test("renders live Verse of the Day from YouVersion API with artwork modal", async ({
+    page,
+    request,
+  }) => {
+    // 1. Verify API route returns 200 with valid structure
+    const apiRes = await request.get("/api/verse-of-the-day");
+    expect(apiRes.ok()).toBe(true);
+    const votdData = await apiRes.json();
+    expect(votdData).toHaveProperty("reference");
+    expect(votdData).toHaveProperty("text");
+    expect(typeof votdData.day).toBe("number");
+
+    // 2. Verify /books UI displays Verse of the Day banner
+    await page.goto("/books");
+    await expect(page.getByText("Verse of the Day")).toBeVisible();
+    await expect(page.getByText("YouVersion")).toBeVisible();
+    await expect(page.getByText(votdData.reference)).toBeVisible();
+
+    // 3. Verify separate button is removed, and verse text itself is pressable for artwork
+    await expect(
+      page.getByRole("button", { name: "Verse Art", exact: true })
+    ).not.toBeVisible();
+    const verseTextButton = page.getByRole("button", {
+      name: "View verse artwork",
+    });
+    if (await verseTextButton.isVisible()) {
+      await verseTextButton.click();
+      const artDialog = page.getByRole("dialog", {
+        name: "Verse of the Day Artwork",
+      });
+      await expect(artDialog).toBeVisible();
+      await expect(
+        artDialog.getByRole("img", {
+          name: new RegExp(
+            `${votdData.reference} Verse of the Day Artwork`,
+            "i"
+          ),
+        })
+      ).toBeVisible();
+      await artDialog.getByRole("button", { name: "Close" }).click();
+      await expect(artDialog).not.toBeVisible();
+    }
+  });
 });

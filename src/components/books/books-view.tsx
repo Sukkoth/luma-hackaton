@@ -22,6 +22,7 @@ import { BookChaptersModal } from "./book-chapters-modal";
 import { BooksAuthModal } from "./books-auth-modal";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import type { UserTrackerSummary } from "@/actions/trackers";
+import type { VerseOfTheDayData } from "@/lib/youversion";
 
 type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
@@ -31,6 +32,7 @@ type Props = {
   trackers?: ReadonlyArray<UserTrackerSummary>;
   userName?: string | null;
   streak?: StreakData;
+  verseOfTheDay?: VerseOfTheDayData;
 };
 
 const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {};
@@ -43,6 +45,7 @@ export function BooksView({
   trackers,
   userName = null,
   streak,
+  verseOfTheDay,
 }: Props) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -211,6 +214,7 @@ export function BooksView({
         totalReadChapters={totalReadChapters}
         totalChaptersAcrossCanon={totalChaptersAcrossCanon}
         canonPercentage={canonPercentage}
+        verse={verseOfTheDay}
       />
 
       {/* Books Section */}
