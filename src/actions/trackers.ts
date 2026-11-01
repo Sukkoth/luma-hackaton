@@ -268,6 +268,44 @@ export async function getUserTrackersData({
     }),
   ]);
 
+  if (trackers.length === 0) {
+    try {
+      const trackerId = crypto.randomUUID();
+      const [newTracker] = await db
+        .insert(readingTrackers)
+        .values({
+          id: trackerId,
+          userId,
+          name: "Personal Reading",
+          canon: "protestant",
+          color: "#82ADD4",
+          icon: "book-open",
+        })
+        .returning();
+
+      if (newTracker) {
+        await db
+          .insert(userSettings)
+          .values({
+            userId,
+            activeTrackerId: trackerId,
+            streakFreezesAvailable: 3,
+          })
+          .onConflictDoUpdate({
+            target: userSettings.userId,
+            set: { activeTrackerId: trackerId },
+          });
+
+        return {
+          trackers: [newTracker],
+          activeTracker: newTracker,
+        };
+      }
+    } catch (e: unknown) {
+      console.error("Failed to auto-provision initial tracker:", e);
+    }
+  }
+
   const activeTracker =
     trackers.find((t) => t.id === settings?.activeTrackerId) ??
     trackers[0] ??
