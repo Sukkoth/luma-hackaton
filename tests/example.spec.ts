@@ -136,27 +136,30 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     ).not.toBeVisible();
   });
 
-  test("social OAuth buttons display coming soon notice while retaining UI", async ({
+  test("social OAuth buttons initiate OAuth redirect flow for Google and GitHub", async ({
     page,
   }) => {
-    // Login page
+    // Login page: Google OAuth button initiates navigation to Google accounts
     await page.goto("/login");
-    await page.getByRole("button", { name: "Google" }).click();
-    await expect(
-      page.getByText(/Google authentication will be enabled soon/i)
-    ).toBeVisible();
+    const [googleRequest] = await Promise.all([
+      page.waitForRequest((req) =>
+        req.url().includes("/api/auth/sign-in/social")
+      ),
+      page.getByRole("button", { name: "Google" }).click(),
+    ]);
+    expect(googleRequest.method()).toBe("POST");
+    await page.waitForURL((url) => url.hostname.includes("google.com"));
 
-    await page.getByRole("button", { name: "GitHub" }).click();
-    await expect(
-      page.getByText(/GitHub authentication will be enabled soon/i)
-    ).toBeVisible();
-
-    // Signup page
+    // Signup page: GitHub OAuth button initiates navigation to GitHub OAuth
     await page.goto("/signup");
-    await page.getByRole("button", { name: "Google" }).click();
-    await expect(
-      page.getByText(/Google authentication will be enabled soon/i)
-    ).toBeVisible();
+    const [githubRequest] = await Promise.all([
+      page.waitForRequest((req) =>
+        req.url().includes("/api/auth/sign-in/social")
+      ),
+      page.getByRole("button", { name: "GitHub" }).click(),
+    ]);
+    expect(githubRequest.method()).toBe("POST");
+    await page.waitForURL((url) => url.hostname.includes("github.com"));
   });
 
   test("full user registration, onboarding flow with canon selection, and authenticated dashboard access", async ({
