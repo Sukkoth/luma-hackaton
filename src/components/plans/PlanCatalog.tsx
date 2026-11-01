@@ -180,8 +180,8 @@ export function PlanCatalog({ initialTab = "catalog" }: Props) {
               No active plans started yet
             </h3>
             <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
-              Browse the catalog and click &ldquo;Create & Start Plan&rdquo; on
-              any plan to begin your daily scheduled readings.
+              Browse the catalog to preview reading blueprints and schedules.
+              Full plan enrollment is coming soon.
             </p>
             <button
               type="button"

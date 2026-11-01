@@ -106,16 +106,11 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
   test("unauthenticated users are guarded when attempting protected actions", async ({
     page,
   }) => {
-    // 1. On Plan Blueprint, clicking 'Create & Start Plan' prompts to sign in
+    // 1. On Plan Blueprint, verify 'Coming Soon' button is rendered and disabled
     await page.goto("/plans/templates/the_four_gospels_30");
-    await page.getByRole("button", { name: "Create & Start Plan" }).click();
-    await expect(
-      page.getByRole("dialog", { name: "Sign In to Start Plan" })
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Cancel" }).click();
-    await expect(
-      page.getByRole("dialog", { name: "Sign In to Start Plan" })
-    ).not.toBeVisible();
+    const comingSoonBtn = page.getByRole("button", { name: "Coming Soon" });
+    await expect(comingSoonBtn).toBeVisible();
+    await expect(comingSoonBtn).toBeDisabled();
 
     // 2. On Books page, clicking a chapter to mark as read prompts to sign in
     await page.goto("/books");
