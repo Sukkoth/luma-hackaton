@@ -71,8 +71,8 @@ export function OnboardingView({ userName = "Reader" }: Props) {
         {/* Brand bar */}
         <div className="flex items-center justify-between border-b border-black/6 pb-4 dark:border-white/8">
           <div className="flex items-center gap-2">
-            <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
-              Scripture<span className="text-[#82ADD4]">.</span>
+            <span className="text-[20px] font-semibold tracking-tight text-black dark:text-white">
+              Luma<span className="text-[#82ADD4]">.</span>
             </span>
             <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
               Onboarding

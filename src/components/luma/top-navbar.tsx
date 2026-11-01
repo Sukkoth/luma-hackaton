@@ -10,20 +10,30 @@ import {
   StreakDetailModal,
   type StreakData,
 } from "@/components/streak/streak-detail-modal";
+import { TrackerSwitcher } from "@/components/trackers/tracker-switcher";
+import type { UserTrackerSummary } from "@/actions/trackers";
 
 type TopNavbarProps = {
   userName?: string;
   streak?: StreakData;
+  trackers?: ReadonlyArray<UserTrackerSummary>;
+  activeTrackerId?: string | null;
 };
 
-export function TopNavbar({ userName = "James", streak }: TopNavbarProps) {
+export function TopNavbar({
+  userName = "James",
+  streak,
+  trackers,
+  activeTrackerId,
+}: TopNavbarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isStreakOpen, setIsStreakOpen] = useState(false);
   const effectiveUserName = session?.user?.name || userName;
+  const isAuthenticated = !!session || (!!trackers && trackers.length > 0);
 
   // When unauthenticated, user should not see Overview, Insights, Notes, or Settings
-  const NAV_TABS = session
+  const NAV_TABS = isAuthenticated
     ? [
         { label: "Overview", href: "/home" },
         { label: "Bible Books", href: "/books" },
@@ -36,19 +46,31 @@ export function TopNavbar({ userName = "James", streak }: TopNavbarProps) {
         { label: "Plans", href: "/plans" },
       ];
 
-  const brandHref = session ? "/home" : "/";
+  const brandHref = isAuthenticated ? "/home" : "/";
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 py-3">
-      {/* Brand logo */}
-      <Link href={brandHref} className="group flex items-center gap-1.5">
-        <span className="text-[22px] font-medium tracking-tight text-black dark:text-white">
-          Scripture<span className="text-[#82ADD4]">.</span>
-        </span>
-        <span className="hidden rounded-md bg-black/5 px-1.5 py-0.5 text-[10px] font-medium text-[#666666] sm:inline-block dark:bg-white/8 dark:text-[#A1A1AA]">
-          Luma
-        </span>
-      </Link>
+      {/* Brand logo & Tracker Switcher - centered in relation to the blue overview card (lg:w-95) */}
+      <div className="flex items-center gap-3 lg:w-95 lg:justify-center">
+        <Link href={brandHref} className="group flex items-center">
+          <span className="text-[22px] font-semibold tracking-tight text-black dark:text-white">
+            Luma<span className="text-[#82ADD4]">.</span>
+          </span>
+        </Link>
+
+        {trackers && trackers.length > 0 && (
+          <>
+            <div
+              className="h-4 w-px bg-black/10 dark:bg-white/10"
+              aria-hidden="true"
+            />
+            <TrackerSwitcher
+              trackers={trackers}
+              activeTrackerId={activeTrackerId}
+            />
+          </>
+        )}
+      </div>
 
       {/* Center cluster: Frosted Glass Tab Tiles */}
       <nav aria-label="Main Navigation" className="flex items-center gap-2">
@@ -76,7 +98,7 @@ export function TopNavbar({ userName = "James", streak }: TopNavbarProps) {
 
       {/* Right controls: Streak button, Theme Toggle, and Auth / Settings button */}
       <div className="flex items-center gap-2">
-        {session && streak && (
+        {isAuthenticated && streak && (
           <button
             type="button"
             onClick={() => setIsStreakOpen(true)}
@@ -108,7 +130,7 @@ export function TopNavbar({ userName = "James", streak }: TopNavbarProps) {
           </button>
         )}
         <ThemeToggle />
-        {session ? (
+        {isAuthenticated ? (
           <Link
             href="/settings"
             aria-label="Settings"
