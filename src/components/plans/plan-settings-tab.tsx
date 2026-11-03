@@ -25,6 +25,8 @@ import {
   updatePlanSettingsAction,
   resetPlanProgressAction,
   deletePlanInstanceAction,
+  pausePlanAction,
+  resumePlanAction,
   type PlanInstanceDetail,
 } from "@/actions/plans";
 
@@ -272,13 +274,13 @@ export function PlanSettingsTab({
 
   // Handle Pause / Resume (dedicated immediate action)
   const handleTogglePause = () => {
-    const nextStatus = plan.status === "paused" ? "active" : "paused";
     startTransition(async () => {
-      const res = await updatePlanSettingsAction({
-        instanceId: plan.id,
-        status: nextStatus,
-        shiftScheduleOnResume: nextStatus === "active" ? shiftOnResume : false,
-      });
+      let res;
+      if (plan.status === "paused") {
+        res = await resumePlanAction({ instanceId: plan.id });
+      } else {
+        res = await pausePlanAction({ instanceId: plan.id });
+      }
       if (!res.success) {
         setErrorMessage(res.error);
       } else {
@@ -556,14 +558,14 @@ export function PlanSettingsTab({
 
               {/* Quick Presets */}
               {plan.allowCustomPace && (
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap">
                   {DURATION_PRESETS.map((preset) => (
                     <button
                       key={preset}
                       type="button"
                       disabled={isPending}
                       onClick={() => handleUpdateDurationDays(preset)}
-                      className={`rounded-xl border px-3 py-1 text-[11.5px] font-medium transition-all ${
+                      className={`shrink-0 rounded-xl border px-3 py-1 text-[11.5px] font-medium transition-all ${
                         targetDurationDays === preset
                           ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
                           : "border-black/10 bg-white/60 text-[#666666] hover:bg-black/5 dark:border-white/10 dark:bg-white/6 dark:text-[#A1A1AA]"

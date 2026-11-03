@@ -24,6 +24,10 @@ import {
   UpdatePlanSettingsSchema,
   ResetPlanProgressSchema,
   DeletePlanInstanceSchema,
+  CatchUpShiftSchema,
+  CatchUpIncreasePaceSchema,
+  PausePlanSchema,
+  ResumePlanSchema,
 } from "@/lib/schemas/plans";
 import {
   getReadingPlanById,
@@ -620,6 +624,22 @@ export type PlanSessionDetail = {
   completedCount: number;
   totalCount: number;
   readings: ReadonlyArray<PlanReadingSessionItem>;
+  date?: string;
+  dateLabel?: string;
+  isToday?: boolean;
+  isPastDue?: boolean;
+};
+
+export type PlanOverdueInfo = {
+  overdueDaysCount: number;
+  overdueChaptersCount: number;
+  firstOverdueSessionIndex: number;
+  firstOverdueSessionTitle: string;
+  firstOverdueSessionDateLabel?: string;
+  projectedEndDateLabel?: string;
+  hasTargetEndDate?: boolean;
+  targetEndDateLabel?: string;
+  requiredDailyPace?: number;
 };
 
 export type PlanPartDetail = {
@@ -668,6 +688,7 @@ export type PlanInstanceDetail = {
   sessions: ReadonlyArray<PlanSessionDetail>;
   parts: ReadonlyArray<PlanPartDetail>;
   notesCount: number;
+  overdueInfo: PlanOverdueInfo | null;
 };
 
 export type GetPlanInstanceDetailParams = {
@@ -713,10 +734,51 @@ export async function getPlanInstanceDetailAction({
   const dailyTarget = Math.max(1, instance.dailyTarget || 2);
   const sessions: PlanSessionDetail[] = [];
 
+  const activeDayIndices: number[] = [];
+  for (let d = 0; d < 7; d++) {
+    if ((instance.activeDaysMask || "1111111")[d] === "1") {
+      activeDayIndices.push(d);
+    }
+  }
+  const safeDays =
+    activeDayIndices.length > 0 ? activeDayIndices : [0, 1, 2, 3, 4, 5, 6];
+
+  const nowMidnight = new Date();
+  nowMidnight.setHours(0, 0, 0, 0);
+
+  const cursorDate = new Date(instance.startDate);
+  cursorDate.setHours(0, 0, 0, 0);
+  while (!safeDays.includes(cursorDate.getDay())) {
+    cursorDate.setDate(cursorDate.getDate() + 1);
+  }
+
+  const SHORT_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const SHORT_MONTHS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
   for (let i = 0; i < readings.length; i += dailyTarget) {
     const sessionIdx = Math.floor(i / dailyTarget) + 1;
     const partIdx = Math.floor((sessionIdx - 1) / 7) + 1;
     const chunk = readings.slice(i, i + dailyTarget);
+
+    if (sessionIdx > 1) {
+      cursorDate.setDate(cursorDate.getDate() + 1);
+      while (!safeDays.includes(cursorDate.getDay())) {
+        cursorDate.setDate(cursorDate.getDate() + 1);
+      }
+    }
 
     const sessionReadings: PlanReadingSessionItem[] = chunk.map((r) => ({
       id: r.id,
@@ -731,16 +793,100 @@ export async function getPlanInstanceDetailAction({
     const sessionCompletedCount = sessionReadings.filter(
       (r) => r.isCompleted
     ).length;
+    const isCompleted = sessionCompletedCount === sessionReadings.length;
+
+    const sessionMidnightTime = cursorDate.getTime();
+    const isToday = sessionMidnightTime === nowMidnight.getTime();
+    const isPastDue =
+      instance.mode === "scheduled" &&
+      instance.status === "active" &&
+      !isCompleted &&
+      sessionMidnightTime < nowMidnight.getTime();
+
+    const dateLabel = `${SHORT_WEEKDAYS[cursorDate.getDay()]}, ${
+      SHORT_MONTHS[cursorDate.getMonth()]
+    } ${cursorDate.getDate()}`;
 
     sessions.push({
       sessionIndex: sessionIdx,
       partIndex: partIdx,
       title: `Session ${sessionIdx}`,
-      isCompleted: sessionCompletedCount === sessionReadings.length,
+      isCompleted,
       completedCount: sessionCompletedCount,
       totalCount: sessionReadings.length,
       readings: sessionReadings,
+      date: cursorDate.toISOString(),
+      dateLabel,
+      isToday,
+      isPastDue,
     });
+  }
+
+  // Calculate overdue schedule info (Watermelon parity)
+  let overdueInfo: PlanOverdueInfo | null = null;
+  if (instance.status === "active" && instance.mode === "scheduled") {
+    const overdueSessions = sessions.filter((s) => s.isPastDue);
+    if (overdueSessions.length > 0) {
+      const overdueChaptersCount = overdueSessions.reduce(
+        (acc, s) => acc + (s.totalCount - s.completedCount),
+        0
+      );
+      const firstOverdue = overdueSessions[0];
+      const firstOverdueIdx = firstOverdue.sessionIndex - 1;
+      const remainingSessions = sessions.length - firstOverdueIdx;
+
+      // Projected end date if shifted to today
+      const projCursor = new Date(nowMidnight);
+      let daysForward = Math.max(0, remainingSessions - 1);
+      while (daysForward > 0) {
+        projCursor.setDate(projCursor.getDate() + 1);
+        if (safeDays.includes(projCursor.getDay())) {
+          daysForward--;
+        }
+      }
+      const projectedEndDateLabel = `${
+        SHORT_WEEKDAYS[projCursor.getDay()]
+      }, ${SHORT_MONTHS[projCursor.getMonth()]} ${projCursor.getDate()}`;
+
+      // Required pace calculation
+      const targetEnd = instance.targetEndDate
+        ? new Date(instance.targetEndDate)
+        : null;
+      let requiredDailyPace = dailyTarget + 1;
+      let hasTargetEndDate = false;
+      let targetEndDateLabel: string | undefined = undefined;
+
+      if (targetEnd && targetEnd.getTime() > nowMidnight.getTime()) {
+        hasTargetEndDate = true;
+        targetEndDateLabel = `${
+          SHORT_WEEKDAYS[targetEnd.getDay()]
+        }, ${SHORT_MONTHS[targetEnd.getMonth()]} ${targetEnd.getDate()}`;
+        const daysUntilTargetEnd = Math.max(
+          1,
+          Math.ceil(
+            (targetEnd.getTime() - nowMidnight.getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        );
+        const unreadCount = Math.max(1, totalChapters - completedChapters);
+        requiredDailyPace = Math.max(
+          dailyTarget + 1,
+          Math.ceil(unreadCount / daysUntilTargetEnd)
+        );
+      }
+
+      overdueInfo = {
+        overdueDaysCount: overdueSessions.length,
+        overdueChaptersCount,
+        firstOverdueSessionIndex: firstOverdue.sessionIndex,
+        firstOverdueSessionTitle: firstOverdue.title,
+        firstOverdueSessionDateLabel: firstOverdue.dateLabel,
+        projectedEndDateLabel,
+        hasTargetEndDate,
+        targetEndDateLabel,
+        requiredDailyPace,
+      };
+    }
   }
 
   // Group sessions into parts (7 sessions per part)
@@ -815,6 +961,7 @@ export async function getPlanInstanceDetailAction({
     sessions,
     parts,
     notesCount: planNotes.length,
+    overdueInfo,
   };
 }
 
@@ -864,6 +1011,14 @@ export async function togglePlanReadingItemAction({
 
   if (!instance) {
     return { success: false, error: "Plan instance not found" };
+  }
+
+  if (instance.status === "paused") {
+    return {
+      success: false,
+      error:
+        "This reading plan is paused. Check marks are locked. Resume the plan to start logging your readings again.",
+    };
   }
 
   const blueprint = getReadingPlanById(instance.templateId);
@@ -1281,4 +1436,310 @@ export async function deletePlanInstanceAction({
   revalidatePath("/plans");
 
   return { success: true };
+}
+
+type CalculateShiftedPlanDatesParams = {
+  firstIncompleteSessionIndex: number;
+  totalSessions: number;
+  activeDaysMask: string;
+};
+
+function calculateShiftedPlanDates({
+  firstIncompleteSessionIndex,
+  totalSessions,
+  activeDaysMask,
+}: CalculateShiftedPlanDatesParams): {
+  newStartDate: Date;
+  newTargetEndDate: Date;
+} {
+  const nowMidnight = new Date();
+  nowMidnight.setHours(0, 0, 0, 0);
+
+  const activeDayIndices: number[] = [];
+  for (let i = 0; i < 7; i++) {
+    if ((activeDaysMask || "1111111")[i] === "1") {
+      activeDayIndices.push(i);
+    }
+  }
+  const safeDays =
+    activeDayIndices.length > 0 ? activeDayIndices : [0, 1, 2, 3, 4, 5, 6];
+
+  const newStartDate = new Date(nowMidnight);
+  let daysToStepBack = firstIncompleteSessionIndex;
+  while (daysToStepBack > 0) {
+    newStartDate.setDate(newStartDate.getDate() - 1);
+    if (safeDays.includes(newStartDate.getDay())) {
+      daysToStepBack--;
+    }
+  }
+  newStartDate.setHours(0, 0, 0, 0);
+
+  const newTargetEndDate = new Date(nowMidnight);
+  let daysToStepForward = Math.max(
+    0,
+    totalSessions - 1 - firstIncompleteSessionIndex
+  );
+  while (daysToStepForward > 0) {
+    newTargetEndDate.setDate(newTargetEndDate.getDate() + 1);
+    if (safeDays.includes(newTargetEndDate.getDay())) {
+      daysToStepForward--;
+    }
+  }
+  newTargetEndDate.setHours(23, 59, 59, 999);
+
+  return { newStartDate, newTargetEndDate };
+}
+
+export type PausePlanActionParams = {
+  instanceId: string;
+};
+
+export type PausePlanResult =
+  | { success: true; plan?: PlanInstanceDetail }
+  | { success: false; error: string };
+
+export async function pausePlanAction({
+  instanceId,
+}: PausePlanActionParams): Promise<PausePlanResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(PausePlanSchema, { instanceId });
+  if (!parsed.success) return { success: false, error: "Invalid parameters" };
+
+  const instance = await db.query.planInstances.findFirst({
+    where: and(
+      eq(planInstances.id, parsed.output.instanceId),
+      eq(planInstances.userId, session.user.id)
+    ),
+  });
+  if (!instance) return { success: false, error: "Plan not found" };
+
+  await db
+    .update(planInstances)
+    .set({ status: "paused" })
+    .where(eq(planInstances.id, instance.id));
+
+  revalidatePath(`/plans/${instance.id}`);
+  revalidatePath("/plans");
+
+  const updatedPlan = await getPlanInstanceDetailAction({
+    instanceId: instance.id,
+  });
+
+  return { success: true, plan: updatedPlan ?? undefined };
+}
+
+export type ResumePlanActionParams = {
+  instanceId: string;
+};
+
+export type ResumePlanResult =
+  | { success: true; plan?: PlanInstanceDetail }
+  | { success: false; error: string };
+
+export async function resumePlanAction({
+  instanceId,
+}: ResumePlanActionParams): Promise<ResumePlanResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(ResumePlanSchema, { instanceId });
+  if (!parsed.success) return { success: false, error: "Invalid parameters" };
+
+  const instance = await db.query.planInstances.findFirst({
+    where: and(
+      eq(planInstances.id, parsed.output.instanceId),
+      eq(planInstances.userId, session.user.id)
+    ),
+    with: {
+      completedReadings: true,
+    },
+  });
+  if (!instance) return { success: false, error: "Plan not found" };
+
+  const blueprint = getReadingPlanById(instance.templateId);
+  const readings = blueprint?.readings || [];
+  const dailyTarget = Math.max(1, instance.dailyTarget || 2);
+  const totalSessions = Math.max(1, Math.ceil(readings.length / dailyTarget));
+
+  const completedSet = new Set(
+    instance.completedReadings.map((r) => r.readingItemId)
+  );
+
+  let firstIncompleteIdx = 0;
+  for (let s = 0; s < totalSessions; s++) {
+    const chunk = readings.slice(s * dailyTarget, (s + 1) * dailyTarget);
+    const hasIncomplete = chunk.some((r) => !completedSet.has(r.id));
+    if (hasIncomplete) {
+      firstIncompleteIdx = s;
+      break;
+    }
+  }
+
+  const { newStartDate, newTargetEndDate } = calculateShiftedPlanDates({
+    firstIncompleteSessionIndex: firstIncompleteIdx,
+    totalSessions,
+    activeDaysMask: instance.activeDaysMask,
+  });
+
+  await db
+    .update(planInstances)
+    .set({
+      status: "active",
+      startDate: newStartDate,
+      targetEndDate: instance.mode === "scheduled" ? newTargetEndDate : null,
+    })
+    .where(eq(planInstances.id, instance.id));
+
+  revalidatePath(`/plans/${instance.id}`);
+  revalidatePath("/plans");
+
+  const updatedPlan = await getPlanInstanceDetailAction({
+    instanceId: instance.id,
+  });
+
+  return { success: true, plan: updatedPlan ?? undefined };
+}
+
+export type CatchUpShiftActionParams = {
+  instanceId: string;
+};
+
+export type CatchUpShiftResult =
+  | { success: true; plan?: PlanInstanceDetail }
+  | { success: false; error: string };
+
+export async function catchUpShiftAction({
+  instanceId,
+}: CatchUpShiftActionParams): Promise<CatchUpShiftResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(CatchUpShiftSchema, { instanceId });
+  if (!parsed.success) return { success: false, error: "Invalid parameters" };
+
+  const instance = await db.query.planInstances.findFirst({
+    where: and(
+      eq(planInstances.id, parsed.output.instanceId),
+      eq(planInstances.userId, session.user.id)
+    ),
+    with: {
+      completedReadings: true,
+    },
+  });
+  if (!instance) return { success: false, error: "Plan not found" };
+
+  const blueprint = getReadingPlanById(instance.templateId);
+  const readings = blueprint?.readings || [];
+  const dailyTarget = Math.max(1, instance.dailyTarget || 2);
+  const totalSessions = Math.max(1, Math.ceil(readings.length / dailyTarget));
+
+  const completedSet = new Set(
+    instance.completedReadings.map((r) => r.readingItemId)
+  );
+
+  let firstIncompleteIdx = 0;
+  for (let s = 0; s < totalSessions; s++) {
+    const chunk = readings.slice(s * dailyTarget, (s + 1) * dailyTarget);
+    const hasIncomplete = chunk.some((r) => !completedSet.has(r.id));
+    if (hasIncomplete) {
+      firstIncompleteIdx = s;
+      break;
+    }
+  }
+
+  const { newStartDate, newTargetEndDate } = calculateShiftedPlanDates({
+    firstIncompleteSessionIndex: firstIncompleteIdx,
+    totalSessions,
+    activeDaysMask: instance.activeDaysMask,
+  });
+
+  await db
+    .update(planInstances)
+    .set({
+      startDate: newStartDate,
+      targetEndDate: newTargetEndDate,
+    })
+    .where(eq(planInstances.id, instance.id));
+
+  revalidatePath(`/plans/${instance.id}`);
+  revalidatePath("/plans");
+
+  const updatedPlan = await getPlanInstanceDetailAction({
+    instanceId: instance.id,
+  });
+
+  return { success: true, plan: updatedPlan ?? undefined };
+}
+
+export type CatchUpIncreasePaceActionParams = {
+  instanceId: string;
+  newDailyTarget: number;
+};
+
+export type CatchUpIncreasePaceResult =
+  | { success: true; plan?: PlanInstanceDetail }
+  | { success: false; error: string };
+
+export async function catchUpIncreasePaceAction({
+  instanceId,
+  newDailyTarget,
+}: CatchUpIncreasePaceActionParams): Promise<CatchUpIncreasePaceResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(CatchUpIncreasePaceSchema, {
+    instanceId,
+    newDailyTarget,
+  });
+  if (!parsed.success) return { success: false, error: "Invalid parameters" };
+
+  const instance = await db.query.planInstances.findFirst({
+    where: and(
+      eq(planInstances.id, parsed.output.instanceId),
+      eq(planInstances.userId, session.user.id)
+    ),
+    with: {
+      completedReadings: true,
+    },
+  });
+  if (!instance) return { success: false, error: "Plan not found" };
+
+  const remaining = Math.max(
+    1,
+    (instance.totalChapters || 1) - instance.completedReadings.length
+  );
+
+  const projectedEnd = calculateProjectedEndDate({
+    startDate: new Date(),
+    remainingChapters: remaining,
+    dailyTarget: parsed.output.newDailyTarget,
+    activeDaysMask: instance.activeDaysMask,
+  });
+
+  await db
+    .update(planInstances)
+    .set({
+      dailyTarget: parsed.output.newDailyTarget,
+      targetEndDate: instance.mode === "scheduled" ? projectedEnd : null,
+    })
+    .where(eq(planInstances.id, instance.id));
+
+  revalidatePath(`/plans/${instance.id}`);
+  revalidatePath("/plans");
+
+  const updatedPlan = await getPlanInstanceDetailAction({
+    instanceId: instance.id,
+  });
+
+  return { success: true, plan: updatedPlan ?? undefined };
 }

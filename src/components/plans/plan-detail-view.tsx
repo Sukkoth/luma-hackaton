@@ -9,16 +9,26 @@ import {
   Trophy,
   Sparkles,
   Info,
+  PauseCircle,
+  Play,
+  AlertCircle,
+  RefreshCw,
+  ArrowLeftCircle,
 } from "lucide-react";
 import {
   type PlanInstanceDetail,
   type PlanSessionDetail,
   togglePlanReadingItemAction,
+  resumePlanAction,
+  catchUpShiftAction,
+  catchUpIncreasePaceAction,
 } from "@/actions/plans";
 import { PlanSpeedometerGauge } from "./plan-speedometer-gauge";
 import { PlanReadingFlow } from "./plan-reading-flow";
 import { PlanSettingsTab } from "./plan-settings-tab";
 import { PlanDetailsTab } from "./plan-details-tab";
+import { PlanCatchUpModal } from "./plan-catchup-modal";
+import { PlanPausedLockModal } from "./plan-paused-lock-modal";
 import { celebratePlanCompletion } from "@/lib/confetti";
 
 type PlanDetailViewProps = {
@@ -32,6 +42,8 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   const [, startTransition] = useTransition();
   const [activePartIndex, setActivePartIndex] = useState(1);
   const [activeSessionIndex, setActiveSessionIndex] = useState(1);
+  const [isCatchUpModalOpen, setIsCatchUpModalOpen] = useState(false);
+  const [isPausedLockModalOpen, setIsPausedLockModalOpen] = useState(false);
 
   // Current plan state
   const [currentPlan, setCurrentPlan] = useState<PlanInstanceDetail>(plan);
@@ -64,7 +76,45 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   const isFinished =
     currentPlan.status === "completed" || progressPercent === 100;
 
+  const handleResumePlan = () => {
+    startTransition(async () => {
+      const res = await resumePlanAction({ instanceId: currentPlan.id });
+      if (res.success && res.plan) {
+        handlePlanUpdated(res.plan);
+        setIsPausedLockModalOpen(false);
+      }
+    });
+  };
+
+  const handleExecuteCatchUpShift = () => {
+    startTransition(async () => {
+      const res = await catchUpShiftAction({ instanceId: currentPlan.id });
+      if (res.success && res.plan) {
+        handlePlanUpdated(res.plan);
+        setIsCatchUpModalOpen(false);
+      }
+    });
+  };
+
+  const handleExecuteIncreasePace = (newPace: number) => {
+    startTransition(async () => {
+      const res = await catchUpIncreasePaceAction({
+        instanceId: currentPlan.id,
+        newDailyTarget: newPace,
+      });
+      if (res.success && res.plan) {
+        handlePlanUpdated(res.plan);
+        setIsCatchUpModalOpen(false);
+      }
+    });
+  };
+
   const handleToggleReading = (readingItemId: string) => {
+    if (currentPlan.status === "paused") {
+      setIsPausedLockModalOpen(true);
+      return;
+    }
+
     // Optimistic calculation
     let toggledItemNextStatus = false;
     let delta = 0;
@@ -239,6 +289,121 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
             </div>
           )}
 
+          {/* Plan Paused Banner */}
+          {currentPlan.status === "paused" && (
+            <div className="glass-panel flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-[24px] border border-amber-500/25 bg-amber-500/5 p-5 shadow-xs dark:border-amber-500/20 dark:bg-amber-500/8">
+              <div className="flex items-center gap-3.5">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                  <PauseCircle className="size-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                      PLAN PAUSED
+                    </span>
+                  </div>
+                  <h3 className="mt-0.5 text-[15px] font-medium tracking-tight text-black dark:text-white">
+                    Plan is Paused
+                  </h3>
+                  <p className="text-[12.5px] text-[#666666] dark:text-[#9CA3AF]">
+                    Check marks are locked while your plan is paused. When you
+                    are ready to continue, tap Resume to shift your schedule to
+                    today.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleResumePlan}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-black px-4 py-2.5 text-[12.5px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+              >
+                <Play className="size-3.5 fill-current" />
+                <span>Resume Plan</span>
+              </button>
+            </div>
+          )}
+
+          {/* Behind Schedule Banner */}
+          {currentPlan.status === "active" && currentPlan.overdueInfo && (
+            <div className="glass-panel rounded-[24px] border border-red-500/25 bg-red-500/5 p-5 shadow-xs dark:border-red-500/20 dark:bg-red-500/8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-red-500/15 text-red-600 dark:text-red-400">
+                    <AlertCircle className="size-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-red-500/20 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-red-700 dark:text-red-400">
+                        {currentPlan.overdueInfo.overdueDaysCount}{" "}
+                        {currentPlan.overdueInfo.overdueDaysCount === 1
+                          ? "DAY"
+                          : "DAYS"}{" "}
+                        BEHIND SCHEDULE
+                      </span>
+                      <span className="text-[11.5px] font-medium text-red-600/80 dark:text-red-400/80">
+                        {currentPlan.overdueInfo.overdueChaptersCount} chapters
+                        pending
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[12.5px] text-[#666666] dark:text-[#9CA3AF]">
+                      You have unread chapters starting from{" "}
+                      {currentPlan.overdueInfo.firstOverdueSessionTitle}
+                      {currentPlan.overdueInfo.firstOverdueSessionDateLabel
+                        ? ` (${currentPlan.overdueInfo.firstOverdueSessionDateLabel})`
+                        : ""}
+                      .
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3.5 flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none sm:flex-wrap pt-3 border-t border-red-500/15">
+                <button
+                  type="button"
+                  onClick={() => setIsCatchUpModalOpen(true)}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-black px-3.5 py-1.5 text-[12px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+                >
+                  <RefreshCw className="size-3" />
+                  <span>Catch Up to Today</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (currentPlan.overdueInfo) {
+                      setActiveSessionIndex(
+                        currentPlan.overdueInfo.firstOverdueSessionIndex
+                      );
+                      const partForSession =
+                        Math.floor(
+                          (currentPlan.overdueInfo.firstOverdueSessionIndex -
+                            1) /
+                            7
+                        ) + 1;
+                      setActivePartIndex(partForSession);
+                    }
+                  }}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white/80 px-3 py-1.5 text-[12px] font-medium text-black transition-all hover:bg-black/4 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                >
+                  <ArrowLeftCircle className="size-3" />
+                  <span>
+                    {currentPlan.overdueInfo.firstOverdueSessionTitle}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("settings")}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-transparent px-3 py-1.5 text-[12px] font-medium text-[#666666] transition-all hover:text-black dark:border-white/10 dark:text-[#A1A1AA] dark:hover:text-white"
+                >
+                  <Sliders className="size-3" />
+                  <span>Adjust Pace</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Reading Flow Section */}
           <PlanReadingFlow
             key={`${currentPlan.id}-${currentPlan.dailyTarget}-${currentPlan.activeDaysMask}-${currentPlan.mode}`}
@@ -265,6 +430,25 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
             onPlanUpdatedAction={handlePlanUpdated}
           />
         ))}
+
+      {/* Catch-Up Modal */}
+      {currentPlan.overdueInfo && (
+        <PlanCatchUpModal
+          isOpen={isCatchUpModalOpen}
+          onCloseAction={() => setIsCatchUpModalOpen(false)}
+          overdueInfo={currentPlan.overdueInfo}
+          currentPace={currentPlan.dailyTarget}
+          onExecuteShiftAction={handleExecuteCatchUpShift}
+          onExecuteIncreasePaceAction={handleExecuteIncreasePace}
+        />
+      )}
+
+      {/* Paused Checkmarks Locked Notice Modal */}
+      <PlanPausedLockModal
+        isOpen={isPausedLockModalOpen}
+        onCloseAction={() => setIsPausedLockModalOpen(false)}
+        onResumeAction={handleResumePlan}
+      />
     </div>
   );
 }

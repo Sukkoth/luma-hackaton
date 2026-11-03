@@ -176,15 +176,34 @@ export function PlanReadingFlow({
             >
               {/* Session Card Header */}
               <div className="flex items-center justify-between border-b border-black/6 pb-2.5 dark:border-white/6">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-semibold text-black dark:text-white">
-                    {session.title}
-                  </span>
-                  {isLocked && (
-                    <Lock
-                      className="size-3 text-[#888888] dark:text-[#71717A]"
-                      aria-label="Session locked"
-                    />
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[13px] font-semibold text-black dark:text-white">
+                      {session.title}
+                    </span>
+                    {isLocked && (
+                      <Lock
+                        className="size-3 text-[#888888] dark:text-[#71717A]"
+                        aria-label="Session locked"
+                      />
+                    )}
+                  </div>
+                  {session.dateLabel && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-[#888888] dark:text-[#A1A1AA]">
+                        {session.dateLabel}
+                      </span>
+                      {session.isPastDue && (
+                        <span className="rounded bg-red-500/15 px-1 py-0.2 text-[9px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
+                          Overdue
+                        </span>
+                      )}
+                      {session.isToday && (
+                        <span className="rounded bg-[#82ADD4]/20 px-1 py-0.2 text-[9px] font-semibold uppercase tracking-wider text-[#507ea6] dark:text-[#82ADD4]">
+                          Today
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -241,6 +260,8 @@ export function PlanReadingFlow({
                         onToggleReadingAction(reading.id);
                       }}
                       role="button"
+                      aria-label={`Toggle reading ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                      aria-pressed={reading.isCompleted}
                       tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {

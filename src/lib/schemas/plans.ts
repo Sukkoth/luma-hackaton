@@ -77,3 +77,30 @@ export const DeletePlanInstanceSchema = v.object({
 export type DeletePlanInstanceInput = v.InferOutput<
   typeof DeletePlanInstanceSchema
 >;
+
+export const CatchUpShiftSchema = v.object({
+  instanceId: v.pipe(v.string(), v.minLength(1, "Instance ID is required")),
+});
+export type CatchUpShiftInput = v.InferOutput<typeof CatchUpShiftSchema>;
+
+export const CatchUpIncreasePaceSchema = v.object({
+  instanceId: v.pipe(v.string(), v.minLength(1, "Instance ID is required")),
+  newDailyTarget: v.pipe(
+    v.number(),
+    v.minValue(1, "Daily target must be at least 1"),
+    v.maxValue(50, "Daily target cannot exceed 50")
+  ),
+});
+export type CatchUpIncreasePaceInput = v.InferOutput<
+  typeof CatchUpIncreasePaceSchema
+>;
+
+export const PausePlanSchema = v.object({
+  instanceId: v.pipe(v.string(), v.minLength(1, "Instance ID is required")),
+});
+export type PausePlanInput = v.InferOutput<typeof PausePlanSchema>;
+
+export const ResumePlanSchema = v.object({
+  instanceId: v.pipe(v.string(), v.minLength(1, "Instance ID is required")),
+});
+export type ResumePlanInput = v.InferOutput<typeof ResumePlanSchema>;
