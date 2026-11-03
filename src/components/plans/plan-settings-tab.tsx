@@ -8,7 +8,6 @@ import {
   Lock,
   Pause,
   Play,
-  RotateCcw,
   Trash2,
   Bell,
   Coffee,
@@ -23,7 +22,6 @@ import {
 } from "lucide-react";
 import {
   updatePlanSettingsAction,
-  resetPlanProgressAction,
   deletePlanInstanceAction,
   pausePlanAction,
   resumePlanAction,
@@ -134,7 +132,6 @@ export function PlanSettingsTab({
 
   const [shiftOnResume, setShiftOnResume] = useState(true);
   const [showCurriculum, setShowCurriculum] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const remainingChapters = Math.max(
@@ -284,22 +281,6 @@ export function PlanSettingsTab({
       if (!res.success) {
         setErrorMessage(res.error);
       } else {
-        if (res.plan) {
-          onPlanUpdatedAction?.(res.plan);
-        }
-        router.refresh();
-      }
-    });
-  };
-
-  // Handle Reset Progress
-  const handleResetProgress = () => {
-    startTransition(async () => {
-      const res = await resetPlanProgressAction({ instanceId: plan.id });
-      if (!res.success) {
-        setErrorMessage(res.error);
-      } else {
-        setShowResetConfirm(false);
         if (res.plan) {
           onPlanUpdatedAction?.(res.plan);
         }
@@ -813,36 +794,25 @@ export function PlanSettingsTab({
           </div>
         )}
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {/* Pause / Resume Button */}
           <button
             type="button"
             disabled={isPending}
             onClick={handleTogglePause}
-            className="flex items-center justify-center gap-2 rounded-xl border border-black/10 bg-white/80 px-4 py-2.5 text-[13px] font-medium text-black shadow-2xs hover:bg-black/5 dark:border-white/12 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-black/10 bg-white/80 px-4 text-[13px] font-medium text-black shadow-2xs transition-all hover:bg-black/5 dark:border-white/12 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
           >
             {plan.status === "paused" ? (
               <>
-                <Play className="size-4" />
-                <span>Resume Reading Plan</span>
+                <Play className="size-4 shrink-0" />
+                <span>Resume Plan</span>
               </>
             ) : (
               <>
-                <Pause className="size-4" />
+                <Pause className="size-4 shrink-0" />
                 <span>Pause Plan</span>
               </>
             )}
-          </button>
-
-          {/* Reset Progress Button */}
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => setShowResetConfirm(true)}
-            className="flex items-center justify-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-[13px] font-medium text-amber-700 hover:bg-amber-500/20 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400"
-          >
-            <RotateCcw className="size-4" />
-            <span>Reset Progress to 0%</span>
           </button>
 
           {/* Leave Plan Button */}
@@ -850,43 +820,12 @@ export function PlanSettingsTab({
             type="button"
             disabled={isPending}
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-[13px] font-medium text-red-600 hover:bg-red-500/20 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 text-[13px] font-medium text-red-600 transition-all hover:bg-red-500/20 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400"
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-4 shrink-0" />
             <span>Leave / Delete Plan</span>
           </button>
         </div>
-
-        {/* Reset Confirmation Dialog */}
-        {showResetConfirm && (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
-            <h4 className="text-[14px] font-semibold text-amber-800 dark:text-amber-300">
-              Reset all completed chapters?
-            </h4>
-            <p className="mt-1 text-[12px] text-amber-700 dark:text-amber-400">
-              This will unmark all chapters read in this plan and return your
-              progress to 0%.
-            </p>
-            <div className="mt-3.5 flex items-center gap-2.5">
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={handleResetProgress}
-                className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-1.5 text-[12px] font-medium text-white hover:bg-amber-700"
-              >
-                {isPending && <Loader2 className="size-3.5 animate-spin" />}
-                <span>Confirm Reset</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowResetConfirm(false)}
-                className="rounded-xl border border-black/10 px-3.5 py-1.5 text-[12px] font-medium text-[#666666] hover:bg-black/5 dark:border-white/10 dark:text-[#A1A1AA]"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Delete Confirmation Dialog */}
         {showDeleteConfirm && (

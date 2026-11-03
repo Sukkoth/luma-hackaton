@@ -22,7 +22,6 @@ import {
   StartPlanSchema,
   TogglePlanReadingSchema,
   UpdatePlanSettingsSchema,
-  ResetPlanProgressSchema,
   DeletePlanInstanceSchema,
   CatchUpShiftSchema,
   CatchUpIncreasePaceSchema,
@@ -1346,54 +1345,6 @@ export async function updatePlanSettingsAction({
     .update(planInstances)
     .set(updateValues)
     .where(eq(planInstances.id, instance.id));
-
-  revalidatePath(`/plans/${instance.id}`);
-  revalidatePath("/plans");
-
-  const updatedPlan = await getPlanInstanceDetailAction({
-    instanceId: instance.id,
-  });
-
-  return { success: true, plan: updatedPlan ?? undefined };
-}
-
-export type ResetPlanProgressParams = {
-  instanceId: string;
-};
-
-export type ResetPlanProgressResult =
-  | { success: true; plan?: PlanInstanceDetail }
-  | { success: false; error: string };
-
-export async function resetPlanProgressAction({
-  instanceId,
-}: ResetPlanProgressParams): Promise<ResetPlanProgressResult> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) return { success: false, error: "Unauthorized" };
-
-  const parsed = v.safeParse(ResetPlanProgressSchema, { instanceId });
-  if (!parsed.success) return { success: false, error: "Invalid parameters" };
-
-  const instance = await db.query.planInstances.findFirst({
-    where: and(
-      eq(planInstances.id, parsed.output.instanceId),
-      eq(planInstances.userId, session.user.id)
-    ),
-  });
-  if (!instance) return { success: false, error: "Plan not found" };
-
-  await db
-    .delete(planInstanceReadings)
-    .where(eq(planInstanceReadings.instanceId, instance.id));
-
-  await db
-    .update(planInstances)
-    .set({ status: "active", completedAt: null })
-    .where(eq(planInstances.id, instance.id));
-
-  await syncUserStreak({ userId: session.user.id });
 
   revalidatePath(`/plans/${instance.id}`);
   revalidatePath("/plans");

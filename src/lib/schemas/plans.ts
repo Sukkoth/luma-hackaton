@@ -64,13 +64,6 @@ export type UpdatePlanSettingsInput = v.InferOutput<
   typeof UpdatePlanSettingsSchema
 >;
 
-export const ResetPlanProgressSchema = v.object({
-  instanceId: v.pipe(v.string(), v.minLength(1, "Instance ID is required")),
-});
-export type ResetPlanProgressInput = v.InferOutput<
-  typeof ResetPlanProgressSchema
->;
-
 export const DeletePlanInstanceSchema = v.object({
   instanceId: v.pipe(v.string(), v.minLength(1, "Instance ID is required")),
 });
