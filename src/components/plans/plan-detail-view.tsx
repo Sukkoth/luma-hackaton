@@ -1,0 +1,270 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  BookOpen,
+  Sliders,
+  Trophy,
+  Sparkles,
+  Info,
+} from "lucide-react";
+import {
+  type PlanInstanceDetail,
+  type PlanSessionDetail,
+  togglePlanReadingItemAction,
+} from "@/actions/plans";
+import { PlanSpeedometerGauge } from "./plan-speedometer-gauge";
+import { PlanReadingFlow } from "./plan-reading-flow";
+import { PlanSettingsTab } from "./plan-settings-tab";
+import { PlanDetailsTab } from "./plan-details-tab";
+import { celebratePlanCompletion } from "@/lib/confetti";
+
+type PlanDetailViewProps = {
+  plan: PlanInstanceDetail;
+};
+
+export function PlanDetailView({ plan }: PlanDetailViewProps) {
+  const [activeTab, setActiveTab] = useState<"chapters" | "settings">(
+    "chapters"
+  );
+  const [, startTransition] = useTransition();
+  const [activePartIndex, setActivePartIndex] = useState(1);
+  const [activeSessionIndex, setActiveSessionIndex] = useState(1);
+
+  // Current plan state
+  const [currentPlan, setCurrentPlan] = useState<PlanInstanceDetail>(plan);
+  const [sessions, setSessions] = useState<ReadonlyArray<PlanSessionDetail>>(
+    plan.sessions
+  );
+  const [completedChapters, setCompletedChapters] = useState(
+    plan.completedChapters
+  );
+  const [progressPercent, setProgressPercent] = useState(plan.progressPercent);
+
+  // Keep state in sync whenever server component passes a fresh plan prop
+  const [prevPlan, setPrevPlan] = useState<PlanInstanceDetail>(plan);
+  if (prevPlan !== plan) {
+    setPrevPlan(plan);
+    setCurrentPlan(plan);
+    setSessions(plan.sessions);
+    setCompletedChapters(plan.completedChapters);
+    setProgressPercent(plan.progressPercent);
+  }
+
+  // Handle immediate state update when settings tab saves changes
+  const handlePlanUpdated = (updatedPlan: PlanInstanceDetail) => {
+    setCurrentPlan(updatedPlan);
+    setSessions(updatedPlan.sessions);
+    setCompletedChapters(updatedPlan.completedChapters);
+    setProgressPercent(updatedPlan.progressPercent);
+  };
+
+  const isFinished =
+    currentPlan.status === "completed" || progressPercent === 100;
+
+  const handleToggleReading = (readingItemId: string) => {
+    // Optimistic calculation
+    let toggledItemNextStatus = false;
+    let delta = 0;
+
+    const nextSessions = sessions.map((session) => {
+      const hasItem = session.readings.some((r) => r.id === readingItemId);
+      if (!hasItem) return session;
+
+      const nextReadings = session.readings.map((reading) => {
+        if (reading.id === readingItemId) {
+          toggledItemNextStatus = !reading.isCompleted;
+          delta = toggledItemNextStatus ? 1 : -1;
+          return { ...reading, isCompleted: toggledItemNextStatus };
+        }
+        return reading;
+      });
+
+      const nextCompletedCount = nextReadings.filter(
+        (r) => r.isCompleted
+      ).length;
+
+      return {
+        ...session,
+        readings: nextReadings,
+        completedCount: nextCompletedCount,
+        isCompleted: nextCompletedCount === nextReadings.length,
+      };
+    });
+
+    setSessions(nextSessions);
+    const nextCompletedChapters = Math.max(0, completedChapters + delta);
+    setCompletedChapters(nextCompletedChapters);
+    const nextPercent = Math.min(
+      100,
+      Math.round(
+        (nextCompletedChapters / (currentPlan.totalChapters || 1)) * 100
+      )
+    );
+    setProgressPercent(nextPercent);
+
+    if (nextPercent === 100 && progressPercent < 100) {
+      celebratePlanCompletion();
+    }
+
+    startTransition(async () => {
+      const res = await togglePlanReadingItemAction({
+        instanceId: currentPlan.id,
+        readingItemId,
+      });
+
+      if (res.success) {
+        setCompletedChapters(res.completedChapters);
+        setProgressPercent(res.progressPercent);
+        if (res.progressPercent === 100 && progressPercent < 100) {
+          celebratePlanCompletion();
+        }
+      } else {
+        // Rollback on failure
+        setSessions(sessions);
+        setCompletedChapters(completedChapters);
+        setProgressPercent(progressPercent);
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Top Breadcrumb Navigation */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/plans"
+            className="flex size-9 items-center justify-center rounded-xl border border-black/8 bg-black/4 text-black transition-colors hover:bg-black/8 dark:border-white/10 dark:bg-white/6 dark:text-white dark:hover:bg-white/10"
+          >
+            <ArrowLeft className="size-4" />
+            <span className="sr-only">Back to Plan Catalog</span>
+          </Link>
+          <div>
+            <h1 className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-black dark:text-white">
+              {currentPlan.title}
+            </h1>
+            <p className="text-[12px] text-[#777777] dark:text-[#9CA3AF]">
+              Tracker: {currentPlan.tracker.name}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Tabs Navigation */}
+      <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-2 rounded-2xl bg-black/5 p-1.5 dark:bg-white/6">
+        <button
+          type="button"
+          onClick={() => setActiveTab("chapters")}
+          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] transition-all ${
+            activeTab === "chapters"
+              ? "bg-white font-semibold text-black shadow-xs dark:bg-white/15 dark:text-white"
+              : "text-[#666666] hover:text-black dark:text-[#A1A1AA] dark:hover:text-white"
+          }`}
+        >
+          <BookOpen className="size-4" />
+          <span>Plan Chapters</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("settings")}
+          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] transition-all ${
+            activeTab === "settings"
+              ? "bg-black font-semibold text-white shadow-xs dark:bg-white dark:text-black"
+              : "text-[#666666] hover:text-black dark:text-[#A1A1AA] dark:hover:text-white"
+          }`}
+        >
+          {isFinished ? (
+            <>
+              <Info className="size-4" />
+              <span>Plan details</span>
+            </>
+          ) : (
+            <>
+              <Sliders className="size-4" />
+              <span>Pacing & Settings</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Tab 1: Plan Chapters View */}
+      {activeTab === "chapters" && (
+        <div className="space-y-6">
+          {/* Speedometer Gauge Hero Card */}
+          <PlanSpeedometerGauge
+            progressPercent={progressPercent}
+            completedChapters={completedChapters}
+            totalChapters={currentPlan.totalChapters}
+            mode={currentPlan.mode}
+          />
+
+          {/* 100% Completion Celebration Banner */}
+          {progressPercent === 100 && (
+            <div className="glass-panel flex flex-col sm:flex-row items-center justify-between gap-4 rounded-[24px] border border-black/10 bg-white/85 p-5 shadow-xs dark:border-white/12 dark:bg-white/5">
+              <div className="flex items-center gap-3.5">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#DDFD2C] text-black shadow-xs">
+                  <Trophy className="size-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+                      Milestone Reached
+                    </span>
+                    <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-black dark:bg-white/10 dark:text-white">
+                      100% Complete
+                    </span>
+                  </div>
+                  <h3 className="mt-0.5 text-[16px] font-medium tracking-tight text-black dark:text-white">
+                    Journey Finished! 🎉
+                  </h3>
+                  <p className="text-[12.5px] text-[#666666] dark:text-[#9CA3AF]">
+                    You have read all {currentPlan.totalChapters} chapters of{" "}
+                    {currentPlan.title}.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => celebratePlanCompletion()}
+                className="flex items-center gap-1.5 rounded-xl border border-black/10 bg-black px-4 py-2 text-[12.5px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:border-white/12 dark:bg-white dark:text-black dark:hover:bg-white/90"
+              >
+                <Sparkles className="size-3.5" />
+                <span>Celebrate Again</span>
+              </button>
+            </div>
+          )}
+
+          {/* Reading Flow Section */}
+          <PlanReadingFlow
+            key={`${currentPlan.id}-${currentPlan.dailyTarget}-${currentPlan.activeDaysMask}-${currentPlan.mode}`}
+            instanceId={currentPlan.id}
+            sessions={sessions}
+            parts={currentPlan.parts}
+            activePartIndex={activePartIndex}
+            activeSessionIndex={activeSessionIndex}
+            onSelectPartAction={(idx) => setActivePartIndex(idx)}
+            onSelectSessionAction={(idx) => setActiveSessionIndex(idx)}
+            onToggleReadingAction={handleToggleReading}
+            mode={currentPlan.mode}
+          />
+        </div>
+      )}
+
+      {/* Tab 2: Plan details (when finished) OR Pacing & Settings View */}
+      {activeTab === "settings" &&
+        (isFinished ? (
+          <PlanDetailsTab plan={currentPlan} />
+        ) : (
+          <PlanSettingsTab
+            plan={currentPlan}
+            onPlanUpdatedAction={handlePlanUpdated}
+          />
+        ))}
+    </div>
+  );
+}

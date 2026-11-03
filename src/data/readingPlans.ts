@@ -214,6 +214,26 @@ export const isPlanMatchingFilter = (
   return true;
 };
 
+export type IsPlanCanonCompatibleParams = {
+  plan: ReadingPlanTemplate;
+  trackerCanon?: BibleCanon | null;
+};
+
+export function isPlanCanonCompatible({
+  plan,
+  trackerCanon,
+}: IsPlanCanonCompatibleParams): boolean {
+  if (!trackerCanon) return true;
+
+  if (plan.canonCompatibility && plan.canonCompatibility !== trackerCanon) {
+    return false;
+  }
+
+  const canonBooks = getBibleBooks(trackerCanon);
+  const canonBookIds = new Set(canonBooks.map((b) => b.id));
+  return !plan.readings.some((r) => !canonBookIds.has(r.bookId));
+}
+
 export interface ReadingPlanTemplate {
   id: string;
   title: string;

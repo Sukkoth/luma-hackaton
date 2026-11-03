@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bookmark, LogIn, Play, Compass } from "lucide-react";
+import { Bookmark, LogIn, Play } from "lucide-react";
 import type { useSession } from "@/lib/auth-client";
 import { READING_PLANS } from "@/data/readingPlans";
 
@@ -12,8 +12,9 @@ export type ActivePlanInstance = {
   progressPercent: number;
   readChapters: number;
   totalChapters: number;
-  status: "On Track" | "Rest Buffer" | "Flexible";
+  status: "On Track" | "Rest Buffer" | "Flexible" | "Paused" | "Finished";
   statusColor: string;
+  completedAt?: string | null;
 };
 
 type SessionData = ReturnType<typeof useSession>["data"];
@@ -21,14 +22,10 @@ type SessionData = ReturnType<typeof useSession>["data"];
 type Props = {
   session: SessionData;
   activePlanInstances: ReadonlyArray<ActivePlanInstance>;
-  onBrowseCatalog: () => void;
+  onBrowseCatalog?: () => void;
 };
 
-export function PlanActiveBanner({
-  session,
-  activePlanInstances,
-  onBrowseCatalog,
-}: Props) {
+export function PlanActiveBanner({ session, activePlanInstances }: Props) {
   return (
     <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {!session ? (
@@ -154,16 +151,11 @@ export function PlanActiveBanner({
 
           <div className="mt-5 flex items-center justify-between border-t border-black/4 pt-3 text-[13px] dark:border-white/6">
             <span className="text-[#777777] dark:text-[#A1A1AA]">
-              {READING_PLANS.length} curated blueprints available
+              {READING_PLANS.length} curated blueprints available below
             </span>
-            <button
-              type="button"
-              onClick={onBrowseCatalog}
-              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
-            >
-              <Compass className="size-3.5" />
-              <span>Browse Catalog</span>
-            </button>
+            <span className="text-[12px] font-medium text-[#507ea6] dark:text-[#82ADD4]">
+              Select a plan below to start
+            </span>
           </div>
         </div>
       )}

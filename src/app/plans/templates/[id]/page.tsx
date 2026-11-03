@@ -143,14 +143,20 @@ async function PlanTemplateDetailContent({
               <div>
                 <h3 className="flex items-center gap-2 text-[16px] font-medium text-black dark:text-white">
                   <Sliders className="size-4 text-[#82ADD4]" />
-                  <span>Start Plan Wizard</span>
+                  <span>Start Reading Plan</span>
                 </h3>
                 <p className="mt-0.5 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
                   Configure your starting date, schedule buffer, and active
                   tracker association.
                 </p>
               </div>
-              <StartPlanAction planId={plan.id} />
+              <StartPlanAction
+                plan={plan}
+                activeTrackerId={trackersData.activeTracker?.id}
+                trackerName={trackersData.activeTracker?.name}
+                trackerCanon={trackersData.activeTracker?.canon}
+                isAuthenticated={Boolean(session)}
+              />
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">

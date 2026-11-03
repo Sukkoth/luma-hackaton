@@ -106,11 +106,16 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
   test("unauthenticated users are guarded when attempting protected actions", async ({
     page,
   }) => {
-    // 1. On Plan Blueprint, verify 'Coming Soon' button is rendered and disabled
+    // 1. On Plan Blueprint, verify unauthenticated user is prompted to sign in
     await page.goto("/plans/templates/the_four_gospels_30");
-    const comingSoonBtn = page.getByRole("button", { name: "Coming Soon" });
-    await expect(comingSoonBtn).toBeVisible();
-    await expect(comingSoonBtn).toBeDisabled();
+    const signInPlanLink = page.getByRole("link", {
+      name: "Sign in to Start Plan",
+    });
+    await expect(signInPlanLink).toBeVisible();
+    await expect(signInPlanLink).toHaveAttribute(
+      "href",
+      "/auth/sign-in?callbackUrl=/plans/templates/the_four_gospels_30"
+    );
 
     // 2. On Books page, clicking a chapter to mark as read prompts to sign in
     await page.goto("/books");
@@ -129,6 +134,60 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(
       page.getByRole("dialog", { name: "Sign In to Log Progress" })
     ).not.toBeVisible();
+  });
+
+  test("plan setup wizard opens and steps through 4 enrollment stages", async ({
+    page,
+  }) => {
+    await page.goto("/plans");
+    await expect(
+      page.getByRole("heading", { name: "Explore Structured Scripture Plans" })
+    ).toBeVisible();
+
+    // Click 'Start' on the first plan card
+    const firstStartButton = page
+      .getByRole("button", { name: "Start", exact: true })
+      .first();
+    await expect(firstStartButton).toBeVisible();
+    await firstStartButton.click();
+
+    // Modal dialog opens at Step 1: Overview
+    const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible();
+    await expect(modal.getByText("Plan Overview")).toBeVisible();
+    await expect(modal.getByText("Reading Plan Setup")).toBeVisible();
+
+    // Verify step 4 indicator is disabled and cannot be clicked from step 1
+    const reviewStepChip = modal.getByRole("button", { name: "04 Review" });
+    await expect(reviewStepChip).toBeDisabled();
+
+    // Continue to Step 2: Pacing Style
+    await modal.getByRole("button", { name: "Continue" }).click();
+    await expect(
+      modal.getByRole("heading", { name: "Pacing Style", exact: true })
+    ).toBeVisible();
+    await expect(modal.getByText("Scheduled Calendar")).toBeVisible();
+    await expect(modal.getByText("Self-Paced (Flexible)")).toBeVisible();
+
+    // Continue to Step 3: Schedule
+    await modal.getByRole("button", { name: "Continue" }).click();
+    await expect(modal.getByText("Schedule & Habits")).toBeVisible();
+    await expect(modal.getByText("Weekly Reading Days")).toBeVisible();
+    await expect(modal.getByText("Plan Start Date")).toBeVisible();
+
+    // Continue to Step 4: Review
+    await modal.getByRole("button", { name: "Continue" }).click();
+    await expect(modal.getByText("Review & Confirm")).toBeVisible();
+    await expect(modal.getByText("ENROLLMENT SUMMARY")).toBeVisible();
+    await expect(modal.getByText("Daily Reminder")).toBeVisible();
+    await expect(modal.getByText("Study Journal Folder")).toBeVisible();
+    await expect(
+      modal.getByRole("button", { name: "Confirm & Start Plan" })
+    ).toBeVisible();
+
+    // Close modal
+    await modal.getByRole("button", { name: "Close dialog" }).click();
+    await expect(modal).not.toBeVisible();
   });
 
   test("social OAuth buttons initiate OAuth redirect flow for Google and GitHub", async ({

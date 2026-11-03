@@ -4,9 +4,15 @@ import type { ReadingPlanTemplate } from "@/data/readingPlans";
 
 type Props = {
   plan: ReadingPlanTemplate;
+  onStartPlanAction?: (plan: ReadingPlanTemplate) => void;
+  isEnrolled?: boolean;
 };
 
-export function PlanCard({ plan }: Props) {
+export function PlanCard({
+  plan,
+  onStartPlanAction,
+  isEnrolled = false,
+}: Props) {
   const isCustom =
     plan.id.startsWith("custom_") || plan.id.startsWith("imported_");
 
@@ -25,6 +31,11 @@ export function PlanCard({ plan }: Props) {
                 <span>{plan.canonCompatibility.replace("_", " ")}</span>
               </span>
             )}
+          {isEnrolled && (
+            <span className="rounded-md bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+              Enrolled
+            </span>
+          )}
           {isCustom && (
             <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
               Custom
@@ -62,13 +73,24 @@ export function PlanCard({ plan }: Props) {
         <span className="text-[11px] font-normal text-[#888888] dark:text-[#A1A1AA]">
           {plan.allowSelfPaced ? "Self-Paced allowed" : "Fixed schedule"}
         </span>
-        <Link
-          href={`/plans/templates/${plan.id}`}
-          className="flex items-center gap-1.5 rounded-xl border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
-        >
-          <span>View Details</span>
-          <ArrowRight className="size-3.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/plans/templates/${plan.id}`}
+            className="flex items-center gap-1 rounded-xl border border-black/8 bg-white/70 px-3 py-1.5 text-[12px] font-medium text-black shadow-2xs transition-all hover:bg-black hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white dark:hover:text-black"
+          >
+            <span>Details</span>
+          </Link>
+          {onStartPlanAction && (
+            <button
+              type="button"
+              onClick={() => onStartPlanAction(plan)}
+              className="flex items-center gap-1 rounded-xl bg-black px-3.5 py-1.5 text-[12px] font-medium text-white shadow-2xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+            >
+              <span>Start</span>
+              <ArrowRight className="size-3.5" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
