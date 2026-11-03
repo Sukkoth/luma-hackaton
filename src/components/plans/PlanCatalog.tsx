@@ -125,12 +125,15 @@ export function PlanCatalog({
       <section className="glass-panel rounded-[28px] p-6 sm:p-7">
         {/* Navigation Tabs and Search Bar */}
         <div className="flex flex-col gap-4 border-b border-black/4 pb-5 md:flex-row md:items-center md:justify-between dark:border-white/6">
-          {/* Tab Switcher */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Tab Switcher - Horizontally scrollable on small screens */}
+          <div
+            data-testid="plan-catalog-tabs"
+            className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
+          >
             <button
               type="button"
               onClick={() => setActiveTab("catalog")}
-              className={`flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "catalog"
                   ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
                   : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
@@ -142,7 +145,7 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("active")}
-              className={`flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "active"
                   ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
                   : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
@@ -156,7 +159,7 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("paused")}
-              className={`flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "paused"
                   ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
                   : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
@@ -170,7 +173,7 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("finished")}
-              className={`flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
                 activeTab === "finished"
                   ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
                   : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"

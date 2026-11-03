@@ -50,7 +50,7 @@ export default function RootLayout({
         className="min-h-full font-urbanist antialiased transition-colors duration-200"
       >
         <ThemeProvider defaultTheme="system">
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pb-20 md:pb-0">{children}</main>
         </ThemeProvider>
       </body>
     </html>

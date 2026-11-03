@@ -64,10 +64,8 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       page.getByRole("link", { name: /Settings/i })
     ).not.toBeVisible();
 
-    // But DOES show Bible Books and Plans
-    await expect(
-      guestNav.getByRole("link", { name: "Bible Books" })
-    ).toBeVisible();
+    // But DOES show Books and Plans
+    await expect(guestNav.getByRole("link", { name: "Books" })).toBeVisible();
     await expect(guestNav.getByRole("link", { name: "Plans" })).toBeVisible();
     await expect(
       page.locator("header").getByRole("link", { name: "Sign In" })

@@ -262,8 +262,11 @@ export function BooksView({
           </div>
         </div>
 
-        {/* Category Filter Pills */}
-        <div className="mt-4 flex flex-wrap gap-2">
+        {/* Category Filter Pills - Horizontally scrollable on small screens */}
+        <div
+          data-testid="books-category-filter"
+          className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
+        >
           {categoryFilters.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
@@ -271,7 +274,7 @@ export function BooksView({
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`rounded-xl px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
+                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
                   isSelected
                     ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
                     : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
