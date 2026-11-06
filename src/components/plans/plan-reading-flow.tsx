@@ -1,28 +1,35 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
   MapPin,
   Check,
-  FileText,
-  Plus,
   CheckCircle2,
   Lock,
 } from "lucide-react";
-import type { PlanSessionDetail, PlanPartDetail } from "@/actions/plans";
+import type {
+  PlanSessionDetail,
+  PlanPartDetail,
+  PlanNoteDetail,
+} from "@/actions/plans";
+import { PlanSessionNotes } from "./plan-session-notes";
 
 type PlanReadingFlowProps = {
   instanceId: string;
+  planTitle: string;
   sessions: ReadonlyArray<PlanSessionDetail>;
   parts: ReadonlyArray<PlanPartDetail>;
+  notes: ReadonlyArray<PlanNoteDetail>;
   activePartIndex: number;
   activeSessionIndex: number;
   onSelectPartAction: (partIndex: number) => void;
   onSelectSessionAction: (sessionIndex: number) => void;
   onToggleReadingAction: (readingItemId: string) => void;
+  onNoteCreatedAction: (note: PlanNoteDetail) => void;
+  onNoteUpdatedAction: (note: PlanNoteDetail) => void;
+  onNoteDeletedAction: (noteId: string) => void;
   mode?: "scheduled" | "flexible";
 };
 
@@ -52,13 +59,18 @@ function isSessionLocked({
 
 export function PlanReadingFlow({
   instanceId,
+  planTitle,
   sessions,
   parts,
+  notes,
   activePartIndex,
   activeSessionIndex,
   onSelectPartAction,
   onSelectSessionAction,
   onToggleReadingAction,
+  onNoteCreatedAction,
+  onNoteUpdatedAction,
+  onNoteDeletedAction,
   mode,
 }: PlanReadingFlowProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -306,30 +318,15 @@ export function PlanReadingFlow({
 
       {/* Selected Session Notes Section */}
       {activeSession && (
-        <div className="flex items-center justify-between rounded-2xl border border-black/6 bg-white/70 p-3.5 shadow-2xs backdrop-blur-md dark:border-white/8 dark:bg-white/[0.04]">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-black/5 text-[#555555] dark:bg-white/8 dark:text-[#9CA3AF]">
-              <FileText className="size-4.5" />
-            </div>
-            <div>
-              <h3 className="text-[13.5px] font-semibold text-black dark:text-white">
-                {activeSession.title} Notes
-              </h3>
-              <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
-                {activeSession.totalCount} Chapters •{" "}
-                {activeSession.completedCount}/{activeSession.totalCount} read
-              </p>
-            </div>
-          </div>
-
-          <Link
-            href={`/notes?planId=${instanceId}&session=${activeSession.sessionIndex}`}
-            className="flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-3 py-1.5 text-[11.5px] font-medium text-black shadow-2xs transition-all hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
-          >
-            <Plus className="size-3.5" />
-            <span>Add Note</span>
-          </Link>
-        </div>
+        <PlanSessionNotes
+          instanceId={instanceId}
+          planTitle={planTitle}
+          activeSession={activeSession}
+          notes={notes}
+          onNoteCreatedAction={onNoteCreatedAction}
+          onNoteUpdatedAction={onNoteUpdatedAction}
+          onNoteDeletedAction={onNoteDeletedAction}
+        />
       )}
     </div>
   );

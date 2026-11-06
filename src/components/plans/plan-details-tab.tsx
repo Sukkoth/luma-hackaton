@@ -10,9 +10,12 @@ import {
   Sparkles,
   FileText,
   Trash2,
+  ExternalLink,
+  Plus,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { PlanInstanceDetail } from "@/actions/plans";
 import { deletePlanInstanceAction } from "@/actions/plans";
 import { celebratePlanCompletion } from "@/lib/confetti";
@@ -160,22 +163,101 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
-              <FileText className="size-3.5 text-[#82ADD4]" />
-              <span>Study Notes</span>
+          <Link
+            href={`/notes?planId=${plan.id}`}
+            className="group block rounded-2xl border border-black/6 bg-white/70 p-3.5 hover:border-black/15 hover:bg-white transition-all dark:border-white/8 dark:bg-white/3 dark:hover:bg-white/6"
+          >
+            <span className="flex items-center justify-between text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
+              <span className="flex items-center gap-1.5">
+                <FileText className="size-3.5 text-[#82ADD4]" />
+                <span>Study Notes</span>
+              </span>
+              <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </span>
             <p className="mt-1 text-[16px] font-semibold text-black dark:text-white">
               {plan.notesCount} Note{plan.notesCount === 1 ? "" : "s"}
             </p>
             <p className="text-[11px] text-[#888888] dark:text-[#71717A]">
-              In study journal
+              View in study journal →
             </p>
-          </div>
+          </Link>
         </div>
       </div>
 
-      {/* 3. Conquered Curriculum Breakdown */}
+      {/* 3. Completed Plan Study Reflections */}
+      <div className="glass-panel rounded-[26px] p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h4 className="text-[15px] font-semibold tracking-tight text-black dark:text-white">
+              Plan Study Reflections
+            </h4>
+            <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-neutral-600 dark:bg-white/10 dark:text-neutral-300">
+              {plan.notes.length}
+            </span>
+          </div>
+
+          <Link
+            href={`/notes?planId=${plan.id}`}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-black/8 bg-white/80 px-3 py-1.5 text-[12px] font-medium text-neutral-700 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 transition-colors"
+          >
+            <ExternalLink className="size-3.5" />
+            <span>Open in Journal</span>
+          </Link>
+        </div>
+
+        {plan.notes.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {plan.notes.map((note) => (
+              <Link
+                key={note.id}
+                href={`/notes?noteId=${note.id}`}
+                className="group flex flex-col justify-between rounded-2xl border border-black/6 bg-white/70 p-3.5 hover:border-black/15 hover:bg-white dark:border-white/8 dark:bg-white/3 dark:hover:bg-white/6 transition-all"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 text-[10.5px] text-[#82ADD4]">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <Calendar className="size-3" />
+                      <span>{formatDisplayDate(note.createdAt)}</span>
+                    </span>
+                    {note.planSessionId && (
+                      <span className="rounded-md bg-black/5 px-1.5 py-0.2 text-[9.5px] text-neutral-600 dark:bg-white/10 dark:text-neutral-300">
+                        Session {note.planSessionId}
+                      </span>
+                    )}
+                  </div>
+                  <h5 className="mt-1.5 text-[13.5px] font-semibold text-black group-hover:text-[#82ADD4] dark:text-white transition-colors line-clamp-1">
+                    {note.title}
+                  </h5>
+                  <p className="mt-1 text-[12px] leading-relaxed text-neutral-600 dark:text-neutral-400 line-clamp-2">
+                    {note.plainTextSnippet || "No preview recorded."}
+                  </p>
+                </div>
+                <div className="mt-3 flex items-center justify-between pt-2 border-t border-black/4 dark:border-white/4 text-[11px] text-neutral-500">
+                  <span>View full note</span>
+                  <span className="font-medium group-hover:translate-x-0.5 transition-transform">
+                    →
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 p-6 text-center dark:border-white/10">
+            <p className="text-[12.5px] text-neutral-600 dark:text-neutral-400">
+              No notes were recorded during this plan. You can still add reflections anytime.
+            </p>
+            <Link
+              href={`/notes?planId=${plan.id}`}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+            >
+              <Plus className="size-3.5" />
+              <span>Write Reflection in Journal</span>
+            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* 4. Conquered Curriculum Breakdown */}
       <div className="glass-panel rounded-[26px] p-6 space-y-4">
         <h4 className="text-[15px] font-semibold tracking-tight text-black dark:text-white">
           Completed Curriculum Structure

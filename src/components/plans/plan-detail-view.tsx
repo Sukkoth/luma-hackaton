@@ -18,6 +18,7 @@ import {
 import {
   type PlanInstanceDetail,
   type PlanSessionDetail,
+  type PlanNoteDetail,
   togglePlanReadingItemAction,
   resumePlanAction,
   catchUpShiftAction,
@@ -54,6 +55,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     plan.completedChapters
   );
   const [progressPercent, setProgressPercent] = useState(plan.progressPercent);
+  const [notes, setNotes] = useState<ReadonlyArray<PlanNoteDetail>>(plan.notes);
 
   // Keep state in sync whenever server component passes a fresh plan prop
   const [prevPlan, setPrevPlan] = useState<PlanInstanceDetail>(plan);
@@ -63,6 +65,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     setSessions(plan.sessions);
     setCompletedChapters(plan.completedChapters);
     setProgressPercent(plan.progressPercent);
+    setNotes(plan.notes);
   }
 
   // Handle immediate state update when settings tab saves changes
@@ -71,6 +74,37 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     setSessions(updatedPlan.sessions);
     setCompletedChapters(updatedPlan.completedChapters);
     setProgressPercent(updatedPlan.progressPercent);
+    setNotes(updatedPlan.notes);
+  };
+
+  const handleNoteCreated = (newNote: PlanNoteDetail) => {
+    setNotes((prev) => [newNote, ...prev]);
+    setCurrentPlan((prev) => ({
+      ...prev,
+      notesCount: prev.notesCount + 1,
+      notes: [newNote, ...prev.notes],
+    }));
+  };
+
+  const handleNoteUpdated = (updatedNote: PlanNoteDetail) => {
+    setNotes((prev) =>
+      prev.map((n) => (n.id === updatedNote.id ? updatedNote : n))
+    );
+    setCurrentPlan((prev) => ({
+      ...prev,
+      notes: prev.notes.map((n) =>
+        n.id === updatedNote.id ? updatedNote : n
+      ),
+    }));
+  };
+
+  const handleNoteDeleted = (noteId: string) => {
+    setNotes((prev) => prev.filter((n) => n.id !== noteId));
+    setCurrentPlan((prev) => ({
+      ...prev,
+      notesCount: Math.max(0, prev.notesCount - 1),
+      notes: prev.notes.filter((n) => n.id !== noteId),
+    }));
   };
 
   const isFinished =
@@ -408,13 +442,18 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
           <PlanReadingFlow
             key={`${currentPlan.id}-${currentPlan.dailyTarget}-${currentPlan.activeDaysMask}-${currentPlan.mode}`}
             instanceId={currentPlan.id}
+            planTitle={currentPlan.title}
             sessions={sessions}
             parts={currentPlan.parts}
+            notes={notes}
             activePartIndex={activePartIndex}
             activeSessionIndex={activeSessionIndex}
             onSelectPartAction={(idx) => setActivePartIndex(idx)}
             onSelectSessionAction={(idx) => setActiveSessionIndex(idx)}
             onToggleReadingAction={handleToggleReading}
+            onNoteCreatedAction={handleNoteCreated}
+            onNoteUpdatedAction={handleNoteUpdated}
+            onNoteDeletedAction={handleNoteDeleted}
             mode={currentPlan.mode}
           />
         </div>

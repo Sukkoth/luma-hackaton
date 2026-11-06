@@ -97,8 +97,8 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await page.goto("/books");
     await expect(page.getByText("Verse of the Day")).toBeVisible();
     await expect(page.getByText("All Books")).toBeVisible();
-    await expect(page.getByText("Genesis")).toBeVisible();
-    await expect(page.getByText("Matthew")).toBeVisible();
+    await expect(page.getByText("Genesis", { exact: true })).toBeVisible();
+    await expect(page.getByText("Matthew", { exact: true })).toBeVisible();
   });
 
   test("unauthenticated users are guarded when attempting protected actions", async ({
@@ -200,7 +200,9 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       page.getByRole("button", { name: "Google" }).click(),
     ]);
     expect(googleRequest.method()).toBe("POST");
-    await page.waitForURL((url) => url.hostname.includes("google.com"));
+    await page.waitForURL((url) => url.hostname.includes("google.com"), {
+      waitUntil: "commit",
+    });
 
     // Signup page: GitHub OAuth button initiates navigation to GitHub OAuth
     await page.goto("/signup");
@@ -211,7 +213,9 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       page.getByRole("button", { name: "GitHub" }).click(),
     ]);
     expect(githubRequest.method()).toBe("POST");
-    await page.waitForURL((url) => url.hostname.includes("github.com"));
+    await page.waitForURL((url) => url.hostname.includes("github.com"), {
+      waitUntil: "commit",
+    });
   });
 
   test("full user registration, onboarding flow with canon selection, and authenticated dashboard access", async ({

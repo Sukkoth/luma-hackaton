@@ -652,6 +652,17 @@ export type PlanPartDetail = {
   isCompleted: boolean;
 };
 
+export type PlanNoteDetail = {
+  id: string;
+  planSessionId: number | null;
+  planDayNumber: number | null;
+  title: string;
+  plainTextSnippet: string;
+  bodyHtml: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type PlanInstanceDetail = {
   id: string;
   templateId: string;
@@ -687,6 +698,7 @@ export type PlanInstanceDetail = {
   sessions: ReadonlyArray<PlanSessionDetail>;
   parts: ReadonlyArray<PlanPartDetail>;
   notesCount: number;
+  notes: ReadonlyArray<PlanNoteDetail>;
   overdueInfo: PlanOverdueInfo | null;
 };
 
@@ -912,13 +924,26 @@ export async function getPlanInstanceDetailAction({
     });
   }
 
-  // Count notes for this plan instance
+  // Fetch notes for this plan instance
   const planNotes = await db.query.notes.findMany({
     where: and(
       eq(notes.userId, session.user.id),
-      eq(notes.planInstanceId, instance.id)
+      eq(notes.planInstanceId, instance.id),
+      eq(notes.isArchived, false)
     ),
+    orderBy: [desc(notes.updatedAt)],
   });
+
+  const mappedNotes: PlanNoteDetail[] = planNotes.map((n) => ({
+    id: n.id,
+    planSessionId: n.planSessionId,
+    planDayNumber: n.planDayNumber,
+    title: n.title,
+    plainTextSnippet: n.plainTextSnippet,
+    bodyHtml: n.bodyHtml,
+    createdAt: n.createdAt.toISOString(),
+    updatedAt: n.updatedAt.toISOString(),
+  }));
 
   return {
     id: instance.id,
@@ -959,7 +984,8 @@ export async function getPlanInstanceDetailAction({
     },
     sessions,
     parts,
-    notesCount: planNotes.length,
+    notesCount: mappedNotes.length,
+    notes: mappedNotes,
     overdueInfo,
   };
 }
