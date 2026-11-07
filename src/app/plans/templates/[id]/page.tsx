@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -10,9 +11,12 @@ import {
   Calendar,
   Bookmark,
 } from "lucide-react";
+import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
-import { getReadingPlanById } from "@/data/readingPlans";
+import { resolvePlanBlueprint } from "@/actions/plans";
 import { StartPlanAction } from "@/components/plans/start-plan-action";
+import { getUserTrackersData } from "@/actions/trackers";
+import { syncUserStreak } from "@/lib/streak-service";
 
 type PlanTemplateDetailContentParams = {
   params: Promise<{ id: string }>;
@@ -22,16 +26,34 @@ async function PlanTemplateDetailContent({
   params,
 }: PlanTemplateDetailContentParams) {
   const { id } = await params;
-  const plan = getReadingPlanById(id);
+  const plan = await resolvePlanBlueprint({ templateId: id });
 
   if (!plan) {
     notFound();
   }
 
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const [trackersData, streak] = session
+    ? await Promise.all([
+        getUserTrackersData({ userId: session.user.id }),
+        syncUserStreak({ userId: session.user.id }),
+      ])
+    : [{ trackers: [], activeTracker: null }, undefined];
+
+  const displayName = session?.user?.name || "Reader";
+
   return (
     <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName="James" />
+      <TopNavbar
+        userName={displayName}
+        streak={streak}
+        trackers={trackersData.trackers}
+        activeTrackerId={trackersData.activeTracker?.id}
+      />
 
       <main className="mt-4 space-y-4">
         {/* Breadcrumb / Back button */}
@@ -121,14 +143,20 @@ async function PlanTemplateDetailContent({
               <div>
                 <h3 className="flex items-center gap-2 text-[16px] font-medium text-black dark:text-white">
                   <Sliders className="size-4 text-[#82ADD4]" />
-                  <span>Start Plan Wizard</span>
+                  <span>Start Reading Plan</span>
                 </h3>
                 <p className="mt-0.5 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
                   Configure your starting date, schedule buffer, and active
                   tracker association.
                 </p>
               </div>
-              <StartPlanAction planId={plan.id} />
+              <StartPlanAction
+                plan={plan}
+                activeTrackerId={trackersData.activeTracker?.id}
+                trackerName={trackersData.activeTracker?.name}
+                trackerCanon={trackersData.activeTracker?.canon}
+                isAuthenticated={Boolean(session)}
+              />
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">

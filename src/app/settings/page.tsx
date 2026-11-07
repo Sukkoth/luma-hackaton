@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { SettingsView } from "@/components/settings/settings-view";
+import { getUserTrackersData } from "@/actions/trackers";
+import { syncUserStreak } from "@/lib/streak-service";
 
 export const instant = false;
 
@@ -16,6 +18,11 @@ export default async function SettingsPage() {
 
   const { user } = session;
 
+  const [trackersData, streak] = await Promise.all([
+    getUserTrackersData({ userId: user.id }),
+    syncUserStreak({ userId: user.id }),
+  ]);
+
   return (
     <SettingsView
       user={{
@@ -26,6 +33,9 @@ export default async function SettingsPage() {
         emailVerifiedAt: (user as { emailVerifiedAt?: Date | string | null })
           .emailVerifiedAt,
       }}
+      trackers={trackersData.trackers}
+      activeTrackerId={trackersData.activeTracker?.id}
+      streak={streak}
     />
   );
 }

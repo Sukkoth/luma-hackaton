@@ -3,13 +3,15 @@ type StatMetricCardsProps = {
   currentStreak?: number;
   streakFreezesAvailable?: number;
   longestStreak?: number;
+  isFreezeUnlocked?: boolean;
 };
 
 export function StatMetricCards({
   chaptersRead = 0,
   currentStreak = 0,
-  streakFreezesAvailable = 3,
+  streakFreezesAvailable = 0,
   longestStreak = 0,
+  isFreezeUnlocked = false,
 }: StatMetricCardsProps) {
   const metrics = [
     {
@@ -23,14 +25,14 @@ export function StatMetricCards({
       value: `${currentStreak}d`,
     },
     {
-      title: "Freeze Shields",
-      badge: "Shielded",
-      value: `${streakFreezesAvailable}`,
-    },
-    {
       title: "Longest Streak",
       badge: "Record",
       value: `${longestStreak}d`,
+    },
+    {
+      title: "Freeze Shields",
+      badge: isFreezeUnlocked ? "Shielded" : "Locked",
+      value: isFreezeUnlocked ? `${streakFreezesAvailable}` : "Locked",
     },
   ] as const;
 

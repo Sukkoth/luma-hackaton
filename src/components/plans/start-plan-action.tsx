@@ -1,80 +1,92 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Lock, LogIn } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
+import Link from "next/link";
+import { Calendar, LogIn } from "lucide-react";
+import {
+  type ReadingPlanTemplate,
+  isPlanCanonCompatible,
+} from "@/data/readingPlans";
+import type { BibleCanon } from "@/data/bibleData";
+import { PlanSetupModal } from "./plan-setup-modal";
 
 type StartPlanActionProps = {
-  planId: string;
+  plan: ReadingPlanTemplate;
+  activeTrackerId?: string;
+  trackerName?: string;
+  trackerCanon?: string;
+  isAuthenticated: boolean;
 };
 
-export function StartPlanAction({ planId }: StartPlanActionProps) {
-  const router = useRouter();
-  const { data: session } = useSession();
-  const [showPrompt, setShowPrompt] = useState(false);
+export function StartPlanAction({
+  plan,
+  activeTrackerId,
+  trackerName,
+  trackerCanon,
+  isAuthenticated,
+}: StartPlanActionProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleStart = () => {
-    if (session) {
-      router.push(`/plans/${planId}-instance`);
-    } else {
-      setShowPrompt(true);
-    }
-  };
+  if (!isAuthenticated) {
+    return (
+      <Link
+        href={`/auth/sign-in?callbackUrl=/plans/templates/${plan.id}`}
+        className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-black/10 bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 sm:mt-0 dark:border-white/10 dark:bg-white dark:text-black dark:hover:bg-white/90"
+      >
+        <LogIn className="size-3.5" />
+        <span>Sign in to Start Plan</span>
+      </Link>
+    );
+  }
 
-  return (
-    <div className="relative">
+  if (!activeTrackerId) {
+    return (
       <button
         type="button"
-        onClick={handleStart}
-        className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 sm:mt-0 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+        disabled
+        className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-black/8 bg-black/5 px-5 py-2 text-[13px] font-medium text-[#777777] shadow-xs cursor-not-allowed sm:mt-0 dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF]"
       >
-        <span>Create & Start Plan</span>
-        <ArrowRight className="size-3.5" />
+        <span>No Active Tracker</span>
+      </button>
+    );
+  }
+
+  const isCanonCompatible = isPlanCanonCompatible({
+    plan,
+    trackerCanon: (trackerCanon as BibleCanon) || "protestant",
+  });
+
+  if (!isCanonCompatible) {
+    return (
+      <button
+        type="button"
+        disabled
+        title="This plan contains books that are outside your active tracker's canon"
+        className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-black/8 bg-black/5 px-5 py-2 text-[13px] font-medium text-[#777777] shadow-xs cursor-not-allowed sm:mt-0 dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF]"
+      >
+        <span>Incompatible Canon</span>
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsModalOpen(true)}
+        className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-black/10 bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 sm:mt-0 dark:border-white/10 dark:bg-white dark:text-black dark:hover:bg-white/90"
+      >
+        <Calendar className="size-3.5" />
+        <span>Configure & Start Plan</span>
       </button>
 
-      {showPrompt && !session && (
-        <div
-          role="dialog"
-          aria-labelledby="auth-plan-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-        >
-          <div className="glass-panel relative w-full max-w-sm rounded-3xl border border-white/90 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-[#82ADD4]/20 text-[#507ea6] dark:bg-[#82ADD4]/30 dark:text-[#82ADD4]">
-              <Lock className="size-5" />
-            </div>
-            <h3
-              id="auth-plan-modal-title"
-              className="mt-3 text-[18px] font-medium text-black dark:text-white"
-            >
-              Sign In to Start Plan
-            </h3>
-            <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
-              Creating an active schedule and tracking daily milestones requires
-              an account.
-            </p>
-            <div className="mt-5 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(`/login?redirect=/plans/templates/${planId}`)
-                }
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-black py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
-              >
-                <LogIn className="size-3.5" />
-                <span>Sign In</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowPrompt(false)}
-                className="rounded-xl border border-black/10 bg-black/5 px-4 py-2 text-[12px] font-medium text-black hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <PlanSetupModal
+        isOpen={isModalOpen}
+        onCloseAction={() => setIsModalOpen(false)}
+        plan={plan}
+        activeTrackerId={activeTrackerId}
+        trackerName={trackerName}
+      />
+    </>
   );
 }

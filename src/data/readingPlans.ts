@@ -18,6 +18,7 @@ export interface PlanReadingItem {
   track?: string; // e.g. "Old Testament", "Wisdom", "Gospel"
   displayText?: string; // e.g. "Genesis 1:1-5" or "Genesis 1"
   order: number;
+  dayNumber?: number;
 }
 
 export interface PlanSection {
@@ -213,6 +214,26 @@ export const isPlanMatchingFilter = (
 
   return true;
 };
+
+export type IsPlanCanonCompatibleParams = {
+  plan: ReadingPlanTemplate;
+  trackerCanon?: BibleCanon | null;
+};
+
+export function isPlanCanonCompatible({
+  plan,
+  trackerCanon,
+}: IsPlanCanonCompatibleParams): boolean {
+  if (!trackerCanon) return true;
+
+  if (plan.canonCompatibility && plan.canonCompatibility !== trackerCanon) {
+    return false;
+  }
+
+  const canonBooks = getBibleBooks(trackerCanon);
+  const canonBookIds = new Set(canonBooks.map((b) => b.id));
+  return !plan.readings.some((r) => !canonBookIds.has(r.bookId));
+}
 
 export interface ReadingPlanTemplate {
   id: string;
@@ -2099,6 +2120,11 @@ export const CHRONOLOGICAL_BOOK_ORDER: string[] = [
   "rev",
 ];
 
+export type CustomChapterItem = {
+  bookId: string;
+  chapter: number;
+};
+
 export interface BuildCustomPlanParams {
   id?: string;
   title: string;
@@ -2109,6 +2135,7 @@ export interface BuildCustomPlanParams {
   accentColor?: string;
   bookIds: string[];
   orderType?: CustomPlanOrderType;
+  customChapters?: ReadonlyArray<CustomChapterItem>;
   defaultDailyTarget?: number;
   recommendedDays?: number;
   allowCustomPace?: boolean;
@@ -2131,6 +2158,7 @@ export const buildCustomReadingPlanTemplate = (
     accentColor = "#6366F1",
     bookIds,
     orderType = "canonical",
+    customChapters,
     defaultDailyTarget = 3,
     recommendedDays,
   } = params;
@@ -2157,7 +2185,20 @@ export const buildCustomReadingPlanTemplate = (
   const readings: PlanReadingItem[] = [];
   let orderCounter = 1;
 
-  if (orderType === "blended" && sortedBooks.length > 1) {
+  if (customChapters && customChapters.length > 0) {
+    for (const item of customChapters) {
+      const book = BIBLE_BOOK_MAP[item.bookId];
+      if (!book) continue;
+      readings.push({
+        id: `${book.id}_${item.chapter}`,
+        bookId: book.id,
+        bookName: book.name,
+        chapter: item.chapter,
+        track: book.category,
+        order: orderCounter++,
+      });
+    }
+  } else if (orderType === "blended" && sortedBooks.length > 1) {
     // Group books into OT vs NT or categories
     const otBooks = sortedBooks.filter((b) => b.testament === "OT");
     const ntBooks = sortedBooks.filter((b) => b.testament === "NT");
@@ -2240,8 +2281,15 @@ export const buildCustomReadingPlanTemplate = (
   const totalChapters = readings.length;
 
   // Build sections from grouped categories
+  const targetBooks =
+    customChapters && customChapters.length > 0
+      ? Array.from(new Set(customChapters.map((c) => c.bookId)))
+          .map((id) => BIBLE_BOOK_MAP[id])
+          .filter((b): b is NonNullable<typeof b> => Boolean(b))
+      : sortedBooks;
+
   const categoryGroups = new Map<string, typeof validBooks>();
-  for (const b of sortedBooks) {
+  for (const b of targetBooks) {
     const list = categoryGroups.get(b.category) || [];
     list.push(b);
     categoryGroups.set(b.category, list);
@@ -2249,7 +2297,9 @@ export const buildCustomReadingPlanTemplate = (
 
   const sections: PlanSection[] = [];
   for (const [catName, booksList] of categoryGroups.entries()) {
-    const chCount = booksList.reduce((sum, b) => sum + b.chapters, 0);
+    const chCount = readings.filter((r) =>
+      booksList.some((b) => b.id === r.bookId)
+    ).length;
     const names = booksList.map((b) => b.name).join(", ");
     sections.push({
       title: catName,

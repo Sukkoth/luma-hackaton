@@ -227,6 +227,7 @@ export const planReadingItems = pgTable(
     versesLabel: text("verses_label"),
     track: text("track"),
     displayText: text("display_text"),
+    dayNumber: integer("day_number"),
     orderIndex: integer("order_index").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -556,6 +557,7 @@ export const userSettings = pgTable(
     currentStreak: integer("current_streak").default(0).notNull(),
     longestStreak: integer("longest_streak").default(0).notNull(),
     lastReadDate: text("last_read_date"),
+    timezone: varchar("timezone", { length: 100 }).default("UTC").notNull(),
     streakFreezesAvailable: integer("streak_freezes_available")
       .default(0)
       .notNull(),

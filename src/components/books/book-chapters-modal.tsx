@@ -5,7 +5,11 @@ type Props = {
   book: BibleBook;
   readChapters: ReadonlyArray<number>;
   onClose: () => void;
-  onToggleChapter: (params: { bookId: string; chapter: number }) => void;
+  onToggleChapter: (params: {
+    bookId: string;
+    bookName: string;
+    chapter: number;
+  }) => void;
   onMarkAll: (params: { book: BibleBook }) => void;
   onClearAll: (params: { bookId: string }) => void;
 };
@@ -95,6 +99,7 @@ export function BookChaptersModal({
                     onClick={() =>
                       onToggleChapter({
                         bookId: book.id,
+                        bookName: book.name,
                         chapter: ch,
                       })
                     }

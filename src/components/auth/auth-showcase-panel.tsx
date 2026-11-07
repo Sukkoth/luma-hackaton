@@ -217,7 +217,7 @@ export function AuthShowcasePanel({
         </Link>
 
         <span className="text-[14px] font-light tracking-wide text-white/80">
-          Scripture<span className="text-[#DDFD2C]">.</span>
+          Luma<span className="text-[#DDFD2C]">.</span>
         </span>
       </div>
 

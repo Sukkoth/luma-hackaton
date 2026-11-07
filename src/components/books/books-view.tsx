@@ -1,39 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
-import { BIBLE_BOOKS, type BibleBook } from "@/data/bibleData";
+import {
+  type BibleCanon,
+  getBibleBooks,
+  getCanonTestamentChapters,
+  type BibleBook,
+} from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
+import {
+  toggleChapterAction,
+  markAllChaptersAction,
+  clearAllChaptersAction,
+} from "@/actions/chapters";
 import { VerseOfTheDayBanner } from "./verse-of-the-day-banner";
 import { BookCard } from "./book-card";
 import { BookChaptersModal } from "./book-chapters-modal";
 import { BooksAuthModal } from "./books-auth-modal";
+import type { StreakData } from "@/components/streak/streak-detail-modal";
+import type { UserTrackerSummary } from "@/actions/trackers";
+import type { VerseOfTheDayData } from "@/lib/youversion";
 
 type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
+  activeTrackerId?: string | null;
+  trackerName?: string | null;
+  canon?: BibleCanon;
+  trackers?: ReadonlyArray<UserTrackerSummary>;
+  userName?: string | null;
+  streak?: StreakData;
+  verseOfTheDay?: VerseOfTheDayData;
 };
 
 const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {};
 
-const CATEGORY_FILTERS = [
-  "All",
-  "Old Testament",
-  "New Testament",
-  "Law",
-  "History",
-  "Poetry & Wisdom",
-  "Major Prophets",
-  "Minor Prophets",
-  "Gospels",
-  "Pauline Epistles",
-  "General Epistles",
-] as const;
-
-export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
+export function BooksView({
+  initialReadData = DEFAULT_READ_CHAPTERS,
+  activeTrackerId = null,
+  trackerName = null,
+  canon = "protestant",
+  trackers,
+  userName = null,
+  streak,
+  verseOfTheDay,
+}: Props) {
   const router = useRouter();
   const { data: session } = useSession();
+  const [, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [readChapters, setReadChapters] =
@@ -41,8 +57,22 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
   const [activeBook, setActiveBook] = useState<BibleBook | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const canonBooks = getBibleBooks(canon);
+  const canonStats = getCanonTestamentChapters(canon);
+
+  // Dynamically compute category filters based on books present in this canon
+  const availableCategories = Array.from(
+    new Set(canonBooks.map((b) => b.category))
+  );
+  const categoryFilters = [
+    "All",
+    "Old Testament",
+    "New Testament",
+    ...availableCategories,
+  ];
+
   // Filter books
-  const filteredBooks = BIBLE_BOOKS.filter((book) => {
+  const filteredBooks = canonBooks.filter((book) => {
     const matchesSearch =
       book.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.id.toLowerCase().includes(searchQuery.toLowerCase());
@@ -56,7 +86,7 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
   });
 
   // Calculate totals
-  const totalChaptersAcrossCanon = 1189;
+  const totalChaptersAcrossCanon = canonStats.total;
   const totalReadChapters = Object.values(readChapters).reduce(
     (acc, chs) => acc + chs.length,
     0
@@ -65,68 +95,129 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
     (totalReadChapters / totalChaptersAcrossCanon) * 100
   );
 
-  // Handle chapter toggle for active book - requires authentication
+  // Handle chapter toggle for active book - requires authenticated active tracker
   const handleToggleChapter = ({
     bookId,
+    bookName,
     chapter,
   }: {
     bookId: string;
+    bookName: string;
     chapter: number;
   }) => {
-    if (!session?.user) {
+    if (!activeTrackerId) {
       setShowAuthModal(true);
       return;
     }
 
-    setReadChapters((prev) => {
-      const current = prev[bookId] ?? [];
-      const updated = current.includes(chapter)
-        ? current.filter((c) => c !== chapter)
-        : [...current, chapter];
-      return { ...prev, [bookId]: updated };
+    const current = readChapters[bookId] ?? [];
+    const isAdding = !current.includes(chapter);
+    const updated = isAdding
+      ? [...current, chapter]
+      : current.filter((c) => c !== chapter);
+
+    setReadChapters((prev) => ({
+      ...prev,
+      [bookId]: updated,
+    }));
+
+    startTransition(async () => {
+      const result = await toggleChapterAction({
+        trackerId: activeTrackerId,
+        bookId,
+        bookName,
+        chapter,
+      });
+
+      if (!result.success) {
+        setReadChapters((prev) => ({
+          ...prev,
+          [bookId]: current,
+        }));
+      }
     });
   };
 
   // Mark all chapters as read for active book
   const handleMarkAllChapters = ({ book }: { book: BibleBook }) => {
-    if (!session?.user) {
+    if (!activeTrackerId) {
       setShowAuthModal(true);
       return;
     }
 
+    const current = readChapters[book.id] ?? [];
     const all = Array.from({ length: book.chapters }, (_, i) => i + 1);
+
     setReadChapters((prev) => ({
       ...prev,
       [book.id]: all,
     }));
+
+    startTransition(async () => {
+      const result = await markAllChaptersAction({
+        trackerId: activeTrackerId,
+        bookId: book.id,
+        bookName: book.name,
+        totalChapters: book.chapters,
+      });
+
+      if (!result.success) {
+        setReadChapters((prev) => ({
+          ...prev,
+          [book.id]: current,
+        }));
+      }
+    });
   };
 
   // Reset all chapters for active book
   const handleClearAllChapters = ({ bookId }: { bookId: string }) => {
-    if (!session?.user) {
+    if (!activeTrackerId) {
       setShowAuthModal(true);
       return;
     }
+
+    const current = readChapters[bookId] ?? [];
 
     setReadChapters((prev) => ({
       ...prev,
       [bookId]: [],
     }));
+
+    startTransition(async () => {
+      const result = await clearAllChaptersAction({
+        trackerId: activeTrackerId,
+        bookId,
+      });
+
+      if (!result.success) {
+        setReadChapters((prev) => ({
+          ...prev,
+          [bookId]: current,
+        }));
+      }
+    });
   };
 
   return (
     <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
       {/* Top Navbar */}
-      <TopNavbar userName={session?.user?.name || "Reader"} />
+      <TopNavbar
+        userName={userName || session?.user?.name || "Reader"}
+        streak={streak}
+        trackers={trackers}
+        activeTrackerId={activeTrackerId}
+      />
 
       {/* Top Highlight Cards: Verse of the Day & Active Reading */}
       <VerseOfTheDayBanner
         totalReadChapters={totalReadChapters}
         totalChaptersAcrossCanon={totalChaptersAcrossCanon}
         canonPercentage={canonPercentage}
+        verse={verseOfTheDay}
       />
 
-      {/* 66 Books Section */}
+      {/* Books Section */}
       <section className="glass-panel mt-4 rounded-[28px] p-6 sm:p-7">
         {/* Header & Controls Toolbar */}
         <div className="flex flex-col gap-4 border-b border-black/4 pb-5 md:flex-row md:items-center md:justify-between dark:border-white/8">
@@ -138,6 +229,11 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
               <span className="rounded-full bg-black/4 px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
                 {filteredBooks.length} Books
               </span>
+              {trackerName && (
+                <span className="hidden rounded-full bg-[#82ADD4]/15 px-2.5 py-0.5 text-[11px] font-medium text-[#507ea6] sm:inline-block dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                  {trackerName}
+                </span>
+              )}
             </div>
             <p className="mt-1 text-[13px] font-normal text-[#777777] dark:text-[#9CA3AF]">
               Tap any book to view chapters and toggle your reading progress.
@@ -166,16 +262,19 @@ export function BooksView({ initialReadData = DEFAULT_READ_CHAPTERS }: Props) {
           </div>
         </div>
 
-        {/* Category Filter Pills */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {CATEGORY_FILTERS.map((cat) => {
+        {/* Category Filter Pills - Horizontally scrollable on small screens */}
+        <div
+          data-testid="books-category-filter"
+          className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
+        >
+          {categoryFilters.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`rounded-xl px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
+                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
                   isSelected
                     ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
                     : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"

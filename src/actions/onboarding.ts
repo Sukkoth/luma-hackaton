@@ -42,37 +42,39 @@ export async function completeOnboardingAction({
   try {
     const trackerId = crypto.randomUUID();
 
-    // 1. Insert initial reading tracker
-    await db.insert(readingTrackers).values({
-      id: trackerId,
-      userId: session.user.id,
-      name: parsed.output.name,
-      canon: parsed.output.canon,
-      color: parsed.output.color,
-      icon: parsed.output.icon,
-      description: `Primary ${parsed.output.canon.replace("_", " ")} reading tracker`,
-    });
-
-    // 2. Upsert user settings to mark onboarding as completed with 3 initial streak freezes
-    await db
-      .insert(userSettings)
-      .values({
+    await db.transaction(async (tx) => {
+      // 1. Insert initial reading tracker
+      await tx.insert(readingTrackers).values({
+        id: trackerId,
         userId: session.user.id,
-        activeTrackerId: trackerId,
-        hasCompletedOnboarding: true,
-        streakFreezesAvailable: 3,
-        currentStreak: 0,
-        longestStreak: 0,
-      })
-      .onConflictDoUpdate({
-        target: userSettings.userId,
-        set: {
+        name: parsed.output.name,
+        canon: parsed.output.canon,
+        color: parsed.output.color,
+        icon: parsed.output.icon,
+        description: `Primary ${parsed.output.canon.replace("_", " ")} reading tracker`,
+      });
+
+      // 2. Upsert user settings to mark onboarding as completed with 3 initial streak freezes
+      await tx
+        .insert(userSettings)
+        .values({
+          userId: session.user.id,
           activeTrackerId: trackerId,
           hasCompletedOnboarding: true,
           streakFreezesAvailable: 3,
-          updatedAt: new Date(),
-        },
-      });
+          currentStreak: 0,
+          longestStreak: 0,
+        })
+        .onConflictDoUpdate({
+          target: userSettings.userId,
+          set: {
+            activeTrackerId: trackerId,
+            hasCompletedOnboarding: true,
+            streakFreezesAvailable: 0,
+            updatedAt: new Date(),
+          },
+        });
+    });
 
     return { success: true, trackerId };
   } catch (err: unknown) {
