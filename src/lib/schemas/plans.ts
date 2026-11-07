@@ -147,4 +147,3 @@ export const CreateCustomPlanTemplateSchema = v.object({
 export type CreateCustomPlanTemplateInput = v.InferOutput<
   typeof CreateCustomPlanTemplateSchema
 >;
-

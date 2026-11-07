@@ -3,13 +3,7 @@
 import { useSyncExternalStore, useTransition, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import {
-  FileText,
-  Loader2,
-  X,
-  ExternalLink,
-  Trash2,
-} from "lucide-react";
+import { FileText, Loader2, X, ExternalLink, Trash2 } from "lucide-react";
 import type { PlanNoteDetail } from "@/actions/plans";
 import dynamic from "next/dynamic";
 import {

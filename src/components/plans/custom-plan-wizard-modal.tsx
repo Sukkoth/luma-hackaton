@@ -163,8 +163,7 @@ export function CustomPlanWizardModal({
       const filteredBooks = q
         ? booksInSec.filter(
             (b) =>
-              b.name.toLowerCase().includes(q) ||
-              b.id.toLowerCase().includes(q)
+              b.name.toLowerCase().includes(q) || b.id.toLowerCase().includes(q)
           )
         : booksInSec;
 
@@ -297,7 +296,8 @@ export function CustomPlanWizardModal({
 
   // Auto-scroll to bottom of Column 3 whenever a chapter or session is added
   useEffect(() => {
-    const hasMoreChapters = chapterSequence.length > prevChapterCountRef.current;
+    const hasMoreChapters =
+      chapterSequence.length > prevChapterCountRef.current;
     const hasMoreSessions = wizardSessions.length > prevSessionCountRef.current;
 
     if (sequenceMode === "chapter" && (hasMoreChapters || hasMoreSessions)) {
@@ -382,7 +382,8 @@ export function CustomPlanWizardModal({
     chapter,
   }: AddChapterToSequenceParams) => {
     setWizardSessions((prev) => {
-      const targetId = activeSessionId || prev[prev.length - 1]?.id || "session_1";
+      const targetId =
+        activeSessionId || prev[prev.length - 1]?.id || "session_1";
       const sessionExists = prev.some((s) => s.id === targetId);
 
       if (!sessionExists) {
@@ -405,7 +406,8 @@ export function CustomPlanWizardModal({
       newItems.push({ bookId, chapter: c });
     }
     setWizardSessions((prev) => {
-      const targetId = activeSessionId || prev[prev.length - 1]?.id || "session_1";
+      const targetId =
+        activeSessionId || prev[prev.length - 1]?.id || "session_1";
       return prev.map((s) =>
         s.id === targetId ? { ...s, chapters: [...s.chapters, ...newItems] } : s
       );
@@ -477,10 +479,7 @@ export function CustomPlanWizardModal({
   // Immediate New Session Creation: Appends an empty session card for direct visual feedback
   const startNewSession = () => {
     const newSessionId = `session_${Date.now()}`;
-    setWizardSessions((prev) => [
-      ...prev,
-      { id: newSessionId, chapters: [] },
-    ]);
+    setWizardSessions((prev) => [...prev, { id: newSessionId, chapters: [] }]);
     setActiveSessionId(newSessionId);
   };
 
@@ -689,8 +688,8 @@ export function CustomPlanWizardModal({
             track: r.track,
             displayText: r.displayText,
             dayNumber: isLocked
-              ? indexToDayMap.get(idx) ??
-                Math.floor(idx / Math.max(1, dailyTarget)) + 1
+              ? (indexToDayMap.get(idx) ??
+                Math.floor(idx / Math.max(1, dailyTarget)) + 1)
               : undefined,
             order: r.order ?? idx + 1,
           })),
@@ -746,7 +745,13 @@ export function CustomPlanWizardModal({
               id="custom-plan-title"
               className="mt-1 text-[18px] font-medium tracking-tight text-black dark:text-white"
             >
-              Step {currentStep === "scope" ? "1" : currentStep === "order" ? "2" : "3"} of 3:{" "}
+              Step{" "}
+              {currentStep === "scope"
+                ? "1"
+                : currentStep === "order"
+                  ? "2"
+                  : "3"}{" "}
+              of 3:{" "}
               {currentStep === "scope"
                 ? "Select Books & Scope"
                 : currentStep === "order"
@@ -854,11 +859,13 @@ export function CustomPlanWizardModal({
                     }
                     className="rounded-xl border border-black/10 bg-white px-3 py-1.5 text-[12.5px] text-black shadow-2xs focus:outline-hidden dark:border-white/12 dark:bg-[#1C1D22] dark:text-white"
                   >
-                    {Object.entries(BIBLE_CANONS_CONFIG).map(([key, config]) => (
-                      <option key={key} value={key}>
-                        {config.name} ({config.totalBooks} books)
-                      </option>
-                    ))}
+                    {Object.entries(BIBLE_CANONS_CONFIG).map(
+                      ([key, config]) => (
+                        <option key={key} value={key}>
+                          {config.name} ({config.totalBooks} books)
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
 
@@ -877,8 +884,8 @@ export function CustomPlanWizardModal({
               {/* Bulk Select Actions */}
               <div className="flex items-center justify-between border-y border-black/6 py-2.5 dark:border-white/8">
                 <span className="text-[12px] text-neutral-500 dark:text-neutral-400">
-                  {selectedBookIds.length} of {canonBooks.length} books selected (
-                  {totalSelectedChapters} chapters)
+                  {selectedBookIds.length} of {canonBooks.length} books selected
+                  ({totalSelectedChapters} chapters)
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -888,7 +895,9 @@ export function CustomPlanWizardModal({
                   >
                     Select All
                   </button>
-                  <span className="text-neutral-300 dark:text-neutral-700">•</span>
+                  <span className="text-neutral-300 dark:text-neutral-700">
+                    •
+                  </span>
                   <button
                     type="button"
                     onClick={clearAll}
@@ -919,7 +928,9 @@ export function CustomPlanWizardModal({
                           onClick={() => toggleSection(sec.books)}
                           className="text-[11px] font-medium text-[#82ADD4] hover:underline cursor-pointer"
                         >
-                          {allSectionSelected ? "Deselect section" : "Select section"}
+                          {allSectionSelected
+                            ? "Deselect section"
+                            : "Select section"}
                         </button>
                       </div>
 
@@ -963,7 +974,8 @@ export function CustomPlanWizardModal({
                     Choose Sequencing Mode
                   </span>
                   <p className="text-[11.5px] text-neutral-500 dark:text-neutral-400">
-                    Order entire books sequentially or hand-build custom reading sessions.
+                    Order entire books sequentially or hand-build custom reading
+                    sessions.
                   </p>
                 </div>
 
@@ -1049,7 +1061,9 @@ export function CustomPlanWizardModal({
                             <div className="flex items-center gap-1 shrink-0">
                               <button
                                 type="button"
-                                onClick={() => moveBook({ index, direction: "up" })}
+                                onClick={() =>
+                                  moveBook({ index, direction: "up" })
+                                }
                                 disabled={index === 0}
                                 className="rounded-lg p-1.5 text-neutral-400 hover:bg-black/5 hover:text-black disabled:opacity-30 dark:hover:bg-white/10 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
                                 title="Move up"
@@ -1058,7 +1072,9 @@ export function CustomPlanWizardModal({
                               </button>
                               <button
                                 type="button"
-                                onClick={() => moveBook({ index, direction: "down" })}
+                                onClick={() =>
+                                  moveBook({ index, direction: "down" })
+                                }
                                 disabled={index === orderedBookIds.length - 1}
                                 className="rounded-lg p-1.5 text-neutral-400 hover:bg-black/5 hover:text-black disabled:opacity-30 dark:hover:bg-white/10 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
                                 title="Move down"
@@ -1113,7 +1129,9 @@ export function CustomPlanWizardModal({
                             }`}
                           >
                             <span className="text-[13px] font-bold">{amt}</span>
-                            <span className="text-[9.5px] opacity-70">ch / day</span>
+                            <span className="text-[9.5px] opacity-70">
+                              ch / day
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -1131,11 +1149,15 @@ export function CustomPlanWizardModal({
                             value={dailyTarget}
                             data-testid="daily-target-input"
                             onChange={(e) =>
-                              setDailyTarget(Math.max(1, parseInt(e.target.value || "1", 10)))
+                              setDailyTarget(
+                                Math.max(1, parseInt(e.target.value || "1", 10))
+                              )
                             }
                             className="w-14 rounded-lg border border-black/10 bg-neutral-50 px-2 py-1 text-center text-[12.5px] font-bold text-black focus:outline-hidden dark:border-white/12 dark:bg-[#1C1D22] dark:text-white"
                           />
-                          <span className="text-[11px] text-neutral-500">ch</span>
+                          <span className="text-[11px] text-neutral-500">
+                            ch
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1154,7 +1176,14 @@ export function CustomPlanWizardModal({
                         </div>
                       </div>
                       <span className="text-[13px] font-bold text-[#82ADD4]">
-                        ~{Math.max(1, Math.ceil(totalPlanChapters / Math.max(1, dailyTarget)))} Days
+                        ~
+                        {Math.max(
+                          1,
+                          Math.ceil(
+                            totalPlanChapters / Math.max(1, dailyTarget)
+                          )
+                        )}{" "}
+                        Days
                       </span>
                     </div>
 
@@ -1165,7 +1194,8 @@ export function CustomPlanWizardModal({
                           3. Schedule Enforcement
                         </span>
                         <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
-                          Lock daily pace or allow subscribers to customize speed.
+                          Lock daily pace or allow subscribers to customize
+                          speed.
                         </p>
                       </div>
 
@@ -1192,7 +1222,8 @@ export function CustomPlanWizardModal({
                               </span>
                             </div>
                             <p className="mt-0.5 text-[10.5px] leading-relaxed text-neutral-500 dark:text-neutral-400">
-                              Subscribers read exactly {dailyTarget} chapters each day. Pacing is locked.
+                              Subscribers read exactly {dailyTarget} chapters
+                              each day. Pacing is locked.
                             </p>
                           </div>
                         </button>
@@ -1214,7 +1245,8 @@ export function CustomPlanWizardModal({
                               Flexible Pace
                             </span>
                             <p className="mt-0.5 text-[10.5px] leading-relaxed text-neutral-500 dark:text-neutral-400">
-                              Subscribers can adjust their daily chapter speed or switch to self-paced mode.
+                              Subscribers can adjust their daily chapter speed
+                              or switch to self-paced mode.
                             </p>
                           </div>
                         </button>
@@ -1307,7 +1339,13 @@ export function CustomPlanWizardModal({
                             >
                               <span className="truncate">{b?.name || id}</span>
                               <div className="flex items-center gap-1.5 shrink-0 text-[10.5px]">
-                                <span className={isSelected ? "text-white/70 dark:text-black/70" : "text-neutral-400"}>
+                                <span
+                                  className={
+                                    isSelected
+                                      ? "text-white/70 dark:text-black/70"
+                                      : "text-neutral-400"
+                                  }
+                                >
                                   {b?.chapters} ch
                                 </span>
                                 {scheduledCount > 0 && (
@@ -1336,13 +1374,16 @@ export function CustomPlanWizardModal({
                     >
                       <div className="shrink-0 mb-2 flex items-center justify-between border-b border-black/5 pb-2 dark:border-white/6">
                         <span className="text-[12px] font-semibold text-black dark:text-white truncate">
-                          2. {activeBookForChapters?.name || "Chapters"} ({activeBookForChapters?.chapters || 0})
+                          2. {activeBookForChapters?.name || "Chapters"} (
+                          {activeBookForChapters?.chapters || 0})
                         </span>
                         {activeBookForChapters && (
                           <button
                             type="button"
                             onClick={() =>
-                              addAllChaptersOfBook({ bookId: activeBookForChapters.id })
+                              addAllChaptersOfBook({
+                                bookId: activeBookForChapters.id,
+                              })
                             }
                             className="text-[10.5px] font-medium text-[#82ADD4] hover:underline cursor-pointer shrink-0"
                           >
@@ -1415,21 +1456,23 @@ export function CustomPlanWizardModal({
                             3. Sessions
                           </span>
                           <span className="rounded-md bg-black/5 px-1.5 py-0.5 text-[10px] font-mono font-medium text-neutral-500 dark:bg-white/8 dark:text-neutral-400 whitespace-nowrap">
-                            {curatedSessionsView.length}s · {chapterSequence.length}ch
+                            {curatedSessionsView.length}s ·{" "}
+                            {chapterSequence.length}ch
                           </span>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {chapterSequence.length === 0 && orderedBookIds.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={addAllChaptersOfAllSelectedBooks}
-                              className="text-[11px] font-medium text-[#82ADD4] hover:underline cursor-pointer whitespace-nowrap"
-                              title="Populate all chapters from selected books into Session 1"
-                            >
-                              Load All
-                            </button>
-                          )}
+                          {chapterSequence.length === 0 &&
+                            orderedBookIds.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={addAllChaptersOfAllSelectedBooks}
+                                className="text-[11px] font-medium text-[#82ADD4] hover:underline cursor-pointer whitespace-nowrap"
+                                title="Populate all chapters from selected books into Session 1"
+                              >
+                                Load All
+                              </button>
+                            )}
 
                           {/* Preview Uneditable List Button */}
                           {chapterSequence.length > 0 && (
@@ -1507,7 +1550,9 @@ export function CustomPlanWizardModal({
                                     type="button"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      mergeSessionWithPrevious(session.sessionIndex);
+                                      mergeSessionWithPrevious(
+                                        session.sessionIndex
+                                      );
                                     }}
                                     className="text-[10.5px] text-neutral-500 hover:text-black dark:hover:text-white cursor-pointer px-1 py-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10"
                                     title="Merge chapters into previous session"
@@ -1524,97 +1569,112 @@ export function CustomPlanWizardModal({
                                     Empty Session
                                   </p>
                                   <p className="text-[10.5px] text-neutral-400">
-                                    Click chapters in Column 2 to populate Session {session.sessionIndex}.
+                                    Click chapters in Column 2 to populate
+                                    Session {session.sessionIndex}.
                                   </p>
                                 </div>
                               ) : (
                                 <div className="space-y-1">
-                                  {session.chapters.map((item, idxInSession) => {
-                                    const b = BIBLE_BOOK_MAP[item.bookId];
-                                    const gIdx = item.globalIndex;
-                                    return (
-                                      <div key={`${item.bookId}_${item.chapter}_${gIdx}`}>
+                                  {session.chapters.map(
+                                    (item, idxInSession) => {
+                                      const b = BIBLE_BOOK_MAP[item.bookId];
+                                      const gIdx = item.globalIndex;
+                                      return (
                                         <div
-                                          data-testid={`scheduled-chapter-item-${gIdx}`}
-                                          className="flex items-center justify-between rounded-xl border border-black/5 bg-white px-2.5 py-1.5 text-[11.5px] dark:border-white/6 dark:bg-white/5"
+                                          key={`${item.bookId}_${item.chapter}_${gIdx}`}
                                         >
-                                          <div className="flex items-center gap-2 truncate mr-1">
-                                            <span className="size-4.5 rounded-full bg-black/5 text-center text-[10px] font-semibold leading-4.5 text-neutral-600 dark:bg-white/10 dark:text-neutral-300 shrink-0">
-                                              {gIdx + 1}
-                                            </span>
-                                            <span className="font-medium text-black dark:text-white truncate">
-                                              {b?.name || item.bookId} {item.chapter}
-                                            </span>
+                                          <div
+                                            data-testid={`scheduled-chapter-item-${gIdx}`}
+                                            className="flex items-center justify-between rounded-xl border border-black/5 bg-white px-2.5 py-1.5 text-[11.5px] dark:border-white/6 dark:bg-white/5"
+                                          >
+                                            <div className="flex items-center gap-2 truncate mr-1">
+                                              <span className="size-4.5 rounded-full bg-black/5 text-center text-[10px] font-semibold leading-4.5 text-neutral-600 dark:bg-white/10 dark:text-neutral-300 shrink-0">
+                                                {gIdx + 1}
+                                              </span>
+                                              <span className="font-medium text-black dark:text-white truncate">
+                                                {b?.name || item.bookId}{" "}
+                                                {item.chapter}
+                                              </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-0.5 shrink-0">
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  moveChapterInSequence({
+                                                    globalIndex: gIdx,
+                                                    direction: "up",
+                                                  });
+                                                }}
+                                                disabled={gIdx === 0}
+                                                className="rounded p-1 text-neutral-400 hover:text-black disabled:opacity-20 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
+                                                title="Move up"
+                                              >
+                                                <MoveUp className="size-3" />
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  moveChapterInSequence({
+                                                    globalIndex: gIdx,
+                                                    direction: "down",
+                                                  });
+                                                }}
+                                                disabled={
+                                                  gIdx ===
+                                                  chapterSequence.length - 1
+                                                }
+                                                className="rounded p-1 text-neutral-400 hover:text-black disabled:opacity-20 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
+                                                title="Move down"
+                                              >
+                                                <MoveDown className="size-3" />
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  removeChapterFromSequence({
+                                                    sessionId: session.id,
+                                                    chapterIndex: idxInSession,
+                                                  });
+                                                }}
+                                                className="rounded p-1 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 cursor-pointer"
+                                                title="Remove chapter"
+                                              >
+                                                <X className="size-3" />
+                                              </button>
+                                            </div>
                                           </div>
 
-                                          <div className="flex items-center gap-0.5 shrink-0">
-                                            <button
-                                              type="button"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                moveChapterInSequence({
-                                                  globalIndex: gIdx,
-                                                  direction: "up",
-                                                });
-                                              }}
-                                              disabled={gIdx === 0}
-                                              className="rounded p-1 text-neutral-400 hover:text-black disabled:opacity-20 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
-                                              title="Move up"
-                                            >
-                                              <MoveUp className="size-3" />
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                moveChapterInSequence({
-                                                  globalIndex: gIdx,
-                                                  direction: "down",
-                                                });
-                                              }}
-                                              disabled={gIdx === chapterSequence.length - 1}
-                                              className="rounded p-1 text-neutral-400 hover:text-black disabled:opacity-20 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
-                                              title="Move down"
-                                            >
-                                              <MoveDown className="size-3" />
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                removeChapterFromSequence({
-                                                  sessionId: session.id,
-                                                  chapterIndex: idxInSession,
-                                                });
-                                              }}
-                                              className="rounded p-1 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 cursor-pointer"
-                                              title="Remove chapter"
-                                            >
-                                              <X className="size-3" />
-                                            </button>
-                                          </div>
+                                          {/* Inline Split Button between chapters */}
+                                          {idxInSession <
+                                            session.chapters.length - 1 && (
+                                            <div className="flex justify-center my-0.5">
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  splitSessionAtChapter(
+                                                    session.id,
+                                                    idxInSession
+                                                  );
+                                                }}
+                                                className="group flex items-center gap-1 rounded px-2 py-0.5 text-[9.5px] text-neutral-400 hover:bg-black/5 hover:text-[#82ADD4] dark:hover:bg-white/8 cursor-pointer transition-all"
+                                                title="Split into new session starting next chapter"
+                                              >
+                                                <Split className="size-2.5 opacity-60 group-hover:opacity-100" />
+                                                <span>
+                                                  + Split session here
+                                                </span>
+                                              </button>
+                                            </div>
+                                          )}
                                         </div>
-
-                                        {/* Inline Split Button between chapters */}
-                                        {idxInSession < session.chapters.length - 1 && (
-                                          <div className="flex justify-center my-0.5">
-                                            <button
-                                              type="button"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                splitSessionAtChapter(session.id, idxInSession);
-                                              }}
-                                              className="group flex items-center gap-1 rounded px-2 py-0.5 text-[9.5px] text-neutral-400 hover:bg-black/5 hover:text-[#82ADD4] dark:hover:bg-white/8 cursor-pointer transition-all"
-                                              title="Split into new session starting next chapter"
-                                            >
-                                              <Split className="size-2.5 opacity-60 group-hover:opacity-100" />
-                                              <span>+ Split session here</span>
-                                            </button>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
+                                      );
+                                    }
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -1718,7 +1778,14 @@ export function CustomPlanWizardModal({
                         Projected Duration
                       </span>
                       <span className="text-[14px] font-bold text-[#82ADD4]">
-                        ~{Math.max(1, Math.ceil(totalPlanChapters / Math.max(1, dailyTarget)))} Days
+                        ~
+                        {Math.max(
+                          1,
+                          Math.ceil(
+                            totalPlanChapters / Math.max(1, dailyTarget)
+                          )
+                        )}{" "}
+                        Days
                       </span>
                     </div>
                   </div>
@@ -1733,7 +1800,8 @@ export function CustomPlanWizardModal({
                       Session Schedule Enforcement
                     </h4>
                     <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
-                      Choose whether subscribers follow your exact curated sessions or can configure their own pace.
+                      Choose whether subscribers follow your exact curated
+                      sessions or can configure their own pace.
                     </p>
                   </div>
 
@@ -1760,14 +1828,17 @@ export function CustomPlanWizardModal({
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <span className="text-[13.5px] font-semibold text-black dark:text-white">
-                          Fixed Sessions ({populatedSessions.length} Sessions Built)
+                          Fixed Sessions ({populatedSessions.length} Sessions
+                          Built)
                         </span>
                         <span className="rounded bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-neutral-600 dark:bg-white/8 dark:text-neutral-300">
                           Recommended
                         </span>
                       </div>
                       <p className="mt-1 text-[12px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-                        The {populatedSessions.length} sessions are already built. Each session represents one locked reading day that subscribers strictly follow.
+                        The {populatedSessions.length} sessions are already
+                        built. Each session represents one locked reading day
+                        that subscribers strictly follow.
                       </p>
                     </div>
                   </button>
@@ -1787,7 +1858,7 @@ export function CustomPlanWizardModal({
                       className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${
                         pacingStyle === "flexible"
                           ? "bg-black text-white dark:bg-white dark:text-black"
-                        : "bg-black/5 text-neutral-500 dark:bg-white/8 dark:text-neutral-300"
+                          : "bg-black/5 text-neutral-500 dark:bg-white/8 dark:text-neutral-300"
                       }`}
                     >
                       <Unlock className="size-4.5" />
@@ -1799,7 +1870,8 @@ export function CustomPlanWizardModal({
                         </span>
                       </div>
                       <p className="mt-1 text-[12px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-                        Subscribers can choose their own daily speed or read self-paced.
+                        Subscribers can choose their own daily speed or read
+                        self-paced.
                       </p>
                     </div>
                   </button>
@@ -1816,7 +1888,14 @@ export function CustomPlanWizardModal({
                           Session Distribution Warning
                         </p>
                         <p className="leading-relaxed opacity-95">
-                          In Flexible mode, readings are distributed evenly according to the reader&apos;s preferred daily speed and will <strong>not respect the {populatedSessions.length} custom session boundaries</strong> you created.
+                          In Flexible mode, readings are distributed evenly
+                          according to the reader&apos;s preferred daily speed
+                          and will{" "}
+                          <strong>
+                            not respect the {populatedSessions.length} custom
+                            session boundaries
+                          </strong>{" "}
+                          you created.
                         </p>
                       </div>
                     </div>
@@ -1840,33 +1919,39 @@ export function CustomPlanWizardModal({
                           max={30}
                           value={dailyTarget}
                           onChange={(e) =>
-                            setDailyTarget(Math.max(1, parseInt(e.target.value || "1", 10)))
+                            setDailyTarget(
+                              Math.max(1, parseInt(e.target.value || "1", 10))
+                            )
                           }
                           className="w-16 rounded-xl border border-black/10 bg-white px-2 py-1 text-center text-[13px] font-bold text-black dark:border-white/12 dark:bg-[#1C1D22] dark:text-white"
                         />
-                        <span className="text-[12px] text-neutral-500">Ch / day</span>
+                        <span className="text-[12px] text-neutral-500">
+                          Ch / day
+                        </span>
                       </div>
                     </div>
                   )}
 
                   {/* Session Breakdown Tags for Fixed Curated Sessions */}
-                  {pacingStyle === "locked_curated" && populatedSessions.length > 0 && (
-                    <div className="rounded-xl bg-black/2.5 p-3.5 dark:bg-white/3">
-                      <span className="block text-[11.5px] font-medium text-neutral-600 dark:text-neutral-300 mb-2">
-                        Curated Schedule Breakdown:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
-                        {populatedSessions.map((s, idx) => (
-                          <span
-                            key={s.id}
-                            className="rounded-lg border border-black/6 bg-white px-2.5 py-1 text-[10.5px] text-neutral-700 dark:border-white/8 dark:bg-white/8 dark:text-neutral-300"
-                          >
-                            S{idx + 1}: <strong>{s.chapters.length} ch</strong>
-                          </span>
-                        ))}
+                  {pacingStyle === "locked_curated" &&
+                    populatedSessions.length > 0 && (
+                      <div className="rounded-xl bg-black/2.5 p-3.5 dark:bg-white/3">
+                        <span className="block text-[11.5px] font-medium text-neutral-600 dark:text-neutral-300 mb-2">
+                          Curated Schedule Breakdown:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                          {populatedSessions.map((s, idx) => (
+                            <span
+                              key={s.id}
+                              className="rounded-lg border border-black/6 bg-white px-2.5 py-1 text-[10.5px] text-neutral-700 dark:border-white/8 dark:bg-white/8 dark:text-neutral-300"
+                            >
+                              S{idx + 1}:{" "}
+                              <strong>{s.chapters.length} ch</strong>
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* Stats Overview */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 border-t border-black/6 pt-3.5 dark:border-white/6 text-center">
@@ -1880,7 +1965,9 @@ export function CustomPlanWizardModal({
                     </div>
                     <div className="rounded-xl bg-white p-3 dark:bg-white/5 border border-black/5 dark:border-white/6">
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
-                        {pacingStyle === "locked_curated" ? "Curated Sessions" : "Projected Duration"}
+                        {pacingStyle === "locked_curated"
+                          ? "Curated Sessions"
+                          : "Projected Duration"}
                       </span>
                       <span className="text-[16px] font-bold text-[#82ADD4]">
                         {pacingStyle === "locked_curated"
@@ -1893,7 +1980,9 @@ export function CustomPlanWizardModal({
                         Pacing Mode
                       </span>
                       <span className="text-[13px] font-semibold text-black dark:text-white">
-                        {pacingStyle === "locked_curated" ? "🔒 Locked Curated" : "⚡ Flexible"}
+                        {pacingStyle === "locked_curated"
+                          ? "🔒 Locked Curated"
+                          : "⚡ Flexible"}
                       </span>
                     </div>
                   </div>
@@ -1910,7 +1999,11 @@ export function CustomPlanWizardModal({
                         Curriculum & Reading Schedule Preview
                       </h4>
                       <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
-                        {previewPlanSessions.length} {sequenceMode === "chapter" ? "sessions" : "daily assignments"} · {totalPlanChapters} chapters total
+                        {previewPlanSessions.length}{" "}
+                        {sequenceMode === "chapter"
+                          ? "sessions"
+                          : "daily assignments"}{" "}
+                        · {totalPlanChapters} chapters total
                       </p>
                     </div>
                   </div>
@@ -1939,7 +2032,10 @@ export function CustomPlanWizardModal({
                             </span>
                           </div>
                           <span className="text-[10px] text-neutral-400 font-mono">
-                            {session.chapters.length} {session.chapters.length === 1 ? "chapter" : "chapters"}
+                            {session.chapters.length}{" "}
+                            {session.chapters.length === 1
+                              ? "chapter"
+                              : "chapters"}
                           </span>
                         </div>
 
@@ -1953,7 +2049,8 @@ export function CustomPlanWizardModal({
                                 {idx + 1}
                               </span>
                               <span className="font-medium text-black dark:text-white">
-                                {BIBLE_BOOK_MAP[ch.bookId]?.name || ch.bookId} {ch.chapter}
+                                {BIBLE_BOOK_MAP[ch.bookId]?.name || ch.bookId}{" "}
+                                {ch.chapter}
                               </span>
                             </div>
                           ))}
@@ -1974,7 +2071,9 @@ export function CustomPlanWizardModal({
               <button
                 type="button"
                 onClick={() =>
-                  setCurrentStep((prev) => (prev === "review" ? "order" : "scope"))
+                  setCurrentStep((prev) =>
+                    prev === "review" ? "order" : "scope"
+                  )
                 }
                 disabled={isPending}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white/80 px-3.5 py-2 text-[12.5px] font-medium text-black shadow-2xs hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 cursor-pointer disabled:opacity-50 shrink-0"
@@ -2081,8 +2180,10 @@ export function CustomPlanWizardModal({
                   </h3>
                   <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
                     {previewPlanSessions.length}{" "}
-                    {sequenceMode === "chapter" ? "sessions" : "daily assignments"} ·{" "}
-                    {totalPlanChapters} chapters total
+                    {sequenceMode === "chapter"
+                      ? "sessions"
+                      : "daily assignments"}{" "}
+                    · {totalPlanChapters} chapters total
                   </p>
                 </div>
               </div>
@@ -2131,7 +2232,8 @@ export function CustomPlanWizardModal({
                             {idx + 1}
                           </span>
                           <span className="font-medium text-black dark:text-white">
-                            {BIBLE_BOOK_MAP[ch.bookId]?.name || ch.bookId} {ch.chapter}
+                            {BIBLE_BOOK_MAP[ch.bookId]?.name || ch.bookId}{" "}
+                            {ch.chapter}
                           </span>
                         </div>
                       ))}

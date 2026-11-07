@@ -138,7 +138,11 @@ export function ImportPlanModal({
     reader.readAsText(file);
   };
 
-  const handleSaveImportedPlan = ({ shouldStart = false }: { shouldStart?: boolean }) => {
+  const handleSaveImportedPlan = ({
+    shouldStart = false,
+  }: {
+    shouldStart?: boolean;
+  }) => {
     if (!validationResult.isValid || !validationResult.template) return;
     setActionError(null);
 
@@ -449,7 +453,9 @@ export function ImportPlanModal({
                       type="text"
                       value={planTitle}
                       onChange={(e) => setPlanTitle(e.target.value)}
-                      placeholder={validationResult.template?.title || "Imported Plan"}
+                      placeholder={
+                        validationResult.template?.title || "Imported Plan"
+                      }
                       className="w-full rounded-xl border border-black/10 bg-white px-3 py-1.5 text-[12.5px] text-black focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white"
                     />
                   </div>
@@ -462,7 +468,9 @@ export function ImportPlanModal({
                       type="text"
                       value={planDescription}
                       onChange={(e) => setPlanDescription(e.target.value)}
-                      placeholder={validationResult.template?.description || "Description"}
+                      placeholder={
+                        validationResult.template?.description || "Description"
+                      }
                       className="w-full rounded-xl border border-black/10 bg-white px-3 py-1.5 text-[12.5px] text-black focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white"
                     />
                   </div>

@@ -244,7 +244,8 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
         ) : (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 p-6 text-center dark:border-white/10">
             <p className="text-[12.5px] text-neutral-600 dark:text-neutral-400">
-              No notes were recorded during this plan. You can still add reflections anytime.
+              No notes were recorded during this plan. You can still add
+              reflections anytime.
             </p>
             <Link
               href={`/notes?planId=${plan.id}`}

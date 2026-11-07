@@ -78,10 +78,16 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     // Verify rich content modifiers (H1, H2, Bold, lists) are present
     const toolbar = noteModal.getByTestId("tiptap-toolbar");
     await expect(toolbar).toBeVisible();
-    await expect(toolbar.getByRole("button", { name: "Heading 1" })).toBeVisible();
-    await expect(toolbar.getByRole("button", { name: "Heading 2" })).toBeVisible();
+    await expect(
+      toolbar.getByRole("button", { name: "Heading 1" })
+    ).toBeVisible();
+    await expect(
+      toolbar.getByRole("button", { name: "Heading 2" })
+    ).toBeVisible();
     await expect(toolbar.getByRole("button", { name: "Bold" })).toBeVisible();
-    await expect(toolbar.getByRole("button", { name: "Bullet List" })).toBeVisible();
+    await expect(
+      toolbar.getByRole("button", { name: "Bullet List" })
+    ).toBeVisible();
 
     // Fill in reflection details
     await noteModal
@@ -166,9 +172,7 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     await expect(page.getByTestId("note-title-input")).toHaveValue(
       "Day 1 - Unsaved Reflection Straight To Studio"
     );
-    await expect(
-      page.locator(".tiptap-notes-editor")
-    ).toContainText(
+    await expect(page.locator(".tiptap-notes-editor")).toContainText(
       "Directly drafted in session modal without hitting save note first, opened in studio!"
     );
   });

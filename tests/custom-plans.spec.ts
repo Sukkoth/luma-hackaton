@@ -84,9 +84,13 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await wizardModal.getByTestId("order-mode-book-btn").click();
 
     // Verify daily reading target and pacing settings are asked in Order by Book
-    await expect(wizardModal.getByText("2. Daily Reading Target")).toBeVisible();
+    await expect(
+      wizardModal.getByText("2. Daily Reading Target")
+    ).toBeVisible();
     await wizardModal.getByTestId("daily-target-preset-2").click();
-    await expect(wizardModal.getByTestId("pacing-style-locked-btn")).toBeVisible();
+    await expect(
+      wizardModal.getByTestId("pacing-style-locked-btn")
+    ).toBeVisible();
     await wizardModal.getByTestId("pacing-style-locked-btn").click();
 
     // Verify Preview button in Step 2 for Order by Book
@@ -98,7 +102,9 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
       name: "Curriculum & Schedule Preview",
     });
     await expect(bookPreviewDialog).toBeVisible();
-    await expect(bookPreviewDialog.getByText("Day 1", { exact: true })).toBeVisible();
+    await expect(
+      bookPreviewDialog.getByText("Day 1", { exact: true })
+    ).toBeVisible();
     await bookPreviewDialog
       .getByRole("button", { name: "Close Preview", exact: true })
       .click();
@@ -117,9 +123,13 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     ).toBeVisible();
     await expect(wizardModal.getByText("Plan Pacing Summary")).toBeVisible();
     await expect(wizardModal.getByText("Daily Reading Target")).toBeVisible();
-    await expect(wizardModal.getByText("Fixed Daily Pace (2 ch/day)")).toBeVisible();
+    await expect(
+      wizardModal.getByText("Fixed Daily Pace (2 ch/day)")
+    ).toBeVisible();
     // Verify no redundant interactive inputs in Step 3 for Order by Book
-    await expect(wizardModal.getByTestId("review-daily-target-input")).not.toBeVisible();
+    await expect(
+      wizardModal.getByTestId("review-daily-target-input")
+    ).not.toBeVisible();
 
     // Verify embedded Curriculum Preview in Step 3
     await expect(
@@ -264,9 +274,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await expect(saveCatalogBtn).toBeDisabled();
 
     // 5. Test Step B: Load Sample CSV Template
-    const sampleCsvBtn = importModal.getByTestId(
-      "import-load-sample-csv-btn"
-    );
+    const sampleCsvBtn = importModal.getByTestId("import-load-sample-csv-btn");
     await expect(sampleCsvBtn).toBeVisible();
     await sampleCsvBtn.click();
 
@@ -359,7 +367,9 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await expect(wizardModal).toBeVisible();
 
     // Select Genesis and Exodus
-    const genesisBtn = wizardModal.getByRole("button", { name: /^Genesis 50/i });
+    const genesisBtn = wizardModal.getByRole("button", {
+      name: /^Genesis 50/i,
+    });
     const exodusBtn = wizardModal.getByRole("button", { name: /^Exodus 40/i });
     await genesisBtn.click();
     await exodusBtn.click();
@@ -691,14 +701,18 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
 
     // Verify switching to Flexible shows the Session Distribution Warning
     await wizardModal.getByTestId("review-pacing-flexible-btn").click();
-    await expect(wizardModal.getByTestId("flexible-session-warning")).toBeVisible();
+    await expect(
+      wizardModal.getByTestId("flexible-session-warning")
+    ).toBeVisible();
     await expect(
       wizardModal.getByText("Session Distribution Warning")
     ).toBeVisible();
 
     // Switch back to Fixed Sessions
     await wizardModal.getByTestId("review-pacing-locked-btn").click();
-    await expect(wizardModal.getByTestId("flexible-session-warning")).not.toBeVisible();
+    await expect(
+      wizardModal.getByTestId("flexible-session-warning")
+    ).not.toBeVisible();
 
     // 4. Save & Start Plan
     await wizardModal.getByTestId("save-custom-plan-start-btn").click();
@@ -788,14 +802,20 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     // Test Search input: type "Maccabees"
     const searchInput = wizardModal.getByPlaceholder("Search books...");
     await searchInput.fill("Maccabees");
-    await expect(wizardModal.getByRole("button", { name: /1 Maccabees/i })).toBeVisible();
-    await expect(wizardModal.getByRole("button", { name: /2 Maccabees/i })).toBeVisible();
+    await expect(
+      wizardModal.getByRole("button", { name: /1 Maccabees/i })
+    ).toBeVisible();
+    await expect(
+      wizardModal.getByRole("button", { name: /2 Maccabees/i })
+    ).toBeVisible();
     await searchInput.clear();
 
     // Test Section Select All / Deselect Section
-    const gospelsSelectBtn = wizardModal.getByRole("button", {
-      name: "Select section",
-    }).first();
+    const gospelsSelectBtn = wizardModal
+      .getByRole("button", {
+        name: "Select section",
+      })
+      .first();
     await gospelsSelectBtn.click();
     await expect(wizardModal.getByText(/of 73 books selected/i)).toBeVisible();
 
@@ -910,8 +930,12 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
 
     const persistedCard = page.locator(".group", { hasText: customTitle });
     await expect(persistedCard).toBeVisible();
-    await expect(persistedCard.getByText("Custom", { exact: true })).toBeVisible();
-    await expect(persistedCard.getByText("8 ch", { exact: true })).toBeVisible();
+    await expect(
+      persistedCard.getByText("Custom", { exact: true })
+    ).toBeVisible();
+    await expect(
+      persistedCard.getByText("8 ch", { exact: true })
+    ).toBeVisible();
 
     // 10. Verify Catalog search filter finds the custom plan
     const searchInput = page.getByPlaceholder("Search plans...");
@@ -930,8 +954,12 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     ).toBeVisible();
     await expect(page.getByText("Blueprint Template")).toBeVisible();
     await expect(page.getByText(customDesc)).toBeVisible();
-    await expect(page.getByText("Ruth", { exact: false }).first()).toBeVisible();
-    await expect(page.getByText("Jonah", { exact: false }).first()).toBeVisible();
+    await expect(
+      page.getByText("Ruth", { exact: false }).first()
+    ).toBeVisible();
+    await expect(
+      page.getByText("Jonah", { exact: false }).first()
+    ).toBeVisible();
 
     // 12. Return back to catalog
     await page.getByRole("link", { name: "Back to Plan Catalog" }).click();

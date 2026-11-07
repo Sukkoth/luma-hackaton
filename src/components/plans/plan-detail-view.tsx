@@ -92,9 +92,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     );
     setCurrentPlan((prev) => ({
       ...prev,
-      notes: prev.notes.map((n) =>
-        n.id === updatedNote.id ? updatedNote : n
-      ),
+      notes: prev.notes.map((n) => (n.id === updatedNote.id ? updatedNote : n)),
     }));
   };
 

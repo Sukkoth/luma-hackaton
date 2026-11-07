@@ -169,8 +169,7 @@ export async function getUserNotesAction({
 
 export type GetSingleNoteParams = { noteId: string };
 export type GetSingleNoteResult =
-  | { success: true; note: NoteDetail }
-  | { success: false; error: string };
+  { success: true; note: NoteDetail } | { success: false; error: string };
 
 export async function getSingleNoteAction({
   noteId,
@@ -578,7 +577,8 @@ export async function deleteFolderAction({
   if (!session) return { success: false, error: "Unauthorized" };
 
   const parsed = v.safeParse(DeleteFolderSchema, { folderId, deleteNotes });
-  if (!parsed.success) return { success: false, error: "Invalid folder parameters" };
+  if (!parsed.success)
+    return { success: false, error: "Invalid folder parameters" };
 
   const existing = await db.query.noteFolders.findFirst({
     where: and(

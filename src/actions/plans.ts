@@ -1942,8 +1942,7 @@ export async function createCustomPlanTemplateAction({
       recommendedDays: input.targetDays,
       allowCustomPace: input.allowCustomPace ?? true,
       allowSelfPaced: input.allowSelfPaced ?? true,
-      canonCompatibility:
-        (input.canonCompatibility as BibleCanon) ?? undefined,
+      canonCompatibility: (input.canonCompatibility as BibleCanon) ?? undefined,
       sections: (input.sections || []).map((s) => ({
         title: s.title,
         subtitle: s.subtitle || "",
