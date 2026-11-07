@@ -102,11 +102,6 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
         "In the beginning, God created the heavens and the earth. Everything was formed by His word and was very good."
       );
 
-    await page.screenshot({
-      path: "/home/twof/.gemini/antigravity/brain/b2d783bd-3954-4bf5-af7e-8797864147b9/plan-detail-note-modal-tiptap.png",
-      fullPage: false,
-    });
-
     await noteModal.getByRole("button", { name: "Save Note" }).click();
 
     // Modal closes and note card appears
