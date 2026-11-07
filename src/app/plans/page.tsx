@@ -3,7 +3,10 @@ import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { PlanCatalog } from "@/components/plans/PlanCatalog";
 import { getUserTrackersData } from "@/actions/trackers";
-import { getUserPlansAction } from "@/actions/plans";
+import {
+  getUserPlansAction,
+  getUserCustomPlanTemplatesAction,
+} from "@/actions/plans";
 import { syncUserStreak } from "@/lib/streak-service";
 import type { ActivePlanInstance } from "@/components/plans/plan-active-banner";
 import type { BibleCanon } from "@/data/bibleData";
@@ -15,12 +18,13 @@ export default async function PlansPage() {
     headers: await headers(),
   });
 
-  const [trackersData, streak] = session
+  const [trackersData, streak, customPlans] = session
     ? await Promise.all([
         getUserTrackersData({ userId: session.user.id }),
         syncUserStreak({ userId: session.user.id }),
+        getUserCustomPlanTemplatesAction({ userId: session.user.id }),
       ])
-    : [{ trackers: [], activeTracker: null }, undefined];
+    : [{ trackers: [], activeTracker: null }, undefined, []];
 
   const rawPlans =
     session && trackersData.activeTracker?.id
@@ -103,6 +107,7 @@ export default async function PlansPage() {
           activePlanInstances={activePlanInstances}
           pausedPlanInstances={pausedPlanInstances}
           finishedPlanInstances={finishedPlanInstances}
+          customPlans={customPlans}
           activeTrackerId={trackersData.activeTracker?.id}
           trackerName={trackersData.activeTracker?.name}
           trackerCanon={

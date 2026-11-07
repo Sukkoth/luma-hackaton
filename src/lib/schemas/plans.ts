@@ -97,3 +97,54 @@ export const ResumePlanSchema = v.object({
   instanceId: v.pipe(v.string(), v.minLength(1, "Instance ID is required")),
 });
 export type ResumePlanInput = v.InferOutput<typeof ResumePlanSchema>;
+
+export const CustomPlanReadingItemSchema = v.object({
+  id: v.optional(v.string()),
+  bookId: v.pipe(v.string(), v.minLength(1)),
+  bookName: v.pipe(v.string(), v.minLength(1)),
+  chapter: v.pipe(v.number(), v.minValue(1)),
+  startVerse: v.optional(v.number()),
+  endVerse: v.optional(v.number()),
+  verseRange: v.optional(v.string()),
+  versesLabel: v.optional(v.string()),
+  track: v.optional(v.string()),
+  displayText: v.optional(v.string()),
+  dayNumber: v.optional(v.number()),
+  order: v.number(),
+});
+
+export const CustomPlanSectionSchema = v.object({
+  title: v.pipe(v.string(), v.minLength(1)),
+  subtitle: v.optional(v.string()),
+  chaptersCount: v.number(),
+  booksDescription: v.optional(v.string()),
+});
+
+export const CreateCustomPlanTemplateSchema = v.object({
+  id: v.optional(v.string()),
+  title: v.pipe(v.string(), v.minLength(1, "Plan title is required")),
+  subtitle: v.optional(v.string()),
+  description: v.optional(v.string()),
+  category: v.optional(v.string()),
+  icon: v.optional(v.string()),
+  accentColor: v.optional(v.string()),
+  totalChapters: v.pipe(
+    v.number(),
+    v.minValue(1, "Plan must have at least 1 reading item")
+  ),
+  defaultDailyTarget: v.pipe(v.number(), v.minValue(1)),
+  targetDays: v.pipe(v.number(), v.minValue(1)),
+  canonCompatibility: v.optional(v.nullable(v.string())),
+  allowCustomPace: v.optional(v.boolean()),
+  allowSelfPaced: v.optional(v.boolean()),
+  sections: v.optional(v.array(CustomPlanSectionSchema)),
+  readings: v.pipe(
+    v.array(CustomPlanReadingItemSchema),
+    v.minLength(1, "Plan must contain at least one reading item")
+  ),
+});
+
+export type CreateCustomPlanTemplateInput = v.InferOutput<
+  typeof CreateCustomPlanTemplateSchema
+>;
+

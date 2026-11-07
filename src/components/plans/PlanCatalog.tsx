@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -17,6 +17,8 @@ import {
   Trophy,
   Sparkles,
   Coffee,
+  Plus,
+  Upload,
 } from "lucide-react";
 import {
   READING_PLANS,
@@ -24,7 +26,7 @@ import {
   isPlanMatchingFilter,
   isPlanCanonCompatible,
 } from "@/data/readingPlans";
-import { BIBLE_CANONS_CONFIG, type BibleCanon } from "@/data/bibleData";
+import type { BibleCanon } from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
 import { PlanCard } from "./plan-card";
 import { PlanFilterPills } from "./plan-filter-pills";
@@ -33,6 +35,8 @@ import {
   type ActivePlanInstance,
 } from "./plan-active-banner";
 import { PlanSetupModal } from "./plan-setup-modal";
+import { CustomPlanWizardModal } from "./custom-plan-wizard-modal";
+import { ImportPlanModal } from "./import-plan-modal";
 import type { ReadingPlanTemplate } from "@/data/readingPlans";
 import { celebratePlanCompletion } from "@/lib/confetti";
 import { updatePlanSettingsAction } from "@/actions/plans";
@@ -46,6 +50,7 @@ type Props = {
   activePlanInstances?: ReadonlyArray<ActivePlanInstance>;
   pausedPlanInstances?: ReadonlyArray<ActivePlanInstance>;
   finishedPlanInstances?: ReadonlyArray<ActivePlanInstance>;
+  customPlans?: ReadonlyArray<ReadingPlanTemplate>;
   activeTrackerId?: string;
   trackerName?: string;
   trackerCanon?: BibleCanon;
@@ -56,6 +61,7 @@ export function PlanCatalog({
   activePlanInstances = EMPTY_PLAN_INSTANCES,
   pausedPlanInstances = EMPTY_PLAN_INSTANCES,
   finishedPlanInstances = EMPTY_PLAN_INSTANCES,
+  customPlans = [],
   activeTrackerId,
   trackerName,
   trackerCanon = "protestant",
@@ -63,6 +69,11 @@ export function PlanCatalog({
   const router = useRouter();
   const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
+  const [allCustomPlans, setAllCustomPlans] = useState<ReadingPlanTemplate[]>(
+    () => [...(customPlans || [])]
+  );
+  const [isCustomWizardOpen, setIsCustomWizardOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<CatalogTab>(() => {
     if (initialTab === "my_plans" || initialTab === "active") return "active";
     if (initialTab === "paused") return "paused";
@@ -89,7 +100,12 @@ export function PlanCatalog({
     });
   };
 
-  const availablePlans = READING_PLANS.filter((plan) => {
+  const allTemplates: ReadingPlanTemplate[] = useMemo(
+    () => [...allCustomPlans, ...READING_PLANS],
+    [allCustomPlans]
+  );
+
+  const availablePlans = allTemplates.filter((plan) => {
     // 1. Hide templates that already have an active or paused instance in this tracker
     if (enrolledTemplateIds.has(plan.id)) {
       return false;
@@ -218,14 +234,26 @@ export function PlanCatalog({
                 selectedFilter={selectedFilter}
                 onSelectFilter={({ filter }) => setSelectedFilter(filter)}
               />
-              {trackerCanon && BIBLE_CANONS_CONFIG[trackerCanon] && (
-                <div className="inline-flex items-center gap-1.5 self-start rounded-full border border-black/5 bg-black/[0.03] px-3 py-1 text-[11px] text-[#666666] sm:self-auto dark:border-white/10 dark:bg-white/[0.04] dark:text-[#A1A1AA]">
-                  <span className="size-1.5 rounded-full bg-[#82ADD4]" />
-                  <span>
-                    Canon: {BIBLE_CANONS_CONFIG[trackerCanon].shortName}
-                  </span>
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsCustomWizardOpen(true)}
+                  data-testid="open-custom-plan-wizard-btn"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-[12px] font-medium text-white shadow-xs hover:bg-emerald-700 transition-all cursor-pointer"
+                >
+                  <Plus className="size-3.5" />
+                  <span>Create Custom</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsImportModalOpen(true)}
+                  data-testid="open-import-plan-modal-btn"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white/80 px-3 py-1.5 text-[12px] font-medium text-neutral-700 shadow-2xs hover:bg-black/5 dark:border-white/12 dark:bg-white/5 dark:text-neutral-200 dark:hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  <Upload className="size-3.5" />
+                  <span>Import</span>
+                </button>
+              </div>
             </div>
 
             {/* Catalog Grid */}
@@ -590,6 +618,49 @@ export function PlanCatalog({
           plan={selectedPlanForEnrollment}
           activeTrackerId={activeTrackerId || ""}
           trackerName={trackerName}
+        />
+      )}
+
+      {/* Custom Plan Wizard Modal */}
+      {isCustomWizardOpen && (
+        <CustomPlanWizardModal
+          isOpen={isCustomWizardOpen}
+          onCloseAction={() => setIsCustomWizardOpen(false)}
+          activeTrackerCanon={trackerCanon}
+          onPlanCreatedAction={(plan) => {
+            setAllCustomPlans((prev) => [
+              plan,
+              ...prev.filter((p) => p.id !== plan.id),
+            ]);
+          }}
+          onPlanCreatedAndStartAction={(plan) => {
+            setAllCustomPlans((prev) => [
+              plan,
+              ...prev.filter((p) => p.id !== plan.id),
+            ]);
+            setSelectedPlanForEnrollment(plan);
+          }}
+        />
+      )}
+
+      {/* Import Plan Modal */}
+      {isImportModalOpen && (
+        <ImportPlanModal
+          isOpen={isImportModalOpen}
+          onCloseAction={() => setIsImportModalOpen(false)}
+          onPlanImportedAction={(plan) => {
+            setAllCustomPlans((prev) => [
+              plan,
+              ...prev.filter((p) => p.id !== plan.id),
+            ]);
+          }}
+          onPlanImportedAndStartAction={(plan) => {
+            setAllCustomPlans((prev) => [
+              plan,
+              ...prev.filter((p) => p.id !== plan.id),
+            ]);
+            setSelectedPlanForEnrollment(plan);
+          }}
         />
       )}
     </div>

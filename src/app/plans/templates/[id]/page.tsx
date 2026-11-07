@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { TopNavbar } from "@/components/luma/top-navbar";
-import { getReadingPlanById } from "@/data/readingPlans";
+import { resolvePlanBlueprint } from "@/actions/plans";
 import { StartPlanAction } from "@/components/plans/start-plan-action";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
@@ -26,7 +26,7 @@ async function PlanTemplateDetailContent({
   params,
 }: PlanTemplateDetailContentParams) {
   const { id } = await params;
-  const plan = getReadingPlanById(id);
+  const plan = await resolvePlanBlueprint({ templateId: id });
 
   if (!plan) {
     notFound();

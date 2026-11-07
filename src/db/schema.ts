@@ -227,6 +227,7 @@ export const planReadingItems = pgTable(
     versesLabel: text("verses_label"),
     track: text("track"),
     displayText: text("display_text"),
+    dayNumber: integer("day_number"),
     orderIndex: integer("order_index").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()

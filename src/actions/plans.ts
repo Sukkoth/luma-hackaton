@@ -27,13 +27,17 @@ import {
   CatchUpIncreasePaceSchema,
   PausePlanSchema,
   ResumePlanSchema,
+  CreateCustomPlanTemplateSchema,
+  type CreateCustomPlanTemplateInput,
 } from "@/lib/schemas/plans";
 import {
   getReadingPlanById,
   isPlanCanonCompatible,
   type PlanReadingItem,
+  type ReadingPlanTemplate,
+  type PlanCategory,
 } from "@/data/readingPlans";
-import type { BibleCanon } from "@/data/bibleData";
+import { type BibleCanon, getBibleBookById } from "@/data/bibleData";
 import { syncUserStreak } from "@/lib/streak-service";
 
 export type StartPlanResult =
@@ -56,6 +60,66 @@ export type StartPlanActionParams = {
   reminderTime?: string;
   createNoteFolder?: boolean;
 };
+
+type ResolvePlanBlueprintParams = {
+  templateId: string;
+};
+
+export async function resolvePlanBlueprint({
+  templateId,
+}: ResolvePlanBlueprintParams): Promise<ReadingPlanTemplate | null> {
+  const staticPlan = getReadingPlanById(templateId);
+  if (staticPlan) return staticPlan;
+
+  const dbTemplate = await db.query.planTemplates.findFirst({
+    where: eq(planTemplates.id, templateId),
+    with: {
+      sections: true,
+      readings: {
+        orderBy: [planReadingItems.orderIndex],
+      },
+    },
+  });
+
+  if (!dbTemplate) return null;
+
+  return {
+    id: dbTemplate.id,
+    title: dbTemplate.title,
+    subtitle: dbTemplate.subtitle,
+    description: dbTemplate.description,
+    category: (dbTemplate.category as PlanCategory) || "Custom",
+    icon: dbTemplate.icon,
+    accentColor: dbTemplate.accentColor,
+    totalChapters: dbTemplate.totalChapters,
+    defaultDailyTarget: dbTemplate.defaultDailyTarget,
+    recommendedDays: dbTemplate.targetDays,
+    allowCustomPace: dbTemplate.allowCustomPace,
+    allowSelfPaced: dbTemplate.allowSelfPaced,
+    canonCompatibility:
+      (dbTemplate.canonCompatibility as BibleCanon) || undefined,
+    sections: dbTemplate.sections.map((s) => ({
+      title: s.title,
+      subtitle: s.subtitle,
+      chaptersCount: s.chaptersCount,
+      booksDescription: s.booksDescription,
+    })),
+    readings: dbTemplate.readings.map((r) => ({
+      id: r.id,
+      bookId: r.bookId,
+      bookName: getBibleBookById(r.bookId)?.name || r.bookId,
+      chapter: r.chapter,
+      startVerse: r.startVerse ?? undefined,
+      endVerse: r.endVerse ?? undefined,
+      verseRange: r.verseRange ?? undefined,
+      versesLabel: r.versesLabel ?? undefined,
+      track: r.track ?? undefined,
+      displayText: r.displayText ?? undefined,
+      order: r.orderIndex,
+      dayNumber: r.dayNumber ?? undefined,
+    })),
+  };
+}
 
 type EnsurePlanTemplateInDbParams = {
   templateId: string;
@@ -126,6 +190,7 @@ async function ensurePlanTemplateInDb({
         versesLabel: r.versesLabel ?? null,
         track: r.track ?? null,
         displayText: r.displayText ?? `${r.bookName} ${r.chapter}`,
+        dayNumber: r.dayNumber ?? null,
         orderIndex: r.order ?? i + idx + 1,
       }));
       await db
@@ -166,10 +231,34 @@ function calculatePastReadings({
 
   const past: PlanReadingItem[] = [];
 
-  for (let i = 0; i < readings.length; i += dailyTarget) {
-    const chunk = readings.slice(i, i + dailyTarget);
+  const hasCuratedSessions = readings.some((r) => r.dayNumber != null);
+  const sessionChunks: PlanReadingItem[][] = [];
 
-    if (i > 0) {
+  if (hasCuratedSessions) {
+    const dayMap = new Map<number, PlanReadingItem[]>();
+    for (const r of readings) {
+      const day = r.dayNumber ?? 1;
+      const list = dayMap.get(day) ?? [];
+      list.push(r);
+      dayMap.set(day, list);
+    }
+    const sortedDays = Array.from(dayMap.keys()).sort((a, b) => a - b);
+    for (const d of sortedDays) {
+      const items = dayMap.get(d);
+      if (items && items.length > 0) {
+        sessionChunks.push(items);
+      }
+    }
+  } else {
+    for (let i = 0; i < readings.length; i += dailyTarget) {
+      sessionChunks.push(readings.slice(i, i + dailyTarget));
+    }
+  }
+
+  for (let sIdx = 0; sIdx < sessionChunks.length; sIdx++) {
+    const chunk = sessionChunks[sIdx];
+
+    if (sIdx > 0) {
       cursor.setDate(cursor.getDate() + 1);
       while (!safeDays.includes(cursor.getDay())) {
         cursor.setDate(cursor.getDate() + 1);
@@ -264,7 +353,9 @@ export async function startPlanAction({
 
     // 3. Ensure blueprint template exists in database
     await ensurePlanTemplateInDb({ templateId: input.templateId });
-    const blueprint = getReadingPlanById(input.templateId);
+    const blueprint = await resolvePlanBlueprint({
+      templateId: input.templateId,
+    });
     if (!blueprint) {
       return { success: false, error: "Blueprint template not found." };
     }
@@ -727,7 +818,9 @@ export async function getPlanInstanceDetailAction({
 
   if (!instance) return null;
 
-  const blueprint = getReadingPlanById(instance.templateId);
+  const blueprint = await resolvePlanBlueprint({
+    templateId: instance.templateId,
+  });
   const readings = blueprint?.readings || [];
 
   const completedSet = new Set(
@@ -779,10 +872,34 @@ export async function getPlanInstanceDetailAction({
     "Dec",
   ];
 
-  for (let i = 0; i < readings.length; i += dailyTarget) {
-    const sessionIdx = Math.floor(i / dailyTarget) + 1;
+  const hasCuratedSessions = readings.some((r) => r.dayNumber != null);
+  const sessionChunks: PlanReadingItem[][] = [];
+
+  if (hasCuratedSessions) {
+    const dayMap = new Map<number, PlanReadingItem[]>();
+    for (const r of readings) {
+      const day = r.dayNumber ?? 1;
+      const list = dayMap.get(day) ?? [];
+      list.push(r);
+      dayMap.set(day, list);
+    }
+    const sortedDays = Array.from(dayMap.keys()).sort((a, b) => a - b);
+    for (const d of sortedDays) {
+      const items = dayMap.get(d);
+      if (items && items.length > 0) {
+        sessionChunks.push(items);
+      }
+    }
+  } else {
+    for (let i = 0; i < readings.length; i += dailyTarget) {
+      sessionChunks.push(readings.slice(i, i + dailyTarget));
+    }
+  }
+
+  for (let sIdx = 0; sIdx < sessionChunks.length; sIdx++) {
+    const sessionIdx = sIdx + 1;
     const partIdx = Math.floor((sessionIdx - 1) / 7) + 1;
-    const chunk = readings.slice(i, i + dailyTarget);
+    const chunk = sessionChunks[sIdx];
 
     if (sessionIdx > 1) {
       cursorDate.setDate(cursorDate.getDate() + 1);
@@ -1719,4 +1836,208 @@ export async function catchUpIncreasePaceAction({
   });
 
   return { success: true, plan: updatedPlan ?? undefined };
+}
+
+export type CreateCustomPlanTemplateResult =
+  | { success: true; templateId: string; template: ReadingPlanTemplate }
+  | { success: false; error: string };
+
+export type CreateCustomPlanTemplateActionParams = {
+  template: CreateCustomPlanTemplateInput;
+};
+
+export async function createCustomPlanTemplateAction({
+  template,
+}: CreateCustomPlanTemplateActionParams): Promise<CreateCustomPlanTemplateResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return { success: false, error: "Unauthorized. Please sign in." };
+  }
+
+  const parsed = v.safeParse(CreateCustomPlanTemplateSchema, template);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message || "Invalid custom plan parameters.",
+    };
+  }
+
+  const input = parsed.output;
+  const templateId =
+    input.id ||
+    `custom_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  try {
+    // 1. Insert Template
+    await db.insert(planTemplates).values({
+      id: templateId,
+      title: input.title,
+      subtitle: input.subtitle || "",
+      description: input.description || "",
+      category: input.category || "Custom",
+      icon: input.icon || "bookmark",
+      accentColor: input.accentColor || "#10B981",
+      totalChapters: input.totalChapters,
+      defaultDailyTarget: input.defaultDailyTarget,
+      targetDays: input.targetDays,
+      canonCompatibility: input.canonCompatibility ?? null,
+      allowCustomPace: input.allowCustomPace ?? true,
+      allowSelfPaced: input.allowSelfPaced ?? true,
+      isCustom: true,
+      isPublished: false,
+      authorId: session.user.id,
+      authorName: session.user.name,
+    });
+
+    // 2. Insert Sections
+    if (input.sections && input.sections.length > 0) {
+      const sectionValues = input.sections.map((sec, idx) => ({
+        id: `${templateId}_sec_${idx}`,
+        templateId,
+        title: sec.title,
+        subtitle: sec.subtitle || "",
+        chaptersCount: sec.chaptersCount,
+        booksDescription: sec.booksDescription || "",
+        sortOrder: idx,
+      }));
+      await db.insert(planSections).values(sectionValues);
+    }
+
+    // 3. Insert Readings in chunks
+    const chunkSize = 200;
+    for (let i = 0; i < input.readings.length; i += chunkSize) {
+      const chunk = input.readings.slice(i, i + chunkSize);
+      const readingValues = chunk.map((r, idx) => ({
+        id: `${templateId}_${r.bookId}_${r.chapter}_${i + idx}`,
+        templateId,
+        bookId: r.bookId,
+        chapter: r.chapter,
+        startVerse: r.startVerse ?? null,
+        endVerse: r.endVerse ?? null,
+        verseRange: r.verseRange ?? null,
+        versesLabel: r.versesLabel ?? null,
+        track: r.track ?? null,
+        displayText: r.displayText ?? `${r.bookName} ${r.chapter}`,
+        dayNumber: r.dayNumber ?? null,
+        orderIndex: r.order ?? i + idx + 1,
+      }));
+      await db.insert(planReadingItems).values(readingValues);
+    }
+
+    revalidatePath("/plans");
+
+    const fullTemplate: ReadingPlanTemplate = {
+      id: templateId,
+      title: input.title,
+      subtitle: input.subtitle || "",
+      description: input.description || "",
+      category: (input.category as PlanCategory) || "Custom",
+      icon: input.icon || "bookmark",
+      accentColor: input.accentColor || "#10B981",
+      totalChapters: input.totalChapters,
+      defaultDailyTarget: input.defaultDailyTarget,
+      recommendedDays: input.targetDays,
+      allowCustomPace: input.allowCustomPace ?? true,
+      allowSelfPaced: input.allowSelfPaced ?? true,
+      canonCompatibility:
+        (input.canonCompatibility as BibleCanon) ?? undefined,
+      sections: (input.sections || []).map((s) => ({
+        title: s.title,
+        subtitle: s.subtitle || "",
+        chaptersCount: s.chaptersCount,
+        booksDescription: s.booksDescription || "",
+      })),
+      readings: input.readings.map((r, idx) => ({
+        id: r.id || `${templateId}_r_${idx}`,
+        bookId: r.bookId,
+        bookName: r.bookName,
+        chapter: r.chapter,
+        startVerse: r.startVerse,
+        endVerse: r.endVerse,
+        verseRange: r.verseRange,
+        versesLabel: r.versesLabel,
+        track: r.track,
+        displayText: r.displayText,
+        order: r.order ?? idx + 1,
+        dayNumber: r.dayNumber,
+      })),
+    };
+
+    return { success: true, templateId, template: fullTemplate };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to create custom plan template.";
+    return { success: false, error: message };
+  }
+}
+
+export type GetUserCustomPlanTemplatesActionParams = {
+  userId?: string;
+};
+
+export async function getUserCustomPlanTemplatesAction({
+  userId,
+}: GetUserCustomPlanTemplatesActionParams = {}): Promise<
+  ReadingPlanTemplate[]
+> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const effectiveUserId = userId || session?.user?.id;
+  if (!effectiveUserId) return [];
+
+  const dbTemplates = await db.query.planTemplates.findMany({
+    where: and(
+      eq(planTemplates.isCustom, true),
+      eq(planTemplates.authorId, effectiveUserId)
+    ),
+    with: {
+      sections: true,
+      readings: {
+        orderBy: [planReadingItems.orderIndex],
+      },
+    },
+    orderBy: [desc(planTemplates.createdAt)],
+  });
+
+  return dbTemplates.map((t) => ({
+    id: t.id,
+    title: t.title,
+    subtitle: t.subtitle,
+    description: t.description,
+    category: (t.category as PlanCategory) || "Custom",
+    icon: t.icon,
+    accentColor: t.accentColor,
+    totalChapters: t.totalChapters,
+    defaultDailyTarget: t.defaultDailyTarget,
+    recommendedDays: t.targetDays,
+    allowCustomPace: t.allowCustomPace,
+    allowSelfPaced: t.allowSelfPaced,
+    canonCompatibility: (t.canonCompatibility as BibleCanon) || undefined,
+    sections: t.sections.map((s) => ({
+      title: s.title,
+      subtitle: s.subtitle,
+      chaptersCount: s.chaptersCount,
+      booksDescription: s.booksDescription,
+    })),
+    readings: t.readings.map((r) => ({
+      id: r.id,
+      bookId: r.bookId,
+      bookName: getBibleBookById(r.bookId)?.name || r.bookId,
+      chapter: r.chapter,
+      startVerse: r.startVerse ?? undefined,
+      endVerse: r.endVerse ?? undefined,
+      verseRange: r.verseRange ?? undefined,
+      versesLabel: r.versesLabel ?? undefined,
+      track: r.track ?? undefined,
+      displayText: r.displayText ?? undefined,
+      order: r.orderIndex,
+      dayNumber: r.dayNumber ?? undefined,
+    })),
+  }));
 }
