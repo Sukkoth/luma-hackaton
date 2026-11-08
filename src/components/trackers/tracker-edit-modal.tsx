@@ -6,68 +6,111 @@ import {
   X,
   BookOpen,
   Bookmark,
-  Compass,
-  Heart,
+  Sparkles,
   Flame,
-  Sun,
-  Loader2,
+  Award,
+  Layers,
   Lock,
+  Loader2,
 } from "lucide-react";
 import {
   updateTrackerAction,
   type UserTrackerSummary,
 } from "@/actions/trackers";
-import { CANON_OPTIONS } from "@/lib/schemas/onboarding";
+import type { BibleCanon } from "@/data/bibleData";
+
+type TrackerEditModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  tracker: UserTrackerSummary;
+  onTrackerUpdated?: (tracker: UserTrackerSummary) => void;
+};
+
+const CANON_NAMES: Record<BibleCanon, { name: string; totalBooks: number }> = {
+  protestant: { name: "Standard 66-Book Canon", totalBooks: 66 },
+  catholic: { name: "Catholic Canon (73 Books)", totalBooks: 73 },
+  eastern_orthodox: { name: "Eastern Orthodox (78 Books)", totalBooks: 78 },
+  ethiopian_orthodox: { name: "Ethiopian Orthodox (81 Books)", totalBooks: 81 },
+};
 
 const TRACKER_COLORS = [
-  { name: "Gold", value: "#F59E0B" },
-  { name: "Sapphire", value: "#3B82F6" },
+  { name: "Olive Primary", value: "#DADAD6" },
+  { name: "Deep Slate", value: "#1A212D" },
   { name: "Emerald", value: "#10B981" },
-  { name: "Violet", value: "#8B5CF6" },
-  { name: "Rose", value: "#F43F5E" },
-  { name: "Slate", value: "#71717A" },
-];
+  { name: "Amber", value: "#F59E0B" },
+  { name: "Sapphire", value: "#3B82F6" },
+  { name: "Rose", value: "#EF4444" },
+] as const;
 
 const TRACKER_ICONS = [
   { id: "book-open", label: "Open Book", icon: BookOpen },
   { id: "bookmark", label: "Bookmark", icon: Bookmark },
-  { id: "compass", label: "Compass", icon: Compass },
-  { id: "heart", label: "Heart", icon: Heart },
+  { id: "sparkles", label: "Sparkles", icon: Sparkles },
   { id: "flame", label: "Flame", icon: Flame },
-  { id: "sun", label: "Sun", icon: Sun },
-];
+  { id: "award", label: "Award", icon: Award },
+  { id: "layers", label: "Layers", icon: Layers },
+] as const;
 
-type Props = {
-  tracker: UserTrackerSummary;
-  isOpen: boolean;
-  onClose: () => void;
-};
-
-export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
+export function TrackerEditModal({
+  isOpen,
+  onClose,
+  tracker,
+  onTrackerUpdated,
+}: TrackerEditModalProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [selectedColor, setSelectedColor] = useState<string>(tracker.color);
-  const [selectedIcon, setSelectedIcon] = useState<string>(tracker.icon);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [selectedColor, setSelectedColor] = useState<string>(
+    tracker.color || TRACKER_COLORS[0].value
+  );
+  const [selectedIcon, setSelectedIcon] = useState<string>(
+    tracker.icon || "book-open"
+  );
 
   if (!isOpen) return null;
 
   const currentCanon =
-    CANON_OPTIONS.find((c) => c.id === tracker.canon) ?? CANON_OPTIONS[0]!;
+    CANON_NAMES[tracker.canon as BibleCanon] || CANON_NAMES.protestant;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
+
     const formData = new FormData(e.currentTarget);
+    const name = (formData.get("name") as string)?.trim();
+    const description = (formData.get("description") as string)?.trim() || "";
+    const color = (formData.get("color") as string) || selectedColor;
+    const icon = (formData.get("icon") as string) || selectedIcon;
+
+    formData.set("trackerId", tracker.id);
+    if (!formData.get("color")) formData.set("color", color);
+    if (!formData.get("icon")) formData.set("icon", icon);
+
+    if (!name || name.length < 2) {
+      setErrorMessage("Tracker name must be at least 2 characters.");
+      return;
+    }
 
     startTransition(async () => {
-      const result = await updateTrackerAction({ formData });
-      if (result.success) {
-        onClose();
-        router.refresh();
-      } else {
+      const result = await updateTrackerAction({
+        formData,
+      });
+
+      if (!result.success) {
         setErrorMessage(result.error);
+        return;
       }
+
+      onTrackerUpdated?.({
+        ...tracker,
+        name,
+        description,
+        color,
+        icon,
+      });
+      onClose();
+      router.refresh();
     });
   };
 
@@ -76,19 +119,19 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-tracker-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 backdrop-blur-sm sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-4"
     >
-      <div className="glass-panel relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto rounded-3xl border border-white/90 bg-white p-5 shadow-2xl backdrop-blur-2xl sm:p-6 dark:border-white/10 dark:bg-[#121215]">
+      <div className="ui-card relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto p-5 shadow-2xl sm:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/6 pb-3.5 dark:border-white/8">
+        <div className="flex items-center justify-between border-b border-border-subtle pb-3.5">
           <div>
             <h3
               id="edit-tracker-dialog-title"
-              className="text-[17px] font-medium tracking-tight text-black dark:text-white"
+              className="text-[17px] font-semibold tracking-tight text-foreground"
             >
               Edit Reading Tracker
             </h3>
-            <p className="text-[12px] text-[#666666] dark:text-[#9CA3AF]">
+            <p className="text-[12px] text-foreground-secondary">
               Update name and customization for {tracker.name}
             </p>
           </div>
@@ -97,27 +140,25 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
             type="button"
             aria-label="Close edit dialog"
             onClick={onClose}
-            className="flex size-7.5 items-center justify-center rounded-xl bg-black/5 text-[#555555] transition-colors hover:bg-black/10 hover:text-black dark:bg-white/10 dark:text-[#9CA3AF] dark:hover:bg-white/20 dark:hover:text-white"
+            className="flex size-8 items-center justify-center rounded-full bg-surface-elevated text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
           >
             <X className="size-4" />
           </button>
         </div>
 
         {errorMessage && (
-          <div className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 p-2.5 text-[12px] text-red-600 dark:text-red-400">
+          <div className="mt-3 rounded-[12px] border border-destructive/20 bg-destructive/10 p-2.5 text-[12px] text-destructive">
             {errorMessage}
           </div>
         )}
 
         {/* Uncontrolled Form */}
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          <input type="hidden" name="trackerId" value={tracker.id} />
-
           {/* Tracker Name */}
           <div>
             <label
               htmlFor="tracker-edit-name"
-              className="block text-[12px] font-medium text-black dark:text-white"
+              className="block text-[12px] font-medium text-foreground"
             >
               Tracker Name
             </label>
@@ -128,50 +169,52 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
                 type="text"
                 required
                 defaultValue={tracker.name}
-                placeholder="e.g. Ancient Texts or Personal Devotions"
-                className="w-full rounded-xl border border-black/10 bg-white/70 px-3.5 py-2 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#777777] dark:focus:border-white/25"
+                placeholder="e.g. Personal Reading"
+                className="ui-input h-10 w-full text-[13px]"
               />
             </div>
           </div>
 
-          {/* Description */}
+          {/* Description (Optional) */}
           <div>
             <label
               htmlFor="tracker-edit-desc"
-              className="block text-[12px] font-medium text-black dark:text-white"
+              className="block text-[12px] font-medium text-foreground"
             >
               Description{" "}
-              <span className="text-[#888888] font-normal">(optional)</span>
+              <span className="text-foreground-dim font-normal">
+                (optional)
+              </span>
             </label>
             <div className="relative mt-1">
               <input
                 id="tracker-edit-desc"
                 name="description"
                 type="text"
-                defaultValue={tracker.description}
+                defaultValue={tracker.description || ""}
                 placeholder="e.g. Daily devotional reading rhythm"
-                className="w-full rounded-xl border border-black/10 bg-white/70 px-3.5 py-2 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#777777] dark:focus:border-white/25"
+                className="ui-input h-10 w-full text-[13px]"
               />
             </div>
           </div>
 
           {/* Canon Status (Locked / Immutable) */}
-          <div className="rounded-2xl border border-black/6 bg-black/3 p-3 dark:border-white/8 dark:bg-white/3">
+          <div className="rounded-[12px] border border-border-subtle bg-surface-elevated p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Lock className="size-3.5 text-amber-500" />
-                <span className="text-[12px] font-medium text-black dark:text-white">
+                <Lock className="size-3.5 text-warning" />
+                <span className="text-[12px] font-medium text-foreground">
                   Bible Canon (Locked)
                 </span>
               </div>
-              <span className="rounded-md bg-black/6 px-2 py-0.5 text-[10px] font-medium text-black/80 dark:bg-white/10 dark:text-white/90">
+              <span className="ui-pill text-[10px] font-medium">
                 {currentCanon.totalBooks} Books
               </span>
             </div>
-            <p className="mt-1 text-[11px] font-medium text-black dark:text-white">
+            <p className="mt-1 text-[11px] font-medium text-foreground">
               {currentCanon.name}
             </p>
-            <p className="mt-0.5 text-[10px] text-[#777777] dark:text-[#9CA3AF]">
+            <p className="mt-0.5 text-[10px] text-foreground-dim">
               Canon cannot be changed after creation to protect reading history
               and chapter progress.
             </p>
@@ -181,7 +224,7 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Color Palette */}
             <div>
-              <label className="block text-[12px] font-medium text-black dark:text-white">
+              <label className="block text-[12px] font-medium text-foreground">
                 Accent Color
               </label>
               <input type="hidden" name="color" value={selectedColor} />
@@ -192,9 +235,9 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
                     type="button"
                     title={c.name}
                     onClick={() => setSelectedColor(c.value)}
-                    className={`size-6 rounded-full transition-transform ${
+                    className={`size-6 rounded-full transition-transform cursor-pointer ${
                       selectedColor === c.value
-                        ? "ring-2 ring-black/40 ring-offset-2 scale-110 dark:ring-white dark:ring-offset-[#121215]"
+                        ? "ring-2 ring-primary ring-offset-2 scale-110"
                         : "opacity-75 hover:opacity-100"
                     }`}
                     style={{ backgroundColor: c.value }}
@@ -205,7 +248,7 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
 
             {/* Icon Picker */}
             <div>
-              <label className="block text-[12px] font-medium text-black dark:text-white">
+              <label className="block text-[12px] font-medium text-foreground">
                 Tracker Icon
               </label>
               <input type="hidden" name="icon" value={selectedIcon} />
@@ -219,13 +262,13 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
                       type="button"
                       title={i.label}
                       onClick={() => setSelectedIcon(i.id)}
-                      className={`flex size-7 items-center justify-center rounded-lg border transition-all ${
+                      className={`flex size-8 items-center justify-center rounded-[10px] border transition-all cursor-pointer ${
                         isSelected
-                          ? "border-black/30 bg-black/5 text-black dark:border-white/30 dark:bg-white/10 dark:text-white"
-                          : "border-black/6 bg-white/40 text-[#777777] hover:text-black dark:border-white/6 dark:bg-white/2 dark:text-[#9CA3AF] dark:hover:text-white"
+                          ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                          : "border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                       }`}
                     >
-                      <IconComp className="size-3.5" />
+                      <IconComp className="size-4" />
                     </button>
                   );
                 })}
@@ -234,19 +277,19 @@ export function TrackerEditModal({ tracker, isOpen, onClose }: Props) {
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-2 border-t border-black/6 pt-3.5 dark:border-white/8">
+          <div className="flex items-center justify-end gap-2 border-t border-border-subtle pt-3.5">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded-xl border border-black/8 px-4 py-2 text-[12px] font-medium text-[#666666] hover:bg-black/5 dark:border-white/10 dark:text-[#9CA3AF] dark:hover:bg-white/5"
+              className="ui-btn-secondary ui-btn-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-xs transition-opacity hover:opacity-90 disabled:opacity-50 dark:bg-white dark:text-black"
+              className="ui-btn-primary ui-btn-sm gap-1.5"
             >
               {isPending && <Loader2 className="size-3.5 animate-spin" />}
               <span>Save Changes</span>

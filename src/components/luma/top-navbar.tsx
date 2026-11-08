@@ -7,7 +7,7 @@ import {
   Settings,
   LogIn,
   ArrowRight,
-  Flame,
+  Zap,
   Shield,
   Home,
   BookOpen,
@@ -57,34 +57,29 @@ export function TopNavbar({
         { label: "Plans", href: "/plans", icon: Calendar },
       ];
 
-  const brandHref = isAuthenticated ? "/home" : "/";
-
   return (
     <>
       <header className="flex items-center justify-between gap-2 py-3 md:gap-4">
-        {/* Brand logo & Tracker Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3 lg:w-95 lg:justify-center">
-          <Link href={brandHref} className="group flex items-center">
-            <span className="text-[22px] font-semibold tracking-tight text-foreground">
-              Luma<span className="text-foreground-dim">.</span>
-            </span>
-          </Link>
-
-          {trackers && trackers.length > 0 && (
-            <>
-              <div className="h-4 w-px bg-border" aria-hidden="true" />
-              <TrackerSwitcher
-                trackers={trackers}
-                activeTrackerId={activeTrackerId}
-              />
-            </>
+        {/* Left cluster: Tracker Switcher for Authenticated users, Luma brand logo for Guests */}
+        <div className="flex items-center min-w-[220px] sm:min-w-[260px] lg:w-80">
+          {isAuthenticated && trackers && trackers.length > 0 ? (
+            <TrackerSwitcher
+              trackers={trackers}
+              activeTrackerId={activeTrackerId}
+            />
+          ) : (
+            <Link href="/" className="group flex items-center">
+              <span className="text-[22px] font-semibold tracking-tight text-foreground">
+                Luma<span className="text-foreground-dim">.</span>
+              </span>
+            </Link>
           )}
         </div>
 
         {/* Center cluster: Monochrome Tab Tiles (desktop only) */}
         <nav
           aria-label="Main Navigation"
-          className="hidden md:flex items-center gap-1.5"
+          className="hidden md:flex items-center gap-1 rounded-[16px] border border-border bg-surface p-1"
         >
           {NAV_TABS.map((tab) => {
             const isActive =
@@ -96,10 +91,10 @@ export function TopNavbar({
               <Link
                 key={tab.label}
                 href={tab.href}
-                className={`flex items-center justify-center rounded-xl px-4 py-1.5 text-[13px] transition-all ${
+                className={`flex items-center justify-center rounded-[12px] px-3.5 py-1 text-[13px] transition-all ${
                   isActive
-                    ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                    : "border border-border bg-surface-elevated font-normal text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
+                    ? "bg-primary font-semibold text-primary-foreground shadow-xs"
+                    : "bg-transparent font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
                 }`}
               >
                 {tab.label}
@@ -108,65 +103,62 @@ export function TopNavbar({
           })}
         </nav>
 
-        {/* Right controls: Streak button, Theme Toggle, and Auth / Settings button */}
+        {/* Right controls: Capsule with Streak, Theme Toggle, Settings/Auth */}
         <div className="flex items-center gap-2">
-          {isAuthenticated && streak && (
-            <button
-              type="button"
-              onClick={() => setIsStreakOpen(true)}
-              aria-label={`Current streak: ${streak.currentStreak} days`}
-              data-testid="streak-navbar-button"
-              className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[12px] font-medium transition-all ${
-                streak.isTodayCompleted
-                  ? "border-primary-border bg-primary text-primary-foreground"
-                  : "border-border bg-surface text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
-              }`}
-            >
-              <Flame
-                className={`size-3.5 ${
-                  streak.isTodayCompleted
-                    ? "fill-current text-primary-foreground"
-                    : "text-foreground-secondary"
-                }`}
-              />
-              <span className="font-semibold">{streak.currentStreak}</span>
-              {streak.isFreezeUnlocked ? (
-                <span
-                  className="flex items-center gap-0.5 text-[10px] text-foreground-dim"
-                  title={`${streak.availableFreezes} freeze shields available`}
-                >
-                  <Shield className="size-3" />
-                  <span>{streak.availableFreezes}</span>
-                </span>
-              ) : null}
-            </button>
-          )}
-          <ThemeToggle />
           {isAuthenticated ? (
-            <Link
-              href="/settings"
-              aria-label="Settings"
-              className={`flex size-9 items-center justify-center rounded-xl transition-all ${
-                pathname.startsWith("/settings")
-                  ? "border border-primary-border bg-primary text-primary-foreground"
-                  : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
-              }`}
-              title={`Settings (Signed in as ${effectiveUserName})`}
-            >
-              <Settings className="size-3.5" strokeWidth={1.75} />
-            </Link>
+            <div className="flex items-center gap-1.5 rounded-full border border-border bg-surface p-1">
+              {streak && (
+                <button
+                  type="button"
+                  onClick={() => setIsStreakOpen(true)}
+                  aria-label={`Current streak: ${streak.currentStreak} days`}
+                  data-testid="streak-navbar-button"
+                  className={`flex items-center gap-1 rounded-[14px] px-2.5 py-1 text-[12px] font-semibold transition-all cursor-pointer ${
+                    streak.currentStreak > 0
+                      ? "border border-primary bg-primary text-primary-foreground shadow-xs"
+                      : "border border-border bg-surface-elevated text-foreground-dim hover:text-foreground"
+                  }`}
+                >
+                  <Zap className="size-3.5 fill-current" />
+                  <span>{streak.currentStreak}</span>
+                  {streak.isFreezeUnlocked ? (
+                    <span
+                      className="ml-0.5 flex items-center gap-0.5 text-[10px] opacity-80"
+                      title={`${streak.availableFreezes} freeze shields available`}
+                    >
+                      <Shield className="size-3" />
+                      <span>{streak.availableFreezes}</span>
+                    </span>
+                  ) : null}
+                </button>
+              )}
+              <ThemeToggle />
+              <Link
+                href="/settings"
+                aria-label="Settings"
+                className={`flex size-8 items-center justify-center rounded-full border transition-all ${
+                  pathname.startsWith("/settings")
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
+                }`}
+                title={`Settings (Signed in as ${effectiveUserName})`}
+              >
+                <Settings className="size-3.5" strokeWidth={1.75} />
+              </Link>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Link
                 href="/login"
-                className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5"
+                className="ui-btn-secondary ui-btn-sm gap-1.5"
               >
                 <LogIn className="size-3.5" />
                 <span>Sign In</span>
               </Link>
               <Link
                 href="/signup"
-                className="ui-btn-primary hidden px-3.5 py-1.5 text-[12px] gap-1.5 sm:inline-flex"
+                className="ui-btn-primary ui-btn-sm hidden gap-1.5 sm:inline-flex"
               >
                 <span>Get Started</span>
                 <ArrowRight className="size-3.5" />
@@ -187,7 +179,7 @@ export function TopNavbar({
       {/* Mobile Bottom Navigation Bar (Visible on mobile phone, hidden on md+) */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-border bg-surface/90 px-2 py-1.5 shadow-lg backdrop-blur-xl md:hidden pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-border bg-surface/95 px-2 py-2 backdrop-blur-xl md:hidden pb-[max(0.75rem,env(safe-area-inset-bottom))]"
       >
         {NAV_TABS.map((tab) => {
           const isActive =
@@ -203,19 +195,11 @@ export function TopNavbar({
               className={`flex flex-1 flex-col items-center justify-center py-1 transition-all ${
                 isActive
                   ? "font-semibold text-foreground"
-                  : "text-foreground-secondary hover:text-foreground"
+                  : "font-medium text-foreground-dim hover:text-foreground"
               }`}
             >
-              <div
-                className={`flex size-8 items-center justify-center rounded-xl transition-all ${
-                  isActive
-                    ? "bg-primary-muted text-foreground"
-                    : "text-foreground-dim"
-                }`}
-              >
-                <Icon className="size-4.5" strokeWidth={isActive ? 2.2 : 1.8} />
-              </div>
-              <span className="mt-0.5 text-[10.5px] tracking-tight">
+              <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
+              <span className="mt-1 text-[11px] tracking-tight">
                 {tab.label}
               </span>
             </Link>

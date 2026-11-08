@@ -65,7 +65,7 @@ export function ActivityBarChart({
           <span className="block text-[10px] font-medium tracking-wider text-foreground-secondary uppercase">
             Total Chapters
           </span>
-          <span className="mt-0.5 font-mono text-[24px] font-light tracking-tight text-foreground">
+          <span className="mt-0.5 text-[24px] font-light tracking-tight text-foreground">
             {totalChapters.toLocaleString()}
           </span>
         </div>
@@ -93,7 +93,7 @@ export function ActivityBarChart({
               {/* High Contrast Monochrome Tag above Peak Bar */}
               {bar.isPeak && (
                 <div className="absolute -top-7 z-10 flex flex-col items-center">
-                  <span className="rounded-full border border-primary-border bg-primary px-2 py-0.5 font-mono text-[10px] font-medium text-primary-foreground shadow-xs">
+                  <span className="rounded-full border border-primary-border bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground shadow-xs">
                     {bar.value}
                   </span>
                   <div className="mt-0.5 size-1 rounded-full bg-primary" />

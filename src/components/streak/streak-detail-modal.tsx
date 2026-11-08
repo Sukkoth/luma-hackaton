@@ -158,23 +158,23 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="streak-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 backdrop-blur-sm sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-4"
     >
-      <div className="glass-panel relative flex w-full max-w-xl flex-col rounded-3xl border border-white/90 bg-white p-4.5 shadow-2xl backdrop-blur-2xl sm:p-5 dark:border-white/10 dark:bg-[#121215]">
+      <div className="ui-card relative flex w-full max-w-xl flex-col p-4.5 shadow-2xl sm:p-5">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/6 pb-3 dark:border-white/8">
+        <div className="flex items-center justify-between border-b border-border-subtle pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-8 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
-              <Flame className="size-4.5 fill-current text-zinc-950 dark:text-zinc-50" />
+            <div className="flex size-8 items-center justify-center rounded-[10px] border border-border bg-primary-muted text-primary">
+              <Flame className="size-4.5 fill-current" />
             </div>
             <div>
               <h3
                 id="streak-dialog-title"
-                className="text-[16px] font-medium tracking-tight text-black dark:text-white"
+                className="text-[16px] font-bold tracking-tight text-foreground"
               >
                 Reading Habit Streak
               </h3>
-              <p className="text-[11px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="text-[11px] font-medium text-foreground-dim">
                 Consecutive daily reading rhythm
               </p>
             </div>
@@ -184,7 +184,7 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
             type="button"
             aria-label="Close streak dialog"
             onClick={onCloseAction}
-            className="flex size-7.5 items-center justify-center rounded-xl bg-black/5 text-[#555555] transition-colors hover:bg-black/10 hover:text-black dark:bg-white/10 dark:text-[#9CA3AF] dark:hover:bg-white/20 dark:hover:text-white"
+            className="rounded-xl p-1.5 text-foreground-dim hover:bg-surface-elevated hover:text-foreground cursor-pointer transition-colors"
           >
             <X className="size-4" />
           </button>
@@ -195,53 +195,53 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
           {/* Top Row: Side-by-side Streak Counter & Freeze Shields */}
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {/* Current Streak Tile */}
-            <div className="flex flex-col justify-between rounded-2xl border border-black/6 bg-white/70 p-3 text-center shadow-2xs backdrop-blur-md dark:border-white/8 dark:bg-white/4">
+            <div className="ui-card-elevated flex flex-col justify-between p-3 text-center">
               <div>
-                <span className="text-[10px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
+                <span className="text-[10px] font-medium tracking-wider text-foreground-dim uppercase">
                   Current Streak
                 </span>
                 <div className="mt-0.5 flex items-baseline justify-center gap-1.5">
-                  <span className="font-mono text-[32px] font-medium tracking-tight text-zinc-950 dark:text-zinc-50">
+                  <span className="text-[32px] font-medium tracking-tight text-foreground">
                     {streak.currentStreak}
                   </span>
-                  <span className="text-[13px] font-normal text-[#666666] dark:text-[#9CA3AF]">
+                  <span className="text-[13px] font-normal text-foreground-secondary">
                     {streak.currentStreak === 1 ? "day" : "days"}
                   </span>
                 </div>
 
                 <div className="mt-1 flex items-center justify-center">
                   {streak.isTodayCompleted ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2.5 py-0.5 font-mono text-[10px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+                    <span className="ui-pill-primary text-[10px]">
                       <CheckCircle2 className="size-3" />
                       Read completed today
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-medium text-[#666666] dark:bg-white/5 dark:text-[#9CA3AF]">
+                    <span className="ui-pill text-[10px]">
                       Read a chapter today to keep streak active
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="mt-2 border-t border-black/4 pt-1.5 text-[10px] text-[#777777] dark:border-white/6 dark:text-[#9CA3AF]">
+              <div className="mt-2 border-t border-border-subtle pt-1.5 text-[10px] text-foreground-dim">
                 Record:{" "}
-                <strong className="font-mono font-semibold text-zinc-950 dark:text-zinc-50">
+                <strong className="font-semibold text-foreground">
                   {streak.longestStreak} days
                 </strong>
               </div>
             </div>
 
             {/* Streak Freeze Shields Tile */}
-            <div className="flex flex-col justify-between rounded-2xl border border-black/6 bg-white/70 p-3 shadow-2xs backdrop-blur-md dark:border-white/8 dark:bg-white/4">
+            <div className="ui-card-elevated flex flex-col justify-between p-3">
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <Shield className="size-3.5 text-zinc-900 dark:text-zinc-100" />
-                    <h4 className="text-[12px] font-medium text-black dark:text-white">
+                    <Shield className="size-3.5 text-foreground" />
+                    <h4 className="text-[12px] font-medium text-foreground">
                       Freeze Shields
                     </h4>
                   </div>
-                  <span className="text-[10px] font-medium text-[#777777] dark:text-[#9CA3AF]">
+                  <span className="text-[10px] font-medium text-foreground-dim">
                     {streak.isFreezeUnlocked
                       ? `${streak.availableFreezes}/3 Available`
                       : "Locked"}
@@ -258,8 +258,8 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                             key={idx}
                             className={`flex flex-1 items-center justify-center gap-1 rounded-lg border py-1 text-[10px] font-medium transition-all ${
                               isAvailable
-                                ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                                : "border-black/6 bg-black/4 text-[#999999] dark:border-white/6 dark:bg-white/3 dark:text-[#777777]"
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-surface text-foreground-dim"
                             }`}
                           >
                             <Shield className="size-2.5" />
@@ -268,19 +268,19 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                         );
                       })}
                     </div>
-                    <p className="mt-1.5 text-[10px] text-[#777777] dark:text-[#9CA3AF]">
+                    <p className="mt-1.5 text-[10px] text-foreground-dim">
                       {streak.availableFreezes < 3
                         ? `3 consecutive days restore 1 shield (${streak.freezeRestorationDaysCount}/3d).`
                         : "Shields automatically protect up to 3 missed days."}
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-1.5 rounded-lg border border-black/5 bg-black/3 p-2 text-[11px] text-[#666666] dark:border-white/6 dark:bg-white/2 dark:text-[#9CA3AF]">
-                    <div className="flex items-center gap-1 font-medium text-black dark:text-white">
-                      <Lock className="size-3 text-amber-500" />
+                  <div className="mt-1.5 rounded-lg border border-border bg-surface p-2 text-[11px] text-foreground-secondary">
+                    <div className="flex items-center gap-1 font-medium text-foreground">
+                      <Lock className="size-3 text-warning" />
                       <span>Unlocks at 7-day streak</span>
                     </div>
-                    <p className="mt-0.5 text-[10px]">
+                    <p className="mt-0.5 text-[10px] text-foreground-dim">
                       Build 7 consecutive days to unlock (Currently:{" "}
                       {streak.currentStreak}/7 days).
                     </p>
@@ -291,8 +291,8 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
           </div>
 
           {/* Activity Heatmap Card */}
-          <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 shadow-2xs backdrop-blur-md dark:border-white/8 dark:bg-white/4">
-            <div className="flex items-center justify-between border-b border-black/4 pb-2 dark:border-white/6">
+          <div className="ui-card-elevated p-3.5">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-2">
               <div>
                 <h4 className="text-[12px] font-medium text-black dark:text-white">
                   Reading Activity History
@@ -305,33 +305,33 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
               </div>
 
               {/* Heatmap Legend */}
-              <div className="flex items-center gap-1 text-[10px] text-[#777777] dark:text-[#9CA3AF]">
+              <div className="flex items-center gap-1 text-[10px] text-foreground-dim">
                 <span>Less</span>
                 <span
                   title="0 chapters"
-                  className="size-2.5 rounded-xs bg-black/5 dark:bg-white/5"
+                  className="size-2.5 rounded-xs bg-border-subtle"
                 />
                 <span
                   title="1 chapter"
-                  className="size-2.5 rounded-xs bg-zinc-300 dark:bg-zinc-700"
+                  className="size-2.5 rounded-xs bg-border-strong opacity-40"
                 />
                 <span
                   title="2-3 chapters"
-                  className="size-2.5 rounded-xs bg-zinc-500 dark:bg-zinc-500"
+                  className="size-2.5 rounded-xs bg-border-strong opacity-70"
                 />
                 <span
                   title="4-6 chapters"
-                  className="size-2.5 rounded-xs bg-zinc-700 dark:bg-zinc-300"
+                  className="size-2.5 rounded-xs bg-border-strong"
                 />
                 <span
                   title="7+ chapters"
-                  className="size-2.5 rounded-xs bg-zinc-950 dark:bg-white"
+                  className="size-2.5 rounded-xs bg-primary"
                 />
                 <span>More</span>
                 <span className="mx-1 opacity-40">•</span>
                 <span
                   title="Shielded with Freeze"
-                  className="size-2.5 rounded-xs border border-zinc-400 bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-800"
+                  className="size-2.5 rounded-xs border border-border-strong bg-surface-elevated"
                 />
                 <span>Shield</span>
               </div>
@@ -395,24 +395,23 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                   }
 
                   let cellClass =
-                    "bg-black/5 dark:bg-white/5 hover:ring-1 hover:ring-black/20 dark:hover:ring-white/20";
+                    "bg-border-subtle hover:ring-1 hover:ring-border-strong";
 
                   if (day.isFrozen) {
                     cellClass =
-                      "border border-zinc-400 bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-800";
+                      "border border-border-strong bg-surface-elevated";
                   } else if (day.chaptersCount > 0) {
                     if (day.intensityLevel === 1) {
                       cellClass =
-                        "bg-zinc-300 dark:bg-zinc-700 hover:opacity-90";
+                        "bg-border-strong opacity-40 hover:opacity-90";
                     } else if (day.intensityLevel === 2) {
                       cellClass =
-                        "bg-zinc-500 dark:bg-zinc-500 hover:opacity-90";
+                        "bg-border-strong opacity-70 hover:opacity-90";
                     } else if (day.intensityLevel === 3) {
-                      cellClass =
-                        "bg-zinc-700 dark:bg-zinc-300 hover:opacity-90";
+                      cellClass = "bg-border-strong hover:opacity-90";
                     } else {
                       // Level 4 (7+ chapters)
-                      cellClass = "bg-zinc-950 dark:bg-white hover:opacity-90";
+                      cellClass = "bg-primary hover:opacity-90";
                     }
                   }
 
@@ -425,9 +424,7 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                         gridRowStart: day.dayOfWeek + 2,
                       }}
                       className={`aspect-square w-full rounded-xs transition-all hover:scale-125 sm:rounded-[2.5px] ${cellClass} ${
-                        day.isToday
-                          ? "ring-1 ring-inset ring-black/20 dark:ring-inset dark:ring-white/25"
-                          : ""
+                        day.isToday ? "ring-1 ring-inset ring-primary" : ""
                       }`}
                     />
                   );
@@ -438,11 +435,11 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
         </div>
 
         {/* Modal Footer */}
-        <div className="border-t border-black/6 pt-2.5 text-right dark:border-white/8">
+        <div className="border-t border-border-subtle pt-3 text-right">
           <button
             type="button"
             onClick={onCloseAction}
-            className="rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/85"
+            className="ui-btn-primary ui-btn-sm"
           >
             Done
           </button>

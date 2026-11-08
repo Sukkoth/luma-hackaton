@@ -60,10 +60,10 @@ export function DistributionCards({
                 <span>Pentateuch & Law</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-light text-foreground">
                   {distribution.law}
                 </span>
-                <span className="ui-pill font-mono text-[10px]">
+                <span className="ui-pill text-[10px]">
                   {getPercent(distribution.law)}
                 </span>
               </div>
@@ -75,10 +75,10 @@ export function DistributionCards({
                 <span>Historical Books</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-light text-foreground">
                   {distribution.history}
                 </span>
-                <span className="ui-pill font-mono text-[10px]">
+                <span className="ui-pill text-[10px]">
                   {getPercent(distribution.history)}
                 </span>
               </div>
@@ -90,10 +90,10 @@ export function DistributionCards({
                 <span>Poetry & Wisdom</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-light text-foreground">
                   {distribution.poetry}
                 </span>
-                <span className="ui-pill font-mono text-[10px]">
+                <span className="ui-pill text-[10px]">
                   {getPercent(distribution.poetry)}
                 </span>
               </div>
@@ -105,10 +105,10 @@ export function DistributionCards({
                 <span>Gospels & Epistles</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-light text-foreground">
                   {distribution.gospelsEpistles}
                 </span>
-                <span className="ui-pill-primary font-mono text-[10px]">
+                <span className="ui-pill-primary text-[10px]">
                   {getPercent(distribution.gospelsEpistles)}
                 </span>
               </div>
@@ -124,7 +124,7 @@ export function DistributionCards({
             <h4 className="text-[16px] font-normal tracking-tight text-foreground">
               Active Plans Status
             </h4>
-            <span className="ui-pill font-mono text-[10px]">
+            <span className="ui-pill text-[10px]">
               {activePlans.length}{" "}
               {activePlans.length === 1 ? "Active" : "Active"}
             </span>
@@ -151,7 +151,7 @@ export function DistributionCards({
                       </p>
                     </div>
                   </div>
-                  <span className="ui-pill font-mono text-[10px]">
+                  <span className="ui-pill text-[10px]">
                     {plan.progressPercent}%
                   </span>
                 </div>

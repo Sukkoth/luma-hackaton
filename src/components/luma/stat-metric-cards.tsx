@@ -47,10 +47,10 @@ export function StatMetricCards({
             <span className="text-[13px] font-normal text-foreground-secondary">
               {item.title}
             </span>
-            <span className="ui-pill font-mono text-[10px]">{item.badge}</span>
+            <span className="ui-pill text-[10px]">{item.badge}</span>
           </div>
           <div className="mt-3">
-            <span className="font-mono text-[36px] font-light leading-none tracking-tight text-foreground sm:text-[40px]">
+            <span className="text-[36px] font-light leading-none tracking-tight text-foreground sm:text-[40px]">
               {item.value}
             </span>
           </div>
