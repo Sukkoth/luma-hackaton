@@ -33,11 +33,11 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
         <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Bookmark className="size-3.5 text-[#82ADD4]" />
+              <span className="flex items-center gap-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+                <Bookmark className="size-3.5 text-zinc-500 dark:text-zinc-400" />
                 <span>Bible Plans Catalog • Curated Journeys</span>
               </span>
-              <span className="rounded-sm bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+              <span className="rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
                 {READING_PLANS.length} Curated Plans
               </span>
             </div>
@@ -60,7 +60,7 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
             </span>
             <Link
               href="/login?redirect=/plans"
-              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             >
               <LogIn className="size-3.5" />
               <span>Sign In to Start Plan</span>
@@ -72,11 +72,11 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
         <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Bookmark className="size-3.5 text-[#82ADD4]" />
+              <span className="flex items-center gap-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+                <Bookmark className="size-3.5 text-zinc-500 dark:text-zinc-400" />
                 <span>Bible Plans • Active Reading</span>
               </span>
-              <span className="rounded-sm bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+              <span className="rounded-md bg-black px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-white dark:text-black">
                 {activePlanInstances[0]?.progressPercent}% Complete
               </span>
             </div>
@@ -105,7 +105,7 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
                 style={{
                   width: `${activePlanInstances[0]?.progressPercent}%`,
                 }}
-                className="h-full rounded-full bg-linear-to-r from-[#82ADD4] to-[#DDFD2C]"
+                className="h-full rounded-full bg-black dark:bg-white"
               />
             </div>
           </div>
@@ -116,7 +116,7 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
             </span>
             <Link
               href={`/plans/${activePlanInstances[0]?.id}`}
-              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/80 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             >
               <Play className="size-3 fill-current" />
               <span>Resume Reading</span>
@@ -128,8 +128,8 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
         <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Bookmark className="size-3.5 text-[#82ADD4]" />
+              <span className="flex items-center gap-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+                <Bookmark className="size-3.5 text-zinc-500 dark:text-zinc-400" />
                 <span>Bible Plans • Personal Reading</span>
               </span>
               <span className="rounded-sm bg-black/5 px-2 py-0.5 text-[11px] font-medium text-[#666666] dark:bg-white/8 dark:text-[#A1A1AA]">
@@ -153,7 +153,7 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
             <span className="text-[#777777] dark:text-[#A1A1AA]">
               {READING_PLANS.length} curated blueprints available below
             </span>
-            <span className="text-[12px] font-medium text-[#507ea6] dark:text-[#82ADD4]">
+            <span className="text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
               Select a plan below to start
             </span>
           </div>
@@ -193,7 +193,7 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
               <span className="text-[#666666] dark:text-[#9CA3AF]">
                 Pacing Flexibility
               </span>
-              <span className="rounded-sm bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+              <span className="rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
                 Fixed & Self-Paced
               </span>
             </div>

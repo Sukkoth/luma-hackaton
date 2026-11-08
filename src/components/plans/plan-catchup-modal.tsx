@@ -96,9 +96,9 @@ export function PlanCatchUpModal({
         {/* Catch-Up Options Cards */}
         <div className="mt-5 space-y-3.5">
           {/* Option 1: Shift Days to Today (RECOMMENDED) */}
-          <div className="group rounded-[20px] border border-[#82ADD4]/30 bg-[#82ADD4]/5 p-4.5 transition-all dark:border-[#82ADD4]/25 dark:bg-[#82ADD4]/10">
+          <div className="group rounded-[20px] border border-zinc-300 bg-zinc-50 p-4.5 transition-all dark:border-zinc-700 dark:bg-zinc-900/50">
             <div className="flex items-start gap-3.5">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#507ea6] dark:text-[#82ADD4]">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
                 <Calendar className="size-5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -106,7 +106,7 @@ export function PlanCatchUpModal({
                   <h3 className="text-[14.5px] font-semibold text-black dark:text-white">
                     Shift Days to Today
                   </h3>
-                  <span className="rounded-md bg-[#82ADD4]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#507ea6] dark:text-[#82ADD4]">
+                  <span className="rounded-full border border-zinc-300 bg-zinc-200 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                     RECOMMENDED
                   </span>
                 </div>
@@ -120,12 +120,12 @@ export function PlanCatchUpModal({
                 {/* Info Pills */}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <div className="inline-flex items-center gap-1 rounded-lg bg-black/4 px-2.5 py-1 text-[11px] font-medium text-black/70 dark:bg-white/6 dark:text-white/70">
-                    <BookOpen className="size-3 text-[#507ea6] dark:text-[#82ADD4]" />
+                    <BookOpen className="size-3 text-zinc-900 dark:text-zinc-100" />
                     <span>{currentPace} chap/day</span>
                   </div>
                   {overdueInfo.projectedEndDateLabel && (
                     <div className="inline-flex items-center gap-1 rounded-lg bg-black/4 px-2.5 py-1 text-[11px] font-medium text-black/70 dark:bg-white/6 dark:text-white/70">
-                      <Clock className="size-3 text-[#507ea6] dark:text-[#82ADD4]" />
+                      <Clock className="size-3 text-zinc-900 dark:text-zinc-100" />
                       <span>Finishes {overdueInfo.projectedEndDateLabel}</span>
                     </div>
                   )}

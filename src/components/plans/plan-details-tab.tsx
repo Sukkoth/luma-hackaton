@@ -53,18 +53,18 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
   return (
     <div className="space-y-5">
       {/* 1. Journey Completed Hero Card */}
-      <div className="glass-panel rounded-[26px] p-6 space-y-4">
+      <div className="glass-panel space-y-4 rounded-[26px] p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#DDFD2C] text-black shadow-xs">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-950 text-white shadow-xs dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
               <Trophy className="size-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                   Finished Plan
                 </span>
-                <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-black dark:bg-white/10 dark:text-white">
+                <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10.5px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                   100% Completed
                 </span>
               </div>
@@ -72,7 +72,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
                 {plan.title}
               </h3>
               {plan.subtitle && (
-                <p className="mt-0.5 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+                <p className="mt-0.5 text-[13px] text-zinc-500 dark:text-zinc-400">
                   {plan.subtitle}
                 </p>
               )}
@@ -90,62 +90,62 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
         </div>
 
         {plan.description && (
-          <p className="border-t border-black/5 pt-4 text-[13px] leading-relaxed text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
+          <p className="border-t border-black/5 pt-4 text-[13px] leading-relaxed text-zinc-600 dark:border-white/6 dark:text-zinc-400">
             {plan.description}
           </p>
         )}
       </div>
 
       {/* 2. Detailed Journey Specifications */}
-      <div className="glass-panel rounded-[26px] p-6 space-y-4">
+      <div className="glass-panel space-y-4 rounded-[26px] p-6">
         <h4 className="text-[15px] font-semibold tracking-tight text-black dark:text-white">
           Plan Overview & Statistics
         </h4>
 
         <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
-              <BookOpen className="size-3.5 text-[#82ADD4]" />
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
+              <BookOpen className="size-3.5 text-zinc-900 dark:text-zinc-100" />
               <span>Chapters</span>
             </span>
             <p className="mt-1 text-[16px] font-semibold text-black dark:text-white">
               {plan.totalChapters} Chapters
             </p>
-            <p className="text-[11px] text-[#888888] dark:text-[#71717A]">
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
               100% finished
             </p>
           </div>
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
-              <Layers className="size-3.5 text-[#82ADD4]" />
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
+              <Layers className="size-3.5 text-zinc-900 dark:text-zinc-100" />
               <span>Sessions & Parts</span>
             </span>
             <p className="mt-1 text-[16px] font-semibold text-black dark:text-white">
               {plan.sessions.length} Sessions
             </p>
-            <p className="text-[11px] text-[#888888] dark:text-[#71717A]">
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
               Across {plan.parts.length} part
               {plan.parts.length === 1 ? "" : "s"}
             </p>
           </div>
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
-              <Bookmark className="size-3.5 text-[#82ADD4]" />
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
+              <Bookmark className="size-3.5 text-zinc-900 dark:text-zinc-100" />
               <span>Reading Tracker</span>
             </span>
             <p className="mt-1 text-[16px] font-semibold text-black truncate dark:text-white">
               {plan.tracker.name}
             </p>
-            <p className="text-[11px] text-[#888888] capitalize dark:text-[#71717A]">
+            <p className="text-[11px] text-zinc-500 capitalize dark:text-zinc-400">
               {plan.tracker.canon} canon
             </p>
           </div>
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
-              <Calendar className="size-3.5 text-[#82ADD4]" />
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
+              <Calendar className="size-3.5 text-zinc-900 dark:text-zinc-100" />
               <span>Started On</span>
             </span>
             <p className="mt-1 text-[14px] font-medium text-black dark:text-white">
@@ -154,8 +154,8 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
           </div>
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
-              <Trophy className="size-3.5 text-[#82ADD4]" />
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
+              <Trophy className="size-3.5 text-zinc-900 dark:text-zinc-100" />
               <span>Completed</span>
             </span>
             <p className="mt-1 text-[14px] font-medium text-black dark:text-white">
@@ -167,9 +167,9 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
             href={`/notes?planId=${plan.id}`}
             className="group block rounded-2xl border border-black/6 bg-white/70 p-3.5 hover:border-black/15 hover:bg-white transition-all dark:border-white/8 dark:bg-white/3 dark:hover:bg-white/6"
           >
-            <span className="flex items-center justify-between text-[11px] font-medium text-[#777777] uppercase tracking-wider dark:text-[#A1A1AA]">
+            <span className="flex items-center justify-between text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
               <span className="flex items-center gap-1.5">
-                <FileText className="size-3.5 text-[#82ADD4]" />
+                <FileText className="size-3.5 text-zinc-900 dark:text-zinc-100" />
                 <span>Study Notes</span>
               </span>
               <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -177,7 +177,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
             <p className="mt-1 text-[16px] font-semibold text-black dark:text-white">
               {plan.notesCount} Note{plan.notesCount === 1 ? "" : "s"}
             </p>
-            <p className="text-[11px] text-[#888888] dark:text-[#71717A]">
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
               View in study journal →
             </p>
           </Link>
@@ -214,7 +214,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
                 className="group flex flex-col justify-between rounded-2xl border border-black/6 bg-white/70 p-3.5 hover:border-black/15 hover:bg-white dark:border-white/8 dark:bg-white/3 dark:hover:bg-white/6 transition-all"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-2 text-[10.5px] text-[#82ADD4]">
+                  <div className="flex items-center justify-between gap-2 font-mono text-[10.5px] text-zinc-500 dark:text-zinc-400">
                     <span className="flex items-center gap-1.5 font-medium">
                       <Calendar className="size-3" />
                       <span>{formatDisplayDate(note.createdAt)}</span>
@@ -225,7 +225,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
                       </span>
                     )}
                   </div>
-                  <h5 className="mt-1.5 text-[13.5px] font-semibold text-black group-hover:text-[#82ADD4] dark:text-white transition-colors line-clamp-1">
+                  <h5 className="mt-1.5 text-[13.5px] font-semibold text-black group-hover:text-zinc-600 dark:text-white dark:group-hover:text-zinc-300 transition-colors line-clamp-1">
                     {note.title}
                   </h5>
                   <p className="mt-1 text-[12px] leading-relaxed text-neutral-600 dark:text-neutral-400 line-clamp-2">

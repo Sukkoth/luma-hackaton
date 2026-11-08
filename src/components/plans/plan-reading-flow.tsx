@@ -211,7 +211,7 @@ export function PlanReadingFlow({
                         </span>
                       )}
                       {session.isToday && (
-                        <span className="rounded bg-[#82ADD4]/20 px-1 py-0.2 text-[9px] font-semibold uppercase tracking-wider text-[#507ea6] dark:text-[#82ADD4]">
+                        <span className="rounded-full border border-zinc-200 bg-zinc-100 px-1.5 py-0.2 font-mono text-[9px] font-semibold uppercase tracking-wider text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                           Today
                         </span>
                       )}
@@ -221,7 +221,7 @@ export function PlanReadingFlow({
 
                 <div className="flex items-center gap-1.5">
                   {isSelected && !isLocked && (
-                    <MapPin className="size-3 text-[#82ADD4]" />
+                    <MapPin className="size-3 text-zinc-950 dark:text-zinc-50" />
                   )}
                   {session.isCompleted ? (
                     <CheckCircle2

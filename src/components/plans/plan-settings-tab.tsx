@@ -311,7 +311,7 @@ export function PlanSettingsTab({
       )}
 
       {successMessage && (
-        <div className="flex items-center gap-2 rounded-xl border border-[#82ADD4]/30 bg-[#82ADD4]/10 p-3.5 text-[13px] text-[#507ea6] dark:text-[#82ADD4]">
+        <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 text-[13px] text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
           <Check className="size-4 shrink-0" />
           <span>{successMessage}</span>
         </div>
@@ -342,7 +342,7 @@ export function PlanSettingsTab({
               </p>
             </div>
             {isPending && (
-              <Loader2 className="size-4 animate-spin text-[#82ADD4]" />
+              <Loader2 className="size-4 animate-spin text-zinc-900 dark:text-zinc-100" />
             )}
           </div>
 
@@ -567,7 +567,7 @@ export function PlanSettingsTab({
                 <span className="text-[13.5px] font-medium text-black dark:text-white">
                   Weekly Reading Days
                 </span>
-                <span className="text-[12px] font-medium text-[#82ADD4]">
+                <span className="font-mono text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
                   {activeDays.length} active / {7 - activeDays.length} rest
                 </span>
               </div>
@@ -594,7 +594,7 @@ export function PlanSettingsTab({
               </div>
 
               {activeDays.length < 7 && (
-                <p className="flex items-center gap-1.5 text-[11.5px] text-[#507ea6] dark:text-[#82ADD4]">
+                <p className="flex items-center gap-1.5 text-[11.5px] text-zinc-500 dark:text-zinc-400">
                   <Coffee className="size-3.5" />
                   <span>
                     Rest days allow you to reflect or catch up without breaking
@@ -609,7 +609,7 @@ export function PlanSettingsTab({
           {mode === "scheduled" && (
             <div className="rounded-2xl border border-black/6 bg-black/3 p-4 dark:border-white/8 dark:bg-white/4">
               <div className="flex items-start gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#82ADD4] dark:bg-[#82ADD4]/25">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
                   <Clock className="size-4" />
                 </div>
                 <div>
@@ -701,7 +701,7 @@ export function PlanSettingsTab({
           className="flex w-full items-center justify-between text-left"
         >
           <div className="flex items-center gap-2.5">
-            <BookOpen className="size-4.5 text-[#82ADD4]" />
+            <BookOpen className="size-4.5 text-zinc-900 dark:text-zinc-100" />
             <div>
               <h3 className="text-[15px] font-semibold text-black dark:text-white">
                 Curriculum Breakdown
@@ -752,7 +752,7 @@ export function PlanSettingsTab({
                         key={session.sessionIndex}
                         className={`rounded-md border px-2 py-0.5 text-[10.5px] font-medium ${
                           session.isCompleted
-                            ? "border-[#82ADD4]/30 bg-[#82ADD4]/10 text-[#507ea6] dark:text-[#82ADD4]"
+                            ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
                             : "border-black/6 bg-white/70 text-black/80 dark:border-white/8 dark:bg-white/8 dark:text-white/80"
                         }`}
                       >

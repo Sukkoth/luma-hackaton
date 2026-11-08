@@ -67,8 +67,8 @@ export function PlanSessionNotes({
       {/* Header Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-black/6 dark:border-white/6">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-black/5 text-black dark:bg-white/10 dark:text-white">
-            <FileText className="size-5 text-[#82ADD4]" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+            <FileText className="size-5 text-zinc-900 dark:text-zinc-100" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export function PlanSessionNotes({
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-[#82ADD4]">
+                    <span className="flex items-center gap-1.5 font-mono text-[10.5px] font-medium text-zinc-500 dark:text-zinc-400">
                       <Calendar className="size-3" />
                       <span>{formatDisplayDate(note.createdAt)}</span>
                       {note.planSessionId && (
@@ -156,7 +156,7 @@ export function PlanSessionNotes({
 
                   <h4
                     onClick={() => handleOpenEditModal(note)}
-                    className="mt-1.5 text-[13.5px] font-semibold text-black dark:text-white group-hover:text-[#82ADD4] transition-colors cursor-pointer line-clamp-1"
+                    className="mt-1.5 cursor-pointer text-[13.5px] font-semibold text-black transition-colors group-hover:text-zinc-600 dark:text-white dark:group-hover:text-zinc-300 line-clamp-1"
                   >
                     {note.title}
                   </h4>
@@ -186,8 +186,8 @@ export function PlanSessionNotes({
       ) : (
         /* Empty State */
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 py-7 px-4 text-center dark:border-white/10">
-          <div className="flex size-10 items-center justify-center rounded-2xl bg-black/5 text-neutral-500 dark:bg-white/8 dark:text-neutral-400">
-            <BookOpen className="size-5 text-[#82ADD4]" />
+          <div className="flex size-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+            <BookOpen className="size-5 text-zinc-900 dark:text-zinc-100" />
           </div>
           <h4 className="mt-3 text-[14px] font-semibold text-black dark:text-white">
             No reflections recorded for {activeSession.title}

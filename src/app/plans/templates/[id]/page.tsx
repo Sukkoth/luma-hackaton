@@ -75,12 +75,12 @@ async function PlanTemplateDetailContent({
             </span>
             {plan.canonCompatibility &&
               plan.canonCompatibility !== "protestant" && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-[#82ADD4]/15 px-2.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[10px] font-mono font-medium text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
                   <Bookmark className="size-3" />
                   <span>{plan.canonCompatibility.replace("_", " ")}</span>
                 </span>
               )}
-            <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+            <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
               Blueprint Template
             </span>
           </div>
@@ -142,7 +142,7 @@ async function PlanTemplateDetailContent({
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="flex items-center gap-2 text-[16px] font-medium text-black dark:text-white">
-                  <Sliders className="size-4 text-[#82ADD4]" />
+                  <Sliders className="size-4 text-zinc-900 dark:text-zinc-100" />
                   <span>Start Reading Plan</span>
                 </h3>
                 <p className="mt-0.5 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
@@ -220,7 +220,7 @@ async function PlanTemplateDetailContent({
                       </p>
                     )}
                     {section.booksDescription && (
-                      <p className="mt-0.5 text-[12px] text-[#6894BC] dark:text-[#82ADD4]">
+                      <p className="mt-0.5 font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
                         {section.booksDescription}
                       </p>
                     )}

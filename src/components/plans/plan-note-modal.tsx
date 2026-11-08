@@ -188,12 +188,12 @@ export function PlanNoteModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/6 pb-4 dark:border-white/6">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#82ADD4]/15 text-[#82ADD4]">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
               <FileText className="size-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                   {planTitle}
                 </span>
                 <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-black dark:bg-white/10 dark:text-white">
@@ -272,7 +272,7 @@ export function PlanNoteModal({
               name="title"
               defaultValue={defaultTitle}
               required
-              className="mt-1.5 w-full rounded-xl border border-black/8 bg-black/[0.02] px-3.5 py-2.5 text-[13.5px] font-medium text-black focus:border-[#82ADD4] focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-[#1f1f26]"
+              className="mt-1.5 w-full rounded-xl border border-black/8 bg-black/[0.02] px-3.5 py-2.5 text-[13.5px] font-medium text-black focus:border-black focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-white dark:focus:bg-[#1f1f26]"
               placeholder="e.g. Day 1 - Key Insights & Prayer"
             />
           </div>

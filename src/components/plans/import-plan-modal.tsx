@@ -224,10 +224,10 @@ export function ImportPlanModal({
         <div className="shrink-0 flex items-center justify-between border-b border-black/6 px-6 py-4.5 dark:border-white/8">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                 Reading Plan Import
               </span>
-              <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10.5px] font-medium text-black">
+              <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
                 File / CSV / JSON
               </span>
             </div>

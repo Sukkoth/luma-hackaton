@@ -288,22 +288,22 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
           {progressPercent === 100 && (
             <div className="glass-panel flex flex-col sm:flex-row items-center justify-between gap-4 rounded-[24px] border border-black/10 bg-white/85 p-5 shadow-xs dark:border-white/12 dark:bg-white/5">
               <div className="flex items-center gap-3.5">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#DDFD2C] text-black shadow-xs">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-950 text-white shadow-xs dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
                   <Trophy className="size-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                       Milestone Reached
                     </span>
-                    <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-black dark:bg-white/10 dark:text-white">
+                    <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10.5px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                       100% Complete
                     </span>
                   </div>
                   <h3 className="mt-0.5 text-[16px] font-medium tracking-tight text-black dark:text-white">
                     Journey Finished! 🎉
                   </h3>
-                  <p className="text-[12.5px] text-[#666666] dark:text-[#9CA3AF]">
+                  <p className="text-[12.5px] text-zinc-500 dark:text-zinc-400">
                     You have read all {currentPlan.totalChapters} chapters of{" "}
                     {currentPlan.title}.
                   </p>

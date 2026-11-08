@@ -38,8 +38,8 @@ export function PlanSpeedometerGauge({
               x2="100%"
               y2="0%"
             >
-              <stop offset="0%" stopColor="#82ADD4" />
-              <stop offset="100%" stopColor="#FFFFFF" />
+              <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="1" />
             </linearGradient>
           </defs>
 
@@ -63,7 +63,7 @@ export function PlanSpeedometerGauge({
               strokeLinecap="round"
               strokeDasharray={ARC_LENGTH}
               strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-700 ease-out"
+              className="text-zinc-950 dark:text-zinc-50 transition-all duration-700 ease-out"
             />
           )}
         </svg>
