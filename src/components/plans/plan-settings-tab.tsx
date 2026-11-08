@@ -422,10 +422,10 @@ export function PlanSettingsTab({
                   setSuccessMessage(null);
                   setPaceType("by_daily_target");
                 }}
-                className={`rounded-xl px-3 py-1.5 text-[12px] font-medium transition-all ${
+                className={`rounded-xl px-3 py-1.5 text-[12px] transition-all cursor-pointer ${
                   paceType === "by_daily_target"
-                    ? "bg-black text-white dark:bg-white dark:text-black"
-                    : "border border-black/10 bg-white/60 text-[#666666] hover:bg-black/5 dark:border-white/10 dark:bg-white/6 dark:text-[#A1A1AA]"
+                    ? "bg-primary font-bold text-primary-foreground shadow-xs"
+                    : "border border-border bg-surface font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
                 }`}
               >
                 By Chapters Per Day
@@ -436,10 +436,10 @@ export function PlanSettingsTab({
                   setSuccessMessage(null);
                   setPaceType("by_end_date");
                 }}
-                className={`rounded-xl px-3 py-1.5 text-[12px] font-medium transition-all ${
+                className={`rounded-xl px-3 py-1.5 text-[12px] transition-all cursor-pointer ${
                   paceType === "by_end_date"
-                    ? "bg-black text-white dark:bg-white dark:text-black"
-                    : "border border-black/10 bg-white/60 text-[#666666] hover:bg-black/5 dark:border-white/10 dark:bg-white/6 dark:text-[#A1A1AA]"
+                    ? "bg-primary font-bold text-primary-foreground shadow-xs"
+                    : "border border-border bg-surface font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
                 }`}
               >
                 By Target Duration (Days)
@@ -468,11 +468,11 @@ export function PlanSettingsTab({
                     isPending || dailyChapters <= 1 || !plan.allowCustomPace
                   }
                   onClick={() => handleUpdateDailyPace(dailyChapters - 1)}
-                  className="flex size-8.5 items-center justify-center rounded-xl border border-black/10 bg-white text-black shadow-2xs hover:bg-black/5 disabled:opacity-30 dark:border-white/12 dark:bg-white/10 dark:text-white"
+                  className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                 >
                   -
                 </button>
-                <span className="w-8 text-center text-[16px] font-semibold text-black dark:text-white">
+                <span className="w-8 text-center text-[16px] font-semibold text-foreground">
                   {dailyChapters}
                 </span>
                 <button
@@ -481,7 +481,7 @@ export function PlanSettingsTab({
                     isPending || dailyChapters >= 50 || !plan.allowCustomPace
                   }
                   onClick={() => handleUpdateDailyPace(dailyChapters + 1)}
-                  className="flex size-8.5 items-center justify-center rounded-xl border border-black/10 bg-white text-black shadow-2xs hover:bg-black/5 disabled:opacity-30 dark:border-white/12 dark:bg-white/10 dark:text-white"
+                  className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                 >
                   +
                 </button>
@@ -494,10 +494,10 @@ export function PlanSettingsTab({
             <div className="space-y-3.5 py-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[13.5px] font-medium text-black dark:text-white">
+                  <span className="text-[13.5px] font-medium text-foreground">
                     Target Duration
                   </span>
-                  <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                  <p className="text-[11.5px] text-foreground-dim">
                     Total calendar days to complete the remaining chapters
                   </p>
                 </div>
@@ -513,11 +513,11 @@ export function PlanSettingsTab({
                     onClick={() =>
                       handleUpdateDurationDays(targetDurationDays - 5)
                     }
-                    className="flex size-8.5 items-center justify-center rounded-xl border border-black/10 bg-white text-black shadow-2xs hover:bg-black/5 disabled:opacity-30 dark:border-white/12 dark:bg-white/10 dark:text-white"
+                    className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                   >
                     -5
                   </button>
-                  <span className="w-14 text-center text-[15px] font-semibold text-black dark:text-white">
+                  <span className="w-14 text-center text-[15px] font-semibold text-foreground">
                     {targetDurationDays}d
                   </span>
                   <button
@@ -530,7 +530,7 @@ export function PlanSettingsTab({
                     onClick={() =>
                       handleUpdateDurationDays(targetDurationDays + 5)
                     }
-                    className="flex size-8.5 items-center justify-center rounded-xl border border-black/10 bg-white text-black shadow-2xs hover:bg-black/5 disabled:opacity-30 dark:border-white/12 dark:bg-white/10 dark:text-white"
+                    className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                   >
                     +5
                   </button>
@@ -546,10 +546,10 @@ export function PlanSettingsTab({
                       type="button"
                       disabled={isPending}
                       onClick={() => handleUpdateDurationDays(preset)}
-                      className={`shrink-0 rounded-xl border px-3 py-1 text-[11.5px] font-medium transition-all ${
+                      className={`shrink-0 rounded-xl border px-3 py-1 text-[11.5px] transition-all cursor-pointer ${
                         targetDurationDays === preset
-                          ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                          : "border-black/10 bg-white/60 text-[#666666] hover:bg-black/5 dark:border-white/10 dark:bg-white/6 dark:text-[#A1A1AA]"
+                          ? "border-primary bg-primary font-bold text-primary-foreground shadow-xs"
+                          : "border-border bg-surface font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
                       }`}
                     >
                       {preset} days
@@ -562,12 +562,12 @@ export function PlanSettingsTab({
 
           {/* Weekly Reading Days (Rest Days) - only relevant in scheduled mode */}
           {mode === "scheduled" && (
-            <div className="space-y-3 border-t border-black/6 pt-4 dark:border-white/6">
+            <div className="space-y-3 border-t border-border pt-4">
               <div className="flex items-center justify-between">
-                <span className="text-[13.5px] font-medium text-black dark:text-white">
+                <span className="text-[13.5px] font-bold text-foreground">
                   Weekly Reading Days
                 </span>
-                <span className="font-mono text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                <span className="text-[11px] font-medium text-foreground-dim">
                   {activeDays.length} active / {7 - activeDays.length} rest
                 </span>
               </div>
@@ -581,10 +581,10 @@ export function PlanSettingsTab({
                       type="button"
                       disabled={isPending}
                       onClick={() => handleToggleWeekday(w.dayIndex)}
-                      className={`flex size-9 sm:size-10 items-center justify-center rounded-full text-[13px] font-semibold transition-all ${
+                      className={`flex size-9 sm:size-10 items-center justify-center rounded-full text-[13px] transition-all cursor-pointer ${
                         isActive
-                          ? "bg-black text-white shadow-xs dark:bg-white dark:text-black"
-                          : "bg-black/5 text-[#888888] hover:bg-black/10 dark:bg-white/6 dark:text-[#71717A] dark:hover:bg-white/10"
+                          ? "bg-primary font-bold text-primary-foreground shadow-xs"
+                          : "border border-border bg-surface-elevated font-medium text-foreground-dim hover:text-foreground"
                       }`}
                     >
                       {w.label}
@@ -607,13 +607,13 @@ export function PlanSettingsTab({
 
           {/* Live Projected Completion Banner */}
           {mode === "scheduled" && (
-            <div className="rounded-2xl border border-black/6 bg-black/3 p-4 dark:border-white/8 dark:bg-white/4">
+            <div className="ui-card-elevated p-4">
               <div className="flex items-start gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-foreground">
                   <Clock className="size-4" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-black dark:text-white">
+                  <p className="text-[13px] font-semibold text-foreground">
                     Projected Finish:{" "}
                     {projection.projectedDate.toLocaleDateString("en-US", {
                       month: "short",
@@ -621,7 +621,7 @@ export function PlanSettingsTab({
                       year: "numeric",
                     })}
                   </p>
-                  <p className="mt-0.5 text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                  <p className="mt-0.5 text-[11.5px] text-foreground-dim">
                     {remainingChapters} chapters remaining • ~
                     {projection.activeReadingDaysNeeded} active reading sessions
                     ({projection.calendarDaysNeeded} calendar days) at{" "}
@@ -634,21 +634,21 @@ export function PlanSettingsTab({
         </div>
 
         {/* 3. Routine & Habits Notifications */}
-        <div className="glass-panel rounded-[26px] p-5 sm:p-6 space-y-4">
-          <h3 className="text-[16px] font-semibold text-black dark:text-white">
+        <div className="ui-card p-5 sm:p-6 space-y-4">
+          <h3 className="text-[16px] font-semibold text-foreground">
             Habits & Notifications
           </h3>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-black/5 text-[#555555] dark:bg-white/8 dark:text-[#9CA3AF]">
+              <div className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground-secondary">
                 <Bell className="size-4.5" />
               </div>
               <div>
-                <span className="text-[13.5px] font-medium text-black dark:text-white">
+                <span className="text-[13.5px] font-medium text-foreground">
                   Daily Reading Reminder
                 </span>
-                <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                <p className="text-[11.5px] text-foreground-dim">
                   Receive prompt notifications in your browser
                 </p>
               </div>
@@ -658,13 +658,13 @@ export function PlanSettingsTab({
               type="checkbox"
               checked={reminderEnabled}
               onChange={handleToggleReminder}
-              className="size-5 rounded accent-black dark:accent-white"
+              className="size-5 rounded accent-primary"
             />
           </div>
 
           {reminderEnabled && (
-            <div className="flex items-center justify-between rounded-xl bg-black/4 p-3 dark:bg-white/4">
-              <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+            <div className="ui-card-elevated flex items-center justify-between p-3">
+              <span className="text-[12px] text-foreground-secondary">
                 Reminder Time
               </span>
               <input
@@ -674,7 +674,7 @@ export function PlanSettingsTab({
                   setSuccessMessage(null);
                   setReminderTime(e.target.value);
                 }}
-                className="rounded-lg border border-black/10 bg-white px-2.5 py-1 text-[12px] font-medium text-black dark:border-white/10 dark:bg-white/10 dark:text-white"
+                className="ui-input py-1 text-[12px] font-medium"
               />
             </div>
           )}
@@ -685,7 +685,7 @@ export function PlanSettingsTab({
           <button
             type="submit"
             disabled={isPending}
-            className="flex items-center gap-2 rounded-2xl bg-black px-6 py-3 text-[13.5px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/90"
+            className="ui-btn-primary ui-btn-sm gap-2"
           >
             {isPending && <Loader2 className="size-4 animate-spin" />}
             <span>Update Settings</span>
@@ -726,22 +726,19 @@ export function PlanSettingsTab({
                 part.endSessionIndex + 1
               );
               return (
-                <div
-                  key={part.partIndex}
-                  className="rounded-2xl border border-black/6 bg-white/40 p-3.5 dark:border-white/8 dark:bg-white/4"
-                >
+                <div key={part.partIndex} className="ui-card-elevated p-3.5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-[13px] font-semibold text-black dark:text-white">
+                      <span className="text-[13px] font-semibold text-foreground">
                         {part.title}
                       </span>
                       {part.subtitle && (
-                        <p className="mt-0.5 text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                        <p className="mt-0.5 text-[11.5px] text-foreground-dim">
                           {part.subtitle}
                         </p>
                       )}
                     </div>
-                    <span className="rounded-lg bg-black/5 px-2 py-0.5 text-[11px] font-medium text-[#777777] dark:bg-white/8 dark:text-[#A1A1AA]">
+                    <span className="ui-pill text-[11px]">
                       {part.completedSessions}/{part.totalSessions} sessions
                     </span>
                   </div>
@@ -752,8 +749,8 @@ export function PlanSettingsTab({
                         key={session.sessionIndex}
                         className={`rounded-md border px-2 py-0.5 text-[10.5px] font-medium ${
                           session.isCompleted
-                            ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                            : "border-black/6 bg-white/70 text-black/80 dark:border-white/8 dark:bg-white/8 dark:text-white/80"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border bg-surface text-foreground-secondary"
                         }`}
                       >
                         {session.title} ({session.readings.length} ch)
@@ -768,19 +765,19 @@ export function PlanSettingsTab({
       </div>
 
       {/* 5. Danger Zone & Plan Lifecycle */}
-      <div className="glass-panel rounded-[26px] p-5 sm:p-6 space-y-4">
-        <h3 className="text-[16px] font-semibold text-black dark:text-white">
+      <div className="ui-card p-5 sm:p-6 space-y-4">
+        <h3 className="text-[16px] font-semibold text-foreground">
           Plan Status & Danger Zone
         </h3>
 
         {/* Smart Resume Schedule Shift Option when paused */}
         {plan.status === "paused" && (
-          <div className="flex items-center justify-between rounded-xl bg-black/4 p-3 dark:bg-white/4">
+          <div className="ui-card-elevated flex items-center justify-between p-3">
             <div>
-              <span className="text-[12.5px] font-medium text-black dark:text-white">
+              <span className="text-[12.5px] font-medium text-foreground">
                 Shift Schedule on Resume
               </span>
-              <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+              <p className="text-[11px] text-foreground-dim">
                 Advance start date to today so you don&apos;t accumulate overdue
                 days
               </p>
@@ -800,7 +797,7 @@ export function PlanSettingsTab({
             type="button"
             disabled={isPending}
             onClick={handleTogglePause}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-black/10 bg-white/80 px-4 text-[13px] font-medium text-black shadow-2xs transition-all hover:bg-black/5 dark:border-white/12 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+            className="ui-btn-secondary ui-btn-sm w-full gap-2"
           >
             {plan.status === "paused" ? (
               <>
@@ -820,7 +817,7 @@ export function PlanSettingsTab({
             type="button"
             disabled={isPending}
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 text-[13px] font-medium text-red-600 transition-all hover:bg-red-500/20 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400"
+            className="ui-btn-destructive ui-btn-sm w-full gap-2"
           >
             <Trash2 className="size-4 shrink-0" />
             <span>Leave / Delete Plan</span>
@@ -829,11 +826,11 @@ export function PlanSettingsTab({
 
         {/* Delete Confirmation Dialog */}
         {showDeleteConfirm && (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
-            <h4 className="text-[14px] font-semibold text-red-800 dark:text-red-300">
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4">
+            <h4 className="text-[14px] font-bold text-destructive">
               Delete this reading plan?
             </h4>
-            <p className="mt-1 text-[12px] text-red-700 dark:text-red-400">
+            <p className="mt-1 text-[12px] text-destructive/80">
               This will permanently delete this plan instance from your tracker.
             </p>
             <div className="mt-3.5 flex items-center gap-2.5">
@@ -841,7 +838,7 @@ export function PlanSettingsTab({
                 type="button"
                 disabled={isPending}
                 onClick={handleDeletePlan}
-                className="flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-1.5 text-[12px] font-medium text-white hover:bg-red-700"
+                className="ui-btn-destructive ui-btn-sm gap-1.5"
               >
                 {isPending && <Loader2 className="size-3.5 animate-spin" />}
                 <span>Delete Plan</span>
@@ -849,7 +846,7 @@ export function PlanSettingsTab({
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-xl border border-black/10 px-3.5 py-1.5 text-[12px] font-medium text-[#666666] hover:bg-black/5 dark:border-white/10 dark:text-[#A1A1AA]"
+                className="ui-btn-secondary ui-btn-sm"
               >
                 Cancel
               </button>

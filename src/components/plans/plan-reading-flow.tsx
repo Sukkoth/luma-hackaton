@@ -126,27 +126,27 @@ export function PlanReadingFlow({
 
       {/* Part Navigation Pill */}
       {parts.length > 0 && currentPart && (
-        <div className="flex items-center justify-between rounded-2xl border border-black/6 bg-white/70 p-2.5 shadow-2xs backdrop-blur-md dark:border-white/8 dark:bg-white/[0.04]">
+        <div className="ui-card flex items-center justify-between p-2.5">
           <button
             type="button"
             onClick={handlePrevPart}
             disabled={activePartIndex <= 1}
             aria-label="Previous Part"
-            className="flex size-8 items-center justify-center rounded-full border border-black/8 bg-black/4 text-black transition-colors hover:bg-black/8 disabled:opacity-30 disabled:cursor-not-allowed dark:border-white/10 dark:bg-white/6 dark:text-white dark:hover:bg-white/10"
+            className="ui-btn-secondary flex size-8 items-center justify-center rounded-full p-0 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="size-4" />
           </button>
 
           <div className="text-center">
             <div className="inline-flex items-center gap-2">
-              <span className="text-[13.5px] font-semibold text-black dark:text-white">
+              <span className="text-[13.5px] font-bold text-foreground">
                 {currentPart.title}
               </span>
-              <span className="rounded-full bg-black/6 px-2 py-0.5 text-[10.5px] font-medium text-[#555555] dark:bg-white/10 dark:text-[#D4D4D4]">
+              <span className="ui-pill text-[10px]">
                 {currentPart.completedSessions}/{currentPart.totalSessions} Done
               </span>
             </div>
-            <p className="mt-0.5 text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+            <p className="mt-0.5 text-[11px] text-foreground-dim">
               {currentPart.subtitle}
             </p>
           </div>
@@ -156,7 +156,7 @@ export function PlanReadingFlow({
             onClick={handleNextPart}
             disabled={activePartIndex >= parts.length}
             aria-label="Next Part"
-            className="flex size-8 items-center justify-center rounded-full border border-black/8 bg-black/4 text-black transition-colors hover:bg-black/8 disabled:opacity-30 disabled:cursor-not-allowed dark:border-white/10 dark:bg-white/6 dark:text-white dark:hover:bg-white/10"
+            className="ui-btn-secondary flex size-8 items-center justify-center rounded-full p-0 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="size-4" />
           </button>
@@ -180,38 +180,38 @@ export function PlanReadingFlow({
             <div
               key={session.sessionIndex}
               onClick={() => onSelectSessionAction(session.sessionIndex)}
-              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-[18px] border p-3 sm:p-3.5 transition-all ${
+              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-[16px] border p-3 sm:p-3.5 transition-all ${
                 isSelected
-                  ? "border-black/90 bg-white shadow-md dark:border-white dark:bg-white/[0.08]"
-                  : "border-black/6 bg-white/60 hover:border-black/20 hover:bg-white/80 dark:border-white/8 dark:bg-white/[0.03] dark:hover:border-white/16 dark:hover:bg-white/[0.05]"
+                  ? "border-primary bg-surface shadow-xs"
+                  : "border-border bg-surface-elevated hover:border-border-strong"
               }`}
             >
               {/* Session Card Header */}
-              <div className="flex items-center justify-between border-b border-black/6 pb-2.5 dark:border-white/6">
+              <div className="flex items-center justify-between border-b border-border pb-2.5">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-semibold text-black dark:text-white">
+                    <span className="text-[13px] font-bold text-foreground">
                       {session.title}
                     </span>
                     {isLocked && (
                       <Lock
-                        className="size-3 text-[#888888] dark:text-[#71717A]"
+                        className="size-3 text-foreground-dim"
                         aria-label="Session locked"
                       />
                     )}
                   </div>
                   {session.dateLabel && (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-[#888888] dark:text-[#A1A1AA]">
+                      <span className="text-[10px] text-foreground-dim">
                         {session.dateLabel}
                       </span>
                       {session.isPastDue && (
-                        <span className="rounded bg-red-500/15 px-1 py-0.2 text-[9px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
+                        <span className="rounded bg-destructive/15 px-1 py-0.2 text-[9px] font-bold uppercase tracking-wider text-destructive">
                           Overdue
                         </span>
                       )}
                       {session.isToday && (
-                        <span className="rounded-full border border-zinc-200 bg-zinc-100 px-1.5 py-0.2 font-mono text-[9px] font-semibold uppercase tracking-wider text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+                        <span className="ui-pill text-[9px] uppercase tracking-wider">
                           Today
                         </span>
                       )}
@@ -221,15 +221,15 @@ export function PlanReadingFlow({
 
                 <div className="flex items-center gap-1.5">
                   {isSelected && !isLocked && (
-                    <MapPin className="size-3 text-zinc-950 dark:text-zinc-50" />
+                    <MapPin className="size-3 text-primary" />
                   )}
                   {session.isCompleted ? (
                     <CheckCircle2
-                      className="size-3.5 text-black dark:text-white"
+                      className="size-3.5 text-primary"
                       aria-label="Completed"
                     />
                   ) : (
-                    <span className="text-[11.5px] font-medium text-[#777777] dark:text-[#A1A1AA]">
+                    <span className="text-[11.5px] font-medium text-foreground-secondary">
                       {session.completedCount}/{session.totalCount}
                     </span>
                   )}
@@ -249,14 +249,14 @@ export function PlanReadingFlow({
                       >
                         {/* Lock Icon replacing checkbox */}
                         <div
-                          className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-black/5 text-[#888888] dark:bg-white/8 dark:text-[#71717A]"
+                          className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-surface text-foreground-dim"
                           aria-label="Locked"
                         >
                           <Lock className="size-2.5" />
                         </div>
 
                         {/* Reading Title */}
-                        <span className="truncate text-[12px] font-medium text-[#777777] dark:text-[#9CA3AF]">
+                        <span className="truncate text-[12px] font-medium text-foreground-dim">
                           {reading.displayText ||
                             `${reading.bookName} ${reading.chapter}`}
                         </span>
@@ -281,14 +281,14 @@ export function PlanReadingFlow({
                           onToggleReadingAction(reading.id);
                         }
                       }}
-                      className="group flex items-center gap-2 rounded-lg px-1 py-1 text-left transition-colors hover:bg-black/3 cursor-pointer dark:hover:bg-white/5"
+                      className="group flex items-center gap-2 rounded-lg px-1 py-1 text-left transition-colors hover:bg-surface cursor-pointer"
                     >
                       {/* Circular Checkbox */}
                       <div
                         className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-all ${
                           reading.isCompleted
-                            ? "bg-black text-white dark:bg-white dark:text-black"
-                            : "border border-black/25 bg-transparent group-hover:border-black/50 dark:border-white/25 dark:group-hover:border-white/50"
+                            ? "bg-primary text-primary-foreground shadow-xs"
+                            : "border border-border bg-transparent group-hover:border-border-strong"
                         }`}
                       >
                         {reading.isCompleted && (
@@ -298,10 +298,10 @@ export function PlanReadingFlow({
 
                       {/* Reading Title */}
                       <span
-                        className={`truncate text-[12px] font-medium transition-colors ${
+                        className={`truncate text-[12px] font-bold transition-colors ${
                           reading.isCompleted
-                            ? "text-[#888888] line-through dark:text-[#71717A]"
-                            : "text-black dark:text-white"
+                            ? "text-foreground-dim line-through"
+                            : "text-foreground"
                         }`}
                       >
                         {reading.displayText ||

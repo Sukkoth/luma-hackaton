@@ -219,16 +219,16 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
         <div className="flex items-center gap-3">
           <Link
             href="/plans"
-            className="flex size-9 items-center justify-center rounded-xl border border-black/8 bg-black/4 text-black transition-colors hover:bg-black/8 dark:border-white/10 dark:bg-white/6 dark:text-white dark:hover:bg-white/10"
+            className="flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-foreground-secondary transition-colors hover:border-border-strong hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
             <span className="sr-only">Back to Plan Catalog</span>
           </Link>
           <div>
-            <h1 className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-black dark:text-white">
+            <h1 className="text-[20px] sm:text-[24px] font-bold tracking-tight text-foreground">
               {currentPlan.title}
             </h1>
-            <p className="text-[12px] text-[#777777] dark:text-[#9CA3AF]">
+            <p className="text-[12px] font-medium text-foreground-dim">
               Tracker: {currentPlan.tracker.name}
             </p>
           </div>
@@ -236,14 +236,14 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-2 rounded-2xl bg-black/5 p-1.5 dark:bg-white/6">
+      <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-1.5 rounded-[16px] border border-border bg-surface-elevated p-1">
         <button
           type="button"
           onClick={() => setActiveTab("chapters")}
-          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] transition-all ${
+          className={`flex items-center justify-center gap-2 rounded-[12px] py-2 text-[13px] font-bold transition-all cursor-pointer ${
             activeTab === "chapters"
-              ? "bg-white font-semibold text-black shadow-xs dark:bg-white/15 dark:text-white"
-              : "text-[#666666] hover:text-black dark:text-[#A1A1AA] dark:hover:text-white"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "bg-transparent text-foreground-secondary hover:text-foreground"
           }`}
         >
           <BookOpen className="size-4" />
@@ -253,10 +253,10 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
         <button
           type="button"
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] transition-all ${
+          className={`flex items-center justify-center gap-2 rounded-[12px] py-2 text-[13px] font-bold transition-all cursor-pointer ${
             activeTab === "settings"
-              ? "bg-black font-semibold text-white shadow-xs dark:bg-white dark:text-black"
-              : "text-[#666666] hover:text-black dark:text-[#A1A1AA] dark:hover:text-white"
+              ? "bg-primary text-primary-foreground shadow-xs"
+              : "bg-transparent text-foreground-secondary hover:text-foreground"
           }`}
         >
           {isFinished ? (
@@ -286,24 +286,24 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
 
           {/* 100% Completion Celebration Banner */}
           {progressPercent === 100 && (
-            <div className="glass-panel flex flex-col sm:flex-row items-center justify-between gap-4 rounded-[24px] border border-black/10 bg-white/85 p-5 shadow-xs dark:border-white/12 dark:bg-white/5">
+            <div className="ui-card flex flex-col sm:flex-row items-center justify-between gap-4 p-5 shadow-xs">
               <div className="flex items-center gap-3.5">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-950 text-white shadow-xs dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-primary text-primary-foreground shadow-xs">
                   <Trophy className="size-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
                       Milestone Reached
                     </span>
-                    <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10.5px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+                    <span className="ui-pill text-[10.5px] font-bold">
                       100% Complete
                     </span>
                   </div>
-                  <h3 className="mt-0.5 text-[16px] font-medium tracking-tight text-black dark:text-white">
+                  <h3 className="mt-0.5 text-[16px] font-bold tracking-tight text-foreground">
                     Journey Finished! 🎉
                   </h3>
-                  <p className="text-[12.5px] text-zinc-500 dark:text-zinc-400">
+                  <p className="text-[12.5px] text-foreground-secondary">
                     You have read all {currentPlan.totalChapters} chapters of{" "}
                     {currentPlan.title}.
                   </p>
@@ -313,7 +313,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
               <button
                 type="button"
                 onClick={() => celebratePlanCompletion()}
-                className="flex items-center gap-1.5 rounded-xl border border-black/10 bg-black px-4 py-2 text-[12.5px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:border-white/12 dark:bg-white dark:text-black dark:hover:bg-white/90"
+                className="ui-btn-primary px-4 py-2 text-[12.5px] gap-1.5 cursor-pointer"
               >
                 <Sparkles className="size-3.5" />
                 <span>Celebrate Again</span>
@@ -323,21 +323,21 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
 
           {/* Plan Paused Banner */}
           {currentPlan.status === "paused" && (
-            <div className="glass-panel flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-[24px] border border-amber-500/25 bg-amber-500/5 p-5 shadow-xs dark:border-amber-500/20 dark:bg-amber-500/8">
+            <div className="ui-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-warning/30 bg-warning/5 p-5 shadow-xs">
               <div className="flex items-center gap-3.5">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-warning/15 text-warning">
                   <PauseCircle className="size-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                    <span className="rounded-md bg-warning/20 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-warning">
                       PLAN PAUSED
                     </span>
                   </div>
-                  <h3 className="mt-0.5 text-[15px] font-medium tracking-tight text-black dark:text-white">
+                  <h3 className="mt-0.5 text-[15px] font-bold tracking-tight text-foreground">
                     Plan is Paused
                   </h3>
-                  <p className="text-[12.5px] text-[#666666] dark:text-[#9CA3AF]">
+                  <p className="text-[12.5px] text-foreground-secondary">
                     Check marks are locked while your plan is paused. When you
                     are ready to continue, tap Resume to shift your schedule to
                     today.
@@ -348,7 +348,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
               <button
                 type="button"
                 onClick={handleResumePlan}
-                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-black px-4 py-2.5 text-[12.5px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+                className="ui-btn-primary px-4 py-2 text-[12.5px] gap-1.5 cursor-pointer"
               >
                 <Play className="size-3.5 fill-current" />
                 <span>Resume Plan</span>
@@ -394,7 +394,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                 <button
                   type="button"
                   onClick={() => setIsCatchUpModalOpen(true)}
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-black px-3.5 py-1.5 text-[12px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+                  className="ui-btn-primary ui-btn-sm gap-1.5 shrink-0 cursor-pointer"
                 >
                   <RefreshCw className="size-3" />
                   <span>Catch Up to Today</span>

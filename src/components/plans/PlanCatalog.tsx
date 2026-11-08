@@ -138,21 +138,21 @@ export function PlanCatalog({
       />
 
       {/* Main Catalog & My Plans Section */}
-      <section className="glass-panel rounded-[28px] p-6 sm:p-7">
+      <section className="ui-card rounded-[22px] p-5 sm:p-6">
         {/* Navigation Tabs and Search Bar */}
         <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
-          {/* Tab Switcher - Horizontally scrollable on small screens */}
+          {/* Tab Switcher - Segmented control */}
           <div
             data-testid="plan-catalog-tabs"
-            className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
+            className="flex items-center gap-1 rounded-[16px] border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none"
           >
             <button
               type="button"
               onClick={() => setActiveTab("catalog")}
-              className={`shrink-0 flex items-center gap-2 rounded-xl px-4 py-2 text-[13px] transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
                 activeTab === "catalog"
-                  ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                  : "border border-border bg-surface-elevated font-normal text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
               <Compass className="size-3.5" />
@@ -161,10 +161,10 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("active")}
-              className={`shrink-0 flex items-center gap-2 rounded-xl px-4 py-2 text-[13px] transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
                 activeTab === "active"
-                  ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                  : "border border-border bg-surface-elevated font-normal text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
               <Calendar className="size-3.5" />
@@ -175,10 +175,10 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("paused")}
-              className={`shrink-0 flex items-center gap-2 rounded-xl px-4 py-2 text-[13px] transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
                 activeTab === "paused"
-                  ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                  : "border border-border bg-surface-elevated font-normal text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
               <Pause className="size-3.5" />
@@ -189,10 +189,10 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("finished")}
-              className={`shrink-0 flex items-center gap-2 rounded-xl px-4 py-2 text-[13px] transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
                 activeTab === "finished"
-                  ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                  : "border border-border bg-surface-elevated font-normal text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
               <Trophy className="size-3.5" />
@@ -239,7 +239,7 @@ export function PlanCatalog({
                   type="button"
                   onClick={() => setIsCustomWizardOpen(true)}
                   data-testid="open-custom-plan-wizard-btn"
-                  className="ui-btn-primary px-3.5 py-1.5 text-[12px] gap-1.5 cursor-pointer"
+                  className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer"
                 >
                   <Plus className="size-3.5" />
                   <span>Create Custom</span>
@@ -248,7 +248,7 @@ export function PlanCatalog({
                   type="button"
                   onClick={() => setIsImportModalOpen(true)}
                   data-testid="open-import-plan-modal-btn"
-                  className="ui-btn-secondary px-3 py-1.5 text-[12px] gap-1.5 cursor-pointer"
+                  className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
                 >
                   <Upload className="size-3.5" />
                   <span>Import</span>
@@ -279,7 +279,7 @@ export function PlanCatalog({
                     setSearchQuery("");
                     setSelectedFilter("All");
                   }}
-                  className="ui-btn-secondary mt-3 px-4 py-1.5 text-[13px]"
+                  className="ui-btn-secondary ui-btn-sm mt-3"
                 >
                   Reset Filters
                 </button>
@@ -302,7 +302,7 @@ export function PlanCatalog({
               </p>
               <Link
                 href="/login?redirect=/plans"
-                className="ui-btn-primary mt-5 px-5 py-2 text-[13px] gap-1.5"
+                className="ui-btn-primary ui-btn-sm mt-5 gap-1.5"
               >
                 <LogIn className="size-4" />
                 <span>Sign In to Scripture</span>
@@ -323,7 +323,7 @@ export function PlanCatalog({
               <button
                 type="button"
                 onClick={() => setActiveTab("catalog")}
-                className="ui-btn-primary mt-5 px-5 py-2 text-[13px] gap-1.5 cursor-pointer"
+                className="ui-btn-primary ui-btn-sm mt-5 gap-1.5 cursor-pointer"
               >
                 <Compass className="size-3.5" />
                 <span>Browse Plan Catalog</span>
@@ -413,7 +413,7 @@ export function PlanCatalog({
               </p>
               <Link
                 href="/login?redirect=/plans"
-                className="ui-btn-primary mt-5 px-5 py-2 text-[13px] gap-1.5"
+                className="ui-btn-primary ui-btn-sm mt-5 gap-1.5"
               >
                 <LogIn className="size-4" />
                 <span>Sign In to Scripture</span>
@@ -488,14 +488,14 @@ export function PlanCatalog({
                         type="button"
                         disabled={isPending}
                         onClick={() => handleResumePlan(instance.id)}
-                        className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5 cursor-pointer disabled:opacity-50"
+                        className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         <Play className="size-3 fill-current" />
                         <span>Resume Plan</span>
                       </button>
                       <Link
                         href={`/plans/${instance.id}`}
-                        className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5"
+                        className="ui-btn-secondary ui-btn-sm gap-1.5"
                       >
                         <span>View Plan</span>
                         <ArrowRight className="size-3.5" />
@@ -521,7 +521,7 @@ export function PlanCatalog({
             </p>
             <Link
               href="/login?redirect=/plans"
-              className="ui-btn-primary mt-5 px-5 py-2 text-[13px] gap-1.5"
+              className="ui-btn-primary ui-btn-sm mt-5 gap-1.5"
             >
               <LogIn className="size-4" />
               <span>Sign In to Scripture</span>
@@ -590,14 +590,14 @@ export function PlanCatalog({
                     <button
                       type="button"
                       onClick={() => celebratePlanCompletion()}
-                      className="ui-btn-secondary px-3 py-1.5 text-[12px] gap-1.5 cursor-pointer"
+                      className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
                     >
                       <Sparkles className="size-3.5" />
                       <span>Celebrate 🎉</span>
                     </button>
                     <Link
                       href={`/plans/${instance.id}`}
-                      className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5"
+                      className="ui-btn-secondary ui-btn-sm gap-1.5"
                     >
                       <span>Review Plan</span>
                       <ArrowRight className="size-3.5" />

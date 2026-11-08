@@ -93,7 +93,7 @@ export function PlanSessionNotes({
             type="button"
             onClick={handleOpenCreateModal}
             data-testid="add-plan-note-button"
-            className="inline-flex h-8.5 items-center gap-1.5 rounded-xl bg-black px-3.5 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90 transition-colors cursor-pointer"
+            className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Add Note</span>
@@ -102,7 +102,7 @@ export function PlanSessionNotes({
           <Link
             href={`/notes?planId=${instanceId}&session=${activeSession.sessionIndex}`}
             data-testid="open-full-journal-link"
-            className="inline-flex size-8.5 items-center justify-center rounded-xl border border-black/8 bg-white text-neutral-600 hover:bg-black/5 hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 transition-colors"
+            className="ui-btn-secondary size-8.5 rounded-xl cursor-pointer"
             title="Open in full notes studio"
             aria-label="Open in full notes studio"
           >
@@ -123,7 +123,7 @@ export function PlanSessionNotes({
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 font-mono text-[10.5px] font-medium text-zinc-500 dark:text-zinc-400">
+                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-zinc-500 dark:text-zinc-400">
                       <Calendar className="size-3" />
                       <span>{formatDisplayDate(note.createdAt)}</span>
                       {note.planSessionId && (
@@ -199,7 +199,7 @@ export function PlanSessionNotes({
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12.5px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90 transition-colors cursor-pointer"
+            className="ui-btn-primary ui-btn-sm mt-3.5 gap-1.5 cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Write Note for {activeSession.title}</span>

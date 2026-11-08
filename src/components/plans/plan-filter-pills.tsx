@@ -18,10 +18,10 @@ export function PlanFilterPills({ selectedFilter, onSelectFilter }: Props) {
             key={f.id}
             type="button"
             onClick={() => onSelectFilter({ filter: f.id })}
-            className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] transition-all ${
+            className={`shrink-0 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
               isSelected
-                ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                : "border border-border bg-surface-elevated font-normal text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
+                ? "border border-primary bg-primary text-primary-foreground shadow-xs"
+                : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
             }`}
           >
             {f.label}
