@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
 
-const urbanist = localFont({
-  src: "./fonts/Urbanist-Variable.woff2",
-  variable: "--font-urbanist",
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
   display: "swap",
-  weight: "100 900",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +22,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${urbanist.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -47,7 +46,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-full font-urbanist antialiased transition-colors duration-200"
+        className={`${inter.className} min-h-full font-sans antialiased transition-colors duration-200`}
       >
         <ThemeProvider defaultTheme="system">
           <main className="flex-1 pb-20 md:pb-0">{children}</main>

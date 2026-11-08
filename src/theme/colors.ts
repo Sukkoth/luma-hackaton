@@ -1,6 +1,6 @@
 /**
  * Centralized Design Tokens & Color Palettes
- * (Adapted from Watermelon architecture for Next.js & Tailwind CSS v4)
+ * (Exact replica of Watermelon design system for Next.js & Tailwind CSS v4)
  *
  * CHANGE YOUR COLORS HERE:
  * Changing tokens here or in globals.css automatically updates
@@ -9,44 +9,44 @@
 
 import type { ThemeTokens } from "./types";
 
-// --- 1. SINGLE-SOURCE PRIMARY BRAND ACCENTS ---
-export const PRIMARY_COLOR_LIGHT = "#18181B";
+// --- 1. SINGLE-SOURCE PRIMARY BRAND ACCENTS (EXACT WATERMELON TOKENS) ---
+export const PRIMARY_COLOR_LIGHT = "#1A212D";
 export const PRIMARY_FOREGROUND_LIGHT = "#FFFFFF";
-export const PRIMARY_MUTED_LIGHT = "rgba(24, 24, 27, 0.08)";
-export const PRIMARY_BORDER_LIGHT = "rgba(24, 24, 27, 0.25)";
+export const PRIMARY_MUTED_LIGHT = "rgba(26, 33, 45, 0.08)";
+export const PRIMARY_BORDER_LIGHT = "rgba(26, 33, 45, 0.25)";
 
-export const PRIMARY_COLOR_DARK = "#FAFAFA";
-export const PRIMARY_FOREGROUND_DARK = "#09090B";
-export const PRIMARY_MUTED_DARK = "rgba(250, 250, 250, 0.12)";
-export const PRIMARY_BORDER_DARK = "rgba(250, 250, 250, 0.35)";
+export const PRIMARY_COLOR_DARK = "#DADAD6";
+export const PRIMARY_FOREGROUND_DARK = "#10110C";
+export const PRIMARY_MUTED_DARK = "rgba(218, 218, 214, 0.12)";
+export const PRIMARY_BORDER_DARK = "rgba(218, 218, 214, 0.35)";
 
 export const palette = {
   white: "#FFFFFF",
   black: "#000000",
 
-  // Dark Theme Base (Luma / Watermelon dark)
-  darkBg: "#09090B",
-  darkSurface: "#121215",
-  darkSurfaceElevated: "#18181B",
-  darkSurfaceSubtle: "#27272A",
-  darkBorder: "#27272A",
-  darkBorderSubtle: "#1F1F23",
-  darkBorderStrong: "#3F3F46",
-  darkText: "#FAFAFA",
-  darkTextSecondary: "#A1A1AA",
-  darkTextDim: "#71717A",
+  // Dark Theme Base (Exact Watermelon Dark)
+  darkBg: "#10110C",
+  darkSurface: "#181A13",
+  darkSurfaceElevated: "#24271D",
+  darkSurfaceSubtle: "#1E2018",
+  darkBorder: "#26291E",
+  darkBorderSubtle: "#1E2018",
+  darkBorderStrong: "#363A2B",
+  darkText: "#FFFFFF",
+  darkTextSecondary: "#9E9F97",
+  darkTextDim: "#94968C",
 
-  // Light Theme Base
+  // Light Theme Base (Exact Watermelon Light - Deep Slate Theme #1A212D)
   lightBg: "#F8F9FA",
   lightSurface: "#FFFFFF",
-  lightSurfaceElevated: "#F4F4F5",
-  lightSurfaceSubtle: "#ECECEF",
-  lightBorder: "#E4E4E7",
-  lightBorderSubtle: "#F4F4F5",
-  lightBorderStrong: "#A1A1AA",
-  lightText: "#18181B",
-  lightTextSecondary: "#52525B",
-  lightTextDim: "#71717A",
+  lightSurfaceElevated: "#F1F3F5",
+  lightSurfaceSubtle: "#E9ECEF",
+  lightBorder: "#E1E5EA",
+  lightBorderSubtle: "#D4DBE2",
+  lightBorderStrong: "#B0BAC5",
+  lightText: "#1A212D",
+  lightTextSecondary: "#4F5D6E",
+  lightTextDim: "#5C6B7E",
 
   // Status & Utility
   destructive: "#EF4444",
@@ -54,6 +54,7 @@ export const palette = {
   destructiveDark: "rgba(239, 68, 68, 0.15)",
   success: "#10B981",
   warning: "#F59E0B",
+  info: "#3B82F6",
 } as const;
 
 export const lightTokens: ThemeTokens = {
