@@ -105,8 +105,8 @@ export function BookChaptersModal({
                     }
                     className={`flex h-10 items-center justify-center rounded-[11px] text-[13px] transition-all ${
                       isRead
-                        ? "bg-[#82ADD4] font-medium text-white shadow-xs hover:bg-[#6894BC]"
-                        : "border border-black/6 bg-white/60 font-normal text-black hover:border-black/20 hover:bg-white dark:border-white/10 dark:bg-white/4 dark:text-white dark:hover:bg-white/10"
+                        ? "bg-black font-semibold text-white shadow-xs hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                        : "border border-black/8 bg-white/70 font-normal text-black hover:border-black/20 hover:bg-white dark:border-white/10 dark:bg-white/4 dark:text-white dark:hover:bg-white/10"
                     }`}
                   >
                     {ch}

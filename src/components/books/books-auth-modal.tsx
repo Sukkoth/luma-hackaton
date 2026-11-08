@@ -16,7 +16,7 @@ export function BooksAuthModal({ isOpen, onClose, onSignIn }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
     >
       <div className="glass-panel relative w-full max-w-sm rounded-3xl border border-white/90 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-[#82ADD4]/20 text-[#507ea6] dark:bg-[#82ADD4]/30 dark:text-[#82ADD4]">
+        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
           <Lock className="size-5" />
         </div>
         <h3
@@ -33,7 +33,7 @@ export function BooksAuthModal({ isOpen, onClose, onSignIn }: Props) {
           <button
             type="button"
             onClick={onSignIn}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-black py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-black py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
           >
             <LogIn className="size-3.5" />
             <span>Sign In</span>

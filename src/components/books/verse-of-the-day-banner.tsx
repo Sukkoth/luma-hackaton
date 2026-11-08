@@ -34,18 +34,18 @@ export function VerseOfTheDayBanner({
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-[10px] bg-[#82ADD4]/20 text-[#6894BC]">
+                <span className="flex size-7 items-center justify-center rounded-[10px] border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                   <Sparkles className="size-3.5" />
                 </span>
-                <span className="text-[12px] font-medium tracking-wide text-[#555555] dark:text-[#9CA3AF]">
+                <span className="text-[12px] font-medium tracking-wide text-zinc-600 dark:text-zinc-400">
                   Verse of the Day
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="rounded-sm bg-black/5 px-2 py-0.5 text-[10px] font-medium text-[#666666] dark:bg-white/10 dark:text-[#A1A1AA]">
+                <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
                   YouVersion
                 </span>
-                <span className="rounded-sm bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+                <span className="rounded-full border border-zinc-300 bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                   Daily Light
                 </span>
               </div>
@@ -55,16 +55,16 @@ export function VerseOfTheDayBanner({
               <button
                 type="button"
                 onClick={() => setShowArtworkModal(true)}
-                className="group mt-4 block w-full text-left cursor-pointer transition-opacity hover:opacity-85 focus:outline-hidden"
+                className="group mt-4 block w-full cursor-pointer text-left transition-opacity hover:opacity-85 focus:outline-hidden"
                 aria-label="View verse artwork"
                 title="Click to view artwork"
               >
-                <blockquote className="text-[20px] leading-relaxed font-light text-black transition-colors group-hover:text-[#6894BC] sm:text-[22px] dark:text-white dark:group-hover:text-[#82ADD4]">
+                <blockquote className="text-[20px] font-light leading-relaxed text-black transition-colors group-hover:text-zinc-600 sm:text-[22px] dark:text-white dark:group-hover:text-zinc-300">
                   &ldquo;{text}&rdquo;
                 </blockquote>
               </button>
             ) : (
-              <blockquote className="mt-4 text-[20px] leading-relaxed font-light text-black sm:text-[22px] dark:text-white">
+              <blockquote className="mt-4 text-[20px] font-light leading-relaxed text-black sm:text-[22px] dark:text-white">
                 &ldquo;{text}&rdquo;
               </blockquote>
             )}
@@ -84,43 +84,43 @@ export function VerseOfTheDayBanner({
         <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Calendar className="size-3.5 text-[#82ADD4]" />
+              <span className="flex items-center gap-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+                <Calendar className="size-3.5 text-zinc-900 dark:text-zinc-100" />
                 <span>Today&apos;s Reading</span>
               </span>
               <Link
                 href="/plans"
-                className="text-[12px] font-medium text-[#6894BC] hover:underline"
+                className="text-[12px] font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100"
               >
                 View Plans
               </Link>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/90 bg-white/60 p-4 backdrop-blur-md dark:border-white/10 dark:bg-white/4">
+            <div className="mt-4 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-[#82ADD4] text-white">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-950">
                     <Bookmark className="size-3.5" />
                   </div>
                   <div>
-                    <h4 className="text-[14px] font-medium text-black dark:text-white">
+                    <h4 className="text-[14px] font-medium text-zinc-900 dark:text-zinc-100">
                       Romans 8:1–39
                     </h4>
-                    <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                       Bible in a Year • Day 212
                     </p>
                   </div>
                 </div>
-                <span className="rounded-sm bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+                <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                   94%
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between border-t border-black/4 pt-3 text-[12px] text-[#777777] dark:border-white/8 dark:text-[#9CA3AF]">
+          <div className="mt-4 flex items-center justify-between border-t border-black/4 pt-3 text-[12px] text-zinc-500 dark:border-white/8 dark:text-zinc-400">
             <span>Bible Tracker Total</span>
-            <span className="font-light text-black dark:text-white">
+            <span className="font-mono text-zinc-900 dark:text-zinc-100">
               {totalReadChapters} / {totalChaptersAcrossCanon} ch (
               {canonPercentage}%)
             </span>

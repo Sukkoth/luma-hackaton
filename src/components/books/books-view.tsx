@@ -230,7 +230,7 @@ export function BooksView({
                 {filteredBooks.length} Books
               </span>
               {trackerName && (
-                <span className="hidden rounded-full bg-[#82ADD4]/15 px-2.5 py-0.5 text-[11px] font-medium text-[#507ea6] sm:inline-block dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                <span className="hidden rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 font-mono text-[10px] font-medium text-zinc-900 sm:inline-block dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
                   {trackerName}
                 </span>
               )}
