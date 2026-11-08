@@ -78,9 +78,10 @@ export default function ForgotPasswordPage() {
             <div>
               <div className="inline-flex items-center gap-2">
                 <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
-                  Scripture<span className="text-[#82ADD4]">.</span>
+                  Scripture
+                  <span className="text-zinc-400 dark:text-zinc-600">.</span>
                 </span>
-                <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+                <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
                   Recovery
                 </span>
               </div>
@@ -104,8 +105,8 @@ export default function ForgotPasswordPage() {
 
             {submittedEmail ? (
               <div className="mt-6 space-y-4">
-                <div className="rounded-[18px] border border-black/6 bg-[#DDFD2C]/15 p-5 text-center dark:border-white/10 dark:bg-[#DDFD2C]/10">
-                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-xs">
+                <div className="rounded-[18px] border border-zinc-200 bg-zinc-50 p-5 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
+                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
                     <CheckCircle2 className="size-5" />
                   </div>
                   <h3 className="mt-3 text-[15px] font-medium text-black dark:text-white">
@@ -123,7 +124,7 @@ export default function ForgotPasswordPage() {
                 {/* Direct link for demonstration / UI testing */}
                 <Link
                   href="/reset-password"
-                  className="flex w-full items-center justify-center gap-1.5 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
                 >
                   <span>Continue to Set New Password</span>
                   <ArrowRight className="size-4" />
@@ -153,7 +154,7 @@ export default function ForgotPasswordPage() {
 
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                  className="flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
                 >
                   Send Reset Link
                 </button>

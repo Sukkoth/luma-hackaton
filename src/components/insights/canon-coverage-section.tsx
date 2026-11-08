@@ -47,12 +47,12 @@ export function CanonCoverageSection({ canonName, divisions }: Props) {
                   {div.label}
                 </span>
                 <span
-                  className={`rounded-sm px-1.5 py-0.5 text-[11px] font-medium ${
+                  className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium ${
                     isComplete
-                      ? "bg-[#DDFD2C] text-black"
+                      ? "border-zinc-300 bg-zinc-950 text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950"
                       : hasStarted
-                        ? "bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]"
-                        : "bg-black/4 text-[#777777] dark:bg-white/6 dark:text-[#9CA3AF]"
+                        ? "border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100"
+                        : "border-black/5 bg-black/4 text-[#777777] dark:border-white/5 dark:bg-white/6 dark:text-[#9CA3AF]"
                   }`}
                 >
                   {div.percentage}%
@@ -69,8 +69,8 @@ export function CanonCoverageSection({ canonName, divisions }: Props) {
                   style={{ width: `${Math.min(100, div.percentage)}%` }}
                   className={`h-full rounded-full transition-all duration-300 ${
                     isComplete
-                      ? "bg-[#DDFD2C]"
-                      : "bg-linear-to-r from-[#82ADD4] to-[#6894BC]"
+                      ? "bg-black dark:bg-white"
+                      : "bg-zinc-800 dark:bg-zinc-200"
                   }`}
                 />
               </div>

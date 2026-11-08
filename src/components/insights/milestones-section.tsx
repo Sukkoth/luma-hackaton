@@ -13,13 +13,13 @@ export function MilestonesSection() {
           </p>
         </div>
         <span className="inline-flex items-center gap-1 rounded-md bg-black/5 px-2.5 py-0.5 text-[11px] font-medium text-[#777777] dark:bg-white/10 dark:text-[#9CA3AF]">
-          <Sparkles className="size-3 text-[#82ADD4]" />
+          <Sparkles className="size-3 text-zinc-900 dark:text-zinc-100" />
           <span>Coming Soon</span>
         </span>
       </div>
 
       <div className="mt-6 flex flex-col items-center justify-center rounded-[22px] border border-dashed border-black/10 bg-black/[0.01] py-14 text-center dark:border-white/10 dark:bg-white/[0.01]">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-[#82ADD4]/15 text-[#507ea6] shadow-2xs dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+        <div className="flex size-14 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 shadow-2xs dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
           <Award className="size-7" strokeWidth={1.75} />
         </div>
         <h3 className="mt-4 text-[17px] font-medium text-black dark:text-white">

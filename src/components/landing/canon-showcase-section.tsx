@@ -82,7 +82,7 @@ export function CanonShowcaseSection({
     <section className="mt-8 rounded-3xl border border-black/8 bg-white/60 p-6 shadow-xs backdrop-blur-md sm:p-10 dark:border-white/10 dark:bg-white/2">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <span className="text-[11px] font-medium tracking-[0.16em] text-[#82ADD4] uppercase">
+          <span className="font-mono text-[10px] font-semibold tracking-[0.16em] text-zinc-500 dark:text-zinc-400 uppercase">
             UNIVERSAL CHRISTIAN TRADITIONS
           </span>
           <h2 className="mt-1 text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
@@ -105,7 +105,7 @@ export function CanonShowcaseSection({
                 onClick={() => onSelectCanon({ canonId: canon.id })}
                 className={`rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all ${
                   isSelected
-                    ? "bg-black text-white shadow-xs dark:bg-[#DDFD2C] dark:text-black"
+                    ? "bg-black text-white shadow-xs dark:bg-white dark:text-black"
                     : "text-[#666666] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
                 }`}
               >
@@ -119,7 +119,7 @@ export function CanonShowcaseSection({
       {/* Selected Canon Detailed Showcase Card */}
       <div className="mt-6 grid grid-cols-1 gap-6 rounded-[20px] border border-black/6 bg-white/80 p-6 sm:grid-cols-3 dark:border-white/10 dark:bg-white/3">
         <div className="sm:col-span-1">
-          <span className="rounded-md bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#497aa1] dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 font-mono text-[10px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
             {selectedCanon.tradition}
           </span>
           <h3 className="mt-2 text-[22px] font-medium text-black dark:text-white">
@@ -150,7 +150,7 @@ export function CanonShowcaseSection({
                 key={highlight}
                 className="flex items-start gap-2.5 text-[13px] text-[#555555] dark:text-[#A1A1AA]"
               >
-                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#82ADD4]" />
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-zinc-900 dark:text-zinc-100" />
                 <span>{highlight}</span>
               </li>
             ))}
@@ -159,7 +159,7 @@ export function CanonShowcaseSection({
           <div className="mt-6 flex items-center gap-3">
             <Link
               href="/signup"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             >
               <span>Track This Canon</span>
               <ArrowRight className="size-3.5" />

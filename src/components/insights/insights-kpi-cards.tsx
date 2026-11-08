@@ -25,16 +25,16 @@ export function InsightsKpiCards({
       {/* 1. Reading Streak */}
       <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <Flame className="size-3.5 text-orange-500" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
+            <Flame className="size-3.5 text-zinc-950 dark:text-zinc-50" />
             <span>Reading Streak</span>
           </span>
-          <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
+          <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
             {currentStreak > 0 ? "Active" : "Ready"}
           </span>
         </div>
         <div className="mt-3">
-          <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
+          <span className="font-mono text-[36px] font-light leading-none tracking-tight text-zinc-950 sm:text-[40px] dark:text-zinc-50">
             {currentStreak} {currentStreak === 1 ? "Day" : "Days"}
           </span>
           <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
@@ -47,16 +47,16 @@ export function InsightsKpiCards({
       {/* 2. Bible Progress */}
       <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <TrendingUp className="size-3.5 text-[#82ADD4]" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
+            <TrendingUp className="size-3.5 text-zinc-900 dark:text-zinc-100" />
             <span>Bible Complete</span>
           </span>
-          <span className="rounded-full bg-black/4 px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
             {canonPercentage}%
           </span>
         </div>
         <div className="mt-3">
-          <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
+          <span className="font-mono text-[36px] font-light leading-none tracking-tight text-zinc-950 sm:text-[40px] dark:text-zinc-50">
             {canonPercentage}%
           </span>
           <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
@@ -69,16 +69,16 @@ export function InsightsKpiCards({
       {/* 3. Streak Freeze Protection */}
       <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <Shield className="size-3.5 text-[#82ADD4]" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
+            <Shield className="size-3.5 text-zinc-900 dark:text-zinc-100" />
             <span>Streak Freezes</span>
           </span>
-          <span className="rounded-full bg-black/4 px-2 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
             Max 3
           </span>
         </div>
         <div className="mt-3">
-          <span className="text-[38px] leading-none font-light tracking-tight text-black sm:text-[42px] dark:text-white">
+          <span className="font-mono text-[36px] font-light leading-none tracking-tight text-zinc-950 sm:text-[40px] dark:text-zinc-50">
             {freezesRemaining} / 3
           </span>
           <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
@@ -92,16 +92,16 @@ export function InsightsKpiCards({
       {/* 4. Active Tracker */}
       <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-            <BookOpen className="size-3.5 text-[#82ADD4]" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
+            <BookOpen className="size-3.5 text-zinc-900 dark:text-zinc-100" />
             <span>Active Tracker</span>
           </span>
-          <span className="rounded-sm bg-[#82ADD4]/15 px-1.5 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
             Current
           </span>
         </div>
         <div className="mt-3">
-          <span className="truncate block text-[26px] leading-tight font-light tracking-tight text-black sm:text-[28px] dark:text-white">
+          <span className="block truncate text-[24px] font-light leading-tight tracking-tight text-zinc-950 sm:text-[26px] dark:text-zinc-50">
             {activeTrackerName}
           </span>
           <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">

@@ -164,9 +164,10 @@ function SignUpContent() {
             <div>
               <div className="inline-flex items-center gap-2">
                 <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
-                  Luma<span className="text-[#82ADD4]">.</span>
+                  Luma
+                  <span className="text-zinc-400 dark:text-zinc-600">.</span>
                 </span>
-                <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+                <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
                   Register
                 </span>
               </div>
@@ -354,7 +355,7 @@ function SignUpContent() {
                   name="agreeTerms"
                   type="checkbox"
                   required
-                  className="mt-0.5 size-4 rounded-sm border-black/20 text-black accent-black focus:ring-black dark:accent-[#DDFD2C]"
+                  className="mt-0.5 size-4 rounded-sm border-black/20 text-black accent-black focus:ring-black dark:accent-white"
                 />
                 <label
                   htmlFor="agree-terms"
@@ -368,7 +369,7 @@ function SignUpContent() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               >
                 {isLoading && <Loader2 className="size-4 animate-spin" />}
                 <span>
@@ -404,7 +405,7 @@ export default function SignUpPage() {
     <Suspense
       fallback={
         <div className="flex min-h-dvh items-center justify-center">
-          <Loader2 className="size-6 animate-spin text-[#82ADD4]" />
+          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-zinc-100" />
         </div>
       }
     >

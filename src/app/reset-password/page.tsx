@@ -79,9 +79,10 @@ export default function ResetPasswordPage() {
             <div>
               <div className="inline-flex items-center gap-2">
                 <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
-                  Scripture<span className="text-[#82ADD4]">.</span>
+                  Scripture
+                  <span className="text-zinc-400 dark:text-zinc-600">.</span>
                 </span>
-                <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+                <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
                   Security
                 </span>
               </div>
@@ -105,8 +106,8 @@ export default function ResetPasswordPage() {
 
             {submitted ? (
               <div className="mt-6 space-y-4">
-                <div className="rounded-[18px] border border-black/6 bg-[#DDFD2C]/15 p-5 text-center dark:border-white/10 dark:bg-[#DDFD2C]/10">
-                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-[#DDFD2C] text-black shadow-xs">
+                <div className="rounded-[18px] border border-zinc-200 bg-zinc-50 p-5 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
+                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
                     <CheckCircle2 className="size-5" />
                   </div>
                   <h3 className="mt-3 text-[15px] font-medium text-black dark:text-white">
@@ -120,7 +121,7 @@ export default function ResetPasswordPage() {
 
                 <Link
                   href="/login"
-                  className="flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                  className="flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
                 >
                   Sign In With New Password
                 </Link>
@@ -184,18 +185,18 @@ export default function ResetPasswordPage() {
                 {/* Password Criteria Checks */}
                 <div className="space-y-1.5 pt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
                   <div className="flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
+                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-white/60" />
                     <span>At least 8 characters long</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-[#DDFD2C]/60" />
+                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-white/60" />
                     <span>Must match confirmation password</span>
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="mt-2 flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                  className="mt-2 flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
                 >
                   Update Password
                 </button>

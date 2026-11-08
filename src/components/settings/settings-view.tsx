@@ -84,7 +84,7 @@ export function SettingsView({
         {/* Settings Header */}
         <section className="glass-panel rounded-[28px] p-6 sm:p-7">
           <div className="flex items-center gap-2">
-            <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+            <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
               Preferences
             </span>
             <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
@@ -105,7 +105,7 @@ export function SettingsView({
           <div className="flex flex-col gap-2 border-b border-black/4 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/6">
             <div>
               <div className="flex items-center gap-2">
-                <FolderKanban className="size-4 text-[#82ADD4]" />
+                <FolderKanban className="size-4 text-zinc-900 dark:text-zinc-100" />
                 <h2 className="text-[18px] font-normal tracking-tight text-black dark:text-white">
                   Reading Trackers
                 </h2>
@@ -118,7 +118,7 @@ export function SettingsView({
 
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
             >
               <Plus className="size-3.5" />
               <span>Create Tracker</span>
@@ -129,7 +129,7 @@ export function SettingsView({
             {/* Active Tracker */}
             <div className="flex flex-col justify-between gap-3 rounded-[20px] border border-black/8 bg-white/80 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md sm:flex-row sm:items-center dark:border-white/8 dark:bg-white/4 dark:shadow-none">
               <div className="flex items-center gap-3.5">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-[#82ADD4] text-white shadow-xs">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
                   <BookMarked className="size-5" />
                 </div>
                 <div>
@@ -137,7 +137,7 @@ export function SettingsView({
                     <h3 className="text-[16px] font-medium text-black dark:text-white">
                       Primary Devotional Tracker
                     </h3>
-                    <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[10px] font-medium text-black">
+                    <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[9px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                       Current Active
                     </span>
                   </div>
@@ -186,7 +186,7 @@ export function SettingsView({
           {/* Pacing Safeguards */}
           <section className="glass-panel rounded-[28px] p-6">
             <div className="flex items-center gap-2 border-b border-black/4 pb-4 dark:border-white/6">
-              <Sliders className="size-4 text-[#82ADD4]" />
+              <Sliders className="size-4 text-zinc-900 dark:text-zinc-100" />
               <h2 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
                 Reading Pace Safeguards
               </h2>
@@ -202,8 +202,8 @@ export function SettingsView({
                     Recalculates chapters/day if you miss reading sessions
                   </p>
                 </div>
-                <div className="flex h-5 w-9 items-center rounded-full bg-[#82ADD4] p-0.5">
-                  <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform" />
+                <div className="flex h-5 w-9 items-center rounded-full bg-zinc-950 p-0.5 dark:bg-white">
+                  <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform dark:bg-zinc-950" />
                 </div>
               </div>
 
@@ -226,7 +226,7 @@ export function SettingsView({
           {/* Daily Reminders */}
           <section className="glass-panel rounded-[28px] p-6">
             <div className="flex items-center gap-2 border-b border-black/4 pb-4 dark:border-white/6">
-              <Bell className="size-4 text-[#82ADD4]" />
+              <Bell className="size-4 text-zinc-900 dark:text-zinc-100" />
               <h2 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
                 Reminders & Notifications
               </h2>
@@ -246,8 +246,8 @@ export function SettingsView({
                   <span className="text-[12px] font-light text-black dark:text-white">
                     07:30 AM
                   </span>
-                  <div className="flex h-5 w-9 items-center rounded-full bg-[#82ADD4] p-0.5">
-                    <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform" />
+                  <div className="flex h-5 w-9 items-center rounded-full bg-zinc-950 p-0.5 dark:bg-white">
+                    <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform dark:bg-zinc-950" />
                   </div>
                 </div>
               </div>
@@ -261,8 +261,8 @@ export function SettingsView({
                     Sunday recap of chapters read and consistency rating
                   </p>
                 </div>
-                <div className="flex h-5 w-9 items-center rounded-full bg-[#82ADD4] p-0.5">
-                  <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform" />
+                <div className="flex h-5 w-9 items-center rounded-full bg-zinc-950 p-0.5 dark:bg-white">
+                  <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform dark:bg-zinc-950" />
                 </div>
               </div>
             </div>
@@ -273,13 +273,13 @@ export function SettingsView({
         <section className="glass-panel rounded-[28px] p-6 sm:p-7">
           <div className="flex items-center justify-between border-b border-black/4 pb-4 dark:border-white/6">
             <div className="flex items-center gap-2">
-              <User className="size-4 text-[#82ADD4]" />
+              <User className="size-4 text-zinc-900 dark:text-zinc-100" />
               <h2 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
                 Account & Authentication
               </h2>
             </div>
             <span className="flex items-center gap-1 text-[12px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-              <Shield className="size-3.5 text-[#82ADD4]" />
+              <Shield className="size-3.5 text-zinc-900 dark:text-zinc-100" />
               <span>Secured</span>
             </span>
           </div>
@@ -296,7 +296,7 @@ export function SettingsView({
                   className="size-12 rounded-full border border-black/10 object-cover shadow-xs dark:border-white/10"
                 />
               ) : (
-                <div className="flex size-12 items-center justify-center rounded-full bg-[#82ADD4] text-[15px] font-bold text-white shadow-xs">
+                <div className="flex size-12 items-center justify-center rounded-full border border-zinc-200 bg-zinc-950 font-mono text-[15px] font-medium text-white shadow-xs dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
                   {initials}
                 </div>
               )}

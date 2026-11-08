@@ -55,7 +55,7 @@ export function AuthShowcasePanel({
           >
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.28" />
             <stop offset="45%" stopColor="#71717A" stopOpacity="0.14" />
-            <stop offset="75%" stopColor="#DDFD2C" stopOpacity="0.12" />
+            <stop offset="75%" stopColor="#A1A1AA" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.01" />
           </linearGradient>
           <linearGradient
@@ -178,7 +178,7 @@ export function AuthShowcasePanel({
           />
 
           {/* Radiant Canonical Crosshairs and Node Markers */}
-          <circle cx="450" cy="550" r="4" fill="#DDFD2C" opacity="0.9" />
+          <circle cx="450" cy="550" r="4" fill="#FFFFFF" opacity="0.9" />
           <circle cx="450" cy="330" r="3" fill="#FFFFFF" opacity="0.7" />
           <circle cx="450" cy="770" r="3" fill="#71717A" opacity="0.7" />
           <circle cx="230" cy="550" r="3" fill="#FFFFFF" opacity="0.6" />
@@ -193,7 +193,7 @@ export function AuthShowcasePanel({
           />
           <path
             d="M445 110 H455 M450 105 V115"
-            stroke="#DDFD2C"
+            stroke="#FFFFFF"
             strokeWidth="1"
             opacity="0.6"
           />
@@ -217,14 +217,14 @@ export function AuthShowcasePanel({
         </Link>
 
         <span className="text-[14px] font-light tracking-wide text-white/80">
-          Luma<span className="text-[#DDFD2C]">.</span>
+          Luma<span className="text-zinc-500">.</span>
         </span>
       </div>
 
       {/* Center Typography */}
       <div className="relative z-10 my-auto max-w-lg pt-12">
         {badge && (
-          <span className="inline-block text-[11px] font-medium tracking-[0.2em] text-[#DDFD2C] uppercase">
+          <span className="inline-block font-mono text-[10px] font-medium tracking-[0.2em] text-zinc-300 uppercase">
             {badge}
           </span>
         )}
@@ -234,7 +234,7 @@ export function AuthShowcasePanel({
         </h2>
 
         <div className="mt-6 flex items-center gap-3">
-          <span className="h-px w-8 bg-[#DDFD2C]/80" />
+          <span className="h-px w-8 bg-white/40" />
           <span className="text-[13px] font-normal tracking-wide text-white/75">
             {scriptureRef}
           </span>
