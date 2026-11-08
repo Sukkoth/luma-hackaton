@@ -149,7 +149,7 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("catalog")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "catalog"
                   ? "bg-primary text-primary-foreground shadow-xs"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
@@ -161,7 +161,7 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("active")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "active"
                   ? "bg-primary text-primary-foreground shadow-xs"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
@@ -175,7 +175,7 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("paused")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "paused"
                   ? "bg-primary text-primary-foreground shadow-xs"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
@@ -189,7 +189,7 @@ export function PlanCatalog({
             <button
               type="button"
               onClick={() => setActiveTab("finished")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-bold transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "finished"
                   ? "bg-primary text-primary-foreground shadow-xs"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
@@ -205,21 +205,21 @@ export function PlanCatalog({
           {/* Search Input */}
           {activeTab === "catalog" && (
             <div className="relative w-full sm:w-64">
-              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-3.5 -translate-y-1/2 text-foreground-dim" />
+              <Search className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 text-foreground-dim" />
               <input
                 type="text"
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="ui-input w-full pr-3.5 pl-9 text-[13px]"
+                className="h-9 w-full rounded-[12px] border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-foreground-dim hover:text-foreground"
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
                 >
-                  <X className="size-3" />
+                  <X className="size-3.5" />
                 </button>
               )}
             </div>

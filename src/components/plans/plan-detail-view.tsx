@@ -240,7 +240,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
         <button
           type="button"
           onClick={() => setActiveTab("chapters")}
-          className={`flex items-center justify-center gap-2 rounded-[12px] py-2 text-[13px] font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-2 rounded-[12px] py-2 text-[13px] font-medium transition-all cursor-pointer ${
             activeTab === "chapters"
               ? "bg-primary text-primary-foreground shadow-xs"
               : "bg-transparent text-foreground-secondary hover:text-foreground"
@@ -253,7 +253,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
         <button
           type="button"
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center justify-center gap-2 rounded-[12px] py-2 text-[13px] font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-2 rounded-[12px] py-2 text-[13px] font-medium transition-all cursor-pointer ${
             activeTab === "settings"
               ? "bg-primary text-primary-foreground shadow-xs"
               : "bg-transparent text-foreground-secondary hover:text-foreground"

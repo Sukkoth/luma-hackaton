@@ -32,23 +32,23 @@ export function PlanCard({
         {/* Top Header Badge & Meta Row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-bold text-foreground uppercase tracking-wide">
+            <span className="rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground uppercase tracking-wide">
               {plan.category}
             </span>
             {plan.canonCompatibility &&
               plan.canonCompatibility !== "protestant" && (
-                <span className="flex items-center gap-1 rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-bold text-primary">
+                <span className="flex items-center gap-1 rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-semibold text-primary">
                   <Bookmark className="size-2.5" />
                   <span>{plan.canonCompatibility.replace("_", " ")}</span>
                 </span>
               )}
             {isCustom && (
-              <span className="rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-bold text-primary">
+              <span className="rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-semibold text-primary">
                 Custom
               </span>
             )}
             {isEnrolled && (
-              <span className="flex items-center gap-1 rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-bold text-primary">
+              <span className="flex items-center gap-1 rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-semibold text-primary">
                 <Check className="size-2.5" />
                 <span>Enrolled</span>
               </span>
@@ -69,7 +69,7 @@ export function PlanCard({
         </div>
 
         {/* Title & Subtitle */}
-        <h3 className="mt-3 text-[17px] font-bold tracking-tight text-foreground">
+        <h3 className="mt-3 text-[17px] font-semibold tracking-tight text-foreground">
           {plan.title}
         </h3>
         <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed font-normal text-foreground-dim">
@@ -84,7 +84,7 @@ export function PlanCard({
               <span>Fixed {plan.recommendedDays}d</span>
             </span>
           ) : (
-            <span className="flex items-center gap-1 rounded-[8px] bg-primary-muted px-2 py-1 text-[10.5px] font-bold text-primary">
+            <span className="flex items-center gap-1 rounded-[8px] bg-primary-muted px-2 py-1 text-[10.5px] font-medium text-primary">
               <Sliders className="size-3" />
               <span>Custom Pace</span>
             </span>
@@ -112,10 +112,10 @@ export function PlanCard({
       {/* Bottom Action Row */}
       <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-3.5">
         <div>
-          <span className="block text-[9.5px] font-bold tracking-wider text-foreground-dim uppercase">
+          <span className="block text-[9.5px] font-semibold tracking-wider text-foreground-dim uppercase">
             Recommended Pace
           </span>
-          <span className="text-[11.5px] font-semibold text-foreground">
+          <span className="text-[11.5px] font-medium text-foreground">
             {plan.recommendedDays} days · ~{plan.defaultDailyTarget} ch/day
           </span>
         </div>
@@ -123,7 +123,7 @@ export function PlanCard({
         <div className="flex items-center gap-2">
           <Link
             href={`/plans/templates/${plan.id}`}
-            className="rounded-[12px] border border-border bg-surface-elevated px-3 py-1.5 text-[12px] font-bold text-foreground-secondary hover:border-border-strong hover:text-foreground transition-colors"
+            className="rounded-[12px] border border-border bg-surface-elevated px-3 py-1.5 text-[12px] font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground transition-colors"
           >
             Details
           </Link>
@@ -131,7 +131,7 @@ export function PlanCard({
             <button
               type="button"
               onClick={() => onStartPlanAction(plan)}
-              className="flex items-center gap-1 rounded-[12px] bg-primary px-3.5 py-1.5 text-[12px] font-bold text-primary-foreground shadow-xs hover:opacity-90 transition-opacity cursor-pointer"
+              className="flex items-center gap-1 rounded-[12px] bg-primary px-3.5 py-1.5 text-[12px] font-medium text-primary-foreground shadow-xs hover:opacity-90 transition-opacity cursor-pointer"
             >
               <span>Start</span>
               <ArrowRight className="size-3.5" />

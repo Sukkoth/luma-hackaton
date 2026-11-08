@@ -180,17 +180,17 @@ export function PlanReadingFlow({
             <div
               key={session.sessionIndex}
               onClick={() => onSelectSessionAction(session.sessionIndex)}
-              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-[16px] border p-3 sm:p-3.5 transition-all ${
+              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-[16px] border bg-surface p-3 sm:p-3.5 transition-all ${
                 isSelected
-                  ? "border-primary bg-surface shadow-xs"
-                  : "border-border bg-surface-elevated hover:border-border-strong"
+                  ? "border-primary shadow-xs"
+                  : "border-border hover:border-border-strong"
               }`}
             >
               {/* Session Card Header */}
               <div className="flex items-center justify-between border-b border-border pb-2.5">
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-bold text-foreground">
+                    <span className="text-[13px] font-medium text-foreground">
                       {session.title}
                     </span>
                     {isLocked && (
@@ -281,7 +281,7 @@ export function PlanReadingFlow({
                           onToggleReadingAction(reading.id);
                         }
                       }}
-                      className="group flex items-center gap-2 rounded-lg px-1 py-1 text-left transition-colors hover:bg-surface cursor-pointer"
+                      className="group flex items-center gap-2 rounded-lg px-1 py-1 text-left transition-colors hover:bg-surface-elevated/70 cursor-pointer"
                     >
                       {/* Circular Checkbox */}
                       <div
@@ -297,13 +297,7 @@ export function PlanReadingFlow({
                       </div>
 
                       {/* Reading Title */}
-                      <span
-                        className={`truncate text-[12px] font-bold transition-colors ${
-                          reading.isCompleted
-                            ? "text-foreground-dim line-through"
-                            : "text-foreground"
-                        }`}
-                      >
+                      <span className="truncate text-[12px] font-medium text-foreground transition-colors">
                         {reading.displayText ||
                           `${reading.bookName} ${reading.chapter}`}
                       </span>
