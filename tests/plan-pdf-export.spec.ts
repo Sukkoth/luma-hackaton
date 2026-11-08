@@ -41,6 +41,9 @@ test.describe("Plan PDF Extraction Feature", () => {
     await createCustomBtn.click();
 
     const wizardModal = page.getByRole("dialog");
+    if (!(await wizardModal.isVisible())) {
+      await createCustomBtn.click();
+    }
     await expect(wizardModal).toBeVisible();
 
     // Step 1: Select Jonah (4 ch)

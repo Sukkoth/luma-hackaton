@@ -134,7 +134,7 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     // 6. Verify modal saved note and navigated to notes studio with note loaded
     await page.waitForURL(/\/notes\?noteId=/, { timeout: 10000 });
     await expect(
-      page.getByRole("heading", { name: "Study Journal & Notes" })
+      page.getByRole("heading", { name: "Notes", exact: true })
     ).toBeVisible();
     await expect(page.getByTestId("note-title-input")).toHaveValue(
       "Day 1 - Genesis 1 Creation Studio Ready"
@@ -162,7 +162,7 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     // Verify it navigates to notes studio and loads THIS EXACT newly drafted reflection
     await page.waitForURL(/\/notes\?noteId=/, { timeout: 10000 });
     await expect(
-      page.getByRole("heading", { name: "Study Journal & Notes" })
+      page.getByRole("heading", { name: "Notes", exact: true })
     ).toBeVisible();
     await expect(page.getByTestId("note-title-input")).toHaveValue(
       "Day 1 - Unsaved Reflection Straight To Studio"
