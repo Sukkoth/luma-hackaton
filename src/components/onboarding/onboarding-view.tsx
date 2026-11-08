@@ -63,8 +63,7 @@ export function OnboardingView({ userName = "Reader" }: Props) {
     <div className="flex min-h-dvh w-full items-center justify-center p-4 sm:p-6 md:p-10">
       {/* Background ambient bloom */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 size-96 rounded-full bg-[#82ADD4]/10 blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 size-96 rounded-full bg-[#DDFD2C]/10 blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 size-96 rounded-full bg-black/2 blur-3xl dark:bg-white/2" />
       </div>
 
       <div className="glass-panel relative z-10 w-full max-w-155 rounded-4xl p-6 shadow-2xl backdrop-blur-xl sm:p-10 dark:border-white/10 dark:bg-[#121216]/80">
@@ -72,9 +71,9 @@ export function OnboardingView({ userName = "Reader" }: Props) {
         <div className="flex items-center justify-between border-b border-black/6 pb-4 dark:border-white/8">
           <div className="flex items-center gap-2">
             <span className="text-[20px] font-semibold tracking-tight text-black dark:text-white">
-              Luma<span className="text-[#82ADD4]">.</span>
+              Luma<span className="text-zinc-400 dark:text-zinc-600">.</span>
             </span>
-            <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
+            <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
               Onboarding
             </span>
           </div>
@@ -106,7 +105,7 @@ export function OnboardingView({ userName = "Reader" }: Props) {
           /* Phase 2: Canon Selection & Tracker Creation */
           <div className="py-6">
             <div className="text-left">
-              <span className="text-[11px] font-medium tracking-wider text-[#82ADD4] uppercase">
+              <span className="font-mono text-[10px] font-semibold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase">
                 STEP 2 OF 2 • CANON & TRACKER SETUP
               </span>
               <h2 className="mt-1 text-[24px] font-normal tracking-tight text-black sm:text-[28px] dark:text-white">

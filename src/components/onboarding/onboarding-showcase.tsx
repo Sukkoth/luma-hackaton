@@ -64,7 +64,7 @@ export function OnboardingShowcase({
 
       {/* Slide Content */}
       <div className="mt-4 text-center sm:mt-6">
-        <span className="rounded-full bg-[#82ADD4]/15 px-3 py-1 text-[10px] font-medium tracking-wider text-[#3c6b90] uppercase dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+        <span className="rounded-full border border-zinc-200 bg-zinc-100 px-3 py-1 font-mono text-[10px] font-medium tracking-wider text-zinc-900 uppercase dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
           {activeSlide.badge}
         </span>
 
@@ -87,7 +87,7 @@ export function OnboardingShowcase({
             onClick={() => onSelectSlide({ index: idx })}
             className={`h-1.5 rounded-full transition-all ${
               idx === slideIndex
-                ? "w-8 bg-black dark:bg-[#DDFD2C]"
+                ? "w-8 bg-black dark:bg-white"
                 : "w-2 bg-black/15 dark:bg-white/20"
             }`}
           />
@@ -112,7 +112,7 @@ export function OnboardingShowcase({
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center gap-2 rounded-[14px] bg-black px-6 py-2.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+          className="inline-flex items-center gap-2 rounded-[14px] bg-black px-6 py-2.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
         >
           <span>
             {slideIndex === ONBOARDING_SLIDES.length - 1

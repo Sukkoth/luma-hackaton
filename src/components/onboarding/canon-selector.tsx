@@ -67,7 +67,7 @@ export function CanonSelector({ selectedCanonId, onSelectCanon }: Props) {
                         {canon.name}
                       </span>
                       {canon.id === "protestant" && (
-                        <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[9px] font-medium text-black">
+                        <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2 py-0.5 font-mono text-[9px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
                           Default
                         </span>
                       )}
@@ -77,7 +77,7 @@ export function CanonSelector({ selectedCanonId, onSelectCanon }: Props) {
                     </p>
                   </div>
                   {isSelected && (
-                    <Check className="size-4 shrink-0 text-[#82ADD4]" />
+                    <Check className="size-4 shrink-0 text-zinc-950 dark:text-zinc-50" />
                   )}
                 </button>
               );

@@ -127,7 +127,7 @@ export function TrackerSetupForm({
                     defaultChecked={idx === 0}
                     className="peer sr-only"
                   />
-                  <span className="flex h-11 w-full items-center justify-center rounded-xl border border-black/8 bg-white/70 text-[#666666] shadow-2xs transition-all peer-checked:border-black peer-checked:bg-black peer-checked:text-white dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:peer-checked:border-[#DDFD2C] dark:peer-checked:bg-[#DDFD2C] dark:peer-checked:text-black">
+                  <span className="flex h-11 w-full items-center justify-center rounded-xl border border-black/8 bg-white/70 text-[#666666] shadow-2xs transition-all peer-checked:border-black peer-checked:bg-black peer-checked:text-white dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:peer-checked:border-white dark:peer-checked:bg-white dark:peer-checked:text-black">
                     <IconComp className="size-4" />
                   </span>
                 </label>
@@ -141,7 +141,7 @@ export function TrackerSetupForm({
           <button
             type="submit"
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-3 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-3 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
           >
             {isLoading ? (
               <>

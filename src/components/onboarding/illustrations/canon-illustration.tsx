@@ -32,7 +32,7 @@ export function CanonIllustration() {
           className="fill-white stroke-black/15 shadow-sm dark:fill-[#1e1e24] dark:stroke-white/20"
           strokeWidth="1.4"
         />
-        <circle cx="-20" cy="-10" r="4.5" fill="#82ADD4" />
+        <circle cx="-20" cy="-10" r="4.5" fill="#A1A1AA" />
         <path
           d="M -9,-10 L 22,-10"
           className="stroke-black dark:stroke-white"
@@ -58,7 +58,7 @@ export function CanonIllustration() {
           className="fill-white stroke-black/15 shadow-sm dark:fill-[#1e1e24] dark:stroke-white/20"
           strokeWidth="1.4"
         />
-        <circle cx="-20" cy="-10" r="4.5" fill="#DDFD2C" />
+        <circle cx="-20" cy="-10" r="4.5" fill="#FFFFFF" />
         <path
           d="M -9,-10 L 22,-10"
           className="stroke-black dark:stroke-white"
@@ -96,7 +96,7 @@ export function CanonIllustration() {
           d="M 0,-22 L 5.5,-7.5 L 22,0 L 5.5,7.5 L 0,22 L -5.5,7.5 L -22,0 L -5.5,-7.5 Z"
           className="fill-black dark:fill-white"
         />
-        <circle cx="0" cy="0" r="5.5" fill="#DDFD2C" />
+        <circle cx="0" cy="0" r="5.5" fill="#FFFFFF" />
 
         {/* Laurel Wreath Wings */}
         <path
@@ -119,7 +119,7 @@ export function CanonIllustration() {
           className="fill-white stroke-black/15 shadow-sm dark:fill-[#1e1e24] dark:stroke-white/20"
           strokeWidth="1.2"
         />
-        <circle cx="-50" cy="0" r="4" fill="#82ADD4" />
+        <circle cx="-50" cy="0" r="4" fill="#A1A1AA" />
         <path
           d="M -36,0 L 48,0"
           className="stroke-black dark:stroke-white"
