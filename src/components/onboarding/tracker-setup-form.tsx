@@ -73,14 +73,14 @@ export function TrackerSetupForm({
               required
               defaultValue="Personal Reading"
               placeholder="e.g. Personal Reading"
-              className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+              className="ui-input w-full pl-10"
             />
           </div>
         </div>
 
         {/* Accent Color Palette */}
         <div>
-          <label className="block text-[12px] font-medium text-black dark:text-white">
+          <label className="block text-[12px] font-bold text-foreground">
             Accent Color
           </label>
           <div className="mt-2 flex flex-wrap items-center gap-2.5">
@@ -109,7 +109,7 @@ export function TrackerSetupForm({
 
         {/* Icon Badge Selection */}
         <div>
-          <label className="block text-[12px] font-medium text-black dark:text-white">
+          <label className="block text-[12px] font-bold text-foreground">
             Icon Badge
           </label>
           <div className="mt-2 grid grid-cols-6 gap-2">
@@ -127,7 +127,7 @@ export function TrackerSetupForm({
                     defaultChecked={idx === 0}
                     className="peer sr-only"
                   />
-                  <span className="flex h-11 w-full items-center justify-center rounded-xl border border-black/8 bg-white/70 text-[#666666] shadow-2xs transition-all peer-checked:border-black peer-checked:bg-black peer-checked:text-white dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:peer-checked:border-white dark:peer-checked:bg-white dark:peer-checked:text-black">
+                  <span className="flex h-11 w-full items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground-secondary shadow-2xs transition-all peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground">
                     <IconComp className="size-4" />
                   </span>
                 </label>
@@ -141,7 +141,7 @@ export function TrackerSetupForm({
           <button
             type="submit"
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-3 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+            className="ui-btn-primary w-full gap-2"
           >
             {isLoading ? (
               <>

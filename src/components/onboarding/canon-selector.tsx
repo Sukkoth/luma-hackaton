@@ -14,16 +14,16 @@ export function CanonSelector({ selectedCanonId, onSelectCanon }: Props) {
     CANON_OPTIONS.find((c) => c.id === selectedCanonId) || CANON_OPTIONS[0]!;
 
   return (
-    <div className="mt-6 rounded-[20px] border border-black/8 bg-white/70 p-4 backdrop-blur-md dark:border-white/10 dark:bg-white/3">
+    <div className="ui-card mt-6 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-[10px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
+          <span className="text-[10px] font-bold tracking-wider text-foreground-dim uppercase">
             SELECTED BIBLE CANON
           </span>
-          <h3 className="text-[16px] font-medium text-black dark:text-white">
+          <h3 className="text-[16px] font-bold text-foreground">
             {selectedCanon.name}
           </h3>
-          <p className="mt-0.5 text-[12px] text-[#666666] dark:text-[#9CA3AF]">
+          <p className="mt-0.5 text-[12px] text-foreground-secondary">
             {selectedCanon.subtitle}
           </p>
         </div>
@@ -31,7 +31,7 @@ export function CanonSelector({ selectedCanonId, onSelectCanon }: Props) {
         <button
           type="button"
           onClick={() => setShowCanonPicker(!showCanonPicker)}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-3 py-1.5 text-[12px] font-medium text-black shadow-2xs hover:bg-black/5 dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:bg-white/15"
+          className="ui-btn-secondary ui-btn-sm gap-1.5"
         >
           <SlidersHorizontal className="size-3" />
           <span>{showCanonPicker ? "Done" : "Change"}</span>
@@ -40,8 +40,8 @@ export function CanonSelector({ selectedCanonId, onSelectCanon }: Props) {
 
       {/* Collapsible Canon Options List */}
       {showCanonPicker && (
-        <div className="mt-4 space-y-2 border-t border-black/6 pt-3 dark:border-white/8">
-          <span className="text-[11px] font-normal text-[#888888] dark:text-[#A1A1AA]">
+        <div className="mt-4 space-y-2 border-t border-border pt-3">
+          <span className="text-[11px] font-normal text-foreground-dim">
             Choose from 4 historical Christian traditions:
           </span>
           <div className="grid gap-2">
@@ -55,29 +55,27 @@ export function CanonSelector({ selectedCanonId, onSelectCanon }: Props) {
                     onSelectCanon({ canonId: canon.id });
                     setShowCanonPicker(false);
                   }}
-                  className={`flex items-start justify-between rounded-[14px] border p-3 text-left transition-all ${
+                  className={`flex items-start justify-between rounded-[14px] border p-3 text-left transition-all cursor-pointer ${
                     isSelected
-                      ? "border-black/30 bg-black/3 dark:border-white/30 dark:bg-white/6"
-                      : "border-black/6 bg-white/50 hover:bg-white/90 dark:border-white/6 dark:bg-white/2 dark:hover:bg-white/5"
+                      ? "border-primary bg-primary-muted"
+                      : "border-border bg-surface hover:bg-surface-elevated"
                   }`}
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium text-black dark:text-white">
+                      <span className="text-[13px] font-bold text-foreground">
                         {canon.name}
                       </span>
                       {canon.id === "protestant" && (
-                        <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2 py-0.5 font-mono text-[9px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
-                          Default
-                        </span>
+                        <span className="ui-pill text-[9px]">Default</span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-[11px] text-[#666666] dark:text-[#9CA3AF]">
+                    <p className="mt-0.5 text-[11px] text-foreground-secondary">
                       {canon.subtitle}
                     </p>
                   </div>
                   {isSelected && (
-                    <Check className="size-4 shrink-0 text-zinc-950 dark:text-zinc-50" />
+                    <Check className="size-4 shrink-0 text-primary" />
                   )}
                 </button>
               );
