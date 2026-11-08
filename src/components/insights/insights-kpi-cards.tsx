@@ -23,21 +23,21 @@ export function InsightsKpiCards({
   return (
     <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* 1. Reading Streak */}
-      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
+      <div className="ui-card flex flex-col justify-between p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
-            <Flame className="size-3.5 text-zinc-950 dark:text-zinc-50" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-foreground-secondary">
+            <Flame className="size-3.5 text-foreground" />
             <span>Reading Streak</span>
           </span>
-          <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
+          <span className="ui-pill-primary text-[10px]">
             {currentStreak > 0 ? "Active" : "Ready"}
           </span>
         </div>
         <div className="mt-3">
-          <span className="font-mono text-[36px] font-light leading-none tracking-tight text-zinc-950 sm:text-[40px] dark:text-zinc-50">
+          <span className="text-[36px] font-light leading-none tracking-tight text-foreground sm:text-[40px]">
             {currentStreak} {currentStreak === 1 ? "Day" : "Days"}
           </span>
-          <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+          <p className="mt-1 text-[11px] text-foreground-dim">
             Personal best: {longestStreak}{" "}
             {longestStreak === 1 ? "day" : "days"}
           </p>
@@ -45,21 +45,19 @@ export function InsightsKpiCards({
       </div>
 
       {/* 2. Bible Progress */}
-      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
+      <div className="ui-card flex flex-col justify-between p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
-            <TrendingUp className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-foreground-secondary">
+            <TrendingUp className="size-3.5 text-foreground" />
             <span>Bible Complete</span>
           </span>
-          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-            {canonPercentage}%
-          </span>
+          <span className="ui-pill text-[10px]">{canonPercentage}%</span>
         </div>
         <div className="mt-3">
-          <span className="font-mono text-[36px] font-light leading-none tracking-tight text-zinc-950 sm:text-[40px] dark:text-zinc-50">
+          <span className="text-[36px] font-light leading-none tracking-tight text-foreground sm:text-[40px]">
             {canonPercentage}%
           </span>
-          <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+          <p className="mt-1 text-[11px] text-foreground-dim">
             {totalReadChapters} of {totalChaptersAcrossCanon.toLocaleString()}{" "}
             chapters
           </p>
@@ -67,21 +65,19 @@ export function InsightsKpiCards({
       </div>
 
       {/* 3. Streak Freeze Protection */}
-      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
+      <div className="ui-card flex flex-col justify-between p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
-            <Shield className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-foreground-secondary">
+            <Shield className="size-3.5 text-foreground" />
             <span>Streak Freezes</span>
           </span>
-          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-            Max 3
-          </span>
+          <span className="ui-pill text-[10px]">Max 3</span>
         </div>
         <div className="mt-3">
-          <span className="font-mono text-[36px] font-light leading-none tracking-tight text-zinc-950 sm:text-[40px] dark:text-zinc-50">
+          <span className="text-[36px] font-light leading-none tracking-tight text-foreground sm:text-[40px]">
             {freezesRemaining} / 3
           </span>
-          <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+          <p className="mt-1 text-[11px] text-foreground-dim">
             {freezesRemaining > 0
               ? "Shields available if a day is missed"
               : "Reach 7 days streak to unlock freezes"}
@@ -90,21 +86,19 @@ export function InsightsKpiCards({
       </div>
 
       {/* 4. Active Tracker */}
-      <div className="glass-panel flex flex-col justify-between rounded-3xl p-5">
+      <div className="ui-card flex flex-col justify-between p-5">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[13px] font-normal text-zinc-600 dark:text-zinc-400">
-            <BookOpen className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+          <span className="flex items-center gap-1.5 text-[13px] font-normal text-foreground-secondary">
+            <BookOpen className="size-3.5 text-foreground" />
             <span>Active Tracker</span>
           </span>
-          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
-            Current
-          </span>
+          <span className="ui-pill text-[10px]">Current</span>
         </div>
         <div className="mt-3">
-          <span className="block truncate text-[24px] font-light leading-tight tracking-tight text-zinc-950 sm:text-[26px] dark:text-zinc-50">
+          <span className="block truncate text-[24px] font-light leading-tight tracking-tight text-foreground sm:text-[26px]">
             {activeTrackerName}
           </span>
-          <p className="mt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+          <p className="mt-1 text-[11px] text-foreground-dim">
             Connected to PostgreSQL progress
           </p>
         </div>
