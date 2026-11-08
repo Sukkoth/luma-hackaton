@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
           <>
             He restoreth my soul: <br />
             he leadeth me in <br />
-            <span className="font-normal text-white">
+            <span className="font-semibold text-foreground">
               paths of righteousness.
             </span>
           </>
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
         <div className="flex items-center justify-between lg:justify-end">
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-black/75 shadow-2xs backdrop-blur-md transition-all hover:border-white/90 hover:bg-white hover:text-black lg:hidden dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+            className="ui-btn-secondary ui-btn-sm gap-1.5 lg:hidden"
           >
             <ArrowLeft className="size-3.5" strokeWidth={1.75} />
             <span>Sign In</span>
@@ -73,22 +73,20 @@ export default function ForgotPasswordPage() {
 
         {/* Centered Form Container */}
         <div className="m-auto w-full max-w-105 py-8">
-          <div className="glass-panel w-full rounded-[28px] p-7 sm:p-9">
+          <div className="ui-card w-full p-7 sm:p-9">
             {/* Header */}
             <div>
               <div className="inline-flex items-center gap-2">
-                <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
+                <span className="text-[20px] font-bold tracking-tight text-foreground">
                   Scripture
-                  <span className="text-zinc-400 dark:text-zinc-600">.</span>
+                  <span className="text-foreground-dim">.</span>
                 </span>
-                <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
-                  Recovery
-                </span>
+                <span className="ui-pill-primary text-[10px]">Recovery</span>
               </div>
-              <h1 className="mt-3 text-[26px] font-normal tracking-tight text-black sm:text-[28px] dark:text-white">
+              <h1 className="mt-3 text-[26px] font-bold tracking-tight text-foreground sm:text-[28px]">
                 Forgot password?
               </h1>
-              <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mt-1 text-[13px] text-foreground-secondary">
                 Enter your email address to receive password reset instructions.
               </p>
             </div>
@@ -96,7 +94,7 @@ export default function ForgotPasswordPage() {
             {errorMessage && (
               <div
                 role="alert"
-                className="mt-4 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
+                className="mt-4 flex items-center gap-2 rounded-[14px] border border-destructive/20 bg-destructive/10 p-3 text-[12px] font-medium text-destructive"
               >
                 <AlertCircle className="size-4 shrink-0" />
                 <span>{errorMessage}</span>
@@ -105,16 +103,16 @@ export default function ForgotPasswordPage() {
 
             {submittedEmail ? (
               <div className="mt-6 space-y-4">
-                <div className="rounded-[18px] border border-zinc-200 bg-zinc-50 p-5 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
-                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
+                <div className="ui-card-elevated p-5 text-center">
+                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xs">
                     <CheckCircle2 className="size-5" />
                   </div>
-                  <h3 className="mt-3 text-[15px] font-medium text-black dark:text-white">
+                  <h3 className="mt-3 text-[15px] font-bold text-foreground">
                     Reset link sent
                   </h3>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#666666] dark:text-[#9CA3AF]">
+                  <p className="mt-1 text-[12px] leading-relaxed text-foreground-secondary">
                     We sent instructions to{" "}
-                    <strong className="font-medium text-black dark:text-white">
+                    <strong className="font-bold text-foreground">
                       {submittedEmail}
                     </strong>
                     . Please check your inbox and spam folder.
@@ -124,7 +122,7 @@ export default function ForgotPasswordPage() {
                 {/* Direct link for demonstration / UI testing */}
                 <Link
                   href="/reset-password"
-                  className="flex w-full items-center justify-center gap-1.5 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                  className="ui-btn-primary w-full gap-1.5"
                 >
                   <span>Continue to Set New Password</span>
                   <ArrowRight className="size-4" />
@@ -135,38 +133,35 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label
                     htmlFor="forgot-email"
-                    className="block text-[12px] font-medium text-black dark:text-white"
+                    className="block text-[12px] font-bold text-foreground"
                   >
                     Email address
                   </label>
                   <div className="relative mt-1.5">
-                    <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
                     <input
                       id="forgot-email"
                       name="email"
                       type="email"
                       required
                       placeholder="james@example.com"
-                      className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+                      className="ui-input w-full pl-10"
                     />
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                >
+                <button type="submit" className="ui-btn-primary w-full">
                   Send Reset Link
                 </button>
               </form>
             )}
 
             {/* Footer switch back to sign in */}
-            <div className="mt-6 border-t border-black/4 pt-4 text-center text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
+            <div className="mt-6 border-t border-border pt-4 text-center text-[12px] text-foreground-dim">
               <span>Remember your credentials? </span>
               <Link
                 href="/login"
-                className="font-medium text-black transition-colors hover:underline dark:text-white"
+                className="font-semibold text-foreground transition-colors hover:underline"
               >
                 Back to Sign in
               </Link>

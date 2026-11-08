@@ -49,7 +49,9 @@ export default function ResetPasswordPage() {
           <>
             Create in me a clean <br />
             heart, O God; and renew <br />
-            <span className="font-normal text-white">a right spirit.</span>
+            <span className="font-semibold text-foreground">
+              a right spirit.
+            </span>
           </>
         }
         scriptureRef="Psalm 51:10"
@@ -64,7 +66,7 @@ export default function ResetPasswordPage() {
         <div className="flex items-center justify-between lg:justify-end">
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-black/75 shadow-2xs backdrop-blur-md transition-all hover:border-white/90 hover:bg-white hover:text-black lg:hidden dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+            className="ui-btn-secondary ui-btn-sm gap-1.5 lg:hidden"
           >
             <ArrowLeft className="size-3.5" strokeWidth={1.75} />
             <span>Sign In</span>
@@ -74,22 +76,20 @@ export default function ResetPasswordPage() {
 
         {/* Centered Form Container */}
         <div className="m-auto w-full max-w-105 py-8">
-          <div className="glass-panel w-full rounded-[28px] p-7 sm:p-9">
+          <div className="ui-card w-full p-7 sm:p-9">
             {/* Header */}
             <div>
               <div className="inline-flex items-center gap-2">
-                <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
+                <span className="text-[20px] font-bold tracking-tight text-foreground">
                   Scripture
-                  <span className="text-zinc-400 dark:text-zinc-600">.</span>
+                  <span className="text-foreground-dim">.</span>
                 </span>
-                <span className="rounded-full border border-zinc-300 bg-zinc-950 px-2.5 py-0.5 font-mono text-[10px] font-medium text-white dark:border-zinc-700 dark:bg-white dark:text-zinc-950">
-                  Security
-                </span>
+                <span className="ui-pill-primary text-[10px]">Security</span>
               </div>
-              <h1 className="mt-3 text-[26px] font-normal tracking-tight text-black sm:text-[28px] dark:text-white">
+              <h1 className="mt-3 text-[26px] font-bold tracking-tight text-foreground sm:text-[28px]">
                 Set new password
               </h1>
-              <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mt-1 text-[13px] text-foreground-secondary">
                 Create a new secure password for your Scripture account.
               </p>
             </div>
@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
             {errorMessage && (
               <div
                 role="alert"
-                className="mt-4 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
+                className="mt-4 flex items-center gap-2 rounded-[14px] border border-destructive/20 bg-destructive/10 p-3 text-[12px] font-medium text-destructive"
               >
                 <AlertCircle className="size-4 shrink-0" />
                 <span>{errorMessage}</span>
@@ -106,23 +106,20 @@ export default function ResetPasswordPage() {
 
             {submitted ? (
               <div className="mt-6 space-y-4">
-                <div className="rounded-[18px] border border-zinc-200 bg-zinc-50 p-5 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
-                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-zinc-950 text-white shadow-xs dark:bg-white dark:text-zinc-950">
+                <div className="ui-card-elevated p-5 text-center">
+                  <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xs">
                     <CheckCircle2 className="size-5" />
                   </div>
-                  <h3 className="mt-3 text-[15px] font-medium text-black dark:text-white">
+                  <h3 className="mt-3 text-[15px] font-bold text-foreground">
                     Password updated
                   </h3>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#666666] dark:text-[#9CA3AF]">
+                  <p className="mt-1 text-[12px] leading-relaxed text-foreground-secondary">
                     Your new password has been saved. You can now use it to sign
                     in to your Scripture account.
                   </p>
                 </div>
 
-                <Link
-                  href="/login"
-                  className="flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                >
+                <Link href="/login" className="ui-btn-primary w-full">
                   Sign In With New Password
                 </Link>
               </div>
@@ -131,19 +128,19 @@ export default function ResetPasswordPage() {
                 <div>
                   <label
                     htmlFor="new-password"
-                    className="block text-[12px] font-medium text-black dark:text-white"
+                    className="block text-[12px] font-bold text-foreground"
                   >
                     New Password
                   </label>
                   <div className="relative mt-1.5">
-                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
                     <input
                       id="new-password"
                       name="password"
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      className="w-full rounded-[14px] border border-black/8 bg-white/70 px-10 py-2.5 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+                      className="ui-input w-full px-10"
                     />
                     <button
                       type="button"
@@ -151,7 +148,7 @@ export default function ResetPasswordPage() {
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
                       }
-                      className="absolute top-1/2 right-3.5 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                      className="absolute top-1/2 right-3.5 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
                     >
                       {showPassword ? (
                         <EyeOff className="size-4" />
@@ -165,49 +162,46 @@ export default function ResetPasswordPage() {
                 <div>
                   <label
                     htmlFor="confirm-password"
-                    className="block text-[12px] font-medium text-black dark:text-white"
+                    className="block text-[12px] font-bold text-foreground"
                   >
                     Confirm New Password
                   </label>
                   <div className="relative mt-1.5">
-                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                    <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
                     <input
                       id="confirm-password"
                       name="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+                      className="ui-input w-full px-10"
                     />
                   </div>
                 </div>
 
                 {/* Password Criteria Checks */}
-                <div className="space-y-1.5 pt-1 text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                <div className="space-y-1.5 pt-1 text-[11px] text-foreground-dim">
                   <div className="flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-white/60" />
+                    <span className="size-1.5 rounded-full bg-primary" />
                     <span>At least 8 characters long</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-black/40 dark:bg-white/60" />
+                    <span className="size-1.5 rounded-full bg-primary" />
                     <span>Must match confirmation password</span>
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="mt-2 flex w-full items-center justify-center rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                >
+                <button type="submit" className="ui-btn-primary mt-2 w-full">
                   Update Password
                 </button>
               </form>
             )}
 
             {/* Footer switch to sign in */}
-            <div className="mt-6 border-t border-black/4 pt-4 text-center text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
+            <div className="mt-6 border-t border-border pt-4 text-center text-[12px] text-foreground-dim">
               <Link
                 href="/login"
-                className="font-medium text-black transition-colors hover:underline dark:text-white"
+                className="font-semibold text-foreground transition-colors hover:underline"
               >
                 Back to Sign in
               </Link>
