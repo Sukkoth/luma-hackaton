@@ -93,8 +93,8 @@ export function TopNavbar({
                 href={tab.href}
                 className={`flex items-center justify-center rounded-[12px] px-3.5 py-1 text-[13px] transition-all ${
                   isActive
-                    ? "bg-primary font-semibold text-primary-foreground shadow-xs"
-                    : "bg-transparent font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
+                    ? "bg-primary font-medium text-primary-foreground shadow-xs"
+                    : "bg-transparent font-normal text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
                 }`}
               >
                 {tab.label}
@@ -113,7 +113,7 @@ export function TopNavbar({
                   onClick={() => setIsStreakOpen(true)}
                   aria-label={`Current streak: ${streak.currentStreak} days`}
                   data-testid="streak-navbar-button"
-                  className={`flex items-center gap-1 rounded-[14px] px-2.5 py-1 text-[12px] font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-1 rounded-[14px] px-2.5 py-1 text-[12px] font-medium transition-all cursor-pointer ${
                     streak.currentStreak > 0
                       ? "border border-primary bg-primary text-primary-foreground shadow-xs"
                       : "border border-border bg-surface-elevated text-foreground-dim hover:text-foreground"

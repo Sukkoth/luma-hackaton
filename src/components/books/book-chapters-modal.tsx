@@ -130,7 +130,7 @@ export function BookChaptersModal({
           <button
             type="button"
             onClick={onClose}
-            className="ui-btn-primary w-full h-12 rounded-[14px] text-[15px] font-semibold"
+            className="ui-btn-primary w-full h-12 rounded-[14px] text-[15px] font-medium"
           >
             Done
           </button>
