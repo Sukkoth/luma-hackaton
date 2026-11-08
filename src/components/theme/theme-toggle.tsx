@@ -42,7 +42,7 @@ export function ThemeToggle() {
     >
       {isDark ? (
         <Sun
-          className="size-3.5 rotate-0 text-[#DDFD2C] transition-transform duration-300 hover:rotate-45"
+          className="size-3.5 rotate-0 text-zinc-100 transition-transform duration-300 hover:rotate-45"
           strokeWidth={1.75}
         />
       ) : (

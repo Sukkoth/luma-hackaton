@@ -11,49 +11,90 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg-gradient:
-    radial-gradient(
-      circle at 65% 25%,
-      rgba(195, 224, 248, 0.45) 0%,
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 15% 15%,
-      rgba(215, 235, 252, 0.35) 0%,
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 75%,
-      rgba(205, 230, 250, 0.25) 0%,
-      transparent 50%
-    ),
-    linear-gradient(180deg, #f5f7fa 0%, #eceef3 100%);
-  --bg-gradient-dark:
-    radial-gradient(
-      circle at 65% 25%,
-      rgba(50, 50, 56, 0.4) 0%,
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 15% 15%,
-      rgba(42, 42, 48, 0.35) 0%,
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 75%,
-      rgba(36, 36, 42, 0.3) 0%,
-      transparent 50%
-    ),
-    linear-gradient(180deg, #16161b 0%, #0e0e12 100%);
-  --ink: #000000;
-  --ink-muted: #555555;
-  --ink-faint: #888888;
-  --hero-blue: #75a2d2;
-  --neon-yellow: #ddfd2c;
+  /* Watermelon Semantic Tokens - Light */
+  --background: #f8f9fa;
+  --surface: #ffffff;
+  --surface-elevated: #f4f4f5;
+  --surface-subtle: #ececef;
+
+  --foreground: #18181b;
+  --foreground-secondary: #52525b;
+  --foreground-dim: #71717a;
+
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --border-strong: #a1a1aa;
+
+  --primary: #18181b;
+  --primary-foreground: #ffffff;
+  --primary-muted: rgba(24, 24, 27, 0.08);
+  --primary-border: rgba(24, 24, 27, 0.25);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: rgba(239, 68, 68, 0.1);
+
+  --bg-gradient: linear-gradient(180deg, #f7f7f8 0%, #f0f0f2 100%);
+  --bg-gradient-dark: linear-gradient(180deg, #09090b 0%, #070709 100%);
+  --ink: #09090b;
+  --ink-muted: #52525b;
+  --ink-faint: #71717a;
+  --hero-blue: #18181b;
+  --neon-yellow: #ffffff;
   --font-urbanist: "Urbanist", system-ui, -apple-system, sans-serif;
 }
 
+html.dark {
+  color-scheme: dark;
+  background-color: #09090b;
+
+  /* Watermelon Semantic Tokens - Dark */
+  --background: #09090b;
+  --surface: #121215;
+  --surface-elevated: #18181b;
+  --surface-subtle: #27272a;
+
+  --foreground: #fafafa;
+  --foreground-secondary: #a1a1aa;
+  --foreground-dim: #71717a;
+
+  --border: #27272a;
+  --border-subtle: #1f1f23;
+  --border-strong: #3f3f46;
+
+  --primary: #fafafa;
+  --primary-foreground: #09090b;
+  --primary-muted: rgba(250, 250, 250, 0.12);
+  --primary-border: rgba(250, 250, 250, 0.35);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: rgba(239, 68, 68, 0.15);
+}
+
 @theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-subtle: var(--surface-subtle);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-dim: var(--foreground-dim);
+
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-border: var(--primary-border);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-subtle: var(--destructive-subtle);
+
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-ink-faint: var(--ink-faint);
@@ -64,7 +105,7 @@
 
 body {
   background: var(--bg-gradient);
-  color: var(--ink);
+  color: var(--foreground);
   font-family: var(--font-urbanist), "Urbanist", system-ui, sans-serif;
   font-optical-sizing: auto;
   min-height: 100vh;
@@ -74,71 +115,133 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-html.dark {
-  color-scheme: dark;
-  background-color: #0e0e12;
-}
-
 html.dark body {
   background: var(--bg-gradient-dark);
   min-height: 100vh;
-  color: #ffffff;
+  color: var(--foreground);
 }
 
-/* Glassmorphism utility helpers - Light Mode */
+/* Watermelon Semantic Surface Panels */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: var(--surface);
+  border: 1px solid var(--border);
   box-shadow:
-    0 4px 24px -2px rgba(0, 0, 0, 0.03),
+    0 1px 3px rgba(0, 0, 0, 0.04),
     0 1px 2px rgba(0, 0, 0, 0.02);
   isolation: isolate;
   transform: translateZ(0);
 }
 
 .glass-pill {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
 }
 
 .glass-hero {
-  background: linear-gradient(135deg, #8fb6de 0%, #74a2d3 45%, #598ec6 100%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
   box-shadow:
-    0 12px 36px -8px rgba(89, 142, 198, 0.32),
-    inset 0 1px 1px rgba(255, 255, 255, 0.45);
-}
-
-/* Glassmorphism utility helpers - Dark Mode */
-html.dark .glass-panel {
-  background: rgba(24, 24, 29, 0.76);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow:
-    0 8px 32px -4px rgba(0, 0, 0, 0.55),
-    0 1px 2px rgba(255, 255, 255, 0.02);
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.02);
   isolation: isolate;
   transform: translateZ(0);
 }
 
-html.dark .glass-pill {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #e4e4e7;
+/* Watermelon UI Semantic Component Primitives */
+.ui-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: 1.25rem;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
 }
 
-html.dark .glass-hero {
-  background: linear-gradient(135deg, #8fb6de 0%, #74a2d3 45%, #598ec6 100%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow:
-    0 16px 40px -8px rgba(0, 0, 0, 0.7),
-    0 8px 24px -4px rgba(89, 142, 198, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+.ui-card:hover {
+  border-color: var(--border-strong);
+}
+
+.ui-card-elevated {
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--foreground);
+  border-radius: 1rem;
+}
+
+.ui-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--surface-subtle);
+  border: 1px solid var(--border);
+  color: var(--foreground-secondary);
+}
+
+.ui-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--primary);
+  border: 1px solid var(--primary-border);
+  color: var(--primary-foreground);
+}
+
+.ui-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.ui-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  border-radius: 0.75rem;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms ease;
+}
+
+.ui-btn-secondary:hover {
+  background-color: var(--surface-subtle);
+  border-color: var(--border-strong);
+}
+
+.ui-input {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: border-color 150ms ease;
+}
+
+.ui-input:focus {
+  outline: none;
+  border-color: var(--border-strong);
 }
