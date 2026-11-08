@@ -44,10 +44,10 @@ export function DistributionCards({
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {/* Left Card: Scripture Distribution */}
-      <div className="glass-panel flex flex-col justify-between rounded-[28px] p-6">
+      <div className="ui-card flex flex-col justify-between p-6">
         <div>
           <div>
-            <h4 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
+            <h4 className="text-[16px] font-normal tracking-tight text-foreground">
               Scripture Distribution
             </h4>
           </div>
@@ -55,60 +55,60 @@ export function DistributionCards({
           {/* Breakdown items */}
           <div className="mt-5 space-y-3.5">
             <div className="flex items-center justify-between text-[13px]">
-              <span className="flex items-center gap-2 text-[#555555] dark:text-[#9CA3AF]">
-                <span className="size-1.5 rounded-full bg-[#82ADD4]" />
+              <span className="flex items-center gap-2 text-foreground-secondary">
+                <span className="size-1.5 rounded-full bg-border-strong" />
                 <span>Pentateuch & Law</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[16px] font-light text-black dark:text-white">
+                <span className="font-mono text-[15px] font-light text-foreground">
                   {distribution.law}
                 </span>
-                <span className="rounded-sm bg-black/4 px-1.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+                <span className="ui-pill font-mono text-[10px]">
                   {getPercent(distribution.law)}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-between text-[13px]">
-              <span className="flex items-center gap-2 text-[#555555] dark:text-[#9CA3AF]">
-                <span className="size-1.5 rounded-full bg-[#A3C4E2]" />
+              <span className="flex items-center gap-2 text-foreground-secondary">
+                <span className="size-1.5 rounded-full bg-border-strong" />
                 <span>Historical Books</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[16px] font-light text-black dark:text-white">
+                <span className="font-mono text-[15px] font-light text-foreground">
                   {distribution.history}
                 </span>
-                <span className="rounded-sm bg-black/4 px-1.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+                <span className="ui-pill font-mono text-[10px]">
                   {getPercent(distribution.history)}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-between text-[13px]">
-              <span className="flex items-center gap-2 text-[#555555] dark:text-[#9CA3AF]">
-                <span className="size-1.5 rounded-full bg-[#C2D9EE]" />
+              <span className="flex items-center gap-2 text-foreground-secondary">
+                <span className="size-1.5 rounded-full bg-border-strong" />
                 <span>Poetry & Wisdom</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[16px] font-light text-black dark:text-white">
+                <span className="font-mono text-[15px] font-light text-foreground">
                   {distribution.poetry}
                 </span>
-                <span className="rounded-sm bg-black/4 px-1.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+                <span className="ui-pill font-mono text-[10px]">
                   {getPercent(distribution.poetry)}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center justify-between text-[13px]">
-              <span className="flex items-center gap-2 text-[#555555] dark:text-[#9CA3AF]">
-                <span className="size-1.5 rounded-full bg-black dark:bg-white" />
+              <span className="flex items-center gap-2 text-foreground-secondary">
+                <span className="size-1.5 rounded-full bg-primary" />
                 <span>Gospels & Epistles</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[16px] font-light text-black dark:text-white">
+                <span className="font-mono text-[15px] font-light text-foreground">
                   {distribution.gospelsEpistles}
                 </span>
-                <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black shadow-2xs">
+                <span className="ui-pill-primary font-mono text-[10px]">
                   {getPercent(distribution.gospelsEpistles)}
                 </span>
               </div>
@@ -118,13 +118,13 @@ export function DistributionCards({
       </div>
 
       {/* Right Card: Active Plans Status */}
-      <div className="glass-panel flex flex-col justify-between rounded-[28px] p-6">
+      <div className="ui-card flex flex-col justify-between p-6">
         <div>
           <div className="flex items-center justify-between">
-            <h4 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
+            <h4 className="text-[16px] font-normal tracking-tight text-foreground">
               Active Plans Status
             </h4>
-            <span className="rounded-full bg-black/4 px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+            <span className="ui-pill font-mono text-[10px]">
               {activePlans.length}{" "}
               {activePlans.length === 1 ? "Active" : "Active"}
             </span>
@@ -135,42 +135,42 @@ export function DistributionCards({
               {activePlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/80 bg-white/50 p-3.5 dark:border-white/10 dark:bg-white/4"
+                  className="ui-card-elevated flex items-center justify-between p-3.5"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="flex size-7 items-center justify-center rounded-lg bg-[#82ADD4] text-white">
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                       <Bookmark className="size-3.5" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-medium text-black dark:text-white">
+                      <p className="text-[13px] font-medium text-foreground">
                         {plan.title}
                       </p>
-                      <p className="text-[11px] text-[#888888] dark:text-[#9CA3AF]">
+                      <p className="text-[11px] text-foreground-secondary">
                         {plan.completedChapters} of {plan.totalChapters}{" "}
                         chapters
                       </p>
                     </div>
                   </div>
-                  <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[11px] font-medium text-black">
+                  <span className="ui-pill font-mono text-[10px]">
                     {plan.progressPercent}%
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="mt-5 flex flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 p-6 text-center dark:border-white/10">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#82ADD4]">
+            <div className="mt-5 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-6 text-center">
+              <div className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface-subtle text-foreground">
                 <Bookmark className="size-4" />
               </div>
-              <p className="mt-2.5 text-[13px] font-medium text-black dark:text-white">
+              <p className="mt-2.5 text-[13px] font-medium text-foreground">
                 No Active Reading Plans
               </p>
-              <p className="mt-0.5 text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+              <p className="mt-0.5 text-[11px] text-foreground-secondary">
                 Explore structured plans to guide your devotional rhythm.
               </p>
               <Link
                 href="/plans"
-                className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-black px-3.5 py-1.5 text-[11px] font-medium text-white shadow-2xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                className="ui-btn-primary mt-3.5 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[11px]"
               >
                 <span>Browse Plans</span>
               </Link>

@@ -167,7 +167,7 @@ export function TrackerCreationModal({ isOpen, onClose }: Props) {
                     onClick={() => setSelectedCanonId(canon.id)}
                     className={`flex flex-col justify-between rounded-xl border p-2.5 text-left transition-all ${
                       isSelected
-                        ? "border-[#82ADD4] bg-[#82ADD4]/10 shadow-xs dark:border-[#82ADD4] dark:bg-[#82ADD4]/15"
+                        ? "border-zinc-950 bg-zinc-100 shadow-xs dark:border-zinc-200 dark:bg-zinc-800"
                         : "border-black/6 bg-white/50 hover:bg-white dark:border-white/6 dark:bg-white/2 dark:hover:bg-white/5"
                     }`}
                   >
@@ -176,7 +176,7 @@ export function TrackerCreationModal({ isOpen, onClose }: Props) {
                         {canon.name}
                       </span>
                       {isSelected ? (
-                        <Check className="size-3.5 text-[#82ADD4]" />
+                        <Check className="size-3.5 text-zinc-950 dark:text-zinc-50" />
                       ) : (
                         <span className="text-[10px] text-[#888888] dark:text-[#777777]">
                           {canon.totalBooks}B

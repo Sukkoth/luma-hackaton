@@ -164,8 +164,8 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/6 pb-3 dark:border-white/8">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-8 items-center justify-center rounded-xl bg-[#DDFD2C]/25 text-black dark:bg-[#DDFD2C]/20 dark:text-[#DDFD2C]">
-              <Flame className="size-4.5 fill-[#a6c710] text-[#8fa80c] dark:fill-[#DDFD2C] dark:text-[#DDFD2C]" />
+            <div className="flex size-8 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+              <Flame className="size-4.5 fill-current text-zinc-950 dark:text-zinc-50" />
             </div>
             <div>
               <h3
@@ -201,7 +201,7 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                   Current Streak
                 </span>
                 <div className="mt-0.5 flex items-baseline justify-center gap-1.5">
-                  <span className="text-[32px] font-medium tracking-tight text-black dark:text-[#DDFD2C]">
+                  <span className="font-mono text-[32px] font-medium tracking-tight text-zinc-950 dark:text-zinc-50">
                     {streak.currentStreak}
                   </span>
                   <span className="text-[13px] font-normal text-[#666666] dark:text-[#9CA3AF]">
@@ -211,7 +211,7 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
 
                 <div className="mt-1 flex items-center justify-center">
                   {streak.isTodayCompleted ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#DDFD2C]/30 px-2 py-0.5 text-[10px] font-semibold text-black dark:bg-[#DDFD2C]/20 dark:text-[#DDFD2C]">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2.5 py-0.5 font-mono text-[10px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                       <CheckCircle2 className="size-3" />
                       Read completed today
                     </span>
@@ -225,7 +225,7 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
 
               <div className="mt-2 border-t border-black/4 pt-1.5 text-[10px] text-[#777777] dark:border-white/6 dark:text-[#9CA3AF]">
                 Record:{" "}
-                <strong className="font-semibold text-black dark:text-[#DDFD2C]">
+                <strong className="font-mono font-semibold text-zinc-950 dark:text-zinc-50">
                   {streak.longestStreak} days
                 </strong>
               </div>
@@ -236,7 +236,7 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <Shield className="size-3.5 text-[#82ADD4]" />
+                    <Shield className="size-3.5 text-zinc-900 dark:text-zinc-100" />
                     <h4 className="text-[12px] font-medium text-black dark:text-white">
                       Freeze Shields
                     </h4>
@@ -258,7 +258,7 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                             key={idx}
                             className={`flex flex-1 items-center justify-center gap-1 rounded-lg border py-1 text-[10px] font-medium transition-all ${
                               isAvailable
-                                ? "border-[#82ADD4]/40 bg-[#82ADD4]/15 text-[#507ea6] dark:border-[#82ADD4]/40 dark:bg-[#82ADD4]/25 dark:text-[#82ADD4]"
+                                ? "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
                                 : "border-black/6 bg-black/4 text-[#999999] dark:border-white/6 dark:bg-white/3 dark:text-[#777777]"
                             }`}
                           >
@@ -309,29 +309,29 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                 <span>Less</span>
                 <span
                   title="0 chapters"
-                  className="size-2.5 rounded-xs bg-black/5 dark:bg-[#181a1b] dark:border dark:border-white/5"
+                  className="size-2.5 rounded-xs bg-black/5 dark:bg-white/5"
                 />
                 <span
                   title="1 chapter"
-                  className="size-2.5 rounded-xs bg-[#DDFD2C]/35 border border-[#b8d617]/50 dark:bg-[#DDFD2C]/20 dark:border-[#DDFD2C]/30"
+                  className="size-2.5 rounded-xs bg-zinc-300 dark:bg-zinc-700"
                 />
                 <span
                   title="2-3 chapters"
-                  className="size-2.5 rounded-xs bg-[#DDFD2C]/65 border border-[#a2bf10]/65 dark:bg-[#DDFD2C]/45 dark:border-[#DDFD2C]/55"
+                  className="size-2.5 rounded-xs bg-zinc-500 dark:bg-zinc-500"
                 />
                 <span
                   title="4-6 chapters"
-                  className="size-2.5 rounded-xs bg-[#c3e31c] border border-[#8fa80c] dark:bg-[#DDFD2C]/75 dark:border-[#DDFD2C]"
+                  className="size-2.5 rounded-xs bg-zinc-700 dark:bg-zinc-300"
                 />
                 <span
                   title="7+ chapters"
-                  className="size-2.5 rounded-xs bg-[#a4c210] border border-[#788f06] dark:bg-[#DDFD2C] dark:border-[#c6e625]"
+                  className="size-2.5 rounded-xs bg-zinc-950 dark:bg-white"
                 />
                 <span>More</span>
                 <span className="mx-1 opacity-40">•</span>
                 <span
                   title="Shielded with Freeze"
-                  className="size-2.5 rounded-xs bg-cyan-400 ring-1 ring-cyan-300"
+                  className="size-2.5 rounded-xs border border-zinc-400 bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-800"
                 />
                 <span>Shield</span>
               </div>
@@ -395,25 +395,24 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                   }
 
                   let cellClass =
-                    "bg-black/5 dark:bg-[#181a1b] dark:border dark:border-white/5 hover:ring-1 hover:ring-black/20 dark:hover:border-white/20";
+                    "bg-black/5 dark:bg-white/5 hover:ring-1 hover:ring-black/20 dark:hover:ring-white/20";
 
                   if (day.isFrozen) {
                     cellClass =
-                      "bg-cyan-400 dark:bg-cyan-400 ring-1 ring-cyan-300 shadow-2xs";
+                      "border border-zinc-400 bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-800";
                   } else if (day.chaptersCount > 0) {
                     if (day.intensityLevel === 1) {
                       cellClass =
-                        "bg-[#DDFD2C]/35 border border-[#b8d617]/50 dark:bg-[#DDFD2C]/20 dark:border-[#DDFD2C]/30 hover:opacity-90";
+                        "bg-zinc-300 dark:bg-zinc-700 hover:opacity-90";
                     } else if (day.intensityLevel === 2) {
                       cellClass =
-                        "bg-[#DDFD2C]/65 border border-[#a2bf10]/65 dark:bg-[#DDFD2C]/45 dark:border-[#DDFD2C]/55 hover:opacity-90";
+                        "bg-zinc-500 dark:bg-zinc-500 hover:opacity-90";
                     } else if (day.intensityLevel === 3) {
                       cellClass =
-                        "bg-[#c3e31c] border border-[#8fa80c] dark:bg-[#DDFD2C]/75 dark:border-[#DDFD2C] hover:opacity-90";
+                        "bg-zinc-700 dark:bg-zinc-300 hover:opacity-90";
                     } else {
                       // Level 4 (7+ chapters)
-                      cellClass =
-                        "bg-[#a4c210] border border-[#788f06] dark:bg-[#DDFD2C] dark:border-[#c6e625] shadow-[0_0_6px_rgba(221,253,44,0.35)]";
+                      cellClass = "bg-zinc-950 dark:bg-white hover:opacity-90";
                     }
                   }
 

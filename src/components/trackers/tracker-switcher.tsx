@@ -122,7 +122,7 @@ export function TrackerSwitcher({
             {activeCanon.totalBooks}B
           </span>
           {isPending ? (
-            <Loader2 className="size-3 animate-spin text-[#82ADD4]" />
+            <Loader2 className="size-3 animate-spin text-zinc-950 dark:text-zinc-50" />
           ) : (
             <ChevronDown
               className={`size-3.5 opacity-60 transition-transform ${
@@ -195,7 +195,7 @@ export function TrackerSwitcher({
                         ) : null}
                       </div>
                       {isActive && (
-                        <Check className="size-3.5 shrink-0 text-[#82ADD4]" />
+                        <Check className="size-3.5 shrink-0 text-zinc-950 dark:text-zinc-50" />
                       )}
                     </button>
 

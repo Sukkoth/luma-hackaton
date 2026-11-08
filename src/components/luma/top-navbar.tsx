@@ -62,20 +62,17 @@ export function TopNavbar({
   return (
     <>
       <header className="flex items-center justify-between gap-2 py-3 md:gap-4">
-        {/* Brand logo & Tracker Switcher - centered in relation to the blue overview card (lg:w-95) */}
+        {/* Brand logo & Tracker Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 lg:w-95 lg:justify-center">
           <Link href={brandHref} className="group flex items-center">
-            <span className="text-[22px] font-semibold tracking-tight text-black dark:text-white">
-              Luma<span className="text-[#82ADD4]">.</span>
+            <span className="text-[22px] font-semibold tracking-tight text-foreground">
+              Luma<span className="text-foreground-dim">.</span>
             </span>
           </Link>
 
           {trackers && trackers.length > 0 && (
             <>
-              <div
-                className="h-4 w-px bg-black/10 dark:bg-white/10"
-                aria-hidden="true"
-              />
+              <div className="h-4 w-px bg-border" aria-hidden="true" />
               <TrackerSwitcher
                 trackers={trackers}
                 activeTrackerId={activeTrackerId}
@@ -84,10 +81,10 @@ export function TopNavbar({
           )}
         </div>
 
-        {/* Center cluster: Frosted Glass Tab Tiles (desktop only) */}
+        {/* Center cluster: Monochrome Tab Tiles (desktop only) */}
         <nav
           aria-label="Main Navigation"
-          className="hidden md:flex items-center gap-2"
+          className="hidden md:flex items-center gap-1.5"
         >
           {NAV_TABS.map((tab) => {
             const isActive =
@@ -99,10 +96,10 @@ export function TopNavbar({
               <Link
                 key={tab.label}
                 href={tab.href}
-                className={`flex items-center justify-center rounded-[14px] px-5 py-2 text-[13px] backdrop-blur-md transition-all ${
+                className={`flex items-center justify-center rounded-xl px-4 py-1.5 text-[13px] transition-all ${
                   isActive
-                    ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                    : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                    ? "bg-primary font-medium text-primary-foreground shadow-xs"
+                    : "border border-border bg-surface-elevated font-normal text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
                 }`}
               >
                 {tab.label}
@@ -119,23 +116,23 @@ export function TopNavbar({
               onClick={() => setIsStreakOpen(true)}
               aria-label={`Current streak: ${streak.currentStreak} days`}
               data-testid="streak-navbar-button"
-              className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[12px] font-medium shadow-2xs backdrop-blur-md transition-all ${
+              className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[12px] font-medium transition-all ${
                 streak.isTodayCompleted
-                  ? "border-[#b5d31f]/50 bg-[#DDFD2C]/25 text-black hover:bg-[#DDFD2C]/35 dark:border-[#DDFD2C]/30 dark:bg-[#DDFD2C]/15 dark:text-[#DDFD2C]"
-                  : "border-black/10 bg-white/40 text-black/75 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
+                  ? "border-primary-border bg-primary text-primary-foreground"
+                  : "border-border bg-surface text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
               }`}
             >
               <Flame
                 className={`size-3.5 ${
                   streak.isTodayCompleted
-                    ? "fill-[#9db814] text-[#8aa30f] dark:fill-[#DDFD2C] dark:text-[#DDFD2C]"
-                    : "text-[#8aa30f] dark:text-[#DDFD2C]"
+                    ? "fill-current text-primary-foreground"
+                    : "text-foreground-secondary"
                 }`}
               />
               <span className="font-semibold">{streak.currentStreak}</span>
               {streak.isFreezeUnlocked ? (
                 <span
-                  className="flex items-center gap-0.5 text-[10px] text-[#507ea6] dark:text-[#82ADD4]"
+                  className="flex items-center gap-0.5 text-[10px] text-foreground-dim"
                   title={`${streak.availableFreezes} freeze shields available`}
                 >
                   <Shield className="size-3" />
@@ -149,10 +146,10 @@ export function TopNavbar({
             <Link
               href="/settings"
               aria-label="Settings"
-              className={`flex size-9 items-center justify-center rounded-xl shadow-2xs backdrop-blur-md transition-all ${
+              className={`flex size-9 items-center justify-center rounded-xl transition-all ${
                 pathname.startsWith("/settings")
-                  ? "border border-white/90 bg-white text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                  : "border border-white/60 bg-white/40 text-black/75 hover:border-white/80 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+                  ? "border border-primary-border bg-primary text-primary-foreground"
+                  : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:bg-surface hover:text-foreground"
               }`}
               title={`Settings (Signed in as ${effectiveUserName})`}
             >
@@ -162,14 +159,14 @@ export function TopNavbar({
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 rounded-xl border border-black/8 bg-white/70 px-3.5 py-1.5 text-[12px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/8"
+                className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5"
               >
                 <LogIn className="size-3.5" />
                 <span>Sign In</span>
               </Link>
               <Link
                 href="/signup"
-                className="hidden items-center gap-1.5 rounded-xl bg-black px-3.5 py-1.5 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 sm:inline-flex dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                className="ui-btn-primary hidden px-3.5 py-1.5 text-[12px] gap-1.5 sm:inline-flex"
               >
                 <span>Get Started</span>
                 <ArrowRight className="size-3.5" />
@@ -190,7 +187,7 @@ export function TopNavbar({
       {/* Mobile Bottom Navigation Bar (Visible on mobile phone, hidden on md+) */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-black/8 bg-white/90 px-2 py-1.5 shadow-lg backdrop-blur-xl md:hidden dark:border-white/10 dark:bg-[#121212]/90 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-border bg-surface/90 px-2 py-1.5 shadow-lg backdrop-blur-xl md:hidden pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         {NAV_TABS.map((tab) => {
           const isActive =
@@ -205,15 +202,15 @@ export function TopNavbar({
               href={tab.href}
               className={`flex flex-1 flex-col items-center justify-center py-1 transition-all ${
                 isActive
-                  ? "font-semibold text-black dark:text-white"
-                  : "text-[#777777] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                  ? "font-semibold text-foreground"
+                  : "text-foreground-secondary hover:text-foreground"
               }`}
             >
               <div
                 className={`flex size-8 items-center justify-center rounded-xl transition-all ${
                   isActive
-                    ? "bg-black/6 text-black shadow-2xs dark:bg-white/12 dark:text-white"
-                    : "text-[#777777] dark:text-[#9CA3AF]"
+                    ? "bg-primary-muted text-foreground"
+                    : "text-foreground-dim"
                 }`}
               >
                 <Icon className="size-4.5" strokeWidth={isActive ? 2.2 : 1.8} />
