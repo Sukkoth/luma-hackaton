@@ -82,7 +82,7 @@ export function CanonShowcaseSection({
     <section className="mt-8 rounded-3xl border border-black/8 bg-white/60 p-6 shadow-xs backdrop-blur-md sm:p-10 dark:border-white/10 dark:bg-white/2">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <span className="font-mono text-[10px] font-semibold tracking-[0.16em] text-zinc-500 dark:text-zinc-400 uppercase">
+          <span className="text-[10px] font-semibold tracking-[0.16em] text-zinc-500 dark:text-zinc-400 uppercase">
             UNIVERSAL CHRISTIAN TRADITIONS
           </span>
           <h2 className="mt-1 text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
@@ -103,10 +103,10 @@ export function CanonShowcaseSection({
                 key={canon.id}
                 type="button"
                 onClick={() => onSelectCanon({ canonId: canon.id })}
-                className={`rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all ${
+                className={`rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-black text-white shadow-xs dark:bg-white dark:text-black"
-                    : "text-[#666666] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                    : "text-foreground-secondary hover:text-foreground"
                 }`}
               >
                 {canon.name}
@@ -117,57 +117,49 @@ export function CanonShowcaseSection({
       </div>
 
       {/* Selected Canon Detailed Showcase Card */}
-      <div className="mt-6 grid grid-cols-1 gap-6 rounded-[20px] border border-black/6 bg-white/80 p-6 sm:grid-cols-3 dark:border-white/10 dark:bg-white/3">
+      <div className="ui-card-elevated mt-6 grid grid-cols-1 gap-6 p-6 sm:grid-cols-3">
         <div className="sm:col-span-1">
-          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 font-mono text-[10px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+          <span className="ui-pill-primary text-[10px]">
             {selectedCanon.tradition}
           </span>
-          <h3 className="mt-2 text-[22px] font-medium text-black dark:text-white">
+          <h3 className="mt-2 text-[22px] font-medium text-foreground">
             {selectedCanon.name}
           </h3>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-[38px] font-light text-black dark:text-white">
+            <span className="text-[38px] font-light text-foreground">
               {selectedCanon.totalBooks}
             </span>
-            <span className="text-[13px] text-[#777777] dark:text-[#9CA3AF]">
-              Total Books
-            </span>
+            <span className="text-[13px] text-foreground-dim">Total Books</span>
           </div>
-          <div className="mt-2 flex items-center gap-4 text-[12px] text-[#666666] dark:text-[#9CA3AF]">
+          <div className="mt-2 flex items-center gap-4 text-[12px] text-foreground-secondary">
             <span>{selectedCanon.otCount} Old Testament</span>
             <span>•</span>
             <span>{selectedCanon.ntCount} New Testament</span>
           </div>
         </div>
 
-        <div className="border-t border-black/6 pt-4 sm:col-span-2 sm:border-t-0 sm:border-l sm:pl-6 dark:border-white/8">
-          <h4 className="text-[12px] font-medium tracking-wide text-black uppercase dark:text-white">
+        <div className="border-t border-border-subtle pt-4 sm:col-span-2 sm:border-t-0 sm:border-l sm:pl-6">
+          <h4 className="text-[12px] font-medium tracking-wide text-foreground uppercase">
             Tradition Distinctives & Included Texts:
           </h4>
           <ul className="mt-3 space-y-2.5">
             {selectedCanon.uniqueHighlights.map((highlight) => (
               <li
                 key={highlight}
-                className="flex items-start gap-2.5 text-[13px] text-[#555555] dark:text-[#A1A1AA]"
+                className="flex items-start gap-2.5 text-[13px] text-foreground-secondary"
               >
-                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-zinc-900 dark:text-zinc-100" />
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
                 <span>{highlight}</span>
               </li>
             ))}
           </ul>
 
           <div className="mt-6 flex items-center gap-3">
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-            >
+            <Link href="/signup" className="ui-btn-primary ui-btn-sm gap-1.5">
               <span>Track This Canon</span>
               <ArrowRight className="size-3.5" />
             </Link>
-            <Link
-              href="/books"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-black/8 bg-white px-4 py-2 text-[12px] font-medium text-black shadow-2xs hover:border-black/16 dark:border-white/10 dark:bg-white/5 dark:text-white"
-            >
+            <Link href="/books" className="ui-btn-secondary ui-btn-sm gap-1.5">
               <span>View Books Grid</span>
             </Link>
           </div>
