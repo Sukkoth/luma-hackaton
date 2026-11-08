@@ -748,7 +748,7 @@ export function NotesManager({
                 title="New Folder"
                 className="flex size-9 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#555555] shadow-2xs hover:border-white hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white transition-all cursor-pointer"
               >
-                <FolderPlus className="size-4.5 text-[#82ADD4]" />
+                <FolderPlus className="size-4.5 text-zinc-900 dark:text-zinc-100" />
                 <span className="sr-only">New Folder</span>
               </button>
 
@@ -824,7 +824,7 @@ export function NotesManager({
                       : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
                   }`}
                 >
-                  <LayoutGrid className="size-3.5 text-[#82ADD4] shrink-0" />
+                  <LayoutGrid className="size-3.5 text-zinc-900 dark:text-zinc-100 shrink-0" />
                   <span className="truncate">Folders ({folders.length})</span>
                 </button>
 
@@ -931,7 +931,7 @@ export function NotesManager({
                         : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF]"
                     }`}
                   >
-                    <FolderIcon className="size-3 text-[#82ADD4]" />
+                    <FolderIcon className="size-3 text-zinc-900 dark:text-zinc-100" />
                     <span className="truncate max-w-[120px]">
                       {folder.name}
                     </span>
@@ -954,7 +954,7 @@ export function NotesManager({
                   <button
                     type="button"
                     onClick={() => setShowFolderModal(true)}
-                    className="text-[#507ea6] dark:text-[#82ADD4] hover:underline normal-case text-[11px] font-medium"
+                    className="text-zinc-900 dark:text-zinc-100 hover:underline normal-case text-[11px] font-medium"
                   >
                     + New
                   </button>
@@ -966,7 +966,7 @@ export function NotesManager({
                   className="group flex items-center justify-between p-3 rounded-2xl border border-white/70 bg-white/60 hover:bg-white hover:border-white/90 transition-all cursor-pointer dark:border-white/8 dark:bg-white/4 dark:hover:bg-white/8 shadow-2xs"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="flex size-7.5 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/25 dark:text-[#82ADD4] shrink-0">
+                    <span className="flex size-7.5 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 shrink-0">
                       <FileText className="size-3.5" />
                     </span>
                     <div className="min-w-0">
@@ -1011,7 +1011,7 @@ export function NotesManager({
                     className="group flex items-center justify-between p-3 rounded-2xl border border-white/70 bg-white/60 hover:bg-white hover:border-white/90 transition-all cursor-pointer dark:border-white/8 dark:bg-white/4 dark:hover:bg-white/8 shadow-2xs"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="flex size-7.5 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/25 dark:text-[#82ADD4] shrink-0">
+                      <span className="flex size-7.5 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 shrink-0">
                         <FolderIcon className="size-3.5" />
                       </span>
                       <div className="min-w-0">
@@ -1054,7 +1054,7 @@ export function NotesManager({
               <>
                 {/* Active Folder Filter Bar Banner */}
                 {activeFolderId !== "all" && activeTab === "active" && (
-                  <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#82ADD4]/10 border border-[#82ADD4]/20 text-[11px] text-[#507ea6] dark:text-[#82ADD4]">
+                  <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-zinc-100 border border-zinc-200 text-[11px] text-zinc-900 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100">
                     <div className="flex items-center gap-1.5 truncate">
                       <FolderIcon className="size-3 shrink-0" />
                       <span className="font-semibold text-black dark:text-white truncate">
@@ -1122,13 +1122,13 @@ export function NotesManager({
                         data-testid={`note-card-${note.id}`}
                         className={`group relative cursor-pointer rounded-2xl p-3.5 border transition-all ${
                           isSelected
-                            ? "border-[#82ADD4]/70 bg-white shadow-xs dark:border-[#82ADD4]/50 dark:bg-[#1c1c24]"
+                            ? "border-zinc-900 bg-white shadow-xs dark:border-zinc-100 dark:bg-[#1c1c24]"
                             : "border-white/60 bg-white/40 hover:bg-white/80 hover:border-white dark:border-white/5 dark:bg-white/2 dark:hover:bg-white/5"
                         }`}
                       >
                         {/* Active Indicator Bar */}
                         {isSelected && (
-                          <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-[#82ADD4]" />
+                          <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-zinc-950 dark:bg-white" />
                         )}
 
                         <div className="flex items-start justify-between gap-1.5 pl-1.5">
@@ -1142,7 +1142,7 @@ export function NotesManager({
                               </span>
                             )}
                             {note.isPinned && (
-                              <Pin className="size-3 text-[#82ADD4]" />
+                              <Pin className="size-3 text-zinc-950 dark:text-zinc-50" />
                             )}
                           </div>
                         </div>
@@ -1158,7 +1158,7 @@ export function NotesManager({
 
                           {note.folderName && (
                             <span className="inline-flex items-center gap-1 rounded-md bg-black/4 px-1.5 py-0.5 text-[9.5px] font-medium text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF] truncate max-w-[110px]">
-                              <FolderIcon className="size-2 text-[#82ADD4]" />
+                              <FolderIcon className="size-2 text-zinc-900 dark:text-zinc-100" />
                               <span className="truncate">
                                 {note.folderName}
                               </span>
@@ -1166,7 +1166,7 @@ export function NotesManager({
                           )}
 
                           {note.planTitle && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-[#82ADD4]/15 px-1.5 py-0.5 text-[9.5px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4] truncate max-w-[120px]">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-100 px-2 py-0.5 font-mono text-[9.5px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 truncate max-w-[120px]">
                               <Sparkles className="size-2" />
                               <span className="truncate">{note.planTitle}</span>
                             </span>
@@ -1203,8 +1203,8 @@ export function NotesManager({
                     <span>Notes</span>
                   </button>
 
-                  <div className="hidden md:flex items-center gap-2 text-[13px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                    <FileText className="size-4 text-[#82ADD4]" />
+                  <div className="hidden md:flex items-center gap-2 text-[13px] font-medium text-zinc-600 dark:text-zinc-400">
+                    <FileText className="size-4 text-zinc-900 dark:text-zinc-100" />
                     <span>Reflection Editor</span>
                   </div>
                 </div>
@@ -1240,7 +1240,7 @@ export function NotesManager({
                       </>
                     ) : (
                       <>
-                        <Check className="size-3.5 text-[#507ea6] dark:text-[#82ADD4]" />
+                        <Check className="size-3.5 text-zinc-900 dark:text-zinc-100" />
                         <span>Saved</span>
                       </>
                     )}
@@ -1258,7 +1258,7 @@ export function NotesManager({
                     }
                     className={`flex size-9 items-center justify-center rounded-xl border transition-all cursor-pointer ${
                       activeNote.isPinned
-                        ? "border-[#82ADD4]/40 bg-[#82ADD4]/15 text-[#507ea6] dark:text-[#82ADD4]"
+                        ? "border-zinc-900 bg-zinc-100 text-zinc-950 dark:border-zinc-100 dark:bg-zinc-800 dark:text-zinc-50"
                         : "border-white/80 bg-white/70 text-[#555555] shadow-2xs hover:border-white hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
                     }`}
                   >
@@ -1333,7 +1333,7 @@ export function NotesManager({
                     <div className="flex flex-wrap items-center gap-2">
                       {/* Folder Selector Dropdown Tag */}
                       <div className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-black/[0.04] hover:bg-black/[0.07] dark:bg-white/[0.06] dark:hover:bg-white/10 px-2.5 text-[12px] font-medium text-neutral-700 dark:text-neutral-300 transition-colors">
-                        <FolderIcon className="size-3.5 text-[#82ADD4] shrink-0" />
+                        <FolderIcon className="size-3.5 text-zinc-900 dark:text-zinc-100 shrink-0" />
                         <select
                           value={activeNote.folderId || ""}
                           data-testid="note-folder-select"
@@ -1361,7 +1361,7 @@ export function NotesManager({
 
                       {/* Linked Plan Chip */}
                       {activeNote.planTitle && (
-                        <div className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#82ADD4]/15 px-2.5 text-[11.5px] font-medium text-[#416e94] dark:text-[#82ADD4]">
+                        <div className="inline-flex h-8 items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-100 px-2.5 font-mono text-[11px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
                           <Sparkles className="size-3.5 shrink-0" />
                           <span className="truncate max-w-[200px]">
                             {activeNote.planTitle}
@@ -1412,7 +1412,7 @@ export function NotesManager({
             /* Empty State Canvas */
             <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-8 text-center">
               <span className="flex size-16 items-center justify-center rounded-3xl bg-white dark:bg-white/5 border border-black/6 dark:border-white/8 shadow-2xs text-[#888888]">
-                <FileText className="size-8 text-[#82ADD4]" />
+                <FileText className="size-8 text-zinc-900 dark:text-zinc-100" />
               </span>
               <h2 className="mt-4 text-[17px] font-semibold text-black dark:text-white">
                 {activeTab === "archived"

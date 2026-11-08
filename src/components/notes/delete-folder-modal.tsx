@@ -62,7 +62,7 @@ export function DeleteFolderModal({
           <div className="flex size-11 items-center justify-center rounded-2xl bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400">
             <Trash2 className="size-5" />
           </div>
-          <div className="inline-flex items-center gap-1.5 rounded-lg bg-[#82ADD4]/15 px-2.5 py-1 text-[12px] font-medium text-[#416e94] dark:text-[#82ADD4]">
+          <div className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-100 px-2.5 py-1 font-mono text-[11px] font-medium text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
             <Folder className="size-3.5" />
             <span className="truncate max-w-[200px]">{folder.name}</span>
           </div>

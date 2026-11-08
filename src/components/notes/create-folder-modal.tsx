@@ -37,7 +37,7 @@ export function CreateFolderModal({
       <div className="glass-panel relative w-full max-w-md rounded-3xl border border-white/90 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
         <div className="flex items-center justify-between border-b border-black/6 pb-3 dark:border-white/6">
           <div className="flex items-center gap-2">
-            <FolderPlus className="size-5 text-[#82ADD4]" />
+            <FolderPlus className="size-5 text-zinc-900 dark:text-zinc-100" />
             <h3
               id="create-folder-title"
               className="text-[16px] font-semibold text-black dark:text-white"
@@ -66,7 +66,7 @@ export function CreateFolderModal({
               placeholder="e.g. Pauline Epistles, Prayer Requests"
               required
               autoFocus
-              className="mt-1.5 w-full rounded-xl border border-white/80 bg-white/70 px-3.5 py-2.5 text-[13px] text-black focus:border-[#82ADD4] focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white"
+              className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-white/70 px-3.5 py-2.5 text-[13px] text-black focus:border-zinc-950 focus:outline-hidden dark:border-zinc-800 dark:bg-white/5 dark:text-white dark:focus:border-white"
             />
           </div>
 
