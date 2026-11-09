@@ -73,7 +73,7 @@ export function TrackerSetupForm({
               required
               defaultValue="Personal Reading"
               placeholder="e.g. Personal Reading"
-              className="ui-input w-full pl-10"
+              className="ui-input ui-input-icon-left w-full"
             />
           </div>
         </div>

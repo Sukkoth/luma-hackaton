@@ -360,3 +360,14 @@ html.dark body {
   border-color: var(--border-strong);
 }
 
+/* Icon padding utilities for inputs with icon adornments */
+.ui-input-icon-left,
+input.ui-input-icon-left {
+  padding-left: 2.75rem !important; /* 44px: 14px left margin + 16px icon + 14px clearance */
+}
+
+.ui-input-icon-both,
+input.ui-input-icon-both {
+  padding-left: 2.75rem !important;
+  padding-right: 2.75rem !important;
+}

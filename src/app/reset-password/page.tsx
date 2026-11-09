@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      className="ui-input w-full px-10"
+                      className="ui-input ui-input-icon-both w-full"
                     />
                     <button
                       type="button"
@@ -174,7 +174,7 @@ export default function ResetPasswordPage() {
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      className="ui-input w-full px-10"
+                      className="ui-input ui-input-icon-left w-full"
                     />
                   </div>
                 </div>

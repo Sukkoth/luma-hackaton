@@ -145,7 +145,7 @@ export default function ForgotPasswordPage() {
                       type="email"
                       required
                       placeholder="james@example.com"
-                      className="ui-input w-full pl-10"
+                      className="ui-input ui-input-icon-left w-full"
                     />
                   </div>
                 </div>

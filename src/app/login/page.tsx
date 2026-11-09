@@ -270,7 +270,7 @@ function LoginContent() {
                   type="email"
                   required
                   placeholder="james@example.com"
-                  className="ui-input w-full pl-10"
+                  className="ui-input ui-input-icon-left w-full"
                 />
               </div>
             </div>
@@ -298,13 +298,13 @@ function LoginContent() {
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
-                  className="ui-input w-full px-10"
+                  className="ui-input ui-input-icon-both w-full"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute top-1/2 right-3.5 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
+                  className="absolute top-1/2 right-3.5 z-10 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeOff className="size-4" />

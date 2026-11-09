@@ -282,7 +282,7 @@ function SignUpContent() {
                     type="text"
                     required
                     placeholder="James Aris"
-                    className="ui-input w-full pl-10"
+                    className="ui-input ui-input-icon-left w-full"
                   />
                 </div>
               </div>
@@ -302,7 +302,7 @@ function SignUpContent() {
                     type="email"
                     required
                     placeholder="james@example.com"
-                    className="ui-input w-full pl-10"
+                    className="ui-input ui-input-icon-left w-full"
                   />
                 </div>
               </div>
@@ -327,7 +327,7 @@ function SignUpContent() {
                     type={showPassword ? "text" : "password"}
                     required
                     placeholder="••••••••"
-                    className="ui-input w-full px-10"
+                    className="ui-input ui-input-icon-both w-full"
                   />
                   <button
                     type="button"
