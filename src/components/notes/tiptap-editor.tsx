@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useEditor, useEditorState, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -73,7 +74,9 @@ export type TiptapEditorProps = {
   onChangeAction: (content: { html: string; plainText: string }) => void;
   placeholder?: string;
   editable?: boolean;
-  titleSlot?: React.ReactNode;
+  titleSlot?:
+    | React.ReactNode
+    | ((params: { focusEditor: () => void }) => React.ReactNode);
   minHeightClass?: string;
 };
 
@@ -158,9 +161,15 @@ export function TiptapEditor({
     },
   });
 
+  const focusEditor = useCallback(() => {
+    if (editor) {
+      editor.commands.focus("start");
+    }
+  }, [editor]);
+
   if (!editor) {
     return (
-      <div className="flex min-h-[340px] items-center justify-center text-[13px] text-[#777777] dark:text-[#9CA3AF]">
+      <div className="flex min-h-[340px] items-center justify-center text-[13px] text-foreground-dim">
         Loading editor...
       </div>
     );
@@ -177,11 +186,11 @@ export function TiptapEditor({
   const isOrdered = editorState?.isOrdered ?? false;
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col">
       {/* Tiptap Toolbar: Undo, Redo, H1, H2, Bold, Italics, Underline, Lists */}
       <div
         data-testid="tiptap-toolbar"
-        className="sticky top-0 z-10 flex items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none rounded-2xl bg-neutral-100/80 dark:bg-white/[0.06] border border-black/[0.04] dark:border-white/[0.06] p-1.5 backdrop-blur-md shadow-2xs"
+        className="sticky top-0 z-10 flex items-center gap-1 overflow-x-auto scrollbar-none rounded-[14px] bg-surface-elevated border border-border p-1.5 backdrop-blur-md shadow-2xs"
       >
         {/* History: Undo */}
         <button
@@ -189,7 +198,7 @@ export function TiptapEditor({
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!canUndo}
-          className="flex size-8.5 items-center justify-center rounded-xl text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs disabled:opacity-30 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white transition-all cursor-pointer disabled:cursor-not-allowed shrink-0"
+          className="flex size-9 items-center justify-center rounded-[12px] text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer disabled:cursor-not-allowed shrink-0"
           title="Undo"
           aria-label="Undo"
         >
@@ -202,14 +211,14 @@ export function TiptapEditor({
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!canRedo}
-          className="flex size-8.5 items-center justify-center rounded-xl text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs disabled:opacity-30 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white transition-all cursor-pointer disabled:cursor-not-allowed shrink-0"
+          className="flex size-9 items-center justify-center rounded-[12px] text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer disabled:cursor-not-allowed shrink-0"
           title="Redo"
           aria-label="Redo"
         >
           <Redo2 className="size-4" />
         </button>
 
-        <div className="mx-1 h-4 w-px bg-neutral-300/60 dark:bg-white/10 shrink-0" />
+        <div className="mx-1 h-4.5 w-px bg-border shrink-0" />
 
         {/* Heading 1 */}
         <button
@@ -218,10 +227,10 @@ export function TiptapEditor({
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
           }
-          className={`flex size-8.5 items-center justify-center rounded-xl text-[13px] font-semibold transition-all cursor-pointer shrink-0 ${
+          className={`flex size-9 items-center justify-center rounded-[12px] text-[13px] font-medium transition-all cursor-pointer shrink-0 ${
             isH1
-              ? "bg-white text-black shadow-2xs dark:bg-white/20 dark:text-white"
-              : "text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "bg-primary/15 text-primary border border-primary/30 shadow-2xs"
+              : "text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs"
           }`}
           title="Heading 1"
           aria-label="Heading 1"
@@ -237,10 +246,10 @@ export function TiptapEditor({
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 2 }).run()
           }
-          className={`flex size-8.5 items-center justify-center rounded-xl text-[13px] font-semibold transition-all cursor-pointer shrink-0 ${
+          className={`flex size-9 items-center justify-center rounded-[12px] text-[13px] font-medium transition-all cursor-pointer shrink-0 ${
             isH2
-              ? "bg-white text-black shadow-2xs dark:bg-white/20 dark:text-white"
-              : "text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "bg-primary/15 text-primary border border-primary/30 shadow-2xs"
+              : "text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs"
           }`}
           title="Heading 2"
           aria-label="Heading 2"
@@ -249,17 +258,17 @@ export function TiptapEditor({
           <Heading2 className="size-4" />
         </button>
 
-        <div className="mx-1 h-4 w-px bg-neutral-300/60 dark:bg-white/10 shrink-0" />
+        <div className="mx-1 h-4.5 w-px bg-border shrink-0" />
 
         {/* Bold */}
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`flex size-8.5 items-center justify-center rounded-xl text-[13px] font-semibold transition-all cursor-pointer shrink-0 ${
+          className={`flex size-9 items-center justify-center rounded-[12px] text-[13px] font-medium transition-all cursor-pointer shrink-0 ${
             isBold
-              ? "bg-white text-black shadow-2xs dark:bg-white/20 dark:text-white"
-              : "text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "bg-primary/15 text-primary border border-primary/30 shadow-2xs"
+              : "text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs"
           }`}
           title="Bold"
           aria-label="Bold"
@@ -273,10 +282,10 @@ export function TiptapEditor({
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`flex size-8.5 items-center justify-center rounded-xl text-[13px] font-semibold transition-all cursor-pointer shrink-0 ${
+          className={`flex size-9 items-center justify-center rounded-[12px] text-[13px] font-medium transition-all cursor-pointer shrink-0 ${
             isItalic
-              ? "bg-white text-black shadow-2xs dark:bg-white/20 dark:text-white"
-              : "text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "bg-primary/15 text-primary border border-primary/30 shadow-2xs"
+              : "text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs"
           }`}
           title="Italics"
           aria-label="Italics"
@@ -290,10 +299,10 @@ export function TiptapEditor({
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`flex size-8.5 items-center justify-center rounded-xl text-[13px] font-semibold transition-all cursor-pointer shrink-0 ${
+          className={`flex size-9 items-center justify-center rounded-[12px] text-[13px] font-medium transition-all cursor-pointer shrink-0 ${
             isUnderline
-              ? "bg-white text-black shadow-2xs dark:bg-white/20 dark:text-white"
-              : "text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "bg-primary/15 text-primary border border-primary/30 shadow-2xs"
+              : "text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs"
           }`}
           title="Underline"
           aria-label="Underline"
@@ -302,17 +311,17 @@ export function TiptapEditor({
           <UnderlineIcon className="size-4" />
         </button>
 
-        <div className="mx-1 h-4 w-px bg-neutral-300/60 dark:bg-white/10 shrink-0" />
+        <div className="mx-1 h-4.5 w-px bg-border shrink-0" />
 
         {/* Bullet List */}
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`flex size-8.5 items-center justify-center rounded-xl text-[13px] font-semibold transition-all cursor-pointer shrink-0 ${
+          className={`flex size-9 items-center justify-center rounded-[12px] text-[13px] font-medium transition-all cursor-pointer shrink-0 ${
             isBullet
-              ? "bg-white text-black shadow-2xs dark:bg-white/20 dark:text-white"
-              : "text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "bg-primary/15 text-primary border border-primary/30 shadow-2xs"
+              : "text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs"
           }`}
           title="Bullet List"
           aria-label="Bullet List"
@@ -326,10 +335,10 @@ export function TiptapEditor({
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`flex size-8.5 items-center justify-center rounded-xl text-[13px] font-semibold transition-all cursor-pointer shrink-0 ${
+          className={`flex size-9 items-center justify-center rounded-[12px] text-[13px] font-medium transition-all cursor-pointer shrink-0 ${
             isOrdered
-              ? "bg-white text-black shadow-2xs dark:bg-white/20 dark:text-white"
-              : "text-neutral-600 hover:bg-white hover:text-black hover:shadow-2xs dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+              ? "bg-primary/15 text-primary border border-primary/30 shadow-2xs"
+              : "text-foreground-secondary hover:bg-surface hover:text-foreground hover:shadow-2xs"
           }`}
           title="Numbered List"
           aria-label="Numbered List"
@@ -339,16 +348,28 @@ export function TiptapEditor({
         </button>
       </div>
 
-      {/* Note Title slot directly below toolbar */}
-      {titleSlot && <div className="pt-1">{titleSlot}</div>}
+      {/* Note Title & Content Body Section */}
+      <div className="mt-3 space-y-1">
+        {titleSlot && (
+          <div>
+            {typeof titleSlot === "function"
+              ? titleSlot({ focusEditor })
+              : titleSlot}
+          </div>
+        )}
 
-      {/* Editor Content Area */}
-      <div className="mt-2">
-        <EditorContent editor={editor} />
+        {/* Editor Content Area */}
+        <div>
+          <EditorContent editor={editor} />
+        </div>
       </div>
 
       {/* Scoped CSS for Tiptap rendering */}
       <style jsx global>{`
+        .tiptap-notes-editor {
+          word-break: break-word;
+          overflow-wrap: break-word;
+        }
         .tiptap-notes-editor h1 {
           font-size: 1.55rem;
           font-weight: 700;
@@ -392,14 +413,17 @@ export function TiptapEditor({
           padding-left: 0.25rem;
         }
         .tiptap-notes-editor p {
-          margin-top: 0.4rem;
-          margin-bottom: 0.4rem;
+          margin-top: 0.35rem;
+          margin-bottom: 0.35rem;
           line-height: 1.6;
+        }
+        .tiptap-notes-editor p:first-child {
+          margin-top: 0.1rem;
         }
         .tiptap-notes-editor p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           float: left;
-          color: #9ca3af;
+          color: var(--color-foreground-dim);
           pointer-events: none;
           height: 0;
         }

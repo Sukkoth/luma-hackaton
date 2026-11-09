@@ -34,7 +34,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     // 2. Navigate to /notes
     await page.goto("/notes");
     await expect(
-      page.getByRole("heading", { name: "Study Journal & Notes" })
+      page.getByRole("heading", { name: "Notes", exact: true })
     ).toBeVisible();
 
     // 3. Create a new note
@@ -278,7 +278,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     // 13. Reload page to confirm persistence across reloads
     await page.reload();
     await expect(
-      page.getByRole("heading", { name: "Study Journal & Notes" })
+      page.getByRole("heading", { name: "Notes", exact: true })
     ).toBeVisible();
     await expect(
       page

@@ -13,19 +13,19 @@ export function BooksAuthModal({ isOpen, onClose, onSignIn }: Props) {
     <div
       role="dialog"
       aria-labelledby="books-auth-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
     >
-      <div className="glass-panel relative w-full max-w-sm rounded-3xl border border-white/90 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-[#82ADD4]/20 text-[#507ea6] dark:bg-[#82ADD4]/30 dark:text-[#82ADD4]">
+      <div className="ui-card relative w-full max-w-sm p-6 shadow-2xl">
+        <div className="flex size-10 items-center justify-center rounded-[12px] border border-border bg-primary-muted text-primary">
           <Lock className="size-5" />
         </div>
         <h3
           id="books-auth-title"
-          className="mt-3 text-[18px] font-medium text-black dark:text-white"
+          className="mt-3 text-[18px] font-medium text-foreground"
         >
           Sign In to Log Progress
         </h3>
-        <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+        <p className="mt-1 text-[13px] leading-relaxed text-foreground-secondary">
           Marking chapters as read and saving your scripture coverage requires
           an account.
         </p>
@@ -33,7 +33,7 @@ export function BooksAuthModal({ isOpen, onClose, onSignIn }: Props) {
           <button
             type="button"
             onClick={onSignIn}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-black py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+            className="ui-btn-primary flex-1 gap-1.5"
           >
             <LogIn className="size-3.5" />
             <span>Sign In</span>
@@ -41,7 +41,7 @@ export function BooksAuthModal({ isOpen, onClose, onSignIn }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-black/10 bg-black/5 px-4 py-2 text-[12px] font-medium text-black hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+            className="ui-btn-secondary px-4"
           >
             Cancel
           </button>

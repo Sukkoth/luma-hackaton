@@ -64,15 +64,15 @@ export function OnboardingShowcase({
 
       {/* Slide Content */}
       <div className="mt-4 text-center sm:mt-6">
-        <span className="rounded-full bg-[#82ADD4]/15 px-3 py-1 text-[10px] font-medium tracking-wider text-[#3c6b90] uppercase dark:bg-[#82ADD4]/20 dark:text-[#99bfdf]">
+        <span className="ui-pill text-[10px] font-medium tracking-wider uppercase">
           {activeSlide.badge}
         </span>
 
-        <h2 className="mt-4 text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
+        <h2 className="mt-4 text-[26px] font-normal tracking-tight text-foreground sm:text-[30px]">
           {activeSlide.title}
         </h2>
 
-        <p className="mx-auto mt-3 max-w-md text-[13px] leading-relaxed text-[#666666] sm:text-[14px] dark:text-[#9CA3AF]">
+        <p className="mx-auto mt-3 max-w-md text-[13px] leading-relaxed text-foreground-secondary sm:text-[14px]">
           {activeSlide.subtitle}
         </p>
       </div>
@@ -85,10 +85,8 @@ export function OnboardingShowcase({
             type="button"
             aria-label={`Go to slide ${idx + 1}`}
             onClick={() => onSelectSlide({ index: idx })}
-            className={`h-1.5 rounded-full transition-all ${
-              idx === slideIndex
-                ? "w-8 bg-black dark:bg-[#DDFD2C]"
-                : "w-2 bg-black/15 dark:bg-white/20"
+            className={`h-1.5 rounded-full transition-all cursor-pointer ${
+              idx === slideIndex ? "w-8 bg-primary" : "w-2 bg-border-strong"
             }`}
           />
         ))}
@@ -100,7 +98,7 @@ export function OnboardingShowcase({
           <button
             type="button"
             onClick={onPrev}
-            className="inline-flex items-center gap-1.5 rounded-[14px] border border-black/8 bg-white/70 px-4 py-2.5 text-[13px] font-normal text-black hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white"
+            className="ui-btn-secondary ui-btn-sm gap-1.5"
           >
             <ArrowLeft className="size-3.5" />
             <span>Back</span>
@@ -112,7 +110,7 @@ export function OnboardingShowcase({
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center gap-2 rounded-[14px] bg-black px-6 py-2.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+          className="ui-btn-primary ui-btn-sm gap-2"
         >
           <span>
             {slideIndex === ONBOARDING_SLIDES.length - 1

@@ -106,7 +106,7 @@ export function HabitsIllustration() {
             r={token.active ? 13 : 10}
             className={
               token.active
-                ? "fill-[#DDFD2C] stroke-black/20 dark:stroke-black"
+                ? "fill-black stroke-black/20 dark:fill-white dark:stroke-black"
                 : "fill-white stroke-black/15 dark:fill-[#1e1e24] dark:stroke-white/20"
             }
             strokeWidth="1.4"
@@ -142,7 +142,7 @@ export function HabitsIllustration() {
           className="fill-white stroke-black/15 shadow-sm dark:fill-[#1e1e24] dark:stroke-white/20"
           strokeWidth="1.2"
         />
-        <circle cx="-42" cy="0" r="3.5" fill="#DDFD2C" />
+        <circle cx="-42" cy="0" r="3.5" fill="#FFFFFF" />
         <path
           d="M -30,0 L 44,0"
           className="stroke-black/60 dark:stroke-white/70"

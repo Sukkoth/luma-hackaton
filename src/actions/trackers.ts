@@ -278,7 +278,7 @@ export async function getUserTrackersData({
           userId,
           name: "Personal Reading",
           canon: "protestant",
-          color: "#82ADD4",
+          color: "#18181B",
           icon: "book-open",
         })
         .returning();

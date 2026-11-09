@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
 
-const urbanist = localFont({
-  src: "./fonts/Urbanist-Variable.woff2",
-  variable: "--font-urbanist",
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
   display: "swap",
-  weight: "100 900",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${urbanist.variable} h-full antialiased`}
+      className={`${poppins.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -47,7 +47,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-full font-urbanist antialiased transition-colors duration-200"
+        className={`${poppins.className} min-h-full font-sans antialiased transition-colors duration-200`}
       >
         <ThemeProvider defaultTheme="system">
           <main className="flex-1 pb-20 md:pb-0">{children}</main>

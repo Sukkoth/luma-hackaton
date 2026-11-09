@@ -82,35 +82,33 @@ export function SettingsView({
 
       <main className="mt-4 space-y-4">
         {/* Settings Header */}
-        <section className="glass-panel rounded-[28px] p-6 sm:p-7">
+        <section className="ui-card p-6 sm:p-7">
           <div className="flex items-center gap-2">
-            <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-              Preferences
-            </span>
-            <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+            <span className="ui-pill-primary text-[10px]">Preferences</span>
+            <span className="text-[12px] text-foreground-dim">
               Bible Tracker & Planner Settings
             </span>
           </div>
-          <h1 className="mt-2 text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
+          <h1 className="mt-2 text-[26px] font-normal tracking-tight text-foreground sm:text-[30px]">
             Settings
           </h1>
-          <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+          <p className="mt-1 text-[13px] text-foreground-secondary">
             Manage your reading trackers, canonical editions, daily reminders,
             and profile preferences.
           </p>
         </section>
 
         {/* Section 1: Reading Trackers Manager */}
-        <section className="glass-panel rounded-[28px] p-6 sm:p-7">
-          <div className="flex flex-col gap-2 border-b border-black/4 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/6">
+        <section className="ui-card p-6 sm:p-7">
+          <div className="flex flex-col gap-2 border-b border-border-subtle pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <FolderKanban className="size-4 text-[#82ADD4]" />
-                <h2 className="text-[18px] font-normal tracking-tight text-black dark:text-white">
+                <FolderKanban className="size-4 text-foreground" />
+                <h2 className="text-[18px] font-normal tracking-tight text-foreground">
                   Reading Trackers
                 </h2>
               </div>
-              <p className="mt-0.5 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+              <p className="mt-0.5 text-[12px] text-foreground-dim">
                 Trackers act as isolated folders for your reading logs, plans,
                 and journal notes.
               </p>
@@ -118,7 +116,7 @@ export function SettingsView({
 
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer"
             >
               <Plus className="size-3.5" />
               <span>Create Tracker</span>
@@ -127,45 +125,45 @@ export function SettingsView({
 
           <div className="mt-5 space-y-3">
             {/* Active Tracker */}
-            <div className="flex flex-col justify-between gap-3 rounded-[20px] border border-black/8 bg-white/80 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-md sm:flex-row sm:items-center dark:border-white/8 dark:bg-white/4 dark:shadow-none">
+            <div className="ui-card-elevated flex flex-col justify-between gap-3 p-5 sm:flex-row sm:items-center">
               <div className="flex items-center gap-3.5">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-[#82ADD4] text-white shadow-xs">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
                   <BookMarked className="size-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-[16px] font-medium text-black dark:text-white">
+                    <h3 className="text-[16px] font-medium text-foreground">
                       Primary Devotional Tracker
                     </h3>
-                    <span className="rounded-sm bg-[#DDFD2C] px-1.5 py-0.5 text-[10px] font-medium text-black">
+                    <span className="ui-pill-primary text-[9px]">
                       Current Active
                     </span>
                   </div>
-                  <p className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+                  <p className="text-[12px] text-foreground-secondary">
                     Protestant Canon • 66 Books • 443 / 1,189 chapters read
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 rounded-[10px] bg-black/4 px-3 py-1.5 text-[11px] font-medium text-black dark:bg-white/6 dark:text-white">
-                  <Check className="size-3.5" />
+                <span className="ui-pill text-[11px] font-medium gap-1">
+                  <Check className="size-3.5 text-primary" />
                   <span>Active</span>
                 </span>
               </div>
             </div>
 
             {/* Secondary Tracker */}
-            <div className="flex flex-col justify-between gap-3 rounded-[20px] border border-black/8 bg-white/60 p-5 backdrop-blur-md sm:flex-row sm:items-center dark:border-white/8 dark:bg-white/2">
+            <div className="ui-card-elevated flex flex-col justify-between gap-3 p-5 sm:flex-row sm:items-center">
               <div className="flex items-center gap-3.5">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-black/5 text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+                <div className="flex size-10 items-center justify-center rounded-xl border border-border bg-surface text-foreground-dim">
                   <FolderKanban className="size-5" />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-medium text-black dark:text-white">
+                  <h3 className="text-[16px] font-medium text-foreground">
                     Greek & Hebrew Study Workspace
                   </h3>
-                  <p className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+                  <p className="text-[12px] text-foreground-secondary">
                     Academic study • Inactive
                   </p>
                 </div>
@@ -173,7 +171,7 @@ export function SettingsView({
 
               <button
                 type="button"
-                className="rounded-[10px] border border-black/8 bg-white/70 px-3 py-1.5 text-[11px] font-medium text-black shadow-2xs hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                className="ui-btn-secondary ui-btn-sm cursor-pointer"
               >
                 Switch to this
               </button>
@@ -184,10 +182,10 @@ export function SettingsView({
         {/* Section 2: Pacing & Buffer Days and Reminders */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Pacing Safeguards */}
-          <section className="glass-panel rounded-[28px] p-6">
-            <div className="flex items-center gap-2 border-b border-black/4 pb-4 dark:border-white/6">
-              <Sliders className="size-4 text-[#82ADD4]" />
-              <h2 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
+          <section className="ui-card p-6">
+            <div className="flex items-center gap-2 border-b border-border-subtle pb-4">
+              <Sliders className="size-4 text-foreground" />
+              <h2 className="text-[16px] font-normal tracking-tight text-foreground">
                 Reading Pace Safeguards
               </h2>
             </div>
@@ -195,28 +193,28 @@ export function SettingsView({
             <div className="mt-4 space-y-4">
               <div className="flex items-center justify-between text-[13px]">
                 <div>
-                  <p className="font-medium text-black dark:text-white">
+                  <p className="font-medium text-foreground">
                     Auto-Adjust Daily Target
                   </p>
-                  <p className="text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                  <p className="text-[11px] text-foreground-dim">
                     Recalculates chapters/day if you miss reading sessions
                   </p>
                 </div>
-                <div className="flex h-5 w-9 items-center rounded-full bg-[#82ADD4] p-0.5">
-                  <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform" />
+                <div className="flex h-5 w-9 items-center rounded-full bg-primary p-0.5">
+                  <div className="size-4 translate-x-4 rounded-full bg-primary-foreground shadow-xs transition-transform" />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-black/4 pt-3 text-[13px] dark:border-white/6">
+              <div className="flex items-center justify-between border-t border-border-subtle pt-3 text-[13px]">
                 <div>
-                  <p className="font-medium text-black dark:text-white">
+                  <p className="font-medium text-foreground">
                     Weekly Catch-Up Grace Days
                   </p>
-                  <p className="text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                  <p className="text-[11px] text-foreground-dim">
                     Built-in catch-up buffer for unexpected busy days
                   </p>
                 </div>
-                <span className="rounded-[10px] border border-white/90 bg-white px-3 py-1 text-[11px] font-medium text-black shadow-2xs dark:border-white/15 dark:bg-white/10 dark:text-white">
+                <span className="ui-pill text-[11px] font-medium">
                   1 Day / Week
                 </span>
               </div>
@@ -224,10 +222,10 @@ export function SettingsView({
           </section>
 
           {/* Daily Reminders */}
-          <section className="glass-panel rounded-[28px] p-6">
-            <div className="flex items-center gap-2 border-b border-black/4 pb-4 dark:border-white/6">
-              <Bell className="size-4 text-[#82ADD4]" />
-              <h2 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
+          <section className="ui-card p-6">
+            <div className="flex items-center gap-2 border-b border-border-subtle pb-4">
+              <Bell className="size-4 text-foreground" />
+              <h2 className="text-[16px] font-normal tracking-tight text-foreground">
                 Reminders & Notifications
               </h2>
             </div>
@@ -235,34 +233,34 @@ export function SettingsView({
             <div className="mt-4 space-y-4">
               <div className="flex items-center justify-between text-[13px]">
                 <div>
-                  <p className="font-medium text-black dark:text-white">
+                  <p className="font-medium text-foreground">
                     Daily Morning Reminder
                   </p>
-                  <p className="text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                  <p className="text-[11px] text-foreground-dim">
                     Quiet push alert for your daily scripture reading
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] font-light text-black dark:text-white">
+                  <span className="text-[12px] font-light text-foreground">
                     07:30 AM
                   </span>
-                  <div className="flex h-5 w-9 items-center rounded-full bg-[#82ADD4] p-0.5">
-                    <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform" />
+                  <div className="flex h-5 w-9 items-center rounded-full bg-primary p-0.5">
+                    <div className="size-4 translate-x-4 rounded-full bg-primary-foreground shadow-xs transition-transform" />
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-black/4 pt-3 text-[13px] dark:border-white/6">
+              <div className="flex items-center justify-between border-t border-border-subtle pt-3 text-[13px]">
                 <div>
-                  <p className="font-medium text-black dark:text-white">
+                  <p className="font-medium text-foreground">
                     Weekly Progress Summary
                   </p>
-                  <p className="text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                  <p className="text-[11px] text-foreground-dim">
                     Sunday recap of chapters read and consistency rating
                   </p>
                 </div>
-                <div className="flex h-5 w-9 items-center rounded-full bg-[#82ADD4] p-0.5">
-                  <div className="size-4 translate-x-4 rounded-full bg-white shadow-xs transition-transform" />
+                <div className="flex h-5 w-9 items-center rounded-full bg-primary p-0.5">
+                  <div className="size-4 translate-x-4 rounded-full bg-primary-foreground shadow-xs transition-transform" />
                 </div>
               </div>
             </div>
@@ -270,16 +268,16 @@ export function SettingsView({
         </div>
 
         {/* Section 3: Profile & Account */}
-        <section className="glass-panel rounded-[28px] p-6 sm:p-7">
-          <div className="flex items-center justify-between border-b border-black/4 pb-4 dark:border-white/6">
+        <section className="ui-card p-6 sm:p-7">
+          <div className="flex items-center justify-between border-b border-border-subtle pb-4">
             <div className="flex items-center gap-2">
-              <User className="size-4 text-[#82ADD4]" />
-              <h2 className="text-[16px] font-normal tracking-tight text-black dark:text-white">
+              <User className="size-4 text-foreground" />
+              <h2 className="text-[16px] font-normal tracking-tight text-foreground">
                 Account & Authentication
               </h2>
             </div>
-            <span className="flex items-center gap-1 text-[12px] font-normal text-[#555555] dark:text-[#9CA3AF]">
-              <Shield className="size-3.5 text-[#82ADD4]" />
+            <span className="flex items-center gap-1 text-[12px] font-normal text-foreground-dim">
+              <Shield className="size-3.5 text-foreground" />
               <span>Secured</span>
             </span>
           </div>
@@ -293,18 +291,18 @@ export function SettingsView({
                   width={48}
                   height={48}
                   unoptimized
-                  className="size-12 rounded-full border border-black/10 object-cover shadow-xs dark:border-white/10"
+                  className="size-12 rounded-full border border-border object-cover shadow-xs"
                 />
               ) : (
-                <div className="flex size-12 items-center justify-center rounded-full bg-[#82ADD4] text-[15px] font-bold text-white shadow-xs">
+                <div className="flex size-12 items-center justify-center rounded-full border border-border bg-primary text-[15px] font-medium text-primary-foreground shadow-xs">
                   {initials}
                 </div>
               )}
               <div>
-                <p className="text-[16px] font-medium text-black dark:text-white">
+                <p className="text-[16px] font-medium text-foreground">
                   {user.name}
                 </p>
-                <p className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+                <p className="text-[12px] text-foreground-secondary">
                   {user.email} • Session Active
                 </p>
               </div>
@@ -314,7 +312,7 @@ export function SettingsView({
               type="button"
               disabled={isSigningOut}
               onClick={handleSignOut}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-[12px] font-medium text-red-600 shadow-2xs hover:bg-red-500/20 disabled:opacity-60 dark:border-red-400/30 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+              className="ui-btn-destructive ui-btn-sm gap-2 cursor-pointer"
             >
               {isSigningOut ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -326,14 +324,14 @@ export function SettingsView({
           </div>
 
           {/* Account status note */}
-          <div className="mt-5 flex items-center justify-between border-t border-black/4 pt-4 text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
+          <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4 text-[12px] text-foreground-dim">
             <span>
               Account Status:{" "}
-              <strong className="font-medium text-black dark:text-white">
+              <strong className="font-medium text-foreground">
                 {user.emailVerifiedAt ? "Verified" : "Active Member"}
               </strong>
             </span>
-            <span className="text-[11px] text-[#888888] dark:text-[#71717A]">
+            <span className="text-[11px] text-foreground-dim">
               Member ID: {user.id.slice(0, 12)}…
             </span>
           </div>

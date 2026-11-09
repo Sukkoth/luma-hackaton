@@ -134,7 +134,7 @@ function SignUpContent() {
           <>
             Thy testimonies have I <br />
             taken as an heritage <br />
-            <span className="font-normal text-white">for ever.</span>
+            <span className="font-semibold text-foreground">for ever.</span>
           </>
         }
         scriptureRef="Psalm 119:111"
@@ -145,35 +145,34 @@ function SignUpContent() {
 
       {/* RIGHT SIDE: Authentication Form Experience */}
       <section className="relative flex flex-1 flex-col justify-between p-6 sm:p-10 lg:p-14 xl:p-18">
-        {/* Mobile / Tablet Top Navigation Header */}
-        <div className="flex items-center justify-between lg:justify-end">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-black/75 shadow-2xs backdrop-blur-md transition-all hover:border-white/90 hover:bg-white hover:text-black lg:hidden dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
-          >
-            <ArrowLeft className="size-3.5" strokeWidth={1.75} />
-            <span>Dashboard</span>
-          </Link>
+        {/* Top bar on right: Back button (on mobile) + ThemeToggle */}
+        <div className="flex w-full items-center justify-between">
+          <div className="lg:hidden">
+            <Link href="/" className="ui-btn-secondary ui-btn-sm gap-1.5">
+              <ArrowLeft className="size-3.5" strokeWidth={1.75} />
+              <span>Dashboard</span>
+            </Link>
+          </div>
+          <div className="hidden lg:block" />
           <ThemeToggle />
         </div>
 
         {/* Centered Form Container */}
         <div className="m-auto w-full max-w-105 py-8">
-          <div className="glass-panel w-full rounded-[28px] p-7 sm:p-9">
+          <div className="ui-card w-full p-7 sm:p-9">
             {/* Header */}
             <div>
               <div className="inline-flex items-center gap-2">
-                <span className="text-[20px] font-normal tracking-tight text-black dark:text-white">
-                  Luma<span className="text-[#82ADD4]">.</span>
+                <span className="text-[20px] font-bold tracking-tight text-foreground">
+                  Luma
+                  <span className="text-foreground-dim">.</span>
                 </span>
-                <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
-                  Register
-                </span>
+                <span className="ui-pill-primary text-[10px]">Register</span>
               </div>
-              <h1 className="mt-3 text-[26px] font-normal tracking-tight text-black sm:text-[28px] dark:text-white">
+              <h1 className="mt-3 text-[26px] font-bold tracking-tight text-foreground sm:text-[28px]">
                 Create an account
               </h1>
-              <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mt-1 text-[13px] text-foreground-secondary">
                 Start logging your reading habits and tracking canon coverage.
               </p>
             </div>
@@ -181,7 +180,7 @@ function SignUpContent() {
             {errorMessage && (
               <div
                 role="alert"
-                className="mt-5 flex items-center gap-2 rounded-[14px] border border-red-500/20 bg-red-500/10 p-3 text-[12px] font-normal text-red-600 dark:border-red-400/20 dark:bg-red-950/30 dark:text-red-400"
+                className="mt-5 flex items-center gap-2 rounded-[14px] border border-destructive/20 bg-destructive/10 p-3 text-[12px] font-medium text-destructive"
               >
                 <AlertCircle className="size-4 shrink-0" />
                 <span>{errorMessage}</span>
@@ -191,7 +190,7 @@ function SignUpContent() {
             {oauthNotice && (
               <div
                 role="status"
-                className="mt-5 flex items-center gap-2 rounded-[14px] border border-blue-500/20 bg-blue-500/10 p-3 text-[12px] font-normal text-blue-700 dark:border-blue-400/20 dark:bg-blue-950/30 dark:text-blue-300"
+                className="mt-5 flex items-center gap-2 rounded-[14px] border border-info/20 bg-info/10 p-3 text-[12px] font-medium text-info"
               >
                 <Info className="size-4 shrink-0" />
                 <span>{oauthNotice}</span>
@@ -204,7 +203,7 @@ function SignUpContent() {
                 type="button"
                 disabled={isLoading || oauthLoading !== null}
                 onClick={() => handleSocialSignUp("google")}
-                className="flex items-center justify-center gap-2 rounded-[14px] border border-black/8 bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/16 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/8"
+                className="ui-btn-secondary gap-2"
               >
                 {oauthLoading === "google" ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -235,7 +234,7 @@ function SignUpContent() {
                 type="button"
                 disabled={isLoading || oauthLoading !== null}
                 onClick={() => handleSocialSignUp("github")}
-                className="flex items-center justify-center gap-2 rounded-[14px] border border-black/8 bg-white/80 py-2.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/16 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/8"
+                className="ui-btn-secondary gap-2"
               >
                 {oauthLoading === "github" ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -259,9 +258,9 @@ function SignUpContent() {
             {/* Divider */}
             <div className="relative my-6 text-center">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-black/6 dark:border-white/8" />
+                <div className="w-full border-t border-border-subtle" />
               </div>
-              <span className="relative bg-white/70 px-3 text-[11px] font-normal text-[#888888] backdrop-blur-md dark:bg-[#16161b] dark:text-[#9CA3AF]">
+              <span className="relative bg-background px-3 text-[11px] font-normal text-foreground-dim">
                 Or register with email
               </span>
             </div>
@@ -271,19 +270,20 @@ function SignUpContent() {
               <div>
                 <label
                   htmlFor="signup-name"
-                  className="block text-[12px] font-medium text-black dark:text-white"
+                  className="block text-[12px] font-medium text-foreground"
                 >
                   Full Name
                 </label>
                 <div className="relative mt-1.5">
-                  <User className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                  <User className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
                   <input
                     id="signup-name"
                     name="name"
                     type="text"
                     required
                     placeholder="James Aris"
-                    className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+                    style={{ paddingLeft: "2.75rem" }}
+                    className="ui-input ui-input-icon-left w-full"
                   />
                 </div>
               </div>
@@ -291,19 +291,20 @@ function SignUpContent() {
               <div>
                 <label
                   htmlFor="signup-email"
-                  className="block text-[12px] font-medium text-black dark:text-white"
+                  className="block text-[12px] font-bold text-foreground"
                 >
                   Email address
                 </label>
                 <div className="relative mt-1.5">
-                  <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                  <Mail className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
                   <input
                     id="signup-email"
                     name="email"
                     type="email"
                     required
                     placeholder="james@example.com"
-                    className="w-full rounded-[14px] border border-black/8 bg-white/70 py-2.5 pr-4 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+                    style={{ paddingLeft: "2.75rem" }}
+                    className="ui-input ui-input-icon-left w-full"
                   />
                 </div>
               </div>
@@ -312,23 +313,27 @@ function SignUpContent() {
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="signup-password"
-                    className="block text-[12px] font-medium text-black dark:text-white"
+                    className="block text-[12px] font-bold text-foreground"
                   >
                     Password
                   </label>
-                  <span className="text-[11px] text-[#888888] dark:text-[#9CA3AF]">
+                  <span className="text-[11px] text-foreground-dim">
                     Min. 8 characters
                   </span>
                 </div>
                 <div className="relative mt-1.5">
-                  <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+                  <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
                   <input
                     id="signup-password"
                     name="password"
                     type={showPassword ? "text" : "password"}
                     required
                     placeholder="••••••••"
-                    className="w-full rounded-[14px] border border-black/8 bg-white/70 px-10 py-2.5 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-black/30 focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+                    style={{
+                      paddingLeft: "2.75rem",
+                      paddingRight: "2.75rem",
+                    }}
+                    className="ui-input ui-input-icon-both w-full"
                   />
                   <button
                     type="button"
@@ -336,7 +341,7 @@ function SignUpContent() {
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
-                    className="absolute top-1/2 right-3.5 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                    className="absolute top-1/2 right-3.5 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
                   >
                     {showPassword ? (
                       <EyeOff className="size-4" />
@@ -354,11 +359,11 @@ function SignUpContent() {
                   name="agreeTerms"
                   type="checkbox"
                   required
-                  className="mt-0.5 size-4 rounded-sm border-black/20 text-black accent-black focus:ring-black dark:accent-[#DDFD2C]"
+                  className="mt-0.5 size-4 rounded-sm border-border text-primary accent-primary"
                 />
                 <label
                   htmlFor="agree-terms"
-                  className="text-[12px] leading-snug text-[#666666] select-none dark:text-[#9CA3AF]"
+                  className="text-[12px] leading-snug text-foreground-dim select-none"
                 >
                   I agree to the Scripture Terms of Service and Privacy Policy.
                 </label>
@@ -368,7 +373,7 @@ function SignUpContent() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-[14px] bg-black py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                className="ui-btn-primary mt-2 w-full gap-2"
               >
                 {isLoading && <Loader2 className="size-4 animate-spin" />}
                 <span>
@@ -378,11 +383,11 @@ function SignUpContent() {
             </form>
 
             {/* Footer switch to sign in */}
-            <div className="mt-6 border-t border-black/4 pt-4 text-center text-[12px] text-[#777777] dark:border-white/6 dark:text-[#A1A1AA]">
+            <div className="mt-6 border-t border-border pt-4 text-center text-[12px] text-foreground-dim">
               <span>Already have an account? </span>
               <Link
                 href="/login"
-                className="font-medium text-black transition-colors hover:underline dark:text-white"
+                className="font-bold text-foreground transition-colors hover:underline"
               >
                 Sign in
               </Link>
@@ -404,7 +409,7 @@ export default function SignUpPage() {
     <Suspense
       fallback={
         <div className="flex min-h-dvh items-center justify-center">
-          <Loader2 className="size-6 animate-spin text-[#82ADD4]" />
+          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-zinc-100" />
         </div>
       }
     >

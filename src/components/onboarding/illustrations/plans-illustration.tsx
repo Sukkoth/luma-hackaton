@@ -41,7 +41,7 @@ export function PlansIllustration() {
           className="fill-white stroke-black dark:fill-[#141418] dark:stroke-white"
           strokeWidth="1.5"
         />
-        <circle cx="0" cy="0" r="3" fill="#82ADD4" />
+        <circle cx="0" cy="0" r="3" fill="#71717A" />
       </g>
 
       {/* Flowing Floating Winding S-Curved Journey Trail */}
@@ -64,7 +64,7 @@ export function PlansIllustration() {
           className="fill-white stroke-black/15 shadow-sm dark:fill-[#1e1e24] dark:stroke-white/20"
           strokeWidth="1.4"
         />
-        <circle cx="-22" cy="0" r="4.5" fill="#DDFD2C" />
+        <circle cx="-22" cy="0" r="4.5" fill="#FFFFFF" />
         <path
           d="M -10,0 L 24,0"
           className="stroke-black dark:stroke-white"
@@ -84,7 +84,7 @@ export function PlansIllustration() {
           className="fill-white stroke-black/15 shadow-sm dark:fill-[#1e1e24] dark:stroke-white/20"
           strokeWidth="1.4"
         />
-        <circle cx="-26" cy="0" r="4.5" fill="#82ADD4" />
+        <circle cx="-26" cy="0" r="4.5" fill="#71717A" />
         <path
           d="M -13,0 L 28,0"
           className="stroke-black dark:stroke-white"
@@ -125,7 +125,7 @@ export function PlansIllustration() {
           cx={node.cx}
           cy={node.cy}
           r={4.5}
-          fill="#DDFD2C"
+          fill="#FFFFFF"
           className="stroke-black/20 dark:stroke-black"
           strokeWidth="1.2"
         />

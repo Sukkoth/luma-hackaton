@@ -23,19 +23,19 @@ export function OnboardingHeroIllustration({ slideId }: Props) {
         <defs>
           {/* Subtle Ambient Radial Aura */}
           <radialGradient id="heroCoreGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#82ADD4" stopOpacity="0.22" />
-            <stop offset="60%" stopColor="#82ADD4" stopOpacity="0.06" />
-            <stop offset="100%" stopColor="#82ADD4" stopOpacity="0" />
+            <stop offset="0%" stopColor="#71717A" stopOpacity="0.15" />
+            <stop offset="60%" stopColor="#71717A" stopOpacity="0.04" />
+            <stop offset="100%" stopColor="#71717A" stopOpacity="0" />
           </radialGradient>
 
-          {/* Warm Flame & Gold Glow */}
+          {/* Warm Neutral Aura */}
           <radialGradient id="flameAmberGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#DDFD2C" stopOpacity="0.32" />
-            <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0" />
+            <stop offset="0%" stopColor="#A1A1AA" stopOpacity="0.2" />
+            <stop offset="50%" stopColor="#71717A" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#71717A" stopOpacity="0" />
           </radialGradient>
 
-          {/* Golden / Amber Ribbon Gradient */}
+          {/* Monochrome Ribbon Gradient */}
           <linearGradient
             id="goldRibbonGrad"
             x1="0%"
@@ -43,8 +43,8 @@ export function OnboardingHeroIllustration({ slideId }: Props) {
             x2="100%"
             y2="100%"
           >
-            <stop offset="0%" stopColor="#DDFD2C" />
-            <stop offset="100%" stopColor="#F59E0B" />
+            <stop offset="0%" stopColor="#A1A1AA" />
+            <stop offset="100%" stopColor="#FFFFFF" />
           </linearGradient>
 
           {/* Page Gradient */}

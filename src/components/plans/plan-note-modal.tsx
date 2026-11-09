@@ -182,27 +182,25 @@ export function PlanNoteModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="plan-note-modal-title"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
     >
-      <div className="glass-panel relative flex max-h-[92vh] w-full max-w-2xl flex-col rounded-3xl border border-white/90 bg-white p-5 sm:p-6 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
+      <div className="ui-card relative flex max-h-[92vh] w-full max-w-2xl flex-col p-5 sm:p-6 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/6 pb-4 dark:border-white/6">
+        <div className="flex items-center justify-between border-b border-border-subtle pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#82ADD4]/15 text-[#82ADD4]">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-surface-elevated text-foreground">
               <FileText className="size-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim">
                   {planTitle}
                 </span>
-                <span className="rounded-md bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-black dark:bg-white/10 dark:text-white">
-                  {sessionTitle}
-                </span>
+                <span className="ui-pill text-[10.5px]">{sessionTitle}</span>
               </div>
               <h3
                 id="plan-note-modal-title"
-                className="mt-0.5 text-[16px] font-semibold text-black dark:text-white"
+                className="mt-0.5 text-[16px] font-semibold text-foreground"
               >
                 {isEditing ? "Edit Reflection" : "New Study Reflection"}
               </h3>
@@ -212,7 +210,7 @@ export function PlanNoteModal({
           <button
             type="button"
             onClick={onCloseAction}
-            className="rounded-lg p-1.5 text-neutral-400 hover:bg-black/5 hover:text-black dark:text-neutral-500 dark:hover:bg-white/10 dark:hover:text-white cursor-pointer"
+            className="rounded-lg p-1.5 text-foreground-dim hover:bg-surface-elevated hover:text-foreground cursor-pointer transition-colors"
             aria-label="Close dialog"
           >
             <X className="size-4" />
@@ -220,18 +218,18 @@ export function PlanNoteModal({
         </div>
 
         {errorMessage && (
-          <div className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-[12px] text-red-600 dark:text-red-400">
+          <div className="mt-3 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-[12px] text-destructive">
             {errorMessage}
           </div>
         )}
 
         {/* Delete Confirmation Box */}
         {showDeleteConfirm && isEditing && (
-          <div className="mt-4 rounded-2xl border border-red-500/25 bg-red-500/10 p-4">
-            <h4 className="text-[13px] font-semibold text-red-700 dark:text-red-300">
+          <div className="mt-4 rounded-2xl border border-destructive/25 bg-destructive/10 p-4">
+            <h4 className="text-[13px] font-semibold text-destructive">
               Delete this reflection?
             </h4>
-            <p className="mt-1 text-[12px] text-red-600/90 dark:text-red-400/90">
+            <p className="mt-1 text-[12px] text-destructive/90">
               This action cannot be undone. It will remove this reflection from
               both your plan and study journal.
             </p>
@@ -240,7 +238,7 @@ export function PlanNoteModal({
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isPending}
-                className="rounded-xl border border-black/10 bg-white/80 px-3 py-1.5 text-[12px] font-medium text-neutral-700 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300"
+                className="ui-btn-secondary ui-btn-sm"
               >
                 Cancel
               </button>
@@ -248,7 +246,7 @@ export function PlanNoteModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={isPending}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-3.5 py-1.5 text-[12px] font-medium text-white shadow-xs hover:bg-red-700"
+                className="ui-btn-destructive ui-btn-sm gap-1.5"
               >
                 {isPending && <Loader2 className="size-3 animate-spin" />}
                 <span>Delete Note</span>
@@ -264,7 +262,7 @@ export function PlanNoteModal({
           className="mt-4 flex flex-1 flex-col min-h-0 space-y-4"
         >
           <div>
-            <label className="block text-[12.5px] font-medium text-neutral-700 dark:text-neutral-300">
+            <label className="block text-[12.5px] font-medium text-foreground-secondary">
               Reflection Title
             </label>
             <input
@@ -272,12 +270,12 @@ export function PlanNoteModal({
               name="title"
               defaultValue={defaultTitle}
               required
-              className="mt-1.5 w-full rounded-xl border border-black/8 bg-black/[0.02] px-3.5 py-2.5 text-[13.5px] font-medium text-black focus:border-[#82ADD4] focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-[#1f1f26]"
+              className="ui-input mt-1.5 w-full"
               placeholder="e.g. Day 1 - Key Insights & Prayer"
             />
           </div>
 
-          <div className="flex-1 min-h-[220px] max-h-[50vh] flex flex-col overflow-hidden rounded-2xl border border-black/8 bg-white/80 p-2.5 dark:border-white/10 dark:bg-black/20">
+          <div className="flex-1 min-h-[220px] max-h-[50vh] flex flex-col overflow-hidden rounded-2xl border border-border bg-surface p-2.5">
             <div className="flex-1 min-h-0 overflow-y-auto px-1 py-0.5">
               <TiptapEditor
                 key={noteToEdit?.id || `new-${sessionIndex}`}
@@ -292,14 +290,14 @@ export function PlanNoteModal({
           </div>
 
           {/* Footer Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-black/6 dark:border-white/6 shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border-subtle shrink-0">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleSaveAndOpenStudio}
                 disabled={isPending}
                 data-testid="modal-open-in-studio-button"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-black/8 bg-black/4 px-3 py-1.5 text-[12px] font-medium text-neutral-700 hover:bg-black/8 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50"
+                className="ui-btn-secondary ui-btn-sm gap-1.5"
                 title="Save reflection and open in full studio"
               >
                 <ExternalLink className="size-3.5" />
@@ -311,7 +309,7 @@ export function PlanNoteModal({
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isPending}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/15 bg-red-500/5 px-2.5 py-1.5 text-[12px] font-medium text-red-600 hover:bg-red-500/15 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 cursor-pointer"
+                  className="ui-btn-destructive ui-btn-sm"
                   title="Delete reflection"
                 >
                   <Trash2 className="size-3.5" />
@@ -324,14 +322,14 @@ export function PlanNoteModal({
                 type="button"
                 onClick={onCloseAction}
                 disabled={isPending}
-                className="h-9 rounded-xl border border-black/8 bg-black/4 px-4 text-[13px] font-medium text-neutral-700 hover:bg-black/8 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                className="ui-btn-secondary ui-btn-sm"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-black px-4.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/90 cursor-pointer"
+                className="ui-btn-primary ui-btn-sm gap-1.5"
               >
                 {isPending && <Loader2 className="size-3.5 animate-spin" />}
                 <span>{isEditing ? "Save Reflection" : "Save Note"}</span>

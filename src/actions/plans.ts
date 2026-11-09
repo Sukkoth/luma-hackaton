@@ -464,7 +464,7 @@ export async function startPlanAction({
           .values({
             userId: session.user.id,
             name: blueprint.title,
-            color: "#82ADD4",
+            color: "#18181B",
             icon: "book-open",
             isPinned: false,
           })
@@ -1070,7 +1070,7 @@ export async function getPlanInstanceDetailAction({
     description: blueprint?.description || "",
     category: blueprint?.category || "Reading Plan",
     icon: blueprint?.icon || "book-open",
-    accentColor: blueprint?.accentColor || "#82ADD4",
+    accentColor: blueprint?.accentColor || "#18181B",
     status: instance.status as "active" | "paused" | "completed" | "archived",
     mode: instance.mode as "scheduled" | "flexible",
     paceType: instance.paceType as

@@ -45,7 +45,7 @@ export default async function PlansPage() {
       readChapters: p.completedChapters,
       totalChapters: p.totalChapters,
       status: p.mode === "flexible" ? "Flexible" : "On Track",
-      statusColor: "bg-[#82ADD4]/15 text-[#507ea6] dark:text-[#82ADD4]",
+      statusColor: "border border-border bg-surface-elevated text-foreground",
       completedAt: null,
     }));
 
@@ -62,7 +62,7 @@ export default async function PlansPage() {
       totalChapters: p.totalChapters,
       status: "Paused",
       statusColor:
-        "bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+        "border border-border bg-surface-elevated text-foreground-dim",
       completedAt: null,
     }));
 
@@ -84,8 +84,7 @@ export default async function PlansPage() {
       readChapters: p.completedChapters,
       totalChapters: p.totalChapters,
       status: "Finished",
-      statusColor:
-        "bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]",
+      statusColor: "border border-primary bg-primary text-primary-foreground",
       completedAt: p.completedAt ? p.completedAt.toISOString() : null,
     }));
 

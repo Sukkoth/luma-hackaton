@@ -27,9 +27,14 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  Download,
 } from "lucide-react";
 import type { ReadingPlanTemplate } from "@/data/readingPlans";
 import { startPlanAction } from "@/actions/plans";
+import {
+  buildPlanSessions,
+  exportPlanToPdf,
+} from "@/lib/plans/export-plan-pdf";
 
 type Props = {
   isOpen: boolean;
@@ -377,6 +382,31 @@ export function PlanSetupModal({
     });
   };
 
+  const handleExportPdf = () => {
+    const sessions = buildPlanSessions({
+      readings: plan.readings,
+      dailyTarget:
+        pacingMode === "scheduled"
+          ? effectiveDailyPace
+          : plan.defaultDailyTarget,
+      startDate: selectedStartMidnight,
+      activeDays: safeActiveDays,
+    });
+
+    exportPlanToPdf({
+      planTitle: plan.title,
+      subtitle: plan.subtitle,
+      category: plan.category,
+      canonCompatibility: plan.canonCompatibility,
+      totalChapters: plan.totalChapters,
+      dailyTarget:
+        pacingMode === "scheduled"
+          ? effectiveDailyPace
+          : plan.defaultDailyTarget,
+      sessions,
+    });
+  };
+
   return createPortal(
     <div
       role="dialog"
@@ -391,23 +421,23 @@ export function PlanSetupModal({
       />
 
       {/* Modal Card */}
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-2xl dark:border-white/12 dark:bg-[#15161A]">
+      <div className="ui-card relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="shrink-0 flex items-center justify-between border-b border-black/6 px-6 py-4.5 dark:border-white/8">
+        <div className="shrink-0 flex items-center justify-between border-b border-border-subtle px-6 py-4.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim">
                 Reading Plan Setup
               </span>
               {trackerName && (
-                <span className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                <span className="text-[11.5px] text-foreground-dim">
                   • {trackerName}
                 </span>
               )}
             </div>
             <h2
               id="plan-setup-modal-title"
-              className="mt-1 text-[18px] font-medium tracking-tight text-black dark:text-white"
+              className="mt-1 text-[18px] font-medium tracking-tight text-foreground"
             >
               {step === "overview" && "Plan Overview"}
               {step === "pacing" && "Pacing Style"}
@@ -423,14 +453,14 @@ export function PlanSetupModal({
             type="button"
             onClick={onCloseAction}
             aria-label="Close dialog"
-            className="flex size-9 items-center justify-center rounded-full border border-black/8 bg-white/80 text-[#666666] transition-colors hover:bg-black/5 hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#A1A1AA] dark:hover:bg-white/10 dark:hover:text-white"
+            className="rounded-full p-2 text-foreground-dim hover:bg-surface-elevated hover:text-foreground cursor-pointer transition-colors"
           >
             <X className="size-4.5" />
           </button>
         </div>
 
         {/* Step Progress Bar: Distinctive Numeral Stages (No Green Check Mark) */}
-        <div className="shrink-0 border-b border-black/4 bg-black/1.5 px-6 py-3 dark:border-white/6 dark:bg-white/1.5">
+        <div className="shrink-0 border-b border-border-subtle bg-surface-elevated px-6 py-3">
           {/* Subtle connecting track */}
           <div className="mb-2.5 grid grid-cols-4 gap-1.5">
             {WIZARD_STEPS.map((s, idx) => (
@@ -438,8 +468,8 @@ export function PlanSetupModal({
                 key={s.id}
                 className={`h-1 rounded-full transition-all duration-300 ${
                   idx <= currentStepIdx
-                    ? "bg-black dark:bg-white"
-                    : "bg-black/8 dark:bg-white/8"
+                    ? "bg-primary"
+                    : "bg-border-strong opacity-40"
                 }`}
               />
             ))}
@@ -460,19 +490,19 @@ export function PlanSetupModal({
                   onClick={() => handleStepClick(idx)}
                   className={`group relative flex items-center gap-2 rounded-xl px-3 py-1.5 text-left transition-all ${
                     isActive
-                      ? "bg-black text-white shadow-xs dark:bg-white dark:text-black"
+                      ? "bg-primary text-primary-foreground shadow-xs font-semibold"
                       : isPassed
-                        ? "cursor-pointer bg-black/4 text-black hover:bg-black/8 dark:bg-white/6 dark:text-white dark:hover:bg-white/10"
-                        : "cursor-not-allowed opacity-40 text-[#888888] dark:text-[#71717A]"
+                        ? "cursor-pointer bg-surface text-foreground hover:bg-surface-elevated"
+                        : "cursor-not-allowed opacity-40 text-foreground-dim"
                   }`}
                 >
                   <span
-                    className={`font-mono text-[11px] font-semibold tracking-wider ${
+                    className={`text-[11px] font-semibold tracking-wider ${
                       isActive
-                        ? "text-[#82ADD4] dark:text-[#507ea6]"
+                        ? "text-primary-foreground"
                         : isPassed
-                          ? "text-black/60 dark:text-white/60"
-                          : "text-[#888888] dark:text-[#71717A]"
+                          ? "text-foreground-secondary"
+                          : "text-foreground-dim"
                     }`}
                   >
                     {s.num}
@@ -502,14 +532,12 @@ export function PlanSetupModal({
           {/* STEP 1: OVERVIEW */}
           {step === "overview" && (
             <div className="space-y-5">
-              <div className="rounded-2xl border border-black/6 bg-white/60 p-5 dark:border-white/8 dark:bg-white/3">
+              <div className="ui-card-elevated p-5">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md bg-black/5 px-2.5 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/8 dark:text-[#9CA3AF]">
+                  <span className="ui-pill text-[11px] font-medium">
                     {plan.category}
                   </span>
-                  <span className="rounded-md bg-[#DDFD2C] px-2.5 py-0.5 text-[11px] font-medium text-black">
-                    Blueprint
-                  </span>
+                  <span className="ui-pill-primary text-[10px]">Blueprint</span>
                 </div>
                 <h3 className="mt-2.5 text-[21px] font-medium tracking-tight text-black dark:text-white">
                   {plan.title}
@@ -528,7 +556,7 @@ export function PlanSetupModal({
               <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
                 <div className="rounded-xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/4">
                   <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <BookOpen className="size-3.5 text-[#82ADD4]" />
+                    <BookOpen className="size-3.5 text-zinc-900 dark:text-zinc-100" />
                     <span>Chapters</span>
                   </span>
                   <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
@@ -537,7 +565,7 @@ export function PlanSetupModal({
                 </div>
                 <div className="rounded-xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/4">
                   <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <Clock className="size-3.5 text-[#82ADD4]" />
+                    <Clock className="size-3.5 text-zinc-900 dark:text-zinc-100" />
                     <span>Target Length</span>
                   </span>
                   <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
@@ -546,7 +574,7 @@ export function PlanSetupModal({
                 </div>
                 <div className="col-span-2 rounded-xl border border-black/6 bg-white/70 p-3.5 sm:col-span-1 dark:border-white/8 dark:bg-white/4">
                   <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <Sparkles className="size-3.5 text-[#82ADD4]" />
+                    <Sparkles className="size-3.5 text-zinc-900 dark:text-zinc-100" />
                     <span>Default Pace</span>
                   </span>
                   <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
@@ -635,39 +663,39 @@ export function PlanSetupModal({
               <button
                 type="button"
                 onClick={() => setPacingMode("scheduled")}
-                className={`flex w-full items-start gap-4 rounded-2xl border p-4.5 text-left transition-all ${
+                className={`flex w-full items-start gap-4 rounded-2xl border p-4.5 text-left transition-all cursor-pointer ${
                   pacingMode === "scheduled"
-                    ? "border-black/30 bg-black/4 shadow-xs dark:border-white/30 dark:bg-white/6"
-                    : "border-black/8 bg-white/60 hover:bg-white/90 dark:border-white/8 dark:bg-white/2 dark:hover:bg-white/5"
+                    ? "border-primary bg-primary-muted shadow-xs"
+                    : "border-border bg-surface hover:bg-surface-elevated"
                 }`}
               >
                 <div
                   className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
                     pacingMode === "scheduled"
-                      ? "bg-black text-white dark:bg-white dark:text-black"
-                      : "bg-black/6 text-black dark:bg-white/10 dark:text-white"
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border bg-surface-elevated text-foreground-dim"
                   }`}
                 >
                   <Calendar className="size-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[15px] font-medium text-black dark:text-white">
+                    <span className="text-[15px] font-medium text-foreground">
                       Scheduled Calendar
                     </span>
                     <div
                       className={`flex size-5 items-center justify-center rounded-full border ${
                         pacingMode === "scheduled"
-                          ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                          : "border-black/20 dark:border-white/20"
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border"
                       }`}
                     >
                       {pacingMode === "scheduled" && (
-                        <div className="size-2 rounded-full bg-white dark:bg-black" />
+                        <div className="size-2 rounded-full bg-primary-foreground" />
                       )}
                     </div>
                   </div>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-[#666666] dark:text-[#A1A1AA]">
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-foreground-secondary">
                     Structured reading calendar with daily targets, projected
                     finish dates, custom weekly rest days, and smart catch-up
                     rebalancing.
@@ -682,17 +710,17 @@ export function PlanSetupModal({
                 onClick={() => setPacingMode("flexible")}
                 className={`flex w-full items-start gap-4 rounded-2xl border p-4.5 text-left transition-all ${
                   plan.allowSelfPaced === false
-                    ? "opacity-50 cursor-not-allowed border-black/5 bg-black/2"
+                    ? "opacity-50 cursor-not-allowed border-border bg-surface-subtle"
                     : pacingMode === "flexible"
-                      ? "border-black/30 bg-black/4 shadow-xs dark:border-white/30 dark:bg-white/6"
-                      : "border-black/8 bg-white/60 hover:bg-white/90 dark:border-white/8 dark:bg-white/2 dark:hover:bg-white/5"
+                      ? "border-primary bg-primary-muted shadow-xs cursor-pointer"
+                      : "border-border bg-surface hover:bg-surface-elevated cursor-pointer"
                 }`}
               >
                 <div
                   className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
                     pacingMode === "flexible"
-                      ? "bg-black text-white dark:bg-white dark:text-black"
-                      : "bg-black/6 text-black dark:bg-white/10 dark:text-white"
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border bg-surface-elevated text-foreground-dim"
                   }`}
                 >
                   <Sparkles className="size-5" />
@@ -700,11 +728,11 @@ export function PlanSetupModal({
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-[15px] font-medium text-black dark:text-white">
+                      <span className="text-[15px] font-medium text-foreground">
                         Self-Paced (Flexible)
                       </span>
                       {plan.allowSelfPaced === false && (
-                        <span className="rounded bg-black/5 px-2 py-0.5 text-[10.5px] font-medium text-[#777777]">
+                        <span className="ui-pill text-[10.5px]">
                           Fixed Itinerary
                         </span>
                       )}
@@ -712,12 +740,12 @@ export function PlanSetupModal({
                     <div
                       className={`flex size-5 items-center justify-center rounded-full border ${
                         pacingMode === "flexible"
-                          ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
-                          : "border-black/20 dark:border-white/20"
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border"
                       }`}
                     >
                       {pacingMode === "flexible" && (
-                        <div className="size-2 rounded-full bg-white dark:bg-black" />
+                        <div className="size-2 rounded-full bg-primary-foreground" />
                       )}
                     </div>
                   </div>
@@ -810,7 +838,7 @@ export function PlanSetupModal({
                   <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-9 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                        <div className="flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
                           <FolderPlus className="size-4.5" />
                         </div>
                         <div>
@@ -930,8 +958,8 @@ export function PlanSetupModal({
                                 onClick={() => setTargetDays(days)}
                                 className={`rounded-lg px-3 py-1.5 text-[11.5px] font-medium transition-all ${
                                   targetDays === days
-                                    ? "bg-black text-white dark:bg-white dark:text-black font-semibold"
-                                    : "border border-black/8 bg-white/70 text-[#555555] hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-[#A1A1AA]"
+                                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                                    : "border border-border bg-surface text-foreground-secondary hover:bg-surface-elevated"
                                 }`}
                               >
                                 {days}d
@@ -959,7 +987,7 @@ export function PlanSetupModal({
                       <label className="text-[13.5px] font-medium text-black dark:text-white">
                         Weekly Reading Days
                       </label>
-                      <span className="text-[12px] font-medium text-[#82ADD4]">
+                      <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
                         {safeActiveDays.length} active /{" "}
                         {7 - safeActiveDays.length} rest
                       </span>
@@ -979,8 +1007,8 @@ export function PlanSetupModal({
                             onClick={() => handleToggleWeekday(w.dayIndex)}
                             className={`flex size-9 sm:size-10 items-center justify-center rounded-full text-[13px] font-medium transition-all ${
                               isActive
-                                ? "bg-black text-white shadow-xs dark:bg-white dark:text-black font-semibold"
-                                : "bg-black/5 text-[#888888] hover:bg-black/10 dark:bg-white/6 dark:text-[#71717A] dark:hover:bg-white/10"
+                                ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                                : "border border-border bg-surface text-foreground-secondary hover:bg-surface-elevated"
                             }`}
                           >
                             <span>{w.label}</span>
@@ -990,7 +1018,7 @@ export function PlanSetupModal({
                     </div>
 
                     {safeActiveDays.length < 7 && (
-                      <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#82ADD4]/10 p-2.5 text-[11.5px] text-[#507ea6] dark:bg-[#82ADD4]/15 dark:text-[#82ADD4]">
+                      <div className="mt-3 flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-[11.5px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
                         <Coffee className="size-3.5 shrink-0" />
                         <span>
                           Rest days pause new readings without streak penalties.
@@ -1073,7 +1101,7 @@ export function PlanSetupModal({
                     {/* Note Folder Option */}
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-8.5 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                        <div className="flex size-8.5 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
                           <FolderPlus className="size-4" />
                         </div>
                         <div>
@@ -1145,7 +1173,7 @@ export function PlanSetupModal({
             <div className="space-y-4">
               {/* Summary Card */}
               <div className="rounded-2xl border border-black/8 bg-white/80 p-5 dark:border-white/10 dark:bg-white/4">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                   ENROLLMENT SUMMARY
                 </span>
                 <h3 className="mt-1 text-[19px] font-medium text-black dark:text-white">
@@ -1234,14 +1262,14 @@ export function PlanSetupModal({
         </div>
 
         {/* Modal Action Controls & Step 4 Form Submission */}
-        <div className="shrink-0 flex items-center justify-between border-t border-black/6 bg-white px-6 py-4.5 dark:border-white/8 dark:bg-[#15161A]">
+        <div className="shrink-0 flex items-center justify-between border-t border-border-subtle bg-surface px-6 py-4">
           <div>
             {currentStepIdx > 0 && (
               <button
                 key="btn-modal-back"
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-2 rounded-xl border border-black/10 bg-white/80 px-5 py-2.5 text-[13.5px] font-medium text-[#555555] transition-all hover:bg-black/5 dark:border-white/12 dark:bg-white/5 dark:text-[#A1A1AA] dark:hover:bg-white/10"
+                className="ui-btn-secondary ui-btn-sm gap-2"
               >
                 <ArrowLeft className="size-4" />
                 <span>Back</span>
@@ -1255,7 +1283,7 @@ export function PlanSetupModal({
                 key="btn-modal-continue"
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-2 rounded-xl bg-black px-6 py-2.5 text-[14px] font-medium text-white shadow-xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+                className="ui-btn-primary ui-btn-sm gap-2"
               >
                 <span>Continue</span>
                 <ArrowRight className="size-4" />
@@ -1312,21 +1340,34 @@ export function PlanSetupModal({
                   value={createNoteFolder ? "true" : "false"}
                 />
 
-                <button
-                  key="btn-modal-submit"
-                  type="submit"
-                  disabled={isPending || isPlanAlreadyExpired}
-                  className="flex items-center gap-2 rounded-xl bg-black px-7 py-2.5 text-[14px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/90"
-                >
-                  {isPending ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      <span>Enrolling Plan...</span>
-                    </>
-                  ) : (
-                    <span>Confirm & Start Plan</span>
-                  )}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportPdf}
+                    data-testid="extract-plan-pdf-btn"
+                    className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
+                    title="Extract checklist to printable A4 PDF"
+                  >
+                    <Download className="size-3.5" />
+                    <span>Extract to PDF</span>
+                  </button>
+
+                  <button
+                    key="btn-modal-submit"
+                    type="submit"
+                    disabled={isPending || isPlanAlreadyExpired}
+                    className="ui-btn-primary ui-btn-sm gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        <span>Enrolling Plan...</span>
+                      </>
+                    ) : (
+                      <span>Confirm & Start Plan</span>
+                    )}
+                  </button>
+                </div>
               </form>
             )}
           </div>

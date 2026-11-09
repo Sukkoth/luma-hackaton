@@ -67,8 +67,8 @@ export function PlanSessionNotes({
       {/* Header Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-black/6 dark:border-white/6">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-black/5 text-black dark:bg-white/10 dark:text-white">
-            <FileText className="size-5 text-[#82ADD4]" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+            <FileText className="size-5 text-zinc-900 dark:text-zinc-100" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export function PlanSessionNotes({
             type="button"
             onClick={handleOpenCreateModal}
             data-testid="add-plan-note-button"
-            className="inline-flex h-8.5 items-center gap-1.5 rounded-xl bg-black px-3.5 text-[12px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90 transition-colors cursor-pointer"
+            className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Add Note</span>
@@ -102,11 +102,11 @@ export function PlanSessionNotes({
           <Link
             href={`/notes?planId=${instanceId}&session=${activeSession.sessionIndex}`}
             data-testid="open-full-journal-link"
-            className="inline-flex size-8.5 items-center justify-center rounded-xl border border-black/8 bg-white text-neutral-600 hover:bg-black/5 hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 transition-colors"
+            className="ui-btn-secondary ui-btn-icon size-9 shrink-0 rounded-xl cursor-pointer"
             title="Open in full notes studio"
             aria-label="Open in full notes studio"
           >
-            <ExternalLink className="size-3.5" />
+            <ExternalLink className="size-4 shrink-0" />
           </Link>
         </div>
       </div>
@@ -123,7 +123,7 @@ export function PlanSessionNotes({
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-[#82ADD4]">
+                    <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-zinc-500 dark:text-zinc-400">
                       <Calendar className="size-3" />
                       <span>{formatDisplayDate(note.createdAt)}</span>
                       {note.planSessionId && (
@@ -156,7 +156,7 @@ export function PlanSessionNotes({
 
                   <h4
                     onClick={() => handleOpenEditModal(note)}
-                    className="mt-1.5 text-[13.5px] font-semibold text-black dark:text-white group-hover:text-[#82ADD4] transition-colors cursor-pointer line-clamp-1"
+                    className="mt-1.5 cursor-pointer text-[13.5px] font-semibold text-black transition-colors group-hover:text-zinc-600 dark:text-white dark:group-hover:text-zinc-300 line-clamp-1"
                   >
                     {note.title}
                   </h4>
@@ -186,8 +186,8 @@ export function PlanSessionNotes({
       ) : (
         /* Empty State */
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 py-7 px-4 text-center dark:border-white/10">
-          <div className="flex size-10 items-center justify-center rounded-2xl bg-black/5 text-neutral-500 dark:bg-white/8 dark:text-neutral-400">
-            <BookOpen className="size-5 text-[#82ADD4]" />
+          <div className="flex size-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+            <BookOpen className="size-5 text-zinc-900 dark:text-zinc-100" />
           </div>
           <h4 className="mt-3 text-[14px] font-semibold text-black dark:text-white">
             No reflections recorded for {activeSession.title}
@@ -199,7 +199,7 @@ export function PlanSessionNotes({
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-black px-4 py-2 text-[12.5px] font-medium text-white shadow-2xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90 transition-colors cursor-pointer"
+            className="ui-btn-primary ui-btn-sm mt-3.5 gap-1.5 cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Write Note for {activeSession.title}</span>

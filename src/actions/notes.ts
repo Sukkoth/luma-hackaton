@@ -536,7 +536,7 @@ export async function createFolderAction({
     .values({
       userId: session.user.id,
       name: parsed.output.name,
-      color: parsed.output.color || "#82ADD4",
+      color: parsed.output.color || "#18181B",
       icon: parsed.output.icon || "Folder",
     })
     .returning();

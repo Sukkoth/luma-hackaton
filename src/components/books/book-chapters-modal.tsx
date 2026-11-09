@@ -1,4 +1,4 @@
-import { X, CheckCircle2 } from "lucide-react";
+import { X, CheckCircle2, RotateCcw } from "lucide-react";
 import type { BibleBook } from "@/data/bibleData";
 
 type Props = {
@@ -24,30 +24,35 @@ export function BookChaptersModal({
 }: Props) {
   const readCount = readChapters.length;
   const progressPercent = Math.round((readCount / book.chapters) * 100);
+  const isAllComplete = readCount >= book.chapters && book.chapters > 0;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="chapter-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm transition-opacity duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity duration-200"
     >
-      <div className="glass-panel relative flex max-h-[85vh] w-full max-w-145 flex-col rounded-[30px] border border-white/90 bg-white/90 p-6 shadow-2xl backdrop-blur-2xl sm:p-7 dark:border-white/10 dark:bg-[#121215]/95">
+      <div className="ui-card relative flex max-h-[85vh] w-full max-w-145 flex-col p-6 shadow-2xl sm:p-7">
         {/* Modal Header */}
-        <div className="flex items-start justify-between border-b border-black/6 pb-4 dark:border-white/8">
+        <div className="flex items-start justify-between border-b border-border-subtle pb-4">
           <div>
-            <span className="text-[11px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
-              {book.testament === "OT" ? "Old Testament" : "New Testament"} •{" "}
-              {book.category}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="ui-pill-primary text-[10px] font-medium uppercase">
+                {book.category}
+              </span>
+              <span className="ui-pill text-[10px] font-medium uppercase">
+                {book.testament === "OT" ? "Old Testament" : "New Testament"}
+              </span>
+            </div>
             <h3
               id="chapter-dialog-title"
-              className="mt-0.5 text-[24px] font-normal tracking-tight text-black dark:text-white"
+              className="mt-2 text-[24px] font-medium tracking-tight text-foreground"
             >
               {book.name}
             </h3>
-            <p className="text-[13px] text-[#666666] dark:text-[#9CA3AF]">
-              {readCount} of {book.chapters} chapters read
+            <p className="mt-0.5 text-[13px] font-medium text-foreground-secondary">
+              {readCount} of {book.chapters} chapters read ({progressPercent}%)
             </p>
           </div>
 
@@ -55,38 +60,41 @@ export function BookChaptersModal({
             type="button"
             aria-label="Close chapter sheet"
             onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-[10px] bg-black/5 text-[#555555] transition-colors hover:bg-black/10 hover:text-black dark:bg-white/10 dark:text-[#9CA3AF] dark:hover:bg-white/20 dark:hover:text-white"
+            className="flex size-8 items-center justify-center rounded-full bg-surface-elevated text-foreground-secondary transition-colors hover:text-foreground cursor-pointer"
           >
             <X className="size-4" />
           </button>
         </div>
 
         {/* Quick Actions Bar */}
-        <div className="flex items-center justify-between py-3">
-          <span className="text-[12px] font-normal text-[#777777] dark:text-[#9CA3AF]">
-            Tap chapters to toggle
+        <div className="flex items-center justify-between py-3 border-b border-border-subtle">
+          <span className="text-[12px] font-medium text-foreground-dim">
+            Tap chapter to toggle
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => onMarkAll({ book })}
-              className="flex items-center gap-1.5 rounded-xl border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
+              className="ui-btn-primary ui-btn-sm gap-1.5"
             >
               <CheckCircle2 className="size-3.5" />
-              <span>Mark All Read</span>
+              <span>{isAllComplete ? "All Marked Read" : "Mark All Read"}</span>
             </button>
-            <button
-              type="button"
-              onClick={() => onClearAll({ bookId: book.id })}
-              className="rounded-xl border border-white/60 bg-white/40 px-3.5 py-1.5 text-[12px] font-normal text-[#555555] backdrop-blur-md transition-all hover:border-white/80 hover:bg-white hover:text-black dark:border-white/5 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:bg-white/10 dark:hover:text-white"
-            >
-              Reset
-            </button>
+            {readCount > 0 && (
+              <button
+                type="button"
+                onClick={() => onClearAll({ bookId: book.id })}
+                className="ui-btn-secondary ui-btn-sm gap-1 text-destructive hover:border-destructive/30"
+              >
+                <RotateCcw className="size-3" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Scrollable Chapter Grid */}
-        <div className="my-2 max-h-[46vh] overflow-y-auto pr-1">
+        <div className="my-3 max-h-[46vh] overflow-y-auto pr-1">
           <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
             {Array.from({ length: book.chapters }, (_, i) => i + 1).map(
               (ch) => {
@@ -103,10 +111,10 @@ export function BookChaptersModal({
                         chapter: ch,
                       })
                     }
-                    className={`flex h-10 items-center justify-center rounded-[11px] text-[13px] transition-all ${
+                    className={`flex h-11 items-center justify-center rounded-[12px] text-[14px] transition-all cursor-pointer ${
                       isRead
-                        ? "bg-[#82ADD4] font-medium text-white shadow-xs hover:bg-[#6894BC]"
-                        : "border border-black/6 bg-white/60 font-normal text-black hover:border-black/20 hover:bg-white dark:border-white/10 dark:bg-white/4 dark:text-white dark:hover:bg-white/10"
+                        ? "bg-primary border border-primary font-semibold text-primary-foreground shadow-xs"
+                        : "border border-border bg-surface-elevated font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground"
                     }`}
                   >
                     {ch}
@@ -118,17 +126,11 @@ export function BookChaptersModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="mt-4 flex items-center justify-between border-t border-black/6 pt-4 dark:border-white/8">
-          <span className="text-[12px] text-[#777777] dark:text-[#9CA3AF]">
-            Progress:{" "}
-            <strong className="font-medium text-black dark:text-white">
-              {progressPercent}%
-            </strong>
-          </span>
+        <div className="mt-2 pt-3 border-t border-border-subtle">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/85"
+            className="ui-btn-primary w-full h-12 rounded-[14px] text-[15px] font-medium"
           >
             Done
           </button>

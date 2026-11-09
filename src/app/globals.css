@@ -1,71 +1,118 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Urbanist";
-  src: url("/fonts/Urbanist-Variable.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@custom-variant dark (&:where(.dark, .dark *));
+@variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg-gradient:
-    radial-gradient(
-      circle at 65% 25%,
-      rgba(195, 224, 248, 0.45) 0%,
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 15% 15%,
-      rgba(215, 235, 252, 0.35) 0%,
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 75%,
-      rgba(205, 230, 250, 0.25) 0%,
-      transparent 50%
-    ),
-    linear-gradient(180deg, #f5f7fa 0%, #eceef3 100%);
-  --bg-gradient-dark:
-    radial-gradient(
-      circle at 65% 25%,
-      rgba(50, 50, 56, 0.4) 0%,
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 15% 15%,
-      rgba(42, 42, 48, 0.35) 0%,
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 75%,
-      rgba(36, 36, 42, 0.3) 0%,
-      transparent 50%
-    ),
-    linear-gradient(180deg, #16161b 0%, #0e0e12 100%);
-  --ink: #000000;
-  --ink-muted: #555555;
-  --ink-faint: #888888;
-  --hero-blue: #75a2d2;
-  --neon-yellow: #ddfd2c;
-  --font-urbanist: "Urbanist", system-ui, -apple-system, sans-serif;
+  /* Watermelon Light Palette Tokens (#1A212D Deep Slate) */
+  --background: #f8f9fa;
+  --surface: #ffffff;
+  --surface-elevated: #f1f3f5;
+  --surface-subtle: #e9ecef;
+
+  --foreground: #1a212d;
+  --foreground-secondary: #4f5d6e;
+  --foreground-dim: #5c6b7e;
+
+  --border: #e1e5ea;
+  --border-subtle: #d4dbe2;
+  --border-strong: #b0bac5;
+
+  --primary: #1a212d;
+  --primary-foreground: #ffffff;
+  --primary-muted: rgba(26, 33, 45, 0.08);
+  --primary-border: rgba(26, 33, 45, 0.25);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: #fee2e2;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  --bg-gradient: #f8f9fa;
+  --bg-gradient-dark: #10110c;
+  --font-sans:
+    var(--font-poppins), "Poppins", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+:root.dark,
+.dark,
+html.dark {
+  color-scheme: dark;
+  background-color: #10110c;
+
+  /* Watermelon Dark Palette Tokens (Signature #10110C / #181A13) */
+  --background: #10110c;
+  --surface: #181a13;
+  --surface-elevated: #24271d;
+  --surface-subtle: #1e2018;
+
+  --foreground: #ffffff;
+  --foreground-secondary: #9e9f97;
+  --foreground-dim: #94968c;
+
+  --border: #26291e;
+  --border-subtle: #1e2018;
+  --border-strong: #363a2b;
+
+  --primary: #dadad6;
+  --primary-foreground: #10110c;
+  --primary-muted: rgba(218, 218, 214, 0.12);
+  --primary-border: rgba(218, 218, 214, 0.35);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: rgba(239, 68, 68, 0.15);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #3b82f6;
 }
 
 @theme inline {
-  --color-ink: var(--ink);
-  --color-ink-muted: var(--ink-muted);
-  --color-ink-faint: var(--ink-faint);
-  --color-hero-blue: var(--hero-blue);
-  --color-neon-yellow: var(--neon-yellow);
-  --font-urbanist: var(--font-urbanist);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-subtle: var(--surface-subtle);
+
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-dim: var(--foreground-dim);
+
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-border: var(--primary-border);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
+  --font-sans:
+    var(--font-poppins), "Poppins", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-  background: var(--bg-gradient);
-  color: var(--ink);
-  font-family: var(--font-urbanist), "Urbanist", system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family:
+    var(--font-poppins),
+    "Poppins",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   font-optical-sizing: auto;
   min-height: 100vh;
   margin: 0;
@@ -74,71 +121,275 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-html.dark {
-  color-scheme: dark;
-  background-color: #0e0e12;
-}
-
 html.dark body {
-  background: var(--bg-gradient-dark);
-  min-height: 100vh;
-  color: #ffffff;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
-/* Glassmorphism utility helpers - Light Mode */
+/* Short laptop viewport optimization */
+@utility short-laptop-hide {
+  @media (max-height: 799px) {
+    display: none !important;
+  }
+}
+
+@media (max-height: 799px) {
+  .short-laptop-hide {
+    display: none !important;
+  }
+}
+
+/* Watermelon Semantic Surface Panels */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow:
-    0 4px 24px -2px rgba(0, 0, 0, 0.03),
-    0 1px 2px rgba(0, 0, 0, 0.02);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.375rem; /* 22px */
   isolation: isolate;
   transform: translateZ(0);
 }
 
 .glass-pill {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
 }
 
 .glass-hero {
-  background: linear-gradient(135deg, #8fb6de 0%, #74a2d3 45%, #598ec6 100%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow:
-    0 12px 36px -8px rgba(89, 142, 198, 0.32),
-    inset 0 1px 1px rgba(255, 255, 255, 0.45);
-}
-
-/* Glassmorphism utility helpers - Dark Mode */
-html.dark .glass-panel {
-  background: rgba(24, 24, 29, 0.76);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow:
-    0 8px 32px -4px rgba(0, 0, 0, 0.55),
-    0 1px 2px rgba(255, 255, 255, 0.02);
+  background-color: var(--surface);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem; /* 24px */
   isolation: isolate;
   transform: translateZ(0);
 }
 
-html.dark .glass-pill {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #e4e4e7;
+/* Watermelon UI Semantic Component Primitives */
+.ui-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: 1.375rem; /* 22px */
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
 }
 
-html.dark .glass-hero {
-  background: linear-gradient(135deg, #8fb6de 0%, #74a2d3 45%, #598ec6 100%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow:
-    0 16px 40px -8px rgba(0, 0, 0, 0.7),
-    0 8px 24px -4px rgba(89, 142, 198, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+.ui-card:hover {
+  border-color: var(--border-strong);
+}
+
+.ui-card-elevated {
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--foreground);
+  border-radius: 0.875rem; /* 14px */
+}
+
+.ui-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.625rem; /* 10px */
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border);
+  color: var(--foreground-dim);
+}
+
+.ui-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.625rem; /* 10px */
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--primary-foreground);
+}
+
+.ui-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.9375rem; /* 15px */
+  border-radius: 0.75rem; /* 12px - Watermelon standard */
+  min-height: 3rem; /* 48px - Watermelon minHeight: 48 */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: var(--primary);
+  border: 1px solid transparent;
+  color: var(--primary-foreground);
+  transition:
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 150ms ease;
+  cursor: pointer;
+}
+
+.ui-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.ui-btn-primary:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.ui-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.9375rem; /* 15px */
+  border-radius: 0.75rem; /* 12px */
+  min-height: 3rem; /* 48px */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms ease,
+    transform 150ms ease;
+  cursor: pointer;
+}
+
+.ui-btn-secondary:hover {
+  background-color: var(--surface-elevated);
+  border-color: var(--border-strong);
+}
+
+.ui-btn-secondary:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.ui-btn-reversed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.9375rem; /* 15px */
+  border-radius: 0.75rem; /* 12px */
+  min-height: 3rem; /* 48px */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--foreground);
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
+  cursor: pointer;
+}
+
+.ui-btn-reversed:hover {
+  background-color: var(--surface);
+}
+
+.ui-btn-reversed:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.ui-btn-destructive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.9375rem; /* 15px */
+  border-radius: 0.75rem; /* 12px */
+  min-height: 3rem; /* 48px */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  transition:
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 150ms ease;
+  cursor: pointer;
+}
+
+.ui-btn-destructive:hover {
+  opacity: 0.9;
+}
+
+.ui-btn-destructive:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.ui-btn-primary:disabled,
+.ui-btn-secondary:disabled,
+.ui-btn-reversed:disabled,
+.ui-btn-destructive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ui-btn-sm {
+  height: 2.25rem; /* 36px exact */
+  min-height: 2.25rem; /* 36px */
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  border-radius: 0.625rem; /* 10px */
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+@utility ui-btn-icon {
+  min-height: unset !important;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-btn-icon {
+  min-height: unset !important;
+  padding: 0 !important;
+}
+
+.ui-input {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: 0.75rem;
+  min-height: 3rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.9375rem;
+  transition: border-color 150ms ease;
+}
+
+.ui-input:focus {
+  outline: none;
+  border-color: var(--border-strong);
+}
+
+/* Icon padding utilities for inputs with icon adornments */
+@utility ui-input-icon-left {
+  padding-left: 2.75rem !important; /* 44px: 14px left margin + 16px icon + 14px clearance */
+}
+
+@utility ui-input-icon-both {
+  padding-left: 2.75rem !important;
+  padding-right: 2.75rem !important;
+}
+
+.ui-input-icon-left,
+input.ui-input-icon-left {
+  padding-left: 2.75rem !important;
+}
+
+.ui-input-icon-both,
+input.ui-input-icon-both {
+  padding-left: 2.75rem !important;
+  padding-right: 2.75rem !important;
 }

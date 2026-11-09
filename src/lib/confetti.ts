@@ -26,13 +26,13 @@ export type FireConfettiParams = {
 };
 
 const CELEBRATION_COLORS: ReadonlyArray<string> = [
-  "#82ADD4", // Luma accent blue
-  "#DDFD2C", // Luma vibrant lime
-  "#E2E8F0", // Slate light
-  "#F59E0B", // Warm Amber
-  "#EC4899", // Magenta pink
-  "#8B5CF6", // Purple
-  "#3B82F6", // Sky blue
+  "#09090b", // Deep obsidian
+  "#27272a", // Charcoal
+  "#52525b", // Zinc dark
+  "#71717a", // Zinc medium
+  "#a1a1aa", // Silver
+  "#e4e4e7", // Platinum
+  "#ffffff", // Crisp white
 ];
 
 export function fireConfetti({
@@ -84,7 +84,7 @@ export function fireConfetti({
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       size: 5 + Math.random() * 6,
-      color: colors[Math.floor(Math.random() * colors.length)] ?? "#DDFD2C",
+      color: colors[Math.floor(Math.random() * colors.length)] ?? "#ffffff",
       rotation: Math.random() * Math.PI * 2,
       rotationSpeed: (Math.random() - 0.5) * 0.18,
       wobble: Math.random() * Math.PI * 2,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -84,6 +84,11 @@ export function PlanCatalog({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlanForEnrollment, setSelectedPlanForEnrollment] =
     useState<ReadingPlanTemplate | null>(null);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const enrolledTemplateIds = new Set([
     ...activePlanInstances.map((p) => p.templateId),
@@ -138,21 +143,22 @@ export function PlanCatalog({
       />
 
       {/* Main Catalog & My Plans Section */}
-      <section className="glass-panel rounded-[28px] p-6 sm:p-7">
+      <section className="ui-card rounded-[22px] p-5 sm:p-6">
         {/* Navigation Tabs and Search Bar */}
-        <div className="flex flex-col gap-4 border-b border-black/4 pb-5 md:flex-row md:items-center md:justify-between dark:border-white/6">
-          {/* Tab Switcher - Horizontally scrollable on small screens */}
+        <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
+          {/* Tab Switcher - Segmented control */}
           <div
             data-testid="plan-catalog-tabs"
-            className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
+            className="flex items-center gap-1 rounded-[16px] border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none"
           >
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("catalog")}
-              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "catalog"
-                  ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
               <Compass className="size-3.5" />
@@ -160,11 +166,12 @@ export function PlanCatalog({
             </button>
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("active")}
-              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "active"
-                  ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
               <Calendar className="size-3.5" />
@@ -174,11 +181,12 @@ export function PlanCatalog({
             </button>
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("paused")}
-              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "paused"
-                  ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
               <Pause className="size-3.5" />
@@ -188,14 +196,15 @@ export function PlanCatalog({
             </button>
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("finished")}
-              className={`shrink-0 flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] backdrop-blur-md transition-all ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "finished"
-                  ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/15 dark:bg-white/10 dark:text-white"
-                  : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/6 dark:bg-white/3 dark:text-[#A1A1AA] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
-              <Trophy className="size-3.5 text-[#82ADD4]" />
+              <Trophy className="size-3.5" />
               <span>
                 Finished Plans ({session ? finishedPlanInstances.length : 0})
               </span>
@@ -205,21 +214,21 @@ export function PlanCatalog({
           {/* Search Input */}
           {activeTab === "catalog" && (
             <div className="relative w-full sm:w-64">
-              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+              <Search className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 text-foreground-dim" />
               <input
                 type="text"
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-[#A1A1AA] dark:focus:border-white/20 dark:focus:bg-white/8"
+                className="h-9 w-full rounded-[12px] border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
                 >
-                  <X className="size-3" />
+                  <X className="size-3.5" />
                 </button>
               )}
             </div>
@@ -237,18 +246,20 @@ export function PlanCatalog({
               <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
                 <button
                   type="button"
+                  disabled={!mounted}
                   onClick={() => setIsCustomWizardOpen(true)}
                   data-testid="open-custom-plan-wizard-btn"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-[12px] font-medium text-white shadow-xs hover:bg-emerald-700 transition-all cursor-pointer"
+                  className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
                 >
                   <Plus className="size-3.5" />
                   <span>Create Custom</span>
                 </button>
                 <button
                   type="button"
+                  disabled={!mounted}
                   onClick={() => setIsImportModalOpen(true)}
                   data-testid="open-import-plan-modal-btn"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white/80 px-3 py-1.5 text-[12px] font-medium text-neutral-700 shadow-2xs hover:bg-black/5 dark:border-white/12 dark:bg-white/5 dark:text-neutral-200 dark:hover:bg-white/10 transition-all cursor-pointer"
+                  className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
                 >
                   <Upload className="size-3.5" />
                   <span>Import</span>
@@ -269,7 +280,7 @@ export function PlanCatalog({
                 ))}
               </div>
             ) : (
-              <div className="py-16 text-center text-[#777777] dark:text-[#A1A1AA]">
+              <div className="py-16 text-center text-foreground-secondary">
                 <p className="text-[15px] font-normal">
                   No reading plans match &ldquo;{searchQuery}&rdquo;.
                 </p>
@@ -279,7 +290,7 @@ export function PlanCatalog({
                     setSearchQuery("");
                     setSelectedFilter("All");
                   }}
-                  className="mt-3 rounded-xl border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                  className="ui-btn-secondary ui-btn-sm mt-3"
                 >
                   Reset Filters
                 </button>
@@ -290,19 +301,19 @@ export function PlanCatalog({
           /* Active Plans Tab */
           !session ? (
             <div className="py-16 text-center">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-black/4 text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-surface-subtle text-foreground-dim">
                 <Lock className="size-6" />
               </div>
-              <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+              <h3 className="mt-4 text-[18px] font-medium text-foreground">
                 Sign in to view your plans
               </h3>
-              <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mx-auto mt-1 max-w-sm text-[13px] text-foreground-secondary">
                 Active schedules, daily checklists, and section checkoffs are
                 saved to your account.
               </p>
               <Link
                 href="/login?redirect=/plans"
-                className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                className="ui-btn-primary ui-btn-sm mt-5 gap-1.5"
               >
                 <LogIn className="size-4" />
                 <span>Sign In to Scripture</span>
@@ -310,20 +321,20 @@ export function PlanCatalog({
             </div>
           ) : activePlanInstances.length === 0 ? (
             <div className="py-16 text-center">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-surface-subtle text-foreground-secondary">
                 <Calendar className="size-6" />
               </div>
-              <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+              <h3 className="mt-4 text-[18px] font-medium text-foreground">
                 No active plans started yet
               </h3>
-              <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mx-auto mt-1 max-w-sm text-[13px] text-foreground-secondary">
                 Browse the catalog to select a reading blueprint. Enroll in any
                 plan to begin your daily scheduled readings.
               </p>
               <button
                 type="button"
                 onClick={() => setActiveTab("catalog")}
-                className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                className="ui-btn-primary ui-btn-sm mt-5 gap-1.5 cursor-pointer"
               >
                 <Compass className="size-3.5" />
                 <span>Browse Plan Catalog</span>
@@ -335,7 +346,7 @@ export function PlanCatalog({
                 {activePlanInstances.map((instance) => (
                   <div
                     key={instance.id}
-                    className="isolate flex flex-col justify-between rounded-[20px] border border-black/8 bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/18 hover:bg-white hover:shadow-md dark:border-white/8 dark:bg-white/4 dark:shadow-none dark:hover:border-white/18 dark:hover:bg-white/8"
+                    className="ui-card flex flex-col justify-between p-5"
                   >
                     <div>
                       <div className="flex items-center justify-between">
@@ -344,49 +355,49 @@ export function PlanCatalog({
                         >
                           {instance.status}
                         </span>
-                        <span className="text-[12px] font-medium text-black dark:text-white">
+                        <span className="text-[12px] font-medium text-foreground">
                           {instance.progressPercent}%
                         </span>
                       </div>
 
-                      <h3 className="mt-3 text-[18px] font-medium tracking-tight text-black dark:text-white">
+                      <h3 className="mt-3 text-[18px] font-medium tracking-tight text-foreground">
                         {instance.title}
                       </h3>
-                      <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+                      <p className="mt-1 text-[13px] text-foreground-secondary">
                         Passage:{" "}
-                        <strong className="font-medium text-black dark:text-white">
+                        <strong className="font-medium text-foreground">
                           {instance.currentPassage}
                         </strong>
                       </p>
-                      <p className="text-[12px] text-[#888888] dark:text-[#A1A1AA]">
+                      <p className="text-[12px] text-foreground-dim">
                         {instance.dayText}
                       </p>
 
                       {/* Progress Bar */}
                       <div className="mt-4">
-                        <div className="flex justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                        <div className="flex justify-between text-[11px] text-foreground-secondary">
                           <span>
                             {instance.readChapters} / {instance.totalChapters}{" "}
                             chapters
                           </span>
                         </div>
-                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/6">
+                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-subtle">
                           <div
                             style={{ width: `${instance.progressPercent}%` }}
-                            className="h-full rounded-full bg-linear-to-r from-[#82ADD4] to-[#DDFD2C]"
+                            className="h-full rounded-full bg-primary"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-black/5 pt-4 dark:border-white/6">
-                      <span className="flex items-center gap-1 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
-                        <CheckCircle2 className="size-3.5 text-[#82ADD4]" />
+                    <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
+                      <span className="flex items-center gap-1 text-[12px] text-foreground-secondary">
+                        <CheckCircle2 className="size-3.5 text-foreground-dim" />
                         <span>Active Tracker</span>
                       </span>
                       <Link
                         href={`/plans/${instance.id}`}
-                        className="flex items-center gap-1.5 rounded-xl border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
+                        className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5"
                       >
                         <span>View Plan</span>
                         <ArrowRight className="size-3.5" />
@@ -401,19 +412,19 @@ export function PlanCatalog({
           /* Paused Plans Tab */
           !session ? (
             <div className="py-16 text-center">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-black/4 text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-surface-subtle text-foreground-dim">
                 <Lock className="size-6" />
               </div>
-              <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+              <h3 className="mt-4 text-[18px] font-medium text-foreground">
                 Sign in to view paused plans
               </h3>
-              <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mx-auto mt-1 max-w-sm text-[13px] text-foreground-secondary">
                 Paused reading plans are synced to your account so you can
                 resume whenever ready.
               </p>
               <Link
                 href="/login?redirect=/plans"
-                className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+                className="ui-btn-primary ui-btn-sm mt-5 gap-1.5"
               >
                 <LogIn className="size-4" />
                 <span>Sign In to Scripture</span>
@@ -421,13 +432,13 @@ export function PlanCatalog({
             </div>
           ) : pausedPlanInstances.length === 0 ? (
             <div className="py-16 text-center">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-surface-subtle text-foreground-secondary">
                 <Coffee className="size-6" />
               </div>
-              <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+              <h3 className="mt-4 text-[18px] font-medium text-foreground">
                 No paused plans
               </h3>
-              <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mx-auto mt-1 max-w-sm text-[13px] text-foreground-secondary">
                 You have no paused plans. If you need to step away from reading
                 without breaking your pace, pause any active plan from its
                 settings.
@@ -439,7 +450,7 @@ export function PlanCatalog({
                 {pausedPlanInstances.map((instance) => (
                   <div
                     key={instance.id}
-                    className="isolate flex flex-col justify-between rounded-[20px] border border-black/8 bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/18 hover:bg-white hover:shadow-md dark:border-white/8 dark:bg-white/4 dark:shadow-none dark:hover:border-white/18 dark:hover:bg-white/8"
+                    className="ui-card flex flex-col justify-between p-5"
                   >
                     <div>
                       <div className="flex items-center justify-between">
@@ -448,54 +459,54 @@ export function PlanCatalog({
                         >
                           {instance.status}
                         </span>
-                        <span className="text-[12px] font-medium text-black dark:text-white">
+                        <span className="text-[12px] font-medium text-foreground">
                           {instance.progressPercent}%
                         </span>
                       </div>
 
-                      <h3 className="mt-3 text-[18px] font-medium tracking-tight text-black dark:text-white">
+                      <h3 className="mt-3 text-[18px] font-medium tracking-tight text-foreground">
                         {instance.title}
                       </h3>
-                      <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+                      <p className="mt-1 text-[13px] text-foreground-secondary">
                         Passage:{" "}
-                        <strong className="font-medium text-black dark:text-white">
+                        <strong className="font-medium text-foreground">
                           {instance.currentPassage}
                         </strong>
                       </p>
-                      <p className="text-[12px] text-[#888888] dark:text-[#A1A1AA]">
+                      <p className="text-[12px] text-foreground-dim">
                         {instance.dayText}
                       </p>
 
                       {/* Progress Bar */}
                       <div className="mt-4">
-                        <div className="flex justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                        <div className="flex justify-between text-[11px] text-foreground-secondary">
                           <span>
                             {instance.readChapters} / {instance.totalChapters}{" "}
                             chapters
                           </span>
                         </div>
-                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/6">
+                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-subtle">
                           <div
                             style={{ width: `${instance.progressPercent}%` }}
-                            className="h-full rounded-full bg-linear-to-r from-amber-500/70 to-amber-400"
+                            className="h-full rounded-full bg-foreground-dim"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-black/5 pt-4 dark:border-white/6">
+                    <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
                       <button
                         type="button"
                         disabled={isPending}
                         onClick={() => handleResumePlan(instance.id)}
-                        className="flex items-center gap-1.5 rounded-xl border border-black/10 bg-black/5 px-3.5 py-1.5 text-[12px] font-medium text-black transition-all hover:bg-black/10 disabled:opacity-50 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+                        className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         <Play className="size-3 fill-current" />
                         <span>Resume Plan</span>
                       </button>
                       <Link
                         href={`/plans/${instance.id}`}
-                        className="flex items-center gap-1.5 rounded-xl border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
+                        className="ui-btn-secondary ui-btn-sm gap-1.5"
                       >
                         <span>View Plan</span>
                         <ArrowRight className="size-3.5" />
@@ -509,19 +520,19 @@ export function PlanCatalog({
         ) : /* Finished Plans Tab */
         !session ? (
           <div className="py-16 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-black/4 text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-surface-subtle text-foreground-dim">
               <Lock className="size-6" />
             </div>
-            <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+            <h3 className="mt-4 text-[18px] font-medium text-foreground">
               Sign in to view completed plans
             </h3>
-            <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+            <p className="mx-auto mt-1 max-w-sm text-[13px] text-foreground-secondary">
               Your finished plans and reading history are recorded with your
               user profile.
             </p>
             <Link
               href="/login?redirect=/plans"
-              className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-black px-5 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-[#DDFD2C] dark:text-black dark:hover:bg-[#d4f329]"
+              className="ui-btn-primary ui-btn-sm mt-5 gap-1.5"
             >
               <LogIn className="size-4" />
               <span>Sign In to Scripture</span>
@@ -529,13 +540,13 @@ export function PlanCatalog({
           </div>
         ) : finishedPlanInstances.length === 0 ? (
           <div className="py-16 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-surface-subtle text-foreground-secondary">
               <Trophy className="size-6" />
             </div>
-            <h3 className="mt-4 text-[18px] font-medium text-black dark:text-white">
+            <h3 className="mt-4 text-[18px] font-medium text-foreground">
               No finished plans yet
             </h3>
-            <p className="mx-auto mt-1 max-w-sm text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+            <p className="mx-auto mt-1 max-w-sm text-[13px] text-foreground-secondary">
               Complete all reading sessions of a plan to celebrate reaching 100%
               and record your achievement here!
             </p>
@@ -546,58 +557,58 @@ export function PlanCatalog({
               {finishedPlanInstances.map((instance) => (
                 <div
                   key={instance.id}
-                  className="isolate flex flex-col justify-between rounded-[20px] border border-black/8 bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/18 hover:bg-white hover:shadow-md dark:border-white/8 dark:bg-white/4 dark:shadow-none dark:hover:border-white/18 dark:hover:bg-white/8"
+                  className="ui-card flex flex-col justify-between p-5"
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1 rounded-md bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                      <span className="ui-pill text-[11px] gap-1">
                         <Trophy className="size-3" />
                         <span>Finished</span>
                       </span>
-                      <span className="text-[12px] font-semibold text-black dark:text-white">
+                      <span className="text-[12px] font-semibold text-foreground">
                         100%
                       </span>
                     </div>
 
-                    <h3 className="mt-3 text-[18px] font-medium tracking-tight text-black dark:text-white">
+                    <h3 className="mt-3 text-[18px] font-medium tracking-tight text-foreground">
                       {instance.title}
                     </h3>
-                    <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+                    <p className="mt-1 text-[13px] text-foreground-secondary">
                       {instance.dayText}
                     </p>
-                    <p className="text-[12px] text-[#888888] dark:text-[#A1A1AA]">
+                    <p className="text-[12px] text-foreground-dim">
                       All {instance.totalChapters} chapters completed
                     </p>
 
                     {/* Full Progress Bar */}
                     <div className="mt-4">
-                      <div className="flex justify-between text-[11px] text-[#777777] dark:text-[#A1A1AA]">
+                      <div className="flex justify-between text-[11px] text-foreground-secondary">
                         <span>Journey Complete</span>
-                        <span className="font-medium text-black dark:text-white">
+                        <span className="font-medium text-foreground">
                           {instance.totalChapters} / {instance.totalChapters}
                         </span>
                       </div>
-                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/6">
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-subtle">
                         <div
                           style={{ width: "100%" }}
-                          className="h-full rounded-full bg-linear-to-r from-[#82ADD4] to-[#DDFD2C]"
+                          className="h-full rounded-full bg-primary"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-black/5 pt-4 dark:border-white/6">
+                  <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
                     <button
                       type="button"
                       onClick={() => celebratePlanCompletion()}
-                      className="flex items-center gap-1.5 rounded-xl border border-black/10 bg-black/5 px-3 py-1.5 text-[12px] font-medium text-black transition-all hover:bg-black/10 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+                      className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
                     >
                       <Sparkles className="size-3.5" />
                       <span>Celebrate 🎉</span>
                     </button>
                     <Link
                       href={`/plans/${instance.id}`}
-                      className="flex items-center gap-1.5 rounded-xl border border-white/90 bg-white px-3.5 py-1.5 text-[12px] font-medium text-black shadow-xs transition-all hover:bg-black hover:text-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white dark:hover:text-black"
+                      className="ui-btn-secondary ui-btn-sm gap-1.5"
                     >
                       <span>Review Plan</span>
                       <ArrowRight className="size-3.5" />

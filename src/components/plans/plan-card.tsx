@@ -1,5 +1,15 @@
 import Link from "next/link";
-import { BookOpen, Bookmark, Clock, Sparkles, ArrowRight } from "lucide-react";
+import {
+  BookOpen,
+  Bookmark,
+  Clock,
+  ArrowRight,
+  Lock,
+  Sliders,
+  Compass,
+  Activity,
+  Check,
+} from "lucide-react";
 import type { ReadingPlanTemplate } from "@/data/readingPlans";
 
 type Props = {
@@ -17,74 +27,111 @@ export function PlanCard({
     plan.id.startsWith("custom_") || plan.id.startsWith("imported_");
 
   return (
-    <div className="group relative isolate flex flex-col justify-between rounded-[20px] border border-black/8 bg-white/75 p-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors duration-150 hover:border-black/18 hover:bg-white hover:shadow-md dark:border-white/8 dark:bg-white/4 dark:shadow-none dark:hover:border-white/18 dark:hover:bg-white/8">
+    <div className="ui-card group relative isolate flex flex-col justify-between p-5 transition-all duration-150 hover:border-border-strong">
       <div>
-        {/* Badges row */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="rounded-md bg-black/4 px-2 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
-            {plan.category}
-          </span>
-          {plan.canonCompatibility &&
-            plan.canonCompatibility !== "protestant" && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
-                <Bookmark className="size-3" />
-                <span>{plan.canonCompatibility.replace("_", " ")}</span>
+        {/* Top Header Badge & Meta Row */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground uppercase tracking-wide">
+              {plan.category}
+            </span>
+            {plan.canonCompatibility &&
+              plan.canonCompatibility !== "protestant" && (
+                <span className="flex items-center gap-1 rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  <Bookmark className="size-2.5" />
+                  <span>{plan.canonCompatibility.replace("_", " ")}</span>
+                </span>
+              )}
+            {isCustom && (
+              <span className="rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-semibold text-primary">
+                Custom
               </span>
             )}
-          {isEnrolled && (
-            <span className="rounded-md bg-[#82ADD4]/15 px-2 py-0.5 text-[11px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
-              Enrolled
+            {isEnrolled && (
+              <span className="flex items-center gap-1 rounded-lg bg-primary-muted px-2 py-0.5 text-[10px] font-semibold text-primary">
+                <Check className="size-2.5" />
+                <span>Enrolled</span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-foreground-dim">
+            <span className="flex items-center gap-1">
+              <BookOpen className="size-3" />
+              <span>{plan.totalChapters} ch</span>
             </span>
-          )}
-          {isCustom && (
-            <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-              Custom
+            <span>·</span>
+            <span className="flex items-center gap-1">
+              <Clock className="size-3" />
+              <span>{plan.recommendedDays} days</span>
             </span>
-          )}
+          </div>
         </div>
 
-        {/* Title & description */}
-        <h3 className="mt-3 text-[17px] font-medium tracking-tight text-black transition-colors group-hover:text-[#6894BC] dark:text-white dark:group-hover:text-[#82ADD4]">
+        {/* Title & Subtitle */}
+        <h3 className="mt-3 text-[17px] font-semibold tracking-tight text-foreground">
           {plan.title}
         </h3>
-        <p className="mt-1 line-clamp-2 text-[13px] leading-snug font-normal text-[#666666] dark:text-[#9CA3AF]">
+        <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed font-normal text-foreground-dim">
           {plan.subtitle || plan.description}
         </p>
 
-        {/* Plan stats */}
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[12px] text-[#777777] dark:text-[#A1A1AA]">
-          <span className="flex items-center gap-1">
-            <BookOpen className="size-3.5 text-[#888888] dark:text-[#9CA3AF]" />
-            <span>{plan.totalChapters} ch</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="size-3.5 text-[#888888] dark:text-[#9CA3AF]" />
-            <span>{plan.recommendedDays} days</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <Sparkles className="size-3.5 text-[#888888] dark:text-[#9CA3AF]" />
-            <span>~{plan.defaultDailyTarget} / day</span>
+        {/* Capabilities & Pacing Specs Strip (Watermelon signature) */}
+        <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
+          {plan.allowCustomPace === false ? (
+            <span className="flex items-center gap-1 rounded-[8px] bg-surface-elevated px-2 py-1 text-[10.5px] font-medium text-foreground-dim">
+              <Lock className="size-3" />
+              <span>Fixed {plan.recommendedDays}d</span>
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 rounded-[8px] bg-primary-muted px-2 py-1 text-[10.5px] font-medium text-primary">
+              <Sliders className="size-3" />
+              <span>Custom Pace</span>
+            </span>
+          )}
+
+          {plan.allowSelfPaced === false ? (
+            <span className="flex items-center gap-1 rounded-[8px] bg-surface-elevated px-2 py-1 text-[10.5px] font-medium text-foreground-dim">
+              <Clock className="size-3" />
+              <span>Scheduled Only</span>
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 rounded-[8px] bg-surface-elevated px-2 py-1 text-[10.5px] font-medium text-foreground-secondary">
+              <Compass className="size-3" />
+              <span>Self-Paced</span>
+            </span>
+          )}
+
+          <span className="flex items-center gap-1 rounded-[8px] bg-surface-elevated px-2 py-1 text-[10.5px] font-medium text-foreground-dim">
+            <Activity className="size-3" />
+            <span>~{plan.defaultDailyTarget} ch/d</span>
           </span>
         </div>
       </div>
 
-      {/* Action Footer */}
-      <div className="mt-5 flex items-center justify-between border-t border-black/5 pt-4 dark:border-white/6">
-        <span className="text-[11px] font-normal text-[#888888] dark:text-[#A1A1AA]">
-          {plan.allowSelfPaced ? "Self-Paced allowed" : "Fixed schedule"}
-        </span>
+      {/* Bottom Action Row */}
+      <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-3.5">
+        <div>
+          <span className="block text-[9.5px] font-semibold tracking-wider text-foreground-dim uppercase">
+            Recommended Pace
+          </span>
+          <span className="text-[11.5px] font-medium text-foreground">
+            {plan.recommendedDays} days · ~{plan.defaultDailyTarget} ch/day
+          </span>
+        </div>
+
         <div className="flex items-center gap-2">
           <Link
             href={`/plans/templates/${plan.id}`}
-            className="flex items-center gap-1 rounded-xl border border-black/8 bg-white/70 px-3 py-1.5 text-[12px] font-medium text-black shadow-2xs transition-all hover:bg-black hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white dark:hover:text-black"
+            className="rounded-[12px] border border-border bg-surface-elevated px-3 py-1.5 text-[12px] font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground transition-colors"
           >
-            <span>Details</span>
+            Details
           </Link>
           {onStartPlanAction && (
             <button
               type="button"
               onClick={() => onStartPlanAction(plan)}
-              className="flex items-center gap-1 rounded-xl bg-black px-3.5 py-1.5 text-[12px] font-medium text-white shadow-2xs transition-all hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90"
+              className="flex items-center gap-1 rounded-[12px] bg-primary px-3.5 py-1.5 text-[12px] font-medium text-primary-foreground shadow-xs hover:opacity-90 transition-opacity cursor-pointer"
             >
               <span>Start</span>
               <ArrowRight className="size-3.5" />

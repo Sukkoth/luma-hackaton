@@ -33,9 +33,9 @@ export function PlanPausedLockModal({
       />
 
       {/* Modal Dialog Content */}
-      <div className="relative w-full max-w-md rounded-[28px] border border-black/10 bg-white p-6 shadow-2xl transition-all dark:border-white/12 dark:bg-[#141414] sm:p-7">
+      <div className="ui-card relative w-full max-w-md p-6 shadow-2xl sm:p-7">
         <div className="flex items-start justify-between">
-          <div className="flex size-12 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-500 shadow-xs">
+          <div className="flex size-12 items-center justify-center rounded-2xl border border-warning/20 bg-warning/10 text-warning shadow-xs">
             <PauseCircle className="size-6" />
           </div>
 
@@ -43,7 +43,7 @@ export function PlanPausedLockModal({
             type="button"
             onClick={onCloseAction}
             disabled={isPending}
-            className="flex size-8 items-center justify-center rounded-full text-black/40 transition-colors hover:bg-black/5 hover:text-black dark:text-white/40 dark:hover:bg-white/10 dark:hover:text-white"
+            className="flex size-8 items-center justify-center rounded-xl text-foreground-dim transition-colors hover:bg-surface-elevated hover:text-foreground cursor-pointer"
           >
             <X className="size-4" />
             <span className="sr-only">Close modal</span>
@@ -53,11 +53,11 @@ export function PlanPausedLockModal({
         <div className="mt-4">
           <h2
             id="paused-modal-title"
-            className="text-[19px] font-semibold tracking-tight text-black dark:text-white"
+            className="text-[19px] font-bold tracking-tight text-foreground"
           >
             Plan Paused
           </h2>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-[#666666] dark:text-[#9CA3AF]">
+          <p className="mt-1.5 text-[13px] leading-relaxed text-foreground-secondary">
             This reading plan is paused. Check marks are locked. Resume the plan
             to start logging your readings again.
           </p>
@@ -68,7 +68,7 @@ export function PlanPausedLockModal({
             type="button"
             onClick={onResumeAction}
             disabled={isPending}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-black px-4 py-2.5 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-black/85 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/90"
+            className="ui-btn-primary ui-btn-sm flex-1 gap-2"
           >
             <Play className="size-3.5 fill-current" />
             <span>Resume Plan</span>
@@ -77,7 +77,7 @@ export function PlanPausedLockModal({
             type="button"
             onClick={onCloseAction}
             disabled={isPending}
-            className="flex flex-1 items-center justify-center rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-medium text-black transition-all hover:bg-black/4 disabled:opacity-50 dark:border-white/10 dark:text-white dark:hover:bg-white/6"
+            className="ui-btn-secondary ui-btn-sm flex-1"
           >
             <span>Dismiss</span>
           </button>

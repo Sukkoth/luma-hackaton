@@ -63,32 +63,29 @@ export function OnboardingView({ userName = "Reader" }: Props) {
     <div className="flex min-h-dvh w-full items-center justify-center p-4 sm:p-6 md:p-10">
       {/* Background ambient bloom */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 size-96 rounded-full bg-[#82ADD4]/10 blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 size-96 rounded-full bg-[#DDFD2C]/10 blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 size-96 rounded-full bg-black/2 blur-3xl dark:bg-white/2" />
       </div>
 
-      <div className="glass-panel relative z-10 w-full max-w-155 rounded-4xl p-6 shadow-2xl backdrop-blur-xl sm:p-10 dark:border-white/10 dark:bg-[#121216]/80">
+      <div className="ui-card relative z-10 w-full max-w-155 p-6 shadow-2xl sm:p-10">
         {/* Brand bar */}
-        <div className="flex items-center justify-between border-b border-black/6 pb-4 dark:border-white/8">
+        <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-2">
-            <span className="text-[20px] font-semibold tracking-tight text-black dark:text-white">
-              Luma<span className="text-[#82ADD4]">.</span>
+            <span className="text-[20px] font-bold tracking-tight text-foreground">
+              Luma<span className="text-foreground-dim">.</span>
             </span>
-            <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10px] font-medium text-black">
-              Onboarding
-            </span>
+            <span className="ui-pill-primary text-[10px]">Onboarding</span>
           </div>
 
           {phase === "showcase" ? (
             <button
               type="button"
               onClick={() => setPhase("setup")}
-              className="text-[12px] font-normal text-[#666666] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+              className="text-[12px] font-bold text-foreground-dim hover:text-foreground cursor-pointer"
             >
               Skip to Setup
             </button>
           ) : (
-            <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+            <span className="text-[12px] text-foreground-dim">
               Welcome, {userName.split(" ")[0]}
             </span>
           )}
@@ -106,13 +103,13 @@ export function OnboardingView({ userName = "Reader" }: Props) {
           /* Phase 2: Canon Selection & Tracker Creation */
           <div className="py-6">
             <div className="text-left">
-              <span className="text-[11px] font-medium tracking-wider text-[#82ADD4] uppercase">
+              <span className="text-[10px] font-semibold tracking-wider text-foreground-dim uppercase">
                 STEP 2 OF 2 • CANON & TRACKER SETUP
               </span>
-              <h2 className="mt-1 text-[24px] font-normal tracking-tight text-black sm:text-[28px] dark:text-white">
+              <h2 className="mt-1 text-[24px] font-normal tracking-tight text-foreground sm:text-[28px]">
                 Set Up Your Reading Tracker
               </h2>
-              <p className="mt-1 text-[13px] text-[#666666] dark:text-[#9CA3AF]">
+              <p className="mt-1 text-[13px] text-foreground-secondary">
                 A tracker holds your personal Bible reading progress, logs, and
                 habit streaks.
               </p>

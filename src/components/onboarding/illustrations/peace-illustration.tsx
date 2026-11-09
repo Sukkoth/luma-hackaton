@@ -133,7 +133,7 @@ export function PeaceIllustration() {
         </g>
 
         {/* Illuminated Drop Cap Accent on Left Page */}
-        <rect x="-74" y="-16" width="10" height="10" rx="2" fill="#82ADD4" />
+        <rect x="-74" y="-16" width="10" height="10" rx="2" fill="#71717A" />
 
         {/* Floating Golden Bookmark Ribbon Draping Down */}
         <path
@@ -153,7 +153,7 @@ export function PeaceIllustration() {
           className="fill-white/90 stroke-black/15 shadow-sm dark:fill-[#1a1a20]/90 dark:stroke-white/15"
           strokeWidth="1.2"
         />
-        <circle cx="-60" cy="0" r="4.5" fill="#DDFD2C" />
+        <circle cx="-60" cy="0" r="4.5" fill="#FFFFFF" />
         <path
           d="M -44,0 L 62,0"
           className="stroke-black/60 dark:stroke-white/70"

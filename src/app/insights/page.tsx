@@ -172,16 +172,16 @@ export default async function InsightsPage() {
         {/* Header Greeting & Tracker Status */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-[26px] font-normal tracking-tight text-black sm:text-[30px] dark:text-white">
+            <h1 className="text-[26px] font-normal tracking-tight text-foreground sm:text-[30px]">
               Spiritual Metrics & Insights
             </h1>
-            <p className="text-[13px] text-[#777777] dark:text-[#9CA3AF]">
+            <p className="text-[13px] text-foreground-secondary">
               Welcome back, {userFirstName}. Here is your reading trajectory and
               scriptural milestones.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-black/4 px-3 py-1 text-[12px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+            <span className="ui-pill text-[12px] font-normal">
               Active: {activeTrackerName}
             </span>
           </div>

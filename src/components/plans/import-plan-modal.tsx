@@ -219,21 +219,19 @@ export function ImportPlanModal({
       />
 
       {/* Modal Dialog Content */}
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-2xl dark:border-white/12 dark:bg-[#15161A]">
+      <div className="ui-card relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="shrink-0 flex items-center justify-between border-b border-black/6 px-6 py-4.5 dark:border-white/8">
+        <div className="shrink-0 flex items-center justify-between border-b border-border px-6 py-4.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#82ADD4]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
                 Reading Plan Import
               </span>
-              <span className="rounded-md bg-[#DDFD2C] px-2 py-0.5 text-[10.5px] font-medium text-black">
-                File / CSV / JSON
-              </span>
+              <span className="ui-pill text-[10px]">File / CSV / JSON</span>
             </div>
             <h2
               id="import-plan-title"
-              className="mt-1 text-[18px] font-medium tracking-tight text-black dark:text-white"
+              className="mt-1 text-[18px] font-bold tracking-tight text-foreground"
             >
               Import Reading Plan
             </h2>
@@ -242,7 +240,7 @@ export function ImportPlanModal({
             type="button"
             onClick={onCloseAction}
             disabled={isPending}
-            className="flex size-9 items-center justify-center rounded-full border border-black/8 bg-white/80 text-[#666666] transition-colors hover:bg-black/5 hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#A1A1AA] dark:hover:bg-white/10 dark:hover:text-white cursor-pointer"
+            className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground-dim transition-colors hover:bg-surface-elevated hover:text-foreground cursor-pointer"
             aria-label="Close modal"
           >
             <X className="size-4.5" />
@@ -353,7 +351,7 @@ export function ImportPlanModal({
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 placeholder="Day,Book,Chapter,Verses,Track&#10;1,Genesis,1,,Law&#10;1,Matthew,1,,Gospels&#10;2,Genesis,2,,Law"
-                className="w-full font-mono rounded-xl border border-black/10 bg-white p-3 text-[12px] text-black focus:outline-hidden dark:border-white/12 dark:bg-white/5 dark:text-white"
+                className="w-full rounded-xl border border-black/10 bg-white p-3 text-[12px] text-black focus:outline-hidden dark:border-white/12 dark:bg-white/5 dark:text-white"
               />
             </div>
           )}
@@ -481,12 +479,12 @@ export function ImportPlanModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-black/6 p-3.5 sm:p-5 dark:border-white/8 shrink-0 gap-3">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-border p-3.5 sm:p-5 shrink-0 gap-3">
           <button
             type="button"
             onClick={onCloseAction}
             disabled={isPending}
-            className="rounded-xl border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-medium text-black shadow-2xs hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 cursor-pointer disabled:opacity-50 text-center"
+            className="ui-btn-secondary ui-btn-sm text-center"
           >
             Cancel
           </button>
@@ -497,7 +495,7 @@ export function ImportPlanModal({
               onClick={() => handleSaveImportedPlan({ shouldStart: false })}
               disabled={isPending || !validationResult.isValid}
               data-testid="save-imported-plan-catalog-btn"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl border border-black/10 bg-white px-3 sm:px-3.5 py-2 text-[12px] sm:text-[12.5px] font-medium text-black shadow-2xs hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ui-btn-secondary ui-btn-sm flex-1 sm:flex-initial gap-1.5"
             >
               {isPending && <Loader2 className="size-3.5 animate-spin" />}
               <span className="truncate">Save to Catalog</span>
@@ -508,7 +506,7 @@ export function ImportPlanModal({
               onClick={() => handleSaveImportedPlan({ shouldStart: true })}
               disabled={isPending || !validationResult.isValid}
               data-testid="save-imported-plan-start-btn"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-xl bg-black px-3 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-medium text-white shadow-xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="ui-btn-primary ui-btn-sm flex-1 sm:flex-initial gap-1.5"
             >
               {isPending && <Loader2 className="size-3.5 animate-spin" />}
               <span className="truncate">Save & Start</span>

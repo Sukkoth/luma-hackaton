@@ -77,10 +77,6 @@ export function TrackerSwitcher({
   const ActiveIconComp =
     ICON_MAP[activeTracker.icon as keyof typeof ICON_MAP] ?? BookOpen;
 
-  const activeCanon =
-    CANON_OPTIONS.find((c) => c.id === activeTracker.canon) ??
-    CANON_OPTIONS[0]!;
-
   const handleSwitch = (trackerId: string) => {
     if (trackerId === activeTracker.id || isPending) {
       setIsOpen(false);
@@ -98,8 +94,8 @@ export function TrackerSwitcher({
 
   return (
     <>
-      <div className="relative inline-block" ref={dropdownRef}>
-        {/* Main Switcher Button */}
+      <div className="relative inline-block w-full" ref={dropdownRef}>
+        {/* Main Switcher Button (Surface Capsule) */}
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
@@ -107,51 +103,58 @@ export function TrackerSwitcher({
           aria-expanded={isOpen}
           aria-label={`Current tracker: ${activeTracker.name}. Click to switch.`}
           data-testid="tracker-switcher-button"
-          className="flex items-center gap-2 rounded-xl border border-white/60 bg-white/40 px-3 py-1.5 text-[12px] font-medium text-black/85 shadow-2xs backdrop-blur-md transition-all hover:border-white/80 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+          className="group flex w-full items-center justify-between gap-3 rounded-[18px] lg:rounded-[20px] border border-border bg-surface px-3 py-1.5 lg:px-4 lg:py-2 min-w-[210px] sm:min-w-[230px] shadow-xs transition-all hover:border-border-strong hover:bg-surface-elevated/70 active:scale-[0.98] cursor-pointer text-left focus:outline-hidden"
         >
-          {/* Accent dot / icon */}
-          <span
-            className="size-2 rounded-full ring-1 ring-black/15 dark:ring-white/20"
-            style={{ backgroundColor: activeTracker.color }}
+          <div className="flex items-center gap-2.5 lg:gap-3 min-w-0 flex-1">
+            <div className="flex size-9 lg:size-10 shrink-0 items-center justify-center rounded-[12px] lg:rounded-[14px] bg-primary-muted border border-primary-border/20 text-primary transition-all group-hover:bg-primary-muted/80">
+              {isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ActiveIconComp className="size-4 lg:size-4.5" />
+              )}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="size-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: activeTracker.color || "#10B981" }}
+                />
+                <span className="text-[10px] lg:text-[10.5px] font-bold tracking-[0.05em] text-foreground-dim uppercase">
+                  ACTIVE TRACKER
+                </span>
+              </div>
+              <span className="truncate text-[14px] lg:text-[14.5px] font-semibold text-foreground tracking-tight">
+                {activeTracker.name}
+              </span>
+            </div>
+          </div>
+          <ChevronDown
+            className={`size-3.5 lg:size-4 text-foreground-dim transition-transform duration-200 shrink-0 ml-1.5 group-hover:text-foreground ${
+              isOpen ? "rotate-180" : ""
+            }`}
           />
-          <ActiveIconComp className="size-3.5 opacity-80" />
-          <span className="max-w-32 truncate sm:max-w-44 font-semibold">
-            {activeTracker.name}
-          </span>
-          <span className="hidden rounded bg-black/6 px-1.5 py-0.5 text-[10px] text-[#666666] md:inline-block dark:bg-white/10 dark:text-[#A1A1AA]">
-            {activeCanon.totalBooks}B
-          </span>
-          {isPending ? (
-            <Loader2 className="size-3 animate-spin text-[#82ADD4]" />
-          ) : (
-            <ChevronDown
-              className={`size-3.5 opacity-60 transition-transform ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          )}
         </button>
 
-        {/* Dropdown Menu */}
+        {/* Dropdown Menu (Exact Watermelon 22px Rounded Surface) */}
         {isOpen && (
           <div
             role="menu"
             aria-label="Reading Trackers"
-            className="glass-panel absolute left-0 z-50 mt-2 w-72 origin-top-left rounded-2xl border border-white/90 bg-white/95 p-1.5 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-[#141417]/95"
+            className="absolute left-0 z-50 mt-2 w-full min-w-[280px] origin-top-left rounded-[22px] border border-border bg-surface p-3.5 shadow-2xl"
           >
             {/* Menu Header */}
-            <div className="flex items-center justify-between border-b border-black/6 px-2.5 py-2 dark:border-white/8">
-              <span className="text-[11px] font-medium tracking-wider text-[#888888] uppercase dark:text-[#9CA3AF]">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-2 mb-2">
+              <span className="text-[11px] font-medium tracking-wider text-foreground-dim uppercase">
                 Reading Trackers
               </span>
-              <span className="text-[10px] text-[#888888] dark:text-[#777777]">
+              <span className="text-[10px] text-foreground-dim">
                 {trackers.length}{" "}
                 {trackers.length === 1 ? "tracker" : "trackers"}
               </span>
             </div>
 
             {/* Trackers List */}
-            <div className="mt-1 space-y-0.5 max-h-60 overflow-y-auto">
+            <div className="space-y-1 max-h-64 overflow-y-auto">
               {trackers.map((tracker) => {
                 const isActive = tracker.id === activeTracker.id;
                 const IconComp =
@@ -163,39 +166,40 @@ export function TrackerSwitcher({
                 return (
                   <div
                     key={tracker.id}
-                    className={`group flex items-center justify-between rounded-xl px-2.5 py-2 transition-colors ${
+                    className={`group flex items-center justify-between rounded-[14px] p-2.5 transition-colors ${
                       isActive
-                        ? "bg-black/5 dark:bg-white/8 font-medium"
-                        : "hover:bg-black/3 dark:hover:bg-white/4"
+                        ? "bg-primary-muted font-medium"
+                        : "hover:bg-surface-elevated"
                     }`}
                   >
                     <button
                       type="button"
                       onClick={() => handleSwitch(tracker.id)}
-                      className="flex flex-1 items-center gap-2 text-left"
+                      className="flex flex-1 items-center gap-2.5 text-left cursor-pointer"
                     >
-                      <span
-                        className="size-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: tracker.color }}
-                      />
-                      <IconComp className="size-3.5 shrink-0 text-[#777777] dark:text-[#9CA3AF]" />
+                      <div className="flex size-7.5 shrink-0 items-center justify-center rounded-full bg-surface-elevated border border-border">
+                        <IconComp
+                          className="size-3.5"
+                          style={{ color: tracker.color || "var(--primary)" }}
+                        />
+                      </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="truncate text-[12px] text-black dark:text-white">
+                          <span className="truncate text-[13px] font-medium text-foreground">
                             {tracker.name}
                           </span>
-                          <span className="text-[9px] text-[#888888] dark:text-[#777777]">
+                          <span className="text-[10px] text-foreground-dim">
                             ({canonInfo.totalBooks}B)
                           </span>
                         </div>
                         {tracker.description ? (
-                          <p className="truncate text-[10px] text-[#777777] dark:text-[#9CA3AF]">
+                          <p className="truncate text-[11px] text-foreground-dim">
                             {tracker.description}
                           </p>
                         ) : null}
                       </div>
                       {isActive && (
-                        <Check className="size-3.5 shrink-0 text-[#82ADD4]" />
+                        <Check className="size-4 shrink-0 text-primary" />
                       )}
                     </button>
 
@@ -208,9 +212,9 @@ export function TrackerSwitcher({
                         setIsOpen(false);
                         setEditingTracker(tracker);
                       }}
-                      className="ml-1.5 flex size-6 items-center justify-center rounded-lg text-[#888888] opacity-60 transition-opacity hover:bg-black/6 hover:text-black hover:opacity-100 group-hover:opacity-100 dark:text-[#9CA3AF] dark:hover:bg-white/10 dark:hover:text-white"
+                      className="ml-1.5 flex size-7 items-center justify-center rounded-lg text-foreground-dim opacity-70 transition-opacity hover:bg-surface-elevated hover:text-foreground hover:opacity-100 cursor-pointer"
                     >
-                      <Pencil className="size-3" />
+                      <Pencil className="size-3.5" />
                     </button>
                   </div>
                 );
@@ -218,18 +222,16 @@ export function TrackerSwitcher({
             </div>
 
             {/* Menu Footer: Add Tracker Button */}
-            <div className="mt-1 border-t border-black/6 pt-1 dark:border-white/8">
+            <div className="mt-2 border-t border-border-subtle pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setIsOpen(false);
                   setIsCreating(true);
                 }}
-                className="flex w-full items-center gap-2 rounded-xl px-2.5 py-1.5 text-[12px] font-medium text-black transition-colors hover:bg-black/5 dark:text-white dark:hover:bg-white/8"
+                className="flex w-full items-center justify-center gap-2 py-2 text-[13px] font-semibold text-primary transition-opacity hover:opacity-85 cursor-pointer"
               >
-                <div className="flex size-5 items-center justify-center rounded-md bg-black/6 dark:bg-white/10">
-                  <Plus className="size-3" />
-                </div>
+                <Plus className="size-4" />
                 <span>Create New Tracker</span>
               </button>
             </div>

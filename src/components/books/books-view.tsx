@@ -218,45 +218,45 @@ export function BooksView({
       />
 
       {/* Books Section */}
-      <section className="glass-panel mt-4 rounded-[28px] p-6 sm:p-7">
+      <section className="ui-card mt-4 p-5 sm:p-6">
         {/* Header & Controls Toolbar */}
-        <div className="flex flex-col gap-4 border-b border-black/4 pb-5 md:flex-row md:items-center md:justify-between dark:border-white/8">
+        <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-[20px] font-normal tracking-tight text-black dark:text-white">
+              <h2 className="text-[20px] font-medium tracking-tight text-foreground">
                 All Books
               </h2>
-              <span className="rounded-full bg-black/4 px-2.5 py-0.5 text-[11px] font-normal text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF]">
+              <span className="ui-pill text-[11px] font-medium">
                 {filteredBooks.length} Books
               </span>
               {trackerName && (
-                <span className="hidden rounded-full bg-[#82ADD4]/15 px-2.5 py-0.5 text-[11px] font-medium text-[#507ea6] sm:inline-block dark:bg-[#82ADD4]/20 dark:text-[#82ADD4]">
+                <span className="hidden rounded-full border border-border bg-surface-elevated px-2.5 py-0.5 text-[10px] font-medium text-foreground sm:inline-block">
                   {trackerName}
                 </span>
               )}
             </div>
-            <p className="mt-1 text-[13px] font-normal text-[#777777] dark:text-[#9CA3AF]">
+            <p className="mt-1 text-[13px] font-normal text-foreground-secondary">
               Tap any book to view chapters and toggle your reading progress.
             </p>
           </div>
 
           {/* Search Box */}
           <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-3.5 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search books..."
-              className="w-full rounded-xl border border-white/80 bg-white/50 py-2 pr-3.5 pl-9 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/4 dark:text-white dark:placeholder:text-[#6B7280] dark:focus:border-white/20 dark:focus:bg-white/8"
+              className="w-full rounded-[14px] border border-border bg-surface-elevated py-2 pr-3.5 pl-9 text-[13px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
               >
-                <X className="size-3" />
+                <X className="size-3.5" />
               </button>
             )}
           </div>
@@ -274,10 +274,10 @@ export function BooksView({
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] backdrop-blur-md transition-all ${
+                className={`shrink-0 rounded-[12px] px-3.5 py-1.5 text-[12px] transition-all cursor-pointer ${
                   isSelected
-                    ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                    : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                    ? "border border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
+                    : "border border-border bg-surface-elevated font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground"
                 }`}
               >
                 {cat}
@@ -302,7 +302,7 @@ export function BooksView({
         </div>
 
         {filteredBooks.length === 0 && (
-          <div className="py-16 text-center text-[#777777]">
+          <div className="py-16 text-center text-foreground-dim">
             <p className="text-[15px] font-normal">
               No Bible books found matching &ldquo;{searchQuery}&rdquo;.
             </p>

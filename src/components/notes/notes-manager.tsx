@@ -720,25 +720,25 @@ export function NotesManager({
 
   return (
     <>
-      <div className="glass-panel h-[calc(100dvh-10rem)] md:h-[calc(100dvh-5.5rem)] max-h-[1150px] rounded-3xl border border-black/8 shadow-sm dark:border-white/10 overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-black/6 dark:divide-white/8">
+      <div className="ui-card h-[calc(100dvh-10rem)] md:h-[calc(100dvh-5.5rem)] max-h-[1150px] overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border-subtle">
         {/* ================= LEFT PANE: NOTEBOOK SHELF & EXPLORER ================= */}
         <aside
-          className={`w-full md:w-[320px] lg:w-[350px] xl:w-[380px] shrink-0 flex flex-col min-h-0 bg-white/45 dark:bg-[#121217]/60 backdrop-blur-md ${
+          className={`w-full md:w-[360px] lg:w-[380px] xl:w-[410px] shrink-0 flex flex-col min-h-0 bg-surface ${
             mobileView === "editor" ? "hidden md:flex" : "flex"
           }`}
         >
           {/* Shelf Header */}
-          <div className="px-4 py-3.5 border-b border-black/6 dark:border-white/6 flex items-center justify-between gap-2 shrink-0">
+          <div className="px-4 py-3.5 border-b border-border-subtle flex items-center justify-between gap-2 shrink-0">
             <div className="min-w-0">
-              <h1 className="text-[16px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-50 truncate">
-                Study Journal & Notes
+              <h1 className="text-[17px] font-bold tracking-tight text-foreground truncate">
+                Notes
               </h1>
-              <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
-                {activeNotesCount} {activeNotesCount === 1 ? "note" : "notes"}
+              <p className="text-[12px] font-normal text-foreground-dim truncate">
+                Sermon notes & reflections
               </p>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowFolderModal(true)}
@@ -746,9 +746,9 @@ export function NotesManager({
                 data-testid="create-new-folder-button"
                 aria-label="New Folder"
                 title="New Folder"
-                className="flex size-9 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#555555] shadow-2xs hover:border-white hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white transition-all cursor-pointer"
+                className="inline-flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground transition-all cursor-pointer shrink-0"
               >
-                <FolderPlus className="size-4.5 text-[#82ADD4]" />
+                <FolderPlus className="size-4" />
                 <span className="sr-only">New Folder</span>
               </button>
 
@@ -759,7 +759,7 @@ export function NotesManager({
                 data-testid="create-new-note-button"
                 aria-label="New Note"
                 title="New Note"
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-black px-4 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/90 cursor-pointer"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] bg-primary px-3.5 text-[12.5px] font-medium text-primary-foreground shadow-xs transition-all hover:opacity-90 active:scale-95 cursor-pointer shrink-0"
               >
                 <Plus className="size-4" />
                 <span>New Note</span>
@@ -770,11 +770,11 @@ export function NotesManager({
           {/* Search & Filter Strip */}
           <div
             data-testid="notes-folders-filter"
-            className="px-3.5 pt-3 pb-2.5 border-b border-black/6 dark:border-white/6 space-y-2 shrink-0"
+            className="px-3.5 pt-3 pb-2.5 border-b border-border-subtle space-y-2 shrink-0"
           >
             {/* Full-width Search Input */}
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-foreground-dim" />
               <input
                 type="text"
                 placeholder={
@@ -785,13 +785,13 @@ export function NotesManager({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 data-testid="notes-search-input"
-                className="h-10 w-full rounded-xl border border-white/80 bg-white/50 pr-8 pl-10 text-[13px] text-black backdrop-blur-md transition-all placeholder:text-[#888888] focus:border-white focus:bg-white focus:outline-hidden dark:border-white/10 dark:bg-white/4 dark:text-white dark:placeholder:text-[#6B7280] dark:focus:border-white/20 dark:focus:bg-white/8"
+                className="h-9 w-full rounded-[12px] border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#888888] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white p-1"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-dim hover:text-foreground p-1 cursor-pointer"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -805,10 +805,10 @@ export function NotesManager({
                   type="button"
                   onClick={() => handleSwitchFolder({ folderId: "all" })}
                   data-testid="tab-all-notes"
-                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center rounded-xl px-1.5 text-[12px] sm:text-[12.5px] backdrop-blur-md transition-all cursor-pointer ${
+                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center rounded-[12px] px-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                     activeTab === "active" && activeFolderId === "all"
-                      ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                      : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                   }`}
                 >
                   <span className="truncate">All ({activeNotesCount})</span>
@@ -818,13 +818,13 @@ export function NotesManager({
                   type="button"
                   onClick={() => setActiveTab("folders")}
                   data-testid="tab-folders-view"
-                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center gap-1 rounded-xl px-1.5 text-[12px] sm:text-[12.5px] backdrop-blur-md transition-all cursor-pointer ${
+                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center gap-1 rounded-[12px] px-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                     activeTab === "folders"
-                      ? "border border-white/90 bg-white font-medium text-black shadow-xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                      : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                   }`}
                 >
-                  <LayoutGrid className="size-3.5 text-[#82ADD4] shrink-0" />
+                  <LayoutGrid className="size-3.5 shrink-0" />
                   <span className="truncate">Folders ({folders.length})</span>
                 </button>
 
@@ -843,10 +843,10 @@ export function NotesManager({
                     }
                   }}
                   data-testid="tab-archived-notes"
-                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center gap-1 rounded-xl px-1.5 text-[12px] sm:text-[12.5px] backdrop-blur-md transition-all cursor-pointer ${
+                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center gap-1 rounded-[12px] px-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                     activeTab === "archived"
-                      ? "border-amber-500/40 bg-amber-500/20 font-medium text-amber-800 shadow-xs dark:border-amber-500/30 dark:bg-amber-500/25 dark:text-amber-200"
-                      : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF] dark:hover:border-white/15 dark:hover:bg-white/8 dark:hover:text-white"
+                      ? "border border-warning bg-warning/20 text-warning shadow-xs"
+                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                   }`}
                 >
                   <Archive className="size-3.5 shrink-0" />
@@ -867,9 +867,9 @@ export function NotesManager({
                         ? "Created date (newest)"
                         : "Created date (oldest)"
                 }`}
-                className="group relative flex size-9 items-center justify-center rounded-xl border border-white/80 bg-white/70 text-[#555555] shadow-2xs backdrop-blur-md transition-all hover:border-white hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white cursor-pointer shrink-0"
+                className="group relative flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-foreground-secondary transition-all hover:border-border-strong hover:text-foreground cursor-pointer shrink-0"
               >
-                <ArrowUpDown className="pointer-events-none size-4 text-[#555555] group-hover:text-black dark:text-[#9CA3AF] dark:group-hover:text-white transition-colors" />
+                <ArrowUpDown className="pointer-events-none size-3.5 text-foreground-secondary group-hover:text-foreground transition-colors" />
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as NoteSortOption)}
@@ -880,25 +880,25 @@ export function NotesManager({
                 >
                   <option
                     value="updated_desc"
-                    className="text-black dark:bg-[#1c1c22] dark:text-white"
+                    className="bg-surface text-foreground"
                   >
                     Newest
                   </option>
                   <option
                     value="updated_asc"
-                    className="text-black dark:bg-[#1c1c22] dark:text-white"
+                    className="bg-surface text-foreground"
                   >
                     Oldest
                   </option>
                   <option
                     value="created_desc"
-                    className="text-black dark:bg-[#1c1c22] dark:text-white"
+                    className="bg-surface text-foreground"
                   >
                     Created (New)
                   </option>
                   <option
                     value="created_asc"
-                    className="text-black dark:bg-[#1c1c22] dark:text-white"
+                    className="bg-surface text-foreground"
                   >
                     Created (Old)
                   </option>
@@ -912,10 +912,10 @@ export function NotesManager({
                 <button
                   type="button"
                   onClick={() => handleSwitchFolder({ folderId: "all" })}
-                  className={`shrink-0 inline-flex h-8 items-center rounded-lg px-3 text-[12px] backdrop-blur-md transition-all cursor-pointer ${
+                  className={`shrink-0 inline-flex h-8.5 items-center rounded-[10px] px-3 text-[12px] font-medium transition-all cursor-pointer ${
                     activeFolderId === "all"
-                      ? "border border-white/90 bg-white font-medium text-black shadow-2xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                      : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF]"
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                   }`}
                 >
                   All
@@ -925,13 +925,13 @@ export function NotesManager({
                     key={folder.id}
                     type="button"
                     onClick={() => handleSwitchFolder({ folderId: folder.id })}
-                    className={`shrink-0 inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[12px] backdrop-blur-md transition-all cursor-pointer ${
+                    className={`shrink-0 inline-flex h-8.5 items-center gap-1.5 rounded-[10px] px-3 text-[12px] font-medium transition-all cursor-pointer ${
                       activeFolderId === folder.id
-                        ? "border border-white/90 bg-white font-medium text-black shadow-2xs dark:border-white/20 dark:bg-white/15 dark:text-white"
-                        : "border border-white/50 bg-white/35 font-normal text-[#555555] hover:border-white/70 hover:bg-white/60 hover:text-black dark:border-white/5 dark:bg-white/4 dark:text-[#9CA3AF]"
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                     }`}
                   >
-                    <FolderIcon className="size-3 text-[#82ADD4]" />
+                    <FolderIcon className="size-3 text-primary" />
                     <span className="truncate max-w-[120px]">
                       {folder.name}
                     </span>
@@ -949,12 +949,12 @@ export function NotesManager({
             {activeTab === "folders" ? (
               /* FOLDERS GRID VIEW */
               <div data-testid="folders-view-grid" className="space-y-2">
-                <div className="flex items-center justify-between px-1 py-0.5 text-[11px] font-semibold text-[#555555] dark:text-[#9CA3AF] uppercase tracking-wider">
+                <div className="flex items-center justify-between px-1 py-0.5 text-[11px] font-semibold text-foreground-dim uppercase tracking-wider">
                   <span>Collections</span>
                   <button
                     type="button"
                     onClick={() => setShowFolderModal(true)}
-                    className="text-[#507ea6] dark:text-[#82ADD4] hover:underline normal-case text-[11px] font-medium"
+                    className="text-primary hover:underline normal-case text-[11px] font-medium"
                   >
                     + New
                   </button>
@@ -963,17 +963,17 @@ export function NotesManager({
                 {/* All Notes Folder Card */}
                 <div
                   onClick={() => handleOpenFolder({ folderId: "all" })}
-                  className="group flex items-center justify-between p-3 rounded-2xl border border-white/70 bg-white/60 hover:bg-white hover:border-white/90 transition-all cursor-pointer dark:border-white/8 dark:bg-white/4 dark:hover:bg-white/8 shadow-2xs"
+                  className="group flex items-center justify-between p-3.5 rounded-[16px] border border-border bg-surface hover:bg-surface-elevated hover:border-border-strong transition-all cursor-pointer shadow-2xs"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="flex size-7.5 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/25 dark:text-[#82ADD4] shrink-0">
-                      <FileText className="size-3.5" />
+                    <span className="flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-primary shrink-0">
+                      <FileText className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <h4 className="text-[13px] font-medium text-black dark:text-white truncate">
+                      <h4 className="text-[13px] font-semibold text-foreground truncate">
                         All Notes
                       </h4>
-                      <p className="text-[10.5px] text-[#777777] dark:text-[#9CA3AF]">
+                      <p className="text-[11px] text-foreground-dim">
                         {activeNotesCount} active notes
                       </p>
                     </div>
@@ -985,17 +985,17 @@ export function NotesManager({
                   onClick={() =>
                     handleOpenFolder({ folderId: "uncategorized" })
                   }
-                  className="group flex items-center justify-between p-3 rounded-2xl border border-white/70 bg-white/60 hover:bg-white hover:border-white/90 transition-all cursor-pointer dark:border-white/8 dark:bg-white/4 dark:hover:bg-white/8 shadow-2xs"
+                  className="group flex items-center justify-between p-3.5 rounded-[16px] border border-border bg-surface hover:bg-surface-elevated hover:border-border-strong transition-all cursor-pointer shadow-2xs"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="flex size-7.5 items-center justify-center rounded-xl bg-black/5 text-[#555555] dark:bg-white/10 dark:text-[#9CA3AF] shrink-0">
-                      <FolderIcon className="size-3.5" />
+                    <span className="flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-primary shrink-0">
+                      <FolderIcon className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <h4 className="text-[13px] font-medium text-black dark:text-white truncate">
+                      <h4 className="text-[13px] font-semibold text-foreground truncate">
                         Uncategorized
                       </h4>
-                      <p className="text-[10.5px] text-[#777777] dark:text-[#9CA3AF]">
+                      <p className="text-[11px] text-foreground-dim">
                         {uncategorizedNotesCount} notes
                       </p>
                     </div>
@@ -1008,17 +1008,17 @@ export function NotesManager({
                     key={folder.id}
                     onClick={() => handleOpenFolder({ folderId: folder.id })}
                     data-testid={`folder-card-${folder.id}`}
-                    className="group flex items-center justify-between p-3 rounded-2xl border border-white/70 bg-white/60 hover:bg-white hover:border-white/90 transition-all cursor-pointer dark:border-white/8 dark:bg-white/4 dark:hover:bg-white/8 shadow-2xs"
+                    className="group flex items-center justify-between p-3.5 rounded-[16px] border border-border bg-surface hover:bg-surface-elevated hover:border-border-strong transition-all cursor-pointer shadow-2xs"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="flex size-7.5 items-center justify-center rounded-xl bg-[#82ADD4]/15 text-[#507ea6] dark:bg-[#82ADD4]/25 dark:text-[#82ADD4] shrink-0">
-                        <FolderIcon className="size-3.5" />
+                      <span className="flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-primary shrink-0">
+                        <FolderIcon className="size-4" />
                       </span>
                       <div className="min-w-0">
-                        <h4 className="text-[13px] font-medium text-black dark:text-white truncate">
+                        <h4 className="text-[13px] font-semibold text-foreground truncate">
                           {folder.name}
                         </h4>
-                        <p className="text-[10.5px] text-[#777777] dark:text-[#9CA3AF]">
+                        <p className="text-[11px] text-foreground-dim">
                           {
                             notesList.filter(
                               (n) => !n.isArchived && n.folderId === folder.id
@@ -1042,7 +1042,7 @@ export function NotesManager({
                       title="Delete folder"
                       data-testid={`delete-folder-button-${folder.id}`}
                       aria-label={`Delete folder ${folder.name}`}
-                      className="p-1.5 text-neutral-400 hover:text-red-600 rounded-lg hover:bg-red-500/10 transition-all shrink-0 cursor-pointer"
+                      className="size-9 rounded-[12px] text-foreground-dim hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
                     >
                       <Trash2 className="size-4" />
                     </button>
@@ -1054,13 +1054,15 @@ export function NotesManager({
               <>
                 {/* Active Folder Filter Bar Banner */}
                 {activeFolderId !== "all" && activeTab === "active" && (
-                  <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#82ADD4]/10 border border-[#82ADD4]/20 text-[11px] text-[#507ea6] dark:text-[#82ADD4]">
+                  <div className="flex items-center justify-between px-3.5 py-2 rounded-[12px] bg-surface-elevated border border-border text-[12px] text-foreground">
                     <div className="flex items-center gap-1.5 truncate">
-                      <FolderIcon className="size-3 shrink-0" />
-                      <span className="font-semibold text-black dark:text-white truncate">
+                      <FolderIcon className="size-3 text-primary shrink-0" />
+                      <span className="font-semibold text-foreground truncate">
                         {currentFolder?.name ?? "Uncategorized"}
                       </span>
-                      <span>({filteredNotes.length})</span>
+                      <span className="text-foreground-dim">
+                        ({filteredNotes.length})
+                      </span>
                     </div>
                     <div className="flex items-center gap-2.5 shrink-0">
                       {currentFolder && (
@@ -1069,7 +1071,7 @@ export function NotesManager({
                           onClick={() =>
                             handleDeleteFolder({ folderId: currentFolder.id })
                           }
-                          className="text-red-500 hover:text-red-700 font-medium hover:underline cursor-pointer"
+                          className="text-destructive hover:underline font-medium text-[12px] cursor-pointer"
                           title="Delete this folder"
                         >
                           Delete Folder
@@ -1078,7 +1080,7 @@ export function NotesManager({
                       <button
                         type="button"
                         onClick={() => handleSwitchFolder({ folderId: "all" })}
-                        className="font-medium underline shrink-0 hover:opacity-80 cursor-pointer"
+                        className="text-foreground font-medium underline shrink-0 hover:opacity-80 cursor-pointer text-[12px]"
                       >
                         View All
                       </button>
@@ -1088,13 +1090,13 @@ export function NotesManager({
 
                 {sortedNotes.length === 0 ? (
                   <div className="py-14 px-4 text-center">
-                    <FileText className="mx-auto size-7 text-[#888888] opacity-60" />
-                    <p className="mt-2.5 text-[12.5px] font-medium text-black dark:text-white">
+                    <FileText className="mx-auto size-7 text-foreground-dim opacity-60" />
+                    <p className="mt-2.5 text-[13px] font-medium text-foreground">
                       {activeTab === "archived"
                         ? "No archived notes"
                         : "No notes found"}
                     </p>
-                    <p className="mt-1 text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+                    <p className="mt-1 text-[11.5px] text-foreground-dim">
                       {searchQuery
                         ? "Try different keywords"
                         : activeTab === "archived"
@@ -1120,45 +1122,43 @@ export function NotesManager({
                         key={note.id}
                         onClick={() => selectNote({ noteId: note.id })}
                         data-testid={`note-card-${note.id}`}
-                        className={`group relative cursor-pointer rounded-2xl p-3.5 border transition-all ${
+                        className={`group relative cursor-pointer rounded-[16px] p-3.5 border transition-all ${
                           isSelected
-                            ? "border-[#82ADD4]/70 bg-white shadow-xs dark:border-[#82ADD4]/50 dark:bg-[#1c1c24]"
-                            : "border-white/60 bg-white/40 hover:bg-white/80 hover:border-white dark:border-white/5 dark:bg-white/2 dark:hover:bg-white/5"
+                            ? "border-primary bg-surface-elevated shadow-xs"
+                            : "border-border bg-surface hover:border-border-strong hover:bg-surface-elevated/50"
                         }`}
                       >
-                        {/* Active Indicator Bar */}
-                        {isSelected && (
-                          <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-[#82ADD4]" />
-                        )}
-
-                        <div className="flex items-start justify-between gap-1.5 pl-1.5">
-                          <h3 className="line-clamp-1 text-[13.5px] font-semibold text-black dark:text-white">
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h3 className="line-clamp-1 text-[13.5px] font-semibold text-foreground">
                             {note.title || "Untitled Note"}
                           </h3>
                           <div className="flex items-center gap-1 shrink-0">
                             {note.isArchived && (
-                              <span className="inline-flex items-center rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[9.5px] font-medium text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+                              <span className="ui-pill text-[9.5px] font-medium text-warning">
                                 Archived
                               </span>
                             )}
                             {note.isPinned && (
-                              <Pin className="size-3 text-[#82ADD4]" />
+                              <span className="inline-flex items-center gap-1 rounded-[6px] border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                                <Pin className="size-2.5 fill-current" />
+                                <span>Pinned</span>
+                              </span>
                             )}
                           </div>
                         </div>
 
-                        <p className="mt-1 line-clamp-2 text-[11.5px] leading-relaxed text-[#555555] dark:text-[#9CA3AF] pl-1.5">
+                        <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-foreground-secondary">
                           {note.plainTextSnippet || "No additional text"}
                         </p>
 
-                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5 pl-1.5">
-                          <span className="text-[10px] text-[#888888] dark:text-[#777777] font-mono">
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          <span className="text-[11px] text-foreground-dim font-normal">
                             {dateToDisplay}
                           </span>
 
                           {note.folderName && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-black/4 px-1.5 py-0.5 text-[9.5px] font-medium text-[#555555] dark:bg-white/6 dark:text-[#9CA3AF] truncate max-w-[110px]">
-                              <FolderIcon className="size-2 text-[#82ADD4]" />
+                            <span className="inline-flex items-center gap-1 rounded-[8px] border border-border bg-surface-elevated px-2 py-0.5 text-[10.5px] font-medium text-foreground-dim truncate max-w-[120px]">
+                              <FolderIcon className="size-2.5 text-primary shrink-0" />
                               <span className="truncate">
                                 {note.folderName}
                               </span>
@@ -1166,8 +1166,8 @@ export function NotesManager({
                           )}
 
                           {note.planTitle && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-[#82ADD4]/15 px-1.5 py-0.5 text-[9.5px] font-medium text-[#507ea6] dark:bg-[#82ADD4]/20 dark:text-[#82ADD4] truncate max-w-[120px]">
-                              <Sparkles className="size-2" />
+                            <span className="inline-flex items-center gap-1 rounded-[8px] border border-border bg-surface-elevated px-2 py-0.5 text-[10.5px] font-medium text-foreground-dim truncate max-w-[130px]">
+                              <Sparkles className="size-2.5 text-primary shrink-0" />
                               <span className="truncate">{note.planTitle}</span>
                             </span>
                           )}
@@ -1183,44 +1183,39 @@ export function NotesManager({
 
         {/* ================= RIGHT PANE: PHYSICAL JOURNAL DESK ================= */}
         <main
-          className={`flex-1 min-w-0 flex flex-col min-h-0 bg-neutral-100/35 dark:bg-black/25 backdrop-blur-xs ${
+          className={`flex-1 min-w-0 flex flex-col min-h-0 bg-surface/50 backdrop-blur-xs ${
             mobileView === "list" ? "hidden md:flex" : "flex"
           }`}
         >
           {activeNote ? (
             <div className="flex-1 min-h-0 flex flex-col">
               {/* Top Bar: Navigation & Action Buttons */}
-              <div className="h-14 px-4 sm:px-6 border-b border-black/6 dark:border-white/6 flex items-center justify-between gap-2.5 shrink-0 bg-white/60 dark:bg-white/[0.02] backdrop-blur-md">
-                {/* Left Group: Mobile Back Button or Desktop Location */}
+              <div className="h-14 px-4 sm:px-6 border-b border-border-subtle flex items-center justify-between gap-2.5 shrink-0 bg-surface">
+                {/* Left Group: Mobile Back Button */}
                 <div className="flex items-center gap-2 min-w-0">
                   <button
                     type="button"
                     onClick={() => setMobileView("list")}
                     data-testid="back-to-notes-list"
-                    className="flex md:hidden h-9 items-center gap-1.5 rounded-xl border border-white/80 bg-white/70 px-3.5 text-[13px] font-medium text-black shadow-2xs backdrop-blur-md transition-colors hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 shrink-0 cursor-pointer"
+                    className="inline-flex md:!hidden h-9 items-center gap-1.5 rounded-[12px] border border-border bg-surface-elevated px-3 text-[12.5px] font-medium text-foreground transition-colors hover:border-border-strong shrink-0 cursor-pointer"
                   >
                     <ChevronLeft className="size-4" />
                     <span>Notes</span>
                   </button>
-
-                  <div className="hidden md:flex items-center gap-2 text-[13px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                    <FileText className="size-4 text-[#82ADD4]" />
-                    <span>Reflection Editor</span>
-                  </div>
                 </div>
 
                 {/* Right Group: Save, Pin, Archive, Delete */}
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* Save button - matches primary button pattern across Luma */}
+                  {/* Save button */}
                   <button
                     type="button"
                     onClick={handleSaveNote}
                     disabled={!isDirty || isSaving || isPending}
                     data-testid="save-note-button"
-                    className={`inline-flex h-9 items-center gap-2 rounded-xl px-4 text-[13px] font-medium transition-all ${
+                    className={`inline-flex h-9 items-center gap-1.5 rounded-[12px] px-3.5 text-[12.5px] font-medium transition-all ${
                       isDirty
-                        ? "bg-black text-white shadow-xs hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90 cursor-pointer font-semibold"
-                        : "border border-black/8 bg-black/4 text-[#777777] dark:border-white/10 dark:bg-white/5 dark:text-[#888888] cursor-not-allowed opacity-60"
+                        ? "bg-primary text-primary-foreground hover:opacity-90 active:scale-95 shadow-xs cursor-pointer"
+                        : "border border-border bg-surface-elevated text-foreground-dim cursor-not-allowed opacity-60"
                     }`}
                     title={
                       isDirty
@@ -1240,7 +1235,7 @@ export function NotesManager({
                       </>
                     ) : (
                       <>
-                        <Check className="size-3.5 text-[#507ea6] dark:text-[#82ADD4]" />
+                        <Check className="size-3.5" />
                         <span>Saved</span>
                       </>
                     )}
@@ -1256,10 +1251,10 @@ export function NotesManager({
                     aria-label={
                       activeNote.isPinned ? "Unpin note" : "Pin to top of list"
                     }
-                    className={`flex size-9 items-center justify-center rounded-xl border transition-all cursor-pointer ${
+                    className={`flex size-9 items-center justify-center rounded-[12px] border transition-all cursor-pointer ${
                       activeNote.isPinned
-                        ? "border-[#82ADD4]/40 bg-[#82ADD4]/15 text-[#507ea6] dark:text-[#82ADD4]"
-                        : "border-white/80 bg-white/70 text-[#555555] shadow-2xs hover:border-white hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                     }`}
                   >
                     <Pin className="size-4" />
@@ -1276,10 +1271,10 @@ export function NotesManager({
                     aria-label={
                       activeNote.isArchived ? "Restore note" : "Archive note"
                     }
-                    className={`flex size-9 items-center justify-center rounded-xl border transition-all cursor-pointer ${
+                    className={`flex size-9 items-center justify-center rounded-[12px] border transition-all cursor-pointer ${
                       activeNote.isArchived
-                        ? "border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-300"
-                        : "border-white/80 bg-white/70 text-[#555555] shadow-2xs hover:border-white hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#9CA3AF] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+                        ? "border border-warning bg-warning/20 text-warning"
+                        : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                     }`}
                   >
                     {activeNote.isArchived ? (
@@ -1295,7 +1290,7 @@ export function NotesManager({
                     onClick={() => handleDeleteNote({ noteId: activeNote.id })}
                     title="Delete note"
                     aria-label="Delete note"
-                    className="flex size-9 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-600 transition-all hover:bg-red-500/20 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400 cursor-pointer"
+                    className="flex size-9 items-center justify-center rounded-[12px] border border-destructive/30 bg-destructive/10 text-destructive transition-all hover:bg-destructive/20 cursor-pointer"
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -1306,7 +1301,7 @@ export function NotesManager({
               {activeNote.isArchived && (
                 <div
                   data-testid="archived-note-banner"
-                  className="mx-4 mt-3 sm:mx-6 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-2.5 flex items-center justify-between gap-2 text-[12.5px] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-200 shrink-0"
+                  className="mx-4 mt-3 sm:mx-6 rounded-[14px] border border-amber-500/25 bg-amber-500/10 px-4 py-2.5 flex items-center justify-between gap-2 text-[12.5px] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-200 shrink-0"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <Archive className="size-4 shrink-0 text-amber-600" />
@@ -1316,7 +1311,7 @@ export function NotesManager({
                     type="button"
                     onClick={() => handleToggleArchive({ note: activeNote })}
                     data-testid="restore-note-button"
-                    className="inline-flex h-8.5 items-center gap-1.5 rounded-xl bg-black px-4 text-[12px] font-semibold text-white shadow-xs hover:bg-black/85 cursor-pointer dark:bg-white dark:text-black dark:hover:bg-white/90 shrink-0"
+                    className="ui-btn-primary ui-btn-sm h-9 gap-1.5 shrink-0 cursor-pointer"
                   >
                     <ArchiveRestore className="size-3.5" />
                     <span>Restore Note</span>
@@ -1325,15 +1320,15 @@ export function NotesManager({
               )}
 
               {/* Scrollable Journal Canvas */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-10 flex flex-col items-center">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-10 pb-16 flex flex-col items-center">
                 {/* Physical Journal Page Sheet */}
-                <div className="w-full max-w-3xl bg-white dark:bg-[#15151b] rounded-3xl border border-black/[0.06] dark:border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] p-6 sm:p-10 lg:p-12 space-y-5 min-h-[560px]">
+                <div className="ui-card w-full max-w-3xl shrink-0 p-6 sm:p-10 lg:p-12 space-y-5 min-h-[560px]">
                   {/* Journal Document Metadata Strip: Folder Selector + Plan Link + Timestamp */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-black/[0.05] dark:border-white/[0.06]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-border">
                     <div className="flex flex-wrap items-center gap-2">
                       {/* Folder Selector Dropdown Tag */}
-                      <div className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-black/[0.04] hover:bg-black/[0.07] dark:bg-white/[0.06] dark:hover:bg-white/10 px-2.5 text-[12px] font-medium text-neutral-700 dark:text-neutral-300 transition-colors">
-                        <FolderIcon className="size-3.5 text-[#82ADD4] shrink-0" />
+                      <div className="inline-flex h-9 items-center gap-1.5 rounded-[12px] border border-border bg-surface-elevated px-3 text-[12px] font-medium text-foreground transition-colors">
+                        <FolderIcon className="size-3.5 text-primary shrink-0" />
                         <select
                           value={activeNote.folderId || ""}
                           data-testid="note-folder-select"
@@ -1342,16 +1337,19 @@ export function NotesManager({
                               folderId: e.target.value || null,
                             })
                           }
-                          className="bg-transparent focus:outline-hidden font-medium text-black dark:text-white cursor-pointer"
+                          className="bg-transparent focus:outline-hidden font-medium text-foreground cursor-pointer"
                         >
-                          <option value="" className="dark:bg-[#1f1f23]">
+                          <option
+                            value=""
+                            className="bg-surface text-foreground"
+                          >
                             No Folder
                           </option>
                           {folders.map((f) => (
                             <option
                               key={f.id}
                               value={f.id}
-                              className="dark:bg-[#1f1f23]"
+                              className="bg-surface text-foreground"
                             >
                               {f.name}
                             </option>
@@ -1361,8 +1359,8 @@ export function NotesManager({
 
                       {/* Linked Plan Chip */}
                       {activeNote.planTitle && (
-                        <div className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#82ADD4]/15 px-2.5 text-[11.5px] font-medium text-[#416e94] dark:text-[#82ADD4]">
-                          <Sparkles className="size-3.5 shrink-0" />
+                        <div className="inline-flex h-9 items-center gap-1.5 rounded-[12px] border border-border bg-surface-elevated px-3 text-[11.5px] font-medium text-foreground">
+                          <Sparkles className="size-3.5 text-primary shrink-0" />
                           <span className="truncate max-w-[200px]">
                             {activeNote.planTitle}
                           </span>
@@ -1371,7 +1369,7 @@ export function NotesManager({
                     </div>
 
                     {/* Updated Timestamp */}
-                    <span className="text-[12px] text-neutral-400 dark:text-neutral-500 font-normal">
+                    <span className="text-[12px] text-foreground-dim font-normal">
                       Updated{" "}
                       {new Date(activeNote.updatedAt).toLocaleDateString(
                         undefined,
@@ -1391,7 +1389,7 @@ export function NotesManager({
                     content={activeNote.bodyHtml}
                     onChangeAction={handleEditorChange}
                     placeholder="Write your study reflections, cross-references, or devotions..."
-                    titleSlot={
+                    titleSlot={({ focusEditor }) => (
                       <input
                         type="text"
                         placeholder="Note Title..."
@@ -1400,10 +1398,16 @@ export function NotesManager({
                         onChange={(e) =>
                           handleTitleChange({ newTitle: e.target.value })
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            focusEditor();
+                          }
+                        }}
                         data-testid="note-title-input"
-                        className="w-full bg-transparent text-2xl sm:text-3xl lg:text-[34px] font-bold tracking-tight text-neutral-900 placeholder:text-neutral-300 focus:outline-hidden dark:text-neutral-50 dark:placeholder:text-neutral-700 leading-tight border-none p-0"
+                        className="w-full bg-transparent text-[20px] sm:text-[22px] font-bold tracking-tight text-foreground placeholder:text-foreground-dim leading-snug border-none p-0 focus:outline-hidden"
                       />
-                    }
+                    )}
                   />
                 </div>
               </div>
@@ -1411,15 +1415,15 @@ export function NotesManager({
           ) : (
             /* Empty State Canvas */
             <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-8 text-center">
-              <span className="flex size-16 items-center justify-center rounded-3xl bg-white dark:bg-white/5 border border-black/6 dark:border-white/8 shadow-2xs text-[#888888]">
-                <FileText className="size-8 text-[#82ADD4]" />
+              <span className="flex size-14 items-center justify-center rounded-full bg-surface-elevated border border-border text-primary shadow-2xs">
+                <FileText className="size-7" />
               </span>
-              <h2 className="mt-4 text-[17px] font-semibold text-black dark:text-white">
+              <h2 className="mt-4 text-[17px] font-semibold text-foreground">
                 {activeTab === "archived"
                   ? "No note selected"
                   : "Select a note to read or edit"}
               </h2>
-              <p className="mt-1.5 max-w-xs text-[12px] text-[#777777] dark:text-[#9CA3AF] leading-relaxed">
+              <p className="mt-1.5 max-w-xs text-[12.5px] text-foreground-secondary leading-relaxed">
                 {activeTab === "archived"
                   ? "Pick an archived note from the left to read or restore it."
                   : "Choose a reflection from the explorer or create a new journal entry to begin."}
@@ -1429,7 +1433,7 @@ export function NotesManager({
                   type="button"
                   onClick={handleCreateNewNote}
                   disabled={isPending}
-                  className="mt-5 inline-flex h-9.5 items-center gap-2 rounded-xl bg-black px-4.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-black/85 dark:bg-white dark:text-black dark:hover:bg-white/90 cursor-pointer"
+                  className="ui-btn-primary ui-btn-sm h-9 mt-5 gap-2 cursor-pointer"
                 >
                   <Plus className="size-4" />
                   <span>Create New Note</span>

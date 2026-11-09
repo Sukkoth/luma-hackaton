@@ -28,24 +28,24 @@ export function VerseOfTheDayBanner({
 
   return (
     <>
-      <section className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-3 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
         {/* Verse of the Day */}
-        <div className="glass-panel relative flex flex-col justify-between overflow-hidden rounded-[26px] p-6 sm:col-span-2">
+        <div className="ui-card relative flex flex-col justify-between overflow-hidden p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-[10px] bg-[#82ADD4]/20 text-[#6894BC]">
+                <span className="flex size-7 items-center justify-center rounded-[10px] border border-border bg-primary-muted text-primary">
                   <Sparkles className="size-3.5" />
                 </span>
-                <span className="text-[12px] font-medium tracking-wide text-[#555555] dark:text-[#9CA3AF]">
+                <span className="text-[12.5px] font-medium tracking-wide text-foreground-secondary">
                   Verse of the Day
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="rounded-sm bg-black/5 px-2 py-0.5 text-[10px] font-medium text-[#666666] dark:bg-white/10 dark:text-[#A1A1AA]">
+                <span className="ui-pill text-[10px] font-medium">
                   YouVersion
                 </span>
-                <span className="rounded-sm bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
+                <span className="ui-pill-primary text-[10px] font-medium uppercase tracking-wider">
                   Daily Light
                 </span>
               </div>
@@ -55,25 +55,23 @@ export function VerseOfTheDayBanner({
               <button
                 type="button"
                 onClick={() => setShowArtworkModal(true)}
-                className="group mt-4 block w-full text-left cursor-pointer transition-opacity hover:opacity-85 focus:outline-hidden"
+                className="group mt-4 block w-full cursor-pointer text-left transition-opacity hover:opacity-85 focus:outline-hidden"
                 aria-label="View verse artwork"
                 title="Click to view artwork"
               >
-                <blockquote className="text-[20px] leading-relaxed font-light text-black transition-colors group-hover:text-[#6894BC] sm:text-[22px] dark:text-white dark:group-hover:text-[#82ADD4]">
+                <blockquote className="text-[20px] font-normal leading-relaxed text-foreground transition-colors group-hover:text-foreground-secondary sm:text-[22px]">
                   &ldquo;{text}&rdquo;
                 </blockquote>
               </button>
             ) : (
-              <blockquote className="mt-4 text-[20px] leading-relaxed font-light text-black sm:text-[22px] dark:text-white">
+              <blockquote className="mt-4 text-[20px] font-normal leading-relaxed text-foreground sm:text-[22px]">
                 &ldquo;{text}&rdquo;
               </blockquote>
             )}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-black/4 pt-3 text-[13px] text-[#777777] dark:border-white/8 dark:text-[#9CA3AF]">
-            <span className="font-medium text-black dark:text-white">
-              {reference}
-            </span>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-3 text-[13px] text-foreground-dim">
+            <span className="font-semibold text-foreground">{reference}</span>
             <div className="flex items-center gap-3">
               <span>{version}</span>
             </div>
@@ -81,46 +79,44 @@ export function VerseOfTheDayBanner({
         </div>
 
         {/* Today's Active Plan Reading */}
-        <div className="glass-panel flex flex-col justify-between rounded-[26px] p-6">
+        <div className="ui-card flex flex-col justify-between p-6">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-medium text-[#555555] dark:text-[#9CA3AF]">
-                <Calendar className="size-3.5 text-[#82ADD4]" />
+              <span className="flex items-center gap-2 text-[12.5px] font-medium text-foreground-secondary">
+                <Calendar className="size-3.5 text-primary" />
                 <span>Today&apos;s Reading</span>
               </span>
               <Link
                 href="/plans"
-                className="text-[12px] font-medium text-[#6894BC] hover:underline"
+                className="text-[12px] font-medium text-primary underline-offset-4 hover:underline"
               >
                 View Plans
               </Link>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/90 bg-white/60 p-4 backdrop-blur-md dark:border-white/10 dark:bg-white/4">
+            <div className="mt-4 rounded-[14px] border border-border-subtle bg-surface-elevated p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-[#82ADD4] text-white">
+                  <div className="flex size-7 items-center justify-center rounded-[10px] bg-primary text-primary-foreground">
                     <Bookmark className="size-3.5" />
                   </div>
                   <div>
-                    <h4 className="text-[14px] font-medium text-black dark:text-white">
+                    <h4 className="text-[14px] font-medium text-foreground">
                       Romans 8:1–39
                     </h4>
-                    <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+                    <p className="text-[11px] text-foreground-dim">
                       Bible in a Year • Day 212
                     </p>
                   </div>
                 </div>
-                <span className="rounded-sm bg-[#DDFD2C] px-2 py-0.5 text-[11px] font-medium text-black">
-                  94%
-                </span>
+                <span className="ui-pill text-[10px] font-medium">94%</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between border-t border-black/4 pt-3 text-[12px] text-[#777777] dark:border-white/8 dark:text-[#9CA3AF]">
+          <div className="mt-4 flex items-center justify-between border-t border-border-subtle pt-3 text-[12px] text-foreground-dim">
             <span>Bible Tracker Total</span>
-            <span className="font-light text-black dark:text-white">
+            <span className="font-medium text-foreground">
               {totalReadChapters} / {totalChaptersAcrossCanon} ch (
               {canonPercentage}%)
             </span>
@@ -136,27 +132,27 @@ export function VerseOfTheDayBanner({
           aria-label="Verse of the Day Artwork"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md animate-in fade-in"
         >
-          <div className="glass-panel relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-[28px] border border-white/90 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-[#16161b]">
-            <div className="flex items-center justify-between border-b border-black/4 pb-3 dark:border-white/8">
+          <div className="ui-card relative max-h-[90vh] w-full max-w-lg overflow-hidden p-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-[14px] font-medium text-black dark:text-white">
+                <span className="text-[14px] font-medium text-foreground">
                   {reference}
                 </span>
-                <span className="rounded-sm bg-black/5 px-2 py-0.5 text-[10px] text-[#666666] dark:bg-white/10 dark:text-[#A1A1AA]">
+                <span className="ui-pill text-[10px] font-medium text-foreground-dim">
                   {version}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowArtworkModal(false)}
-                className="flex size-7 items-center justify-center rounded-full bg-black/5 text-[#666666] transition-colors hover:bg-black/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                className="flex size-7 items-center justify-center rounded-full bg-surface-elevated text-foreground-secondary transition-colors hover:text-foreground cursor-pointer"
                 aria-label="Close"
               >
                 <X className="size-4" />
               </button>
             </div>
 
-            <div className="relative mt-4 aspect-square w-full overflow-hidden rounded-2xl bg-black/5 dark:bg-black/20">
+            <div className="relative mt-4 aspect-square w-full overflow-hidden rounded-[14px] bg-surface-elevated">
               <Image
                 src={verse.imageUrl}
                 alt={`${reference} Verse of the Day Artwork`}
@@ -169,7 +165,7 @@ export function VerseOfTheDayBanner({
             </div>
 
             {verse.attribution && (
-              <p className="mt-3 text-center text-[11px] text-[#888888] dark:text-[#9CA3AF]">
+              <p className="mt-3 text-center text-[11px] text-foreground-dim">
                 {verse.attribution}
               </p>
             )}

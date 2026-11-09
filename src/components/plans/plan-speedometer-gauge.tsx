@@ -19,38 +19,22 @@ export function PlanSpeedometerGauge({
   const remainingChapters = Math.max(0, totalChapters - completedChapters);
 
   return (
-    <div className="glass-panel relative flex flex-col items-center overflow-hidden rounded-[28px] p-6 sm:p-8">
-      {/* Subtle background ambient glow */}
-      <div className="pointer-events-none absolute -top-24 left-1/2 size-72 -translate-x-1/2 rounded-full bg-white/5 blur-3xl dark:bg-white/[0.03]" />
-
-      {/* SVG Speedometer Gauge with Expanded Headroom */}
+    <div className="ui-card relative flex flex-col items-center overflow-hidden p-6 sm:p-8">
+      {/* SVG Speedometer Gauge with 250° Open Arc Geometry */}
       <div className="relative flex w-full max-w-[300px] sm:max-w-[320px] items-center justify-center">
         <svg
           viewBox="0 0 320 230"
           className="size-full overflow-visible"
           aria-hidden="true"
         >
-          <defs>
-            <linearGradient
-              id="gaugeGradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="0%"
-            >
-              <stop offset="0%" stopColor="#82ADD4" />
-              <stop offset="100%" stopColor="#FFFFFF" />
-            </linearGradient>
-          </defs>
-
           {/* Background Track Arc */}
           <path
             d="M 57.8 204 A 118 118 0 1 1 262.2 204"
             fill="none"
             stroke="currentColor"
-            strokeWidth="12"
+            strokeWidth="14"
             strokeLinecap="round"
-            className="text-black/[0.07] dark:text-white/[0.08]"
+            className="text-border"
           />
 
           {/* Foreground Progress Arc */}
@@ -58,58 +42,58 @@ export function PlanSpeedometerGauge({
             <path
               d="M 57.8 204 A 118 118 0 1 1 262.2 204"
               fill="none"
-              stroke="url(#gaugeGradient)"
-              strokeWidth="12"
+              stroke="currentColor"
+              strokeWidth="14"
               strokeLinecap="round"
               strokeDasharray={ARC_LENGTH}
               strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-700 ease-out"
+              className="text-primary transition-all duration-700 ease-out"
             />
           )}
         </svg>
 
-        {/* Center Metrics with Balanced Breathing Space */}
+        {/* Center Metrics with Watermelon Typography */}
         <div className="absolute inset-x-0 top-[38px] bottom-[26px] flex flex-col items-center justify-center text-center">
-          <span className="text-[10.5px] font-semibold tracking-[0.22em] text-[#888888] uppercase dark:text-[#9CA3AF]">
+          <span className="text-[10px] font-bold tracking-[0.2em] text-foreground-dim uppercase">
             JOURNEY
           </span>
-          <span className="mt-0.5 text-[38px] sm:text-[44px] font-bold leading-none tracking-tight text-black dark:text-white">
+          <span className="mt-0.5 text-[40px] sm:text-[46px] font-extrabold leading-none tracking-tight text-foreground">
             {clampedPercent}%
           </span>
-          <span className="mt-1 text-[12px] sm:text-[12.5px] font-medium text-[#666666] dark:text-[#A1A1AA]">
-            {completedChapters} / {totalChapters} Ch.
+          <span className="mt-1 text-[12px] font-medium text-foreground-secondary">
+            {completedChapters} / {totalChapters} chapters
           </span>
-          <div className="mt-2 rounded-full border border-black/8 bg-black/4 px-2.5 py-0.5 text-[9.5px] font-semibold tracking-wider uppercase text-[#444444] dark:border-white/10 dark:bg-white/8 dark:text-[#D4D4D4]">
+          <div className="ui-pill mt-2 text-[9.5px] font-bold tracking-wider uppercase">
             {mode === "flexible" ? "SELF-PACED" : "ACTIVE SCHEDULE"}
           </div>
         </div>
       </div>
 
       {/* Bottom 3-Column Stats Row */}
-      <div className="mt-2 grid w-full max-w-lg grid-cols-3 divide-x divide-black/6 border-t border-black/6 pt-5 text-center dark:divide-white/8 dark:border-white/8">
+      <div className="mt-2 grid w-full max-w-lg grid-cols-3 divide-x divide-border-subtle border-t border-border-subtle pt-4 text-center">
         <div className="px-2">
-          <span className="text-[10.5px] font-medium tracking-wider text-[#777777] uppercase dark:text-[#8E8E93]">
+          <span className="text-[10px] font-bold tracking-wider text-foreground-dim uppercase">
             MODE
           </span>
-          <p className="mt-1 text-[13.5px] sm:text-[15px] font-semibold text-black dark:text-white">
+          <p className="mt-1 text-[14px] font-bold text-foreground">
             {mode === "flexible" ? "Self-Paced" : "Scheduled"}
           </p>
         </div>
 
         <div className="px-2">
-          <span className="text-[10.5px] font-medium tracking-wider text-[#777777] uppercase dark:text-[#8E8E93]">
+          <span className="text-[10px] font-bold tracking-wider text-foreground-dim uppercase">
             COMPLETED
           </span>
-          <p className="mt-1 text-[13.5px] sm:text-[15px] font-semibold text-black dark:text-white">
+          <p className="mt-1 text-[14px] font-bold text-foreground">
             {completedChapters} / {totalChapters}
           </p>
         </div>
 
         <div className="px-2">
-          <span className="text-[10.5px] font-medium tracking-wider text-[#777777] uppercase dark:text-[#8E8E93]">
+          <span className="text-[10px] font-bold tracking-wider text-foreground-dim uppercase">
             REMAINING
           </span>
-          <p className="mt-1 text-[13.5px] sm:text-[15px] font-semibold text-black dark:text-white">
+          <p className="mt-1 text-[14px] font-bold text-foreground">
             {remainingChapters} Ch
           </p>
         </div>
