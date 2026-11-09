@@ -126,6 +126,19 @@ html.dark body {
   color: var(--foreground);
 }
 
+/* Short laptop viewport optimization */
+@utility short-laptop-hide {
+  @media (max-height: 799px) {
+    display: none !important;
+  }
+}
+
+@media (max-height: 799px) {
+  .short-laptop-hide {
+    display: none !important;
+  }
+}
+
 /* Watermelon Semantic Surface Panels */
 .glass-panel {
   background-color: var(--surface);
@@ -346,3 +359,4 @@ html.dark body {
   outline: none;
   border-color: var(--border-strong);
 }
+

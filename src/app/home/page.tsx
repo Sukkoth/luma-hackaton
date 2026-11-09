@@ -1,154 +1,23 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
-import {
-  userSettings,
-  trackerChapterProgress,
-  readingLogs,
-  planInstances,
-} from "@/db/schema";
-import {
-  type BibleCanon,
-  getBibleBookById,
-  getCanonTestamentChapters,
-} from "@/data/bibleData";
+import { userSettings } from "@/db/schema";
 import { TopNavbar } from "@/components/luma/top-navbar";
-import { HeroProgressCard } from "@/components/luma/hero-progress-card";
-import { StatMetricCards } from "@/components/luma/stat-metric-cards";
-import {
-  ActivityBarChart,
-  type DailyActivity,
-} from "@/components/luma/activity-bar-chart";
-import {
-  DistributionCards,
-  type DistributionBreakdown,
-  type ActivePlanSummary,
-} from "@/components/luma/distribution-cards";
+import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
-import {
-  getUserTrackersData,
-  type UserTrackerSummary,
-} from "@/actions/trackers";
+import { getOverviewData } from "@/actions/overview";
+import { ChartDefs } from "@/components/overview/chart-tokens";
+import { ActivityRingsCard } from "@/components/overview/activity-rings-card";
+import { ProgressStreakMergedCard } from "@/components/overview/progress-streak-merged-card";
+import { ProgressOverTimeCard } from "@/components/overview/progress-over-time-card";
+import { StreakHeatmapCard } from "@/components/overview/streak-heatmap-card";
+import { SunburstCard } from "@/components/overview/sunburst-card";
+import { RadialClockCard } from "@/components/overview/radial-clock-card";
+import { PlanGaugeCard } from "@/components/overview/plan-gauge-card";
 
 export const instant = false;
-
-type FormatCanonParams = {
-  canon: string;
-};
-
-function formatCanonName({ canon }: FormatCanonParams): string {
-  switch (canon) {
-    case "catholic":
-      return "Catholic Canon (73 Books)";
-    case "eastern_orthodox":
-      return "Eastern Orthodox (78 Books)";
-    case "ethiopian_orthodox":
-      return "Ethiopian Orthodox (81 Books)";
-    case "protestant":
-    default:
-      return "Standard 66 Books";
-  }
-}
-
-type GetHomeMetricsParams = {
-  userId: string;
-  tracker: UserTrackerSummary | null;
-};
-
-async function getHomeMetrics({ userId, tracker }: GetHomeMetricsParams) {
-  const canon = (tracker?.canon || "protestant") as BibleCanon;
-  const canonStats = getCanonTestamentChapters(canon);
-
-  // Parallelize independent queries: tracker progress, recent reading logs, and active plans
-  const [progress, recentLogs, activeEnrolledPlans] = await Promise.all([
-    tracker
-      ? db.query.trackerChapterProgress.findMany({
-          where: eq(trackerChapterProgress.trackerId, tracker.id),
-        })
-      : Promise.resolve([]),
-    db.query.readingLogs.findMany({
-      where: eq(readingLogs.userId, userId),
-      orderBy: (readingLogs, { desc }) => [desc(readingLogs.loggedAt)],
-      limit: 100,
-    }),
-    db.query.planInstances.findMany({
-      where: and(
-        eq(planInstances.userId, userId),
-        eq(planInstances.status, "active")
-      ),
-    }),
-  ]);
-
-  let readOt = 0;
-  let readNt = 0;
-  const distribution: DistributionBreakdown = {
-    law: 0,
-    history: 0,
-    poetry: 0,
-    gospelsEpistles: 0,
-  };
-
-  for (const item of progress) {
-    const book = getBibleBookById(item.bookId, canon);
-    if (book) {
-      if (book.testament === "OT") readOt++;
-      else if (book.testament === "NT") readNt++;
-
-      if (book.category === "Law") {
-        distribution.law++;
-      } else if (
-        book.category === "History" ||
-        book.category === "Church History"
-      ) {
-        distribution.history++;
-      } else if (book.category === "Poetry & Wisdom") {
-        distribution.poetry++;
-      } else {
-        distribution.gospelsEpistles++;
-      }
-    }
-  }
-
-  const now = new Date();
-  const past7Days: DailyActivity[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split("T")[0]!;
-    const dayLabel = d.toLocaleDateString("en-US", { weekday: "short" });
-    const count = recentLogs.filter((l) => {
-      const logDate = new Date(l.loggedAt).toISOString().split("T")[0];
-      return logDate === dateStr;
-    }).length;
-    past7Days.push({ dayLabel, dateLabel: dateStr, count });
-  }
-
-  const activePlans: ActivePlanSummary[] = activeEnrolledPlans.map((p) => {
-    return {
-      id: p.id,
-      title: p.title,
-      progressPercent: 0,
-      completedChapters: 0,
-      totalChapters: p.totalChapters,
-    };
-  });
-
-  return {
-    tracker,
-    canon,
-    canonName: formatCanonName({ canon }),
-    totalChapters: canonStats.total,
-    readChapters: progress.length,
-    remainingChapters: Math.max(0, canonStats.total - progress.length),
-    readOt,
-    readNt,
-    distribution,
-    past7Days,
-    activePlans,
-  };
-}
 
 export default async function HomePage() {
   const session = await auth.api.getSession({
@@ -179,54 +48,114 @@ export default async function HomePage() {
     }),
   ]);
 
-  const metrics = await getHomeMetrics({
+  const activeTracker = trackersData.activeTracker;
+  if (!activeTracker) {
+    redirect("/onboarding");
+  }
+
+  const overviewData = await getOverviewData({
     userId: session.user.id,
-    tracker: trackersData.activeTracker,
+    trackerId: activeTracker.id,
   });
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-350 flex-col px-4 py-3 sm:px-6 md:px-8 md:py-4 lg:h-dvh">
+    <div className="mx-auto flex h-dvh max-w-[1600px] flex-col px-3 py-2 sm:px-5 sm:py-3 md:px-7 md:py-3.5 overflow-hidden">
+      {/* Global Chart SVG Patterns & Gradients */}
+      <ChartDefs />
+
       {/* Top Navbar */}
       <TopNavbar
         userName={displayName}
         streak={streak}
         trackers={trackersData.trackers}
-        activeTrackerId={trackersData.activeTracker?.id}
+        activeTrackerId={activeTracker.id}
       />
 
-      {/* Main Dashboard Layout */}
-      <main className="mt-3 flex flex-1 flex-col gap-3.5 pb-1 lg:flex-row lg:items-stretch lg:overflow-hidden">
-        {/* Left Column: Hero Progress Card */}
-        <HeroProgressCard
-          userName={displayName}
-          trackerName={metrics.tracker?.name}
-          readChapters={metrics.readChapters}
-          totalChapters={metrics.totalChapters}
-          otChapters={metrics.readOt}
-          ntChapters={metrics.readNt}
-          remainingChapters={metrics.remainingChapters}
-          canonName={metrics.canonName}
-        />
+      {/* =========================================================================
+          DESKTOP DASHBOARD (>= 1024px): Strictly 100dvh, zero page/card scroll
+          ========================================================================= */}
+      <main className="mt-2.5 hidden lg:flex flex-1 flex-col gap-3 min-h-0 overflow-hidden">
+        {/* ROW 1: Activity Rings (3 col), Progress Over Time Stacked Area (6 col), Streak Heatmap (3 col) on >=1280px
+            On lg (1024-1279px): Merged Rings+Streak (6 col) + Progress Over Time (6 col) */}
+        <div className="grid grid-cols-12 gap-3 flex-[1.18] min-h-0">
+          {/* Card 1: Activity Rings - xl only */}
+          <div className="hidden xl:block xl:col-span-3 h-full min-h-0">
+            <ActivityRingsCard data={overviewData.activityRings} />
+          </div>
 
-        {/* Right Column: Metrics, Chart, Distribution */}
-        <div className="flex flex-1 flex-col justify-between gap-3.5 lg:overflow-hidden">
-          <StatMetricCards
-            chaptersRead={metrics.readChapters}
-            currentStreak={streak.currentStreak}
-            streakFreezesAvailable={streak.availableFreezes}
-            longestStreak={streak.longestStreak}
-            isFreezeUnlocked={streak.isFreezeUnlocked}
-          />
-          <ActivityBarChart
-            totalChapters={metrics.readChapters}
-            activity={metrics.past7Days}
-          />
-          <DistributionCards
-            distribution={metrics.distribution}
-            activePlans={metrics.activePlans}
-          />
+          {/* Cards 1+3 Merged: lg only (1024-1279px) */}
+          <div className="hidden lg:block xl:hidden lg:col-span-6 h-full min-h-0">
+            <ProgressStreakMergedCard
+              ringsData={overviewData.activityRings}
+              streakData={overviewData.streakHeatmap}
+            />
+          </div>
+
+          {/* Card 2: Progress Over Time (Stacked Area Chart) */}
+          <div className="col-span-12 lg:col-span-6 xl:col-span-6 h-full min-h-0">
+            <ProgressOverTimeCard data={overviewData.progressOverTime} />
+          </div>
+
+          {/* Card 3: Streak + Calendar Heatmap - xl only */}
+          <div className="hidden xl:block xl:col-span-3 h-full min-h-0">
+            <StreakHeatmapCard data={overviewData.streakHeatmap} />
+          </div>
+        </div>
+
+        {/* ROW 2: Sunburst (4 col), Radial Clock (4 col), Plan Gauge (4 col) */}
+        <div className="grid grid-cols-12 gap-3 flex-1 min-h-0">
+          {/* Card 4: Bible Sunburst (with Radar / Treemap toggle) */}
+          <div className="col-span-12 lg:col-span-4 xl:col-span-4 h-full min-h-0">
+            <SunburstCard data={overviewData.sunburst} />
+          </div>
+
+          {/* Card 5: 24-Hour Radial Clock (with Weekday radar toggle) */}
+          <div className="col-span-12 lg:col-span-4 xl:col-span-4 h-full min-h-0">
+            <RadialClockCard data={overviewData.radialClock} />
+          </div>
+
+          {/* Card 6: Half-Circle Gauge + Burn-up Line */}
+          <div className="col-span-12 lg:col-span-4 xl:col-span-4 h-full min-h-0">
+            <PlanGaugeCard data={overviewData.planGauge} />
+          </div>
         </div>
       </main>
+
+      {/* =========================================================================
+          MOBILE / TABLET DASHBOARD (< 1024px): Single column, natural scroll
+          Order: 1 Rings, 3 Streak, 2 Progress Over Time, 5 Radial Clock, 4 Sunburst, 6 Plan
+          ========================================================================= */}
+      <div className="mt-3 flex lg:hidden flex-1 flex-col gap-3.5 overflow-y-auto pb-8 pr-0.5">
+        {/* 1. Activity Rings */}
+        <div className="h-[360px] shrink-0">
+          <ActivityRingsCard data={overviewData.activityRings} />
+        </div>
+
+        {/* 3. Streak + Heatmap */}
+        <div className="h-[250px] shrink-0">
+          <StreakHeatmapCard data={overviewData.streakHeatmap} />
+        </div>
+
+        {/* 2. Progress Over Time Stacked Area */}
+        <div className="h-[250px] shrink-0">
+          <ProgressOverTimeCard data={overviewData.progressOverTime} />
+        </div>
+
+        {/* 5. 24-Hour Radial Clock */}
+        <div className="h-[260px] shrink-0">
+          <RadialClockCard data={overviewData.radialClock} />
+        </div>
+
+        {/* 4. Bible Sunburst */}
+        <div className="h-[260px] shrink-0">
+          <SunburstCard data={overviewData.sunburst} />
+        </div>
+
+        {/* 6. Plan Gauge */}
+        <div className="h-[260px] shrink-0">
+          <PlanGaugeCard data={overviewData.planGauge} />
+        </div>
+      </div>
     </div>
   );
 }
