@@ -8,7 +8,6 @@ import {
   LogIn,
   ArrowRight,
   Zap,
-  Shield,
   Home,
   BookOpen,
   Calendar,
@@ -121,15 +120,6 @@ export function TopNavbar({
                 >
                   <Zap className="size-3.5 fill-current" />
                   <span>{streak.currentStreak}</span>
-                  {streak.isFreezeUnlocked ? (
-                    <span
-                      className="ml-0.5 flex items-center gap-0.5 text-[10px] opacity-80"
-                      title={`${streak.availableFreezes} freeze shields available`}
-                    >
-                      <Shield className="size-3" />
-                      <span>{streak.availableFreezes}</span>
-                    </span>
-                  ) : null}
                 </button>
               )}
               <ThemeToggle />
