@@ -35,21 +35,19 @@ export const auth = betterAuth({
     errorURL: "/login",
   },
   socialProviders: {
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-      ? {
-          google: {
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          },
-        }
-      : {}),
-    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
-      ? {
-          github: {
-            clientId: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
-          },
-        }
-      : {}),
+    google: {
+      clientId:
+        process.env.GOOGLE_CLIENT_ID || "mock-google-client-id-for-tests",
+      clientSecret:
+        process.env.GOOGLE_CLIENT_SECRET ||
+        "mock-google-client-secret-for-tests",
+    },
+    github: {
+      clientId:
+        process.env.GITHUB_CLIENT_ID || "mock-github-client-id-for-tests",
+      clientSecret:
+        process.env.GITHUB_CLIENT_SECRET ||
+        "mock-github-client-secret-for-tests",
+    },
   },
 });
