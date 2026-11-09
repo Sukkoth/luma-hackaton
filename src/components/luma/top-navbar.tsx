@@ -58,9 +58,9 @@ export function TopNavbar({
 
   return (
     <>
-      <header className="flex items-center justify-between gap-2 py-3 md:gap-4">
+      <header className="flex items-center justify-between gap-2 py-3 md:gap-4 lg:py-4 xl:grid xl:grid-cols-12 xl:gap-3">
         {/* Left cluster: Tracker Switcher for Authenticated users, Luma brand logo for Guests */}
-        <div className="flex items-center min-w-[220px] sm:min-w-[260px] lg:w-80">
+        <div className="flex items-center min-w-[220px] sm:min-w-[260px] xl:col-span-3 w-full">
           {isAuthenticated && trackers && trackers.length > 0 ? (
             <TrackerSwitcher
               trackers={trackers}
@@ -68,7 +68,7 @@ export function TopNavbar({
             />
           ) : (
             <Link href="/" className="group flex items-center">
-              <span className="text-[22px] font-semibold tracking-tight text-foreground">
+              <span className="text-[22px] lg:text-[24px] font-semibold tracking-tight text-foreground">
                 Luma<span className="text-foreground-dim">.</span>
               </span>
             </Link>
@@ -76,49 +76,51 @@ export function TopNavbar({
         </div>
 
         {/* Center cluster: Monochrome Tab Tiles (desktop only) */}
-        <nav
-          aria-label="Main Navigation"
-          className="hidden md:flex items-center gap-1 rounded-[16px] border border-border bg-surface p-1"
-        >
-          {NAV_TABS.map((tab) => {
-            const isActive =
-              tab.href === "/home"
-                ? pathname === "/home"
-                : pathname.startsWith(tab.href);
+        <div className="hidden md:flex xl:col-span-6 justify-center items-center">
+          <nav
+            aria-label="Main Navigation"
+            className="flex items-center gap-1 lg:gap-1.5 rounded-[16px] lg:rounded-[20px] border border-border bg-surface p-1 lg:p-1.5"
+          >
+            {NAV_TABS.map((tab) => {
+              const isActive =
+                tab.href === "/home"
+                  ? pathname === "/home"
+                  : pathname.startsWith(tab.href);
 
-            return (
-              <Link
-                key={tab.label}
-                href={tab.href}
-                className={`flex items-center justify-center rounded-[12px] px-3.5 py-1 text-[13px] transition-all ${
-                  isActive
-                    ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                    : "bg-transparent font-normal text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
-                }`}
-              >
-                {tab.label}
-              </Link>
-            );
-          })}
-        </nav>
+              return (
+                <Link
+                  key={tab.label}
+                  href={tab.href}
+                  className={`flex items-center justify-center rounded-[12px] lg:rounded-[15px] px-3.5 py-1.5 lg:px-5.5 lg:py-2 text-[13px] lg:text-[14px] transition-all ${
+                    isActive
+                      ? "bg-primary font-medium text-primary-foreground shadow-xs"
+                      : "bg-transparent font-normal text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
         {/* Right controls: Capsule with Streak, Theme Toggle, Settings/Auth */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end xl:col-span-3 gap-2">
           {isAuthenticated ? (
-            <div className="flex items-center gap-1.5 rounded-full border border-border bg-surface p-1">
+            <div className="flex items-center gap-1.5 lg:gap-2 rounded-full border border-border bg-surface p-1 lg:p-1.5">
               {streak && (
                 <button
                   type="button"
                   onClick={() => setIsStreakOpen(true)}
                   aria-label={`Current streak: ${streak.currentStreak} days`}
                   data-testid="streak-navbar-button"
-                  className={`flex items-center gap-1 rounded-[14px] px-2.5 py-1 text-[12px] font-medium transition-all cursor-pointer ${
+                  className={`flex items-center gap-1 lg:gap-1.5 rounded-[14px] lg:rounded-[18px] px-2.5 py-1 lg:px-4 lg:py-2 text-[12px] lg:text-[13.5px] font-medium transition-all cursor-pointer ${
                     streak.currentStreak > 0
                       ? "border border-primary bg-primary text-primary-foreground shadow-xs"
                       : "border border-border bg-surface-elevated text-foreground-dim hover:text-foreground"
                   }`}
                 >
-                  <Zap className="size-3.5 fill-current" />
+                  <Zap className="size-3.5 lg:size-4 fill-current" />
                   <span>{streak.currentStreak}</span>
                 </button>
               )}
@@ -126,32 +128,32 @@ export function TopNavbar({
               <Link
                 href="/settings"
                 aria-label="Settings"
-                className={`flex size-8 items-center justify-center rounded-full border transition-all ${
+                className={`flex size-8 lg:size-9.5 items-center justify-center rounded-full border transition-all ${
                   pathname.startsWith("/settings")
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                 }`}
                 title={`Settings (Signed in as ${effectiveUserName})`}
               >
-                <Settings className="size-3.5" strokeWidth={1.75} />
+                <Settings className="size-3.5 lg:size-4" strokeWidth={1.75} />
               </Link>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 lg:gap-2.5">
               <ThemeToggle />
               <Link
                 href="/login"
-                className="ui-btn-secondary ui-btn-sm gap-1.5"
+                className="ui-btn-secondary ui-btn-sm lg:h-10 lg:px-4.5 gap-1.5 text-[13px] lg:text-[14px]"
               >
-                <LogIn className="size-3.5" />
+                <LogIn className="size-3.5 lg:size-4" />
                 <span>Sign In</span>
               </Link>
               <Link
                 href="/signup"
-                className="ui-btn-primary ui-btn-sm hidden gap-1.5 sm:inline-flex"
+                className="ui-btn-primary ui-btn-sm lg:h-10 lg:px-4.5 hidden gap-1.5 sm:inline-flex text-[13px] lg:text-[14px]"
               >
                 <span>Get Started</span>
-                <ArrowRight className="size-3.5" />
+                <ArrowRight className="size-3.5 lg:size-4" />
               </Link>
             </div>
           )}

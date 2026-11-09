@@ -94,7 +94,7 @@ export function TrackerSwitcher({
 
   return (
     <>
-      <div className="relative inline-block" ref={dropdownRef}>
+      <div className="relative inline-block w-full" ref={dropdownRef}>
         {/* Main Switcher Button (Surface Capsule) */}
         <button
           type="button"
@@ -103,14 +103,14 @@ export function TrackerSwitcher({
           aria-expanded={isOpen}
           aria-label={`Current tracker: ${activeTracker.name}. Click to switch.`}
           data-testid="tracker-switcher-button"
-          className="group flex items-center justify-between gap-3 rounded-[18px] border border-border bg-surface px-3 py-1.5 min-w-[210px] sm:min-w-[230px] shadow-xs transition-all hover:border-border-strong hover:bg-surface-elevated/70 active:scale-[0.98] cursor-pointer text-left focus:outline-hidden"
+          className="group flex w-full items-center justify-between gap-3 rounded-[18px] lg:rounded-[20px] border border-border bg-surface px-3 py-1.5 lg:px-4 lg:py-2 min-w-[210px] sm:min-w-[230px] shadow-xs transition-all hover:border-border-strong hover:bg-surface-elevated/70 active:scale-[0.98] cursor-pointer text-left focus:outline-hidden"
         >
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-[12px] bg-primary-muted border border-primary-border/20 text-primary transition-all group-hover:bg-primary-muted/80">
+          <div className="flex items-center gap-2.5 lg:gap-3 min-w-0 flex-1">
+            <div className="flex size-9 lg:size-10 shrink-0 items-center justify-center rounded-[12px] lg:rounded-[14px] bg-primary-muted border border-primary-border/20 text-primary transition-all group-hover:bg-primary-muted/80">
               {isPending ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
-                <ActiveIconComp className="size-4" />
+                <ActiveIconComp className="size-4 lg:size-4.5" />
               )}
             </div>
             <div className="flex flex-col min-w-0">
@@ -119,17 +119,17 @@ export function TrackerSwitcher({
                   className="size-1.5 rounded-full shrink-0"
                   style={{ backgroundColor: activeTracker.color || "#10B981" }}
                 />
-                <span className="text-[10px] font-bold tracking-[0.05em] text-foreground-dim uppercase">
+                <span className="text-[10px] lg:text-[10.5px] font-bold tracking-[0.05em] text-foreground-dim uppercase">
                   ACTIVE TRACKER
                 </span>
               </div>
-              <span className="truncate text-[14px] font-semibold text-foreground tracking-tight">
+              <span className="truncate text-[14px] lg:text-[14.5px] font-semibold text-foreground tracking-tight">
                 {activeTracker.name}
               </span>
             </div>
           </div>
           <ChevronDown
-            className={`size-3.5 text-foreground-dim transition-transform duration-200 shrink-0 ml-1.5 group-hover:text-foreground ${
+            className={`size-3.5 lg:size-4 text-foreground-dim transition-transform duration-200 shrink-0 ml-1.5 group-hover:text-foreground ${
               isOpen ? "rotate-180" : ""
             }`}
           />
@@ -140,7 +140,7 @@ export function TrackerSwitcher({
           <div
             role="menu"
             aria-label="Reading Trackers"
-            className="absolute left-0 z-50 mt-2 w-80 origin-top-left rounded-[22px] border border-border bg-surface p-3.5 shadow-2xl"
+            className="absolute left-0 z-50 mt-2 w-full min-w-[280px] origin-top-left rounded-[22px] border border-border bg-surface p-3.5 shadow-2xl"
           >
             {/* Menu Header */}
             <div className="flex items-center justify-between border-b border-border-subtle pb-2 mb-2">
