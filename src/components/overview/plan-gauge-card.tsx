@@ -44,7 +44,7 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
             <Compass className="size-4" />
           </div>
           <h4 className="text-[13px] font-semibold text-foreground">
-            No active plans
+            No Active Reading Plans
           </h4>
           <p className="mt-1 text-[11px] text-foreground-dim max-w-[200px]">
             Enroll in a curated or custom plan to track pacing.

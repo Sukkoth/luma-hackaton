@@ -19,6 +19,24 @@ import { PlanGaugeCard } from "@/components/overview/plan-gauge-card";
 
 export const instant = false;
 
+type FormatCanonNameParams = {
+  canon: string;
+};
+
+function formatCanonName({ canon }: FormatCanonNameParams): string {
+  switch (canon) {
+    case "catholic":
+      return "Catholic Canon (73 Books)";
+    case "eastern_orthodox":
+      return "Eastern Orthodox (78 Books)";
+    case "ethiopian_orthodox":
+      return "Ethiopian Orthodox (81 Books)";
+    case "protestant":
+    default:
+      return "Standard 66 Books";
+  }
+}
+
 export default async function HomePage() {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -71,91 +89,66 @@ export default async function HomePage() {
         activeTrackerId={activeTracker.id}
       />
 
-      {/* =========================================================================
-          DESKTOP DASHBOARD (>= 1024px): Strictly 100dvh, zero page/card scroll
-          ========================================================================= */}
-      <main className="mt-2.5 hidden lg:flex flex-1 flex-col gap-3 min-h-0 overflow-hidden">
-        {/* ROW 1: Activity Rings (3 col), Progress Over Time Stacked Area (6 col), Streak Heatmap (3 col) on >=1280px
-            On lg (1024-1279px): Merged Rings+Streak (6 col) + Progress Over Time (6 col) */}
-        <div className="grid grid-cols-12 gap-3 flex-[1.18] min-h-0">
-          {/* Card 1: Activity Rings - xl only */}
-          <div className="hidden xl:block xl:col-span-3 h-full min-h-0">
-            <ActivityRingsCard data={overviewData.activityRings} />
-          </div>
-
-          {/* Cards 1+3 Merged: lg only (1024-1279px) */}
-          <div className="hidden lg:block xl:hidden lg:col-span-6 h-full min-h-0">
-            <ProgressStreakMergedCard
-              ringsData={overviewData.activityRings}
-              streakData={overviewData.streakHeatmap}
-            />
-          </div>
-
-          {/* Card 2: Progress Over Time (Stacked Area Chart) */}
-          <div className="col-span-12 lg:col-span-6 xl:col-span-6 h-full min-h-0">
-            <ProgressOverTimeCard data={overviewData.progressOverTime} />
-          </div>
-
-          {/* Card 3: Streak + Calendar Heatmap - xl only */}
-          <div className="hidden xl:block xl:col-span-3 h-full min-h-0">
-            <StreakHeatmapCard data={overviewData.streakHeatmap} />
-          </div>
+      {/* Subheader: User Greeting & Active Tracker Context */}
+      <div className="flex flex-wrap items-center justify-between gap-1 px-1 py-0.5 text-xs text-foreground-secondary shrink-0">
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-foreground">Hello, {displayName}!</p>
+          <span className="text-foreground-dim">·</span>
+          <span className="font-medium text-foreground">Bible Progress</span>
+          <span className="text-foreground-dim tabular-nums">
+            {overviewData.activityRings.readChapters} of{" "}
+            {overviewData.activityRings.totalChapters}
+          </span>
         </div>
-
-        {/* ROW 2: Sunburst (4 col), Radial Clock (4 col), Plan Gauge (4 col) */}
-        <div className="grid grid-cols-12 gap-3 flex-1 min-h-0">
-          {/* Card 4: Bible Sunburst (with Radar / Treemap toggle) */}
-          <div className="col-span-12 lg:col-span-4 xl:col-span-4 h-full min-h-0">
-            <SunburstCard data={overviewData.sunburst} />
-          </div>
-
-          {/* Card 5: 24-Hour Radial Clock (with Weekday radar toggle) */}
-          <div className="col-span-12 lg:col-span-4 xl:col-span-4 h-full min-h-0">
-            <RadialClockCard data={overviewData.radialClock} />
-          </div>
-
-          {/* Card 6: Half-Circle Gauge + Burn-up Line */}
-          <div className="col-span-12 lg:col-span-4 xl:col-span-4 h-full min-h-0">
-            <PlanGaugeCard data={overviewData.planGauge} />
-          </div>
-        </div>
-      </main>
+        <p className="text-foreground-dim truncate">
+          {`Tracking "${activeTracker.name}" with active ${formatCanonName({ canon: activeTracker.canon })}`}
+        </p>
+      </div>
 
       {/* =========================================================================
-          MOBILE / TABLET DASHBOARD (< 1024px): Single column, natural scroll
-          Order: 1 Rings, 3 Streak, 2 Progress Over Time, 5 Radial Clock, 4 Sunburst, 6 Plan
+          DASHBOARD: Single Responsive Layout
+          Desktop (>= 1024px): Strictly 100dvh, 12-column grid with 2 rows, zero page scroll
+          Mobile (< 1024px): Single column, natural vertical scroll
           ========================================================================= */}
-      <div className="mt-3 flex lg:hidden flex-1 flex-col gap-3.5 overflow-y-auto pb-8 pr-0.5">
-        {/* 1. Activity Rings */}
-        <div className="h-[360px] shrink-0">
+      <main className="mt-2.5 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[1.18fr_1fr] gap-3.5 lg:gap-3 pb-8 lg:pb-0 pr-0.5 lg:pr-0">
+        {/* Card 1: Activity Rings (Mobile: order-1, xl: col-span-3 row-1) */}
+        <div className="block lg:hidden xl:block xl:col-span-3 xl:row-start-1 h-[360px] lg:h-full min-h-0 order-1 xl:order-none">
           <ActivityRingsCard data={overviewData.activityRings} />
         </div>
 
-        {/* 3. Streak + Heatmap */}
-        <div className="h-[250px] shrink-0">
-          <StreakHeatmapCard data={overviewData.streakHeatmap} />
+        {/* Cards 1+3 Merged: lg only (1024-1279px: col-span-6 row-1) */}
+        <div className="hidden lg:block xl:hidden lg:col-span-6 lg:row-start-1 h-full min-h-0">
+          <ProgressStreakMergedCard
+            ringsData={overviewData.activityRings}
+            streakData={overviewData.streakHeatmap}
+          />
         </div>
 
-        {/* 2. Progress Over Time Stacked Area */}
-        <div className="h-[250px] shrink-0">
+        {/* Card 2: Progress Over Time Stacked Area (Mobile: order-3, lg+: col-span-6 row-1) */}
+        <div className="col-span-1 lg:col-span-6 xl:col-span-6 lg:row-start-1 h-[250px] lg:h-full min-h-0 order-3 xl:order-none">
           <ProgressOverTimeCard data={overviewData.progressOverTime} />
         </div>
 
-        {/* 5. 24-Hour Radial Clock */}
-        <div className="h-[260px] shrink-0">
-          <RadialClockCard data={overviewData.radialClock} />
+        {/* Card 3: Streak + Calendar Heatmap (Mobile: order-2, xl: col-span-3 row-1) */}
+        <div className="block lg:hidden xl:block xl:col-span-3 xl:row-start-1 h-[250px] lg:h-full min-h-0 order-2 xl:order-none">
+          <StreakHeatmapCard data={overviewData.streakHeatmap} />
         </div>
 
-        {/* 4. Bible Sunburst */}
-        <div className="h-[260px] shrink-0">
+        {/* Card 4: Bible Sunburst (Mobile: order-5, lg+: col-span-4 row-2) */}
+        <div className="col-span-1 lg:col-span-4 xl:col-span-4 lg:row-start-2 h-[260px] lg:h-full min-h-0 order-5 xl:order-none">
           <SunburstCard data={overviewData.sunburst} />
         </div>
 
-        {/* 6. Plan Gauge */}
-        <div className="h-[260px] shrink-0">
+        {/* Card 5: 24-Hour Radial Clock (Mobile: order-4, lg+: col-span-4 row-2) */}
+        <div className="col-span-1 lg:col-span-4 xl:col-span-4 lg:row-start-2 h-[260px] lg:h-full min-h-0 order-4 xl:order-none">
+          <RadialClockCard data={overviewData.radialClock} />
+        </div>
+
+        {/* Card 6: Plan Gauge (Mobile: order-6, lg+: col-span-4 row-2) */}
+        <div className="col-span-1 lg:col-span-4 xl:col-span-4 lg:row-start-2 h-[260px] lg:h-full min-h-0 order-6 xl:order-none">
           <PlanGaugeCard data={overviewData.planGauge} />
         </div>
-      </div>
+      </main>
     </div>
   );
 }

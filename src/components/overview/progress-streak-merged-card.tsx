@@ -102,7 +102,7 @@ export function ProgressStreakMergedCard({
                 {overallPercentage}%
               </span>
               <span className="mt-0.5 text-[9.5px] text-foreground-secondary tabular-nums">
-                {readChapters}/{totalChapters.toLocaleString()}
+                {readChapters} / {totalChapters.toLocaleString()}
               </span>
             </div>
           </div>

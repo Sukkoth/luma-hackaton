@@ -98,7 +98,7 @@ export function ActivityRingsCard({ data }: ActivityRingsCardProps) {
               {overallPercentage}%
             </span>
             <span className="mt-1 text-[11px] font-medium text-foreground-secondary tabular-nums">
-              {readChapters} of {totalChapters.toLocaleString()}
+              {readChapters} / {totalChapters.toLocaleString()}
             </span>
           </div>
         </div>

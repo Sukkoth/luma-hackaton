@@ -207,7 +207,7 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
             </span>
           </div>
           <span className="text-[9px] sm:text-[10px] min-[1440px]:text-[11px] font-semibold text-foreground-dim uppercase tracking-wider mt-1 truncate max-w-full">
-            Freezes Left
+            Freeze Shields
           </span>
         </div>
       </div>
