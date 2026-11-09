@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -84,6 +84,11 @@ export function PlanCatalog({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlanForEnrollment, setSelectedPlanForEnrollment] =
     useState<ReadingPlanTemplate | null>(null);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const enrolledTemplateIds = new Set([
     ...activePlanInstances.map((p) => p.templateId),
@@ -148,6 +153,7 @@ export function PlanCatalog({
           >
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("catalog")}
               className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "catalog"
@@ -160,6 +166,7 @@ export function PlanCatalog({
             </button>
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("active")}
               className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "active"
@@ -174,6 +181,7 @@ export function PlanCatalog({
             </button>
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("paused")}
               className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "paused"
@@ -188,6 +196,7 @@ export function PlanCatalog({
             </button>
             <button
               type="button"
+              disabled={!mounted}
               onClick={() => setActiveTab("finished")}
               className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "finished"
@@ -237,18 +246,20 @@ export function PlanCatalog({
               <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
                 <button
                   type="button"
+                  disabled={!mounted}
                   onClick={() => setIsCustomWizardOpen(true)}
                   data-testid="open-custom-plan-wizard-btn"
-                  className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer"
+                  className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
                 >
                   <Plus className="size-3.5" />
                   <span>Create Custom</span>
                 </button>
                 <button
                   type="button"
+                  disabled={!mounted}
                   onClick={() => setIsImportModalOpen(true)}
                   data-testid="open-import-plan-modal-btn"
-                  className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
+                  className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
                 >
                   <Upload className="size-3.5" />
                   <span>Import</span>
