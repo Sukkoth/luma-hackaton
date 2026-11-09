@@ -270,6 +270,7 @@ function LoginContent() {
                   type="email"
                   required
                   placeholder="james@example.com"
+                  style={{ paddingLeft: "2.75rem" }}
                   className="ui-input ui-input-icon-left w-full"
                 />
               </div>
@@ -298,6 +299,10 @@ function LoginContent() {
                   type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••"
+                  style={{
+                    paddingLeft: "2.75rem",
+                    paddingRight: "2.75rem",
+                  }}
                   className="ui-input ui-input-icon-both w-full"
                 />
                 <button

@@ -145,15 +145,15 @@ function SignUpContent() {
 
       {/* RIGHT SIDE: Authentication Form Experience */}
       <section className="relative flex flex-1 flex-col justify-between p-6 sm:p-10 lg:p-14 xl:p-18">
-        {/* Mobile / Tablet Top Navigation Header */}
-        <div className="flex items-center justify-between lg:justify-end">
-          <Link
-            href="/"
-            className="ui-btn-secondary ui-btn-sm gap-1.5 lg:hidden"
-          >
-            <ArrowLeft className="size-3.5" strokeWidth={1.75} />
-            <span>Dashboard</span>
-          </Link>
+        {/* Top bar on right: Back button (on mobile) + ThemeToggle */}
+        <div className="flex w-full items-center justify-between">
+          <div className="lg:hidden">
+            <Link href="/" className="ui-btn-secondary ui-btn-sm gap-1.5">
+              <ArrowLeft className="size-3.5" strokeWidth={1.75} />
+              <span>Dashboard</span>
+            </Link>
+          </div>
+          <div className="hidden lg:block" />
           <ThemeToggle />
         </div>
 
@@ -282,6 +282,7 @@ function SignUpContent() {
                     type="text"
                     required
                     placeholder="James Aris"
+                    style={{ paddingLeft: "2.75rem" }}
                     className="ui-input ui-input-icon-left w-full"
                   />
                 </div>
@@ -302,6 +303,7 @@ function SignUpContent() {
                     type="email"
                     required
                     placeholder="james@example.com"
+                    style={{ paddingLeft: "2.75rem" }}
                     className="ui-input ui-input-icon-left w-full"
                   />
                 </div>
@@ -327,6 +329,10 @@ function SignUpContent() {
                     type={showPassword ? "text" : "password"}
                     required
                     placeholder="••••••••"
+                    style={{
+                      paddingLeft: "2.75rem",
+                      paddingRight: "2.75rem",
+                    }}
                     className="ui-input ui-input-icon-both w-full"
                   />
                   <button

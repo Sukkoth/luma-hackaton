@@ -73,6 +73,7 @@ export function TrackerSetupForm({
               required
               defaultValue="Personal Reading"
               placeholder="e.g. Personal Reading"
+              style={{ paddingLeft: "2.75rem" }}
               className="ui-input ui-input-icon-left w-full"
             />
           </div>

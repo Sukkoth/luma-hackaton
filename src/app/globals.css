@@ -361,9 +361,18 @@ html.dark body {
 }
 
 /* Icon padding utilities for inputs with icon adornments */
+@utility ui-input-icon-left {
+  padding-left: 2.75rem !important; /* 44px: 14px left margin + 16px icon + 14px clearance */
+}
+
+@utility ui-input-icon-both {
+  padding-left: 2.75rem !important;
+  padding-right: 2.75rem !important;
+}
+
 .ui-input-icon-left,
 input.ui-input-icon-left {
-  padding-left: 2.75rem !important; /* 44px: 14px left margin + 16px icon + 14px clearance */
+  padding-left: 2.75rem !important;
 }
 
 .ui-input-icon-both,
