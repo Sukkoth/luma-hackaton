@@ -468,7 +468,7 @@ export function PlanSettingsTab({
                     isPending || dailyChapters <= 1 || !plan.allowCustomPace
                   }
                   onClick={() => handleUpdateDailyPace(dailyChapters - 1)}
-                  className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
+                  className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                 >
                   -
                 </button>
@@ -481,7 +481,7 @@ export function PlanSettingsTab({
                     isPending || dailyChapters >= 50 || !plan.allowCustomPace
                   }
                   onClick={() => handleUpdateDailyPace(dailyChapters + 1)}
-                  className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
+                  className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                 >
                   +
                 </button>
@@ -513,7 +513,7 @@ export function PlanSettingsTab({
                     onClick={() =>
                       handleUpdateDurationDays(targetDurationDays - 5)
                     }
-                    className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
+                    className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                   >
                     -5
                   </button>
@@ -530,7 +530,7 @@ export function PlanSettingsTab({
                     onClick={() =>
                       handleUpdateDurationDays(targetDurationDays + 5)
                     }
-                    className="ui-btn-secondary size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
+                    className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
                   >
                     +5
                   </button>

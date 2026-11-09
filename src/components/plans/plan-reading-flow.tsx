@@ -132,9 +132,9 @@ export function PlanReadingFlow({
             onClick={handlePrevPart}
             disabled={activePartIndex <= 1}
             aria-label="Previous Part"
-            className="ui-btn-secondary flex size-8 items-center justify-center rounded-full p-0 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="ui-btn-secondary ui-btn-icon size-8 shrink-0 rounded-full cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-4 shrink-0" />
           </button>
 
           <div className="text-center">
@@ -156,9 +156,9 @@ export function PlanReadingFlow({
             onClick={handleNextPart}
             disabled={activePartIndex >= parts.length}
             aria-label="Next Part"
-            className="ui-btn-secondary flex size-8 items-center justify-center rounded-full p-0 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="ui-btn-secondary ui-btn-icon size-8 shrink-0 rounded-full cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-4 shrink-0" />
           </button>
         </div>
       )}

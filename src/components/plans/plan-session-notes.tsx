@@ -102,11 +102,11 @@ export function PlanSessionNotes({
           <Link
             href={`/notes?planId=${instanceId}&session=${activeSession.sessionIndex}`}
             data-testid="open-full-journal-link"
-            className="ui-btn-secondary size-8.5 rounded-xl cursor-pointer"
+            className="ui-btn-secondary ui-btn-icon size-9 shrink-0 rounded-xl cursor-pointer"
             title="Open in full notes studio"
             aria-label="Open in full notes studio"
           >
-            <ExternalLink className="size-3.5" />
+            <ExternalLink className="size-4 shrink-0" />
           </Link>
         </div>
       </div>

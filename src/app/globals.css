@@ -344,6 +344,19 @@ html.dark body {
   line-height: 1.25;
 }
 
+@utility ui-btn-icon {
+  min-height: unset !important;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-btn-icon {
+  min-height: unset !important;
+  padding: 0 !important;
+}
+
 .ui-input {
   background-color: var(--surface);
   border: 1px solid var(--border);
