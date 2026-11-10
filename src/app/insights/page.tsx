@@ -6,14 +6,14 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { trackerChapterProgress } from "@/db/schema";
 import { TopNavbar } from "@/components/luma/top-navbar";
-import { InsightsKpiCards } from "@/components/insights/insights-kpi-cards";
-import {
-  CanonCoverageSection,
-  type DivisionProgress,
-} from "@/components/insights/canon-coverage-section";
-import { MilestonesSection } from "@/components/insights/milestones-section";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
+import { getUserAchievementsData } from "@/actions/achievements";
+import {
+  InsightsContainer,
+  type InsightsTab,
+} from "@/components/insights/insights-container";
+import type { DivisionProgress } from "@/components/insights/canon-coverage-section";
 import {
   type BibleCanon,
   getBibleBooks,
@@ -74,8 +74,18 @@ function formatCanonTitle({ canon }: { canon: string }): string {
   }
 }
 
-export default async function InsightsPage() {
+type InsightsPageProps = {
+  searchParams?: Promise<{ tab?: string }>;
+};
+
+export default async function InsightsPage({
+  searchParams,
+}: InsightsPageProps) {
   await connection();
+
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const initialTab: InsightsTab =
+    resolvedSearchParams?.tab === "achievements" ? "achievements" : "coverage";
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -85,9 +95,10 @@ export default async function InsightsPage() {
     redirect("/login?redirect=/insights");
   }
 
-  const [trackersData, streak] = await Promise.all([
+  const [trackersData, streak, achievementsData] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
+    getUserAchievementsData({ userId: session.user.id }),
   ]);
 
   const activeTracker = trackersData.activeTracker;
@@ -187,20 +198,18 @@ export default async function InsightsPage() {
           </div>
         </div>
 
-        {/* Highlight Stats Row (Real Metrics) */}
-        <InsightsKpiCards
+        {/* Tabbed Insights & Achievements Container */}
+        <InsightsContainer
+          initialTab={initialTab}
+          canonName={canonName}
+          divisions={divisions}
           streak={streak}
           totalReadChapters={totalReadChapters}
           totalChaptersAcrossCanon={totalChaptersAcrossCanon}
           canonPercentage={canonPercentage}
           activeTrackerName={activeTrackerName}
+          achievementsData={achievementsData}
         />
-
-        {/* Section 1: Canonical Distribution & Velocity (Real Progress) */}
-        <CanonCoverageSection canonName={canonName} divisions={divisions} />
-
-        {/* Section 2: Milestones & Badges Grid (Coming Soon) */}
-        <MilestonesSection />
       </main>
     </div>
   );

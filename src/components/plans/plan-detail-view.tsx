@@ -203,6 +203,13 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
         if (res.progressPercent === 100 && progressPercent < 100) {
           celebratePlanCompletion();
         }
+        if (res.newlyUnlocked && res.newlyUnlocked.length > 0) {
+          window.dispatchEvent(
+            new CustomEvent("achievement-unlocked", {
+              detail: res.newlyUnlocked,
+            })
+          );
+        }
       } else {
         // Rollback on failure
         setSessions(sessions);

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { Suspense } from "react";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { AchievementCelebrationListener } from "@/components/achievements/achievement-celebration-listener";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -49,9 +52,14 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${poppins.className} min-h-full font-sans antialiased transition-colors duration-200`}
       >
-        <ThemeProvider defaultTheme="system">
-          <main className="flex-1 pb-20 md:pb-0">{children}</main>
-        </ThemeProvider>
+        <NuqsAdapter>
+          <ThemeProvider defaultTheme="system">
+            <Suspense fallback={null}>
+              <AchievementCelebrationListener />
+            </Suspense>
+            <main className="flex-1 pb-20 md:pb-0">{children}</main>
+          </ThemeProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );

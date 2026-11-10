@@ -39,9 +39,16 @@ import {
 } from "@/data/readingPlans";
 import { type BibleCanon, getBibleBookById } from "@/data/bibleData";
 import { syncUserStreak } from "@/lib/streak-service";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
+import type { SerializableAchievement } from "@/data/achievements";
 
 export type StartPlanResult =
-  { success: true; instanceId: string } | { success: false; error: string };
+  | {
+      success: true;
+      instanceId: string;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
+    }
+  | { success: false; error: string };
 
 export type StartPlanActionParams = {
   templateId: string;
@@ -587,9 +594,13 @@ export async function startPlanAction({
       await syncUserStreak({ userId: session.user.id });
     }
 
+    const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
+    });
+
     revalidatePath("/plans");
     revalidatePath(`/plans/${instanceId}`);
-    return { success: true, instanceId };
+    return { success: true, instanceId, newlyUnlocked };
   } catch (err) {
     console.error("Failed to start reading plan:", err);
     return {
@@ -1119,6 +1130,7 @@ export type TogglePlanReadingResult =
       readingItemId: string;
       completedChapters: number;
       progressPercent: number;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
     }
   | { success: false; error: string };
 
@@ -1307,6 +1319,10 @@ export async function togglePlanReadingItemAction({
 
   await syncUserStreak({ userId: session.user.id });
 
+  const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
+    userId: session.user.id,
+  });
+
   const newProgressPercent = Math.min(
     100,
     Math.round((newCompletedCount / (instance.totalChapters || 1)) * 100)
@@ -1322,6 +1338,7 @@ export async function togglePlanReadingItemAction({
     readingItemId: parsed.output.readingItemId,
     completedChapters: newCompletedCount,
     progressPercent: newProgressPercent,
+    newlyUnlocked,
   };
 }
 

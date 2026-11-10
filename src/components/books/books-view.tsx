@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import { Search, X } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import {
@@ -50,8 +51,14 @@ export function BooksView({
   const router = useRouter();
   const { data: session } = useSession();
   const [, startTransition] = useTransition();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("")
+  );
+  const [selectedCategory, setSelectedCategory] = useQueryState(
+    "category",
+    parseAsString.withDefault("All")
+  );
   const [readChapters, setReadChapters] =
     useState<Record<string, ReadonlyArray<number>>>(initialReadData);
   const [activeBook, setActiveBook] = useState<BibleBook | null>(null);
@@ -134,6 +141,12 @@ export function BooksView({
           ...prev,
           [bookId]: current,
         }));
+      } else if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
+        window.dispatchEvent(
+          new CustomEvent("achievement-unlocked", {
+            detail: result.newlyUnlocked,
+          })
+        );
       }
     });
   };
@@ -166,6 +179,12 @@ export function BooksView({
           ...prev,
           [book.id]: current,
         }));
+      } else if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
+        window.dispatchEvent(
+          new CustomEvent("achievement-unlocked", {
+            detail: result.newlyUnlocked,
+          })
+        );
       }
     });
   };

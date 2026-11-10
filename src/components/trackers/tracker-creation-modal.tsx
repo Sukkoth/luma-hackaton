@@ -120,6 +120,14 @@ export function TrackerCreationModal({
         return;
       }
 
+      if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
+        window.dispatchEvent(
+          new CustomEvent("achievement-unlocked", {
+            detail: result.newlyUnlocked,
+          })
+        );
+      }
+
       onTrackerCreated?.(result);
       onClose();
       router.refresh();

@@ -7,6 +7,7 @@ import { userSettings } from "@/db/schema";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import { getOverviewData } from "@/actions/overview";
 import { ChartDefs } from "@/components/overview/chart-tokens";
 import { ActivityRingsCard } from "@/components/overview/activity-rings-card";
@@ -64,6 +65,9 @@ export default async function HomePage() {
     syncUserStreak({
       userId: session.user.id,
     }),
+    evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
+    }),
   ]);
 
   const activeTracker = trackersData.activeTracker;
@@ -77,7 +81,7 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="mx-auto flex h-dvh max-w-[1600px] flex-col px-3 py-2 sm:px-5 sm:py-3 md:px-7 md:py-3.5 overflow-hidden">
+    <div className="mx-auto flex h-dvh max-w-350 flex-col px-4 py-3 sm:px-6 md:px-8 md:py-3.5 overflow-hidden">
       {/* Global Chart SVG Patterns & Gradients */}
       <ChartDefs />
 

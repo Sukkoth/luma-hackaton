@@ -12,6 +12,8 @@ import {
   UpdateTrackerSchema,
   SwitchTrackerSchema,
 } from "@/lib/schemas/trackers";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
+import type { SerializableAchievement } from "@/data/achievements";
 
 export type UserTrackerSummary = {
   id: string;
@@ -26,7 +28,12 @@ export type UserTrackerSummary = {
 };
 
 export type CreateTrackerActionResult =
-  { success: true; trackerId: string } | { success: false; error: string };
+  | {
+      success: true;
+      trackerId: string;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
+    }
+  | { success: false; error: string };
 
 export type CreateTrackerActionParams = {
   formData: FormData;
@@ -83,6 +90,10 @@ export async function createTrackerAction({
         .where(eq(userSettings.userId, session.user.id));
     });
 
+    const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
+    });
+
     revalidatePath("/home");
     revalidatePath("/books");
     revalidatePath("/insights");
@@ -90,7 +101,7 @@ export async function createTrackerAction({
     revalidatePath("/plans");
     revalidatePath("/settings");
 
-    return { success: true, trackerId };
+    return { success: true, trackerId, newlyUnlocked };
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : "Failed to create tracker.";

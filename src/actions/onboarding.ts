@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { readingTrackers, userSettings } from "@/db/schema";
 import { OnboardingTrackerSchema } from "@/lib/schemas/onboarding";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 
 export type CompleteOnboardingResult =
   { success: true; trackerId: string } | { success: false; error: string };
@@ -74,6 +75,10 @@ export async function completeOnboardingAction({
             updatedAt: new Date(),
           },
         });
+    });
+
+    await evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
     });
 
     return { success: true, trackerId };

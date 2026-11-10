@@ -370,6 +370,13 @@ export function PlanSetupModal({
       });
 
       if (res.success) {
+        if (res.newlyUnlocked && res.newlyUnlocked.length > 0) {
+          window.dispatchEvent(
+            new CustomEvent("achievement-unlocked", {
+              detail: res.newlyUnlocked,
+            })
+          );
+        }
         onCloseAction();
         if (onSuccessAction) {
           onSuccessAction(res.instanceId);
