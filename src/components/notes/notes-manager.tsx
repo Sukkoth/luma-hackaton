@@ -9,6 +9,7 @@ import {
   useDeferredValue,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import {
   FileText,
   Plus,
@@ -48,6 +49,7 @@ export type NotesManagerProps = {
   initialFolders: NoteFolderDetail[];
   defaultPlanId?: string;
   defaultSessionId?: number;
+  defaultFolderId?: string;
   defaultNoteId?: string;
 };
 
@@ -82,11 +84,21 @@ export function NotesManager({
   initialFolders,
   defaultPlanId,
   defaultSessionId,
+  defaultFolderId,
   defaultNoteId,
 }: NotesManagerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  const [activeFolderId, setActiveFolderId] = useQueryState(
+    "folderId",
+    parseAsString.withDefault(defaultFolderId || "all")
+  );
+  const [noteIdQuery, setNoteIdQuery] = useQueryState(
+    "noteId",
+    parseAsString.withDefault(defaultNoteId || "")
+  );
 
   const [notesList, setNotesList] = useState<NoteDetail[]>(initialNotes);
   const [folders, setFolders] = useState<NoteFolderDetail[]>(initialFolders);
@@ -108,13 +120,13 @@ export function NotesManager({
   const [activeTab, setActiveTab] = useState<"active" | "folders" | "archived">(
     "active"
   );
-  const [activeFolderId, setActiveFolderId] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [sortBy, setSortBy] = useState<NoteSortOption>("updated_desc");
 
   // Target note parameter from props or URL
-  const targetNoteId = defaultNoteId || searchParams.get("noteId");
+  const targetNoteId =
+    noteIdQuery || defaultNoteId || searchParams.get("noteId");
 
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<"list" | "editor">(() => {
@@ -243,6 +255,7 @@ export function NotesManager({
   // Switch active note implementation
   const performSelectNote = ({ noteId }: SelectNoteParams) => {
     setSelectedNoteId(noteId);
+    void setNoteIdQuery(noteId);
     setIsDirty(false);
     setMobileView("editor");
     const target = notesList.find((n) => n.id === noteId);
@@ -354,6 +367,7 @@ export function NotesManager({
       if (res.success && res.note) {
         setNotesList((prev) => [res.note, ...prev]);
         setSelectedNoteId(res.note.id);
+        void setNoteIdQuery(res.note.id);
         currentDraftRef.current = {
           title: res.note.title,
           bodyHtml: res.note.bodyHtml,
@@ -399,6 +413,7 @@ export function NotesManager({
           activeTab === "archived" ? n.isArchived : !n.isArchived
         );
         setSelectedNoteId(nextActive?.id ?? null);
+        void setNoteIdQuery(nextActive?.id ?? null);
         setIsDirty(false);
         setMobileView("list");
         router.refresh();
@@ -521,7 +536,7 @@ export function NotesManager({
   // Switch folder filter implementation
   const performSwitchFolder = ({ folderId }: SwitchFolderParams) => {
     setActiveTab("active");
-    setActiveFolderId(folderId);
+    void setActiveFolderId(folderId);
     setIsDirty(false);
 
     const notesInFolder = notesList.filter((note) => {
@@ -553,6 +568,7 @@ export function NotesManager({
 
     const first = sorted[0] ?? null;
     setSelectedNoteId(first?.id ?? null);
+    void setNoteIdQuery(first?.id ?? null);
     if (first) {
       currentDraftRef.current = {
         title: first.title,

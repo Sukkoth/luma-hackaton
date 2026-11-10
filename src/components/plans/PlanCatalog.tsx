@@ -3,6 +3,7 @@
 import { useState, useTransition, useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
 import {
   Calendar,
   Compass,
@@ -74,14 +75,43 @@ export function PlanCatalog({
   );
   const [isCustomWizardOpen, setIsCustomWizardOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<CatalogTab>(() => {
-    if (initialTab === "my_plans" || initialTab === "active") return "active";
-    if (initialTab === "paused") return "paused";
-    if (initialTab === "finished") return "finished";
-    return "catalog";
-  });
-  const [selectedFilter, setSelectedFilter] = useState<PlanFilterType>("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral([
+      "catalog",
+      "active",
+      "paused",
+      "finished",
+    ] as const).withDefault(
+      initialTab === "my_plans" || initialTab === "active"
+        ? "active"
+        : initialTab === "paused"
+          ? "paused"
+          : initialTab === "finished"
+            ? "finished"
+            : "catalog"
+    )
+  );
+  const [selectedFilter, setSelectedFilter] = useQueryState<PlanFilterType>(
+    "filter",
+    parseAsStringLiteral([
+      "All",
+      "Custom",
+      "Fixed",
+      "Customizable",
+      "Old",
+      "New",
+      "Gospels",
+      "Epistles",
+      "Short",
+      "Long",
+      "Whole",
+    ] as const).withDefault("All")
+  );
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("")
+  );
   const [selectedPlanForEnrollment, setSelectedPlanForEnrollment] =
     useState<ReadingPlanTemplate | null>(null);
   const mounted = useSyncExternalStore(
