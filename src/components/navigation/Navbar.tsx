@@ -13,8 +13,8 @@ import {
 const NAV_ITEMS = [
   { href: "/", label: "Books", icon: BookOpen },
   { href: "/plans", label: "Plans", icon: Calendar },
-  { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/notes", label: "Notes", icon: FileText },
+  { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

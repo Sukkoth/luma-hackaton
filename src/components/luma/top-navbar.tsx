@@ -48,8 +48,8 @@ export function TopNavbar({
         { label: "Overview", href: "/home", icon: Home },
         { label: "Books", href: "/books", icon: BookOpen },
         { label: "Plans", href: "/plans", icon: Calendar },
-        { label: "Insights", href: "/insights", icon: TrendingUp },
         { label: "Notes", href: "/notes", icon: FileText },
+        { label: "Insights", href: "/insights", icon: TrendingUp },
       ]
     : [
         { label: "Books", href: "/books", icon: BookOpen },
