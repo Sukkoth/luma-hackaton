@@ -10,31 +10,31 @@
 import type { ThemeTokens } from "./types";
 
 // --- 1. SINGLE-SOURCE PRIMARY BRAND ACCENTS (EXACT WATERMELON TOKENS) ---
-export const PRIMARY_COLOR_LIGHT = "#1A212D";
-export const PRIMARY_FOREGROUND_LIGHT = "#FFFFFF";
-export const PRIMARY_MUTED_LIGHT = "rgba(26, 33, 45, 0.08)";
-export const PRIMARY_BORDER_LIGHT = "rgba(26, 33, 45, 0.25)";
+export const PRIMARY_COLOR_LIGHT = "#1e293b";
+export const PRIMARY_FOREGROUND_LIGHT = "#ffffff";
+export const PRIMARY_MUTED_LIGHT = "rgba(30, 41, 59, 0.08)";
+export const PRIMARY_BORDER_LIGHT = "rgba(30, 41, 59, 0.2)";
 
-export const PRIMARY_COLOR_DARK = "#DADAD6";
-export const PRIMARY_FOREGROUND_DARK = "#10110C";
-export const PRIMARY_MUTED_DARK = "rgba(218, 218, 214, 0.12)";
-export const PRIMARY_BORDER_DARK = "rgba(218, 218, 214, 0.35)";
+export const PRIMARY_COLOR_DARK = "#ffffff";
+export const PRIMARY_FOREGROUND_DARK = "#050505";
+export const PRIMARY_MUTED_DARK = "rgba(255, 255, 255, 0.08)";
+export const PRIMARY_BORDER_DARK = "rgba(255, 255, 255, 0.18)";
 
 export const palette = {
-  white: "#FFFFFF",
+  white: "#ffffff",
   black: "#000000",
 
-  // Dark Theme Base (Exact Watermelon Dark)
-  darkBg: "#10110C",
-  darkSurface: "#181A13",
-  darkSurfaceElevated: "#24271D",
-  darkSurfaceSubtle: "#1E2018",
-  darkBorder: "#26291E",
-  darkBorderSubtle: "#1E2018",
-  darkBorderStrong: "#363A2B",
-  darkText: "#FFFFFF",
-  darkTextSecondary: "#9E9F97",
-  darkTextDim: "#94968C",
+  // Dark Theme Base (Pure #050505 canvas / #111111 surfaces)
+  darkBg: "#050505",
+  darkSurface: "#111111",
+  darkSurfaceElevated: "#1b1b1b",
+  darkSurfaceSubtle: "#161616",
+  darkBorder: "#050505",
+  darkBorderSubtle: "#050505",
+  darkBorderStrong: "#050505",
+  darkText: "#ffffff",
+  darkTextSecondary: "#a1a1aa",
+  darkTextDim: "#71717a",
 
   // Light Theme Base (Exact Watermelon Light - Deep Slate Theme #1A212D)
   lightBg: "#F8F9FA",

@@ -5,7 +5,7 @@ export function PillarsSection() {
     <section className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       {/* Pillar 1 */}
       <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
-        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
           <Compass className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">
@@ -19,7 +19,7 @@ export function PillarsSection() {
 
       {/* Pillar 2 */}
       <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
-        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
           <Cpu className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">
@@ -33,7 +33,7 @@ export function PillarsSection() {
 
       {/* Pillar 3 */}
       <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
-        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
           <Flame className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">
@@ -47,7 +47,7 @@ export function PillarsSection() {
 
       {/* Pillar 4 */}
       <div className="rounded-[20px] border border-black/8 bg-white/70 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/3">
-        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+        <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
           <Users className="size-5" />
         </div>
         <h3 className="mt-4 text-[16px] font-medium text-black dark:text-white">

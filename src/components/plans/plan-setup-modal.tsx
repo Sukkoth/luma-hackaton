@@ -563,7 +563,7 @@ export function PlanSetupModal({
               <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
                 <div className="rounded-xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/4">
                   <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <BookOpen className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+                    <BookOpen className="size-3.5 text-zinc-900 dark:text-white" />
                     <span>Chapters</span>
                   </span>
                   <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
@@ -572,7 +572,7 @@ export function PlanSetupModal({
                 </div>
                 <div className="rounded-xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/4">
                   <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <Clock className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+                    <Clock className="size-3.5 text-zinc-900 dark:text-white" />
                     <span>Target Length</span>
                   </span>
                   <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
@@ -581,7 +581,7 @@ export function PlanSetupModal({
                 </div>
                 <div className="col-span-2 rounded-xl border border-black/6 bg-white/70 p-3.5 sm:col-span-1 dark:border-white/8 dark:bg-white/4">
                   <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <Sparkles className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+                    <Sparkles className="size-3.5 text-zinc-900 dark:text-white" />
                     <span>Default Pace</span>
                   </span>
                   <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
@@ -845,7 +845,7 @@ export function PlanSetupModal({
                   <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+                        <div className="flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
                           <FolderPlus className="size-4.5" />
                         </div>
                         <div>
@@ -1108,7 +1108,7 @@ export function PlanSetupModal({
                     {/* Note Folder Option */}
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-8.5 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+                        <div className="flex size-8.5 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
                           <FolderPlus className="size-4" />
                         </div>
                         <div>

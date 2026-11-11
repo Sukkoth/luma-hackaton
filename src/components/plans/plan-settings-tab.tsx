@@ -311,7 +311,7 @@ export function PlanSettingsTab({
       )}
 
       {successMessage && (
-        <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 text-[13px] text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+        <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 text-[13px] text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white">
           <Check className="size-4 shrink-0" />
           <span>{successMessage}</span>
         </div>
@@ -342,7 +342,7 @@ export function PlanSettingsTab({
               </p>
             </div>
             {isPending && (
-              <Loader2 className="size-4 animate-spin text-zinc-900 dark:text-zinc-100" />
+              <Loader2 className="size-4 animate-spin text-zinc-900 dark:text-white" />
             )}
           </div>
 
@@ -701,7 +701,7 @@ export function PlanSettingsTab({
           className="flex w-full items-center justify-between text-left"
         >
           <div className="flex items-center gap-2.5">
-            <BookOpen className="size-4.5 text-zinc-900 dark:text-zinc-100" />
+            <BookOpen className="size-4.5 text-zinc-900 dark:text-white" />
             <div>
               <h3 className="text-[15px] font-semibold text-black dark:text-white">
                 Curriculum Breakdown
