@@ -736,7 +736,7 @@ export function NotesManager({
 
   return (
     <>
-      <div className="ui-card h-[calc(100dvh-10rem)] md:h-[calc(100dvh-5.5rem)] max-h-[1150px] overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border-subtle">
+      <div className="ui-card w-full h-[calc(100dvh-10rem)] md:h-[calc(100dvh-5.5rem)] max-h-[1150px] overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border-subtle">
         {/* ================= LEFT PANE: NOTEBOOK SHELF & EXPLORER ================= */}
         <aside
           className={`w-full md:w-[360px] lg:w-[380px] xl:w-[410px] shrink-0 flex flex-col min-h-0 bg-surface ${
@@ -1338,7 +1338,7 @@ export function NotesManager({
               {/* Scrollable Journal Canvas */}
               <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-10 pb-16 flex flex-col items-center">
                 {/* Physical Journal Page Sheet */}
-                <div className="ui-card w-full max-w-3xl shrink-0 p-6 sm:p-10 lg:p-12 space-y-5 min-h-[560px]">
+                <div className="ui-card w-full max-w-4xl lg:max-w-5xl 2xl:max-w-6xl shrink-0 p-6 sm:p-10 lg:p-12 space-y-5 min-h-[560px]">
                   {/* Journal Document Metadata Strip: Folder Selector + Plan Link + Timestamp */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-border">
                     <div className="flex flex-wrap items-center gap-2">

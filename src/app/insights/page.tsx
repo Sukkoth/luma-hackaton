@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { trackerChapterProgress } from "@/db/schema";
-import { TopNavbar } from "@/components/luma/top-navbar";
+import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { getUserAchievementsData } from "@/actions/achievements";
@@ -169,48 +169,49 @@ export default async function InsightsPage({
   const canonName = formatCanonTitle({ canon });
 
   return (
-    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navigation */}
-      <TopNavbar
-        userName={session.user.name}
-        streak={streak}
-        trackers={trackersData.trackers}
-        activeTrackerId={activeTracker?.id}
-      />
-
-      {/* Main Insights Content Layout */}
-      <main className="mt-4 space-y-6">
-        {/* Header Greeting & Tracker Status */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-[26px] font-normal tracking-tight text-foreground sm:text-[30px]">
-              Spiritual Metrics & Insights
-            </h1>
-            <p className="text-[13px] text-foreground-secondary">
-              Welcome back, {userFirstName}. Here is your reading trajectory and
-              scriptural milestones.
-            </p>
+    <AppShell
+      userName={session.user.name}
+      userEmail={session.user.email}
+      userImage={session.user.image ?? undefined}
+      streak={streak}
+      trackers={trackersData.trackers}
+      activeTrackerId={activeTracker?.id}
+    >
+      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
+        {/* Main Insights Content Layout */}
+        <main className="mt-1 w-full space-y-6">
+          {/* Header Greeting & Tracker Status */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-[26px] font-normal tracking-tight text-foreground sm:text-[30px]">
+                Spiritual Metrics & Insights
+              </h1>
+              <p className="text-[13px] text-foreground-secondary">
+                Welcome back, {userFirstName}. Here is your reading trajectory
+                and scriptural milestones.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="ui-pill text-[12px] font-normal">
+                Active: {activeTrackerName}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="ui-pill text-[12px] font-normal">
-              Active: {activeTrackerName}
-            </span>
-          </div>
-        </div>
 
-        {/* Tabbed Insights & Achievements Container */}
-        <InsightsContainer
-          initialTab={initialTab}
-          canonName={canonName}
-          divisions={divisions}
-          streak={streak}
-          totalReadChapters={totalReadChapters}
-          totalChaptersAcrossCanon={totalChaptersAcrossCanon}
-          canonPercentage={canonPercentage}
-          activeTrackerName={activeTrackerName}
-          achievementsData={achievementsData}
-        />
-      </main>
-    </div>
+          {/* Tabbed Insights & Achievements Container */}
+          <InsightsContainer
+            initialTab={initialTab}
+            canonName={canonName}
+            divisions={divisions}
+            streak={streak}
+            totalReadChapters={totalReadChapters}
+            totalChaptersAcrossCanon={totalChaptersAcrossCanon}
+            canonPercentage={canonPercentage}
+            activeTrackerName={activeTrackerName}
+            achievementsData={achievementsData}
+          />
+        </main>
+      </div>
+    </AppShell>
   );
 }

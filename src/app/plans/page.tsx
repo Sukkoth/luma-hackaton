@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { TopNavbar } from "@/components/luma/top-navbar";
+import { AppShell } from "@/components/navigation/app-shell";
 import { PlanCatalog } from "@/components/plans/PlanCatalog";
 import { getUserTrackersData } from "@/actions/trackers";
 import {
@@ -91,29 +91,30 @@ export default async function PlansPage() {
   const displayName = session?.user?.name || "Reader";
 
   return (
-    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navbar */}
-      <TopNavbar
-        userName={displayName}
-        streak={streak}
-        trackers={trackersData.trackers}
-        activeTrackerId={trackersData.activeTracker?.id}
-      />
-
-      {/* Main Content Area */}
-      <main className="mt-3">
-        <PlanCatalog
-          activePlanInstances={activePlanInstances}
-          pausedPlanInstances={pausedPlanInstances}
-          finishedPlanInstances={finishedPlanInstances}
-          customPlans={customPlans}
-          activeTrackerId={trackersData.activeTracker?.id}
-          trackerName={trackersData.activeTracker?.name}
-          trackerCanon={
-            (trackersData.activeTracker?.canon as BibleCanon) || "protestant"
-          }
-        />
-      </main>
-    </div>
+    <AppShell
+      userName={displayName}
+      userEmail={session?.user?.email}
+      userImage={session?.user?.image ?? undefined}
+      streak={streak}
+      trackers={trackersData.trackers}
+      activeTrackerId={trackersData.activeTracker?.id}
+    >
+      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
+        {/* Main Content Area */}
+        <main className="mt-1 w-full">
+          <PlanCatalog
+            activePlanInstances={activePlanInstances}
+            pausedPlanInstances={pausedPlanInstances}
+            finishedPlanInstances={finishedPlanInstances}
+            customPlans={customPlans}
+            activeTrackerId={trackersData.activeTracker?.id}
+            trackerName={trackersData.activeTracker?.name}
+            trackerCanon={
+              (trackersData.activeTracker?.canon as BibleCanon) || "protestant"
+            }
+          />
+        </main>
+      </div>
+    </AppShell>
   );
 }

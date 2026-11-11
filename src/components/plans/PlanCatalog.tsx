@@ -371,8 +371,8 @@ export function PlanCatalog({
               </button>
             </div>
           ) : (
-            <div className="mt-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 w-full">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {activePlanInstances.map((instance) => (
                   <div
                     key={instance.id}
@@ -475,8 +475,8 @@ export function PlanCatalog({
               </p>
             </div>
           ) : (
-            <div className="mt-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 w-full">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {pausedPlanInstances.map((instance) => (
                   <div
                     key={instance.id}
@@ -582,8 +582,8 @@ export function PlanCatalog({
             </p>
           </div>
         ) : (
-          <div className="mt-6">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="mt-6 w-full">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {finishedPlanInstances.map((instance) => (
                 <div
                   key={instance.id}

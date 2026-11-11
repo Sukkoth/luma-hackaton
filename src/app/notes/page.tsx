@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { TopNavbar } from "@/components/luma/top-navbar";
+import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import {
@@ -63,28 +63,31 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navbar */}
-      <TopNavbar
-        userName={displayName}
-        streak={streak}
-        trackers={trackersData.trackers}
-        activeTrackerId={trackersData.activeTracker?.id}
-      />
-
-      <main className="mt-4">
-        <NotesManager
-          key={resolvedParams.noteId ?? "default"}
-          initialNotes={initialNotes}
-          initialFolders={initialFolders}
-          defaultPlanId={resolvedParams.planId}
-          defaultSessionId={
-            resolvedParams.session ? Number(resolvedParams.session) : undefined
-          }
-          defaultFolderId={resolvedParams.folderId}
-          defaultNoteId={resolvedParams.noteId}
-        />
-      </main>
-    </div>
+    <AppShell
+      userName={displayName}
+      userEmail={session.user.email}
+      userImage={session.user.image ?? undefined}
+      streak={streak}
+      trackers={trackersData.trackers}
+      activeTrackerId={trackersData.activeTracker?.id}
+    >
+      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
+        <main className="mt-1 w-full">
+          <NotesManager
+            key={resolvedParams.noteId ?? "default"}
+            initialNotes={initialNotes}
+            initialFolders={initialFolders}
+            defaultPlanId={resolvedParams.planId}
+            defaultSessionId={
+              resolvedParams.session
+                ? Number(resolvedParams.session)
+                : undefined
+            }
+            defaultFolderId={resolvedParams.folderId}
+            defaultNoteId={resolvedParams.noteId}
+          />
+        </main>
+      </div>
+    </AppShell>
   );
 }

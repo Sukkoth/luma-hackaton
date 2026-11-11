@@ -42,7 +42,7 @@ export function InsightsContainer({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       {/* Top Segmented Tab Switcher */}
       <div className="flex items-center gap-1.5 rounded-[18px] border border-border bg-surface p-1 w-fit shadow-xs">
         <button
