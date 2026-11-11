@@ -191,7 +191,6 @@ test.describe("Onboarding Experience via New User E2E", () => {
       expect(tracker).toBeDefined();
       expect(tracker?.name).toBe("My Ethiopian Canon Devotional");
       expect(tracker?.canon).toBe("ethiopian_orthodox");
-      expect(tracker?.color).toBe("#10B981");
       expect(tracker?.icon).toBe("flame");
     }
   });

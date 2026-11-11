@@ -25,7 +25,6 @@ export const readingTrackers = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     description: text("description").default("").notNull(),
-    color: text("color").default("#3B82F6").notNull(),
     icon: text("icon").default("book").notNull(),
     canon: varchar("canon", { length: 50 }).default("protestant").notNull(),
     isArchived: boolean("is_archived").default(false).notNull(),

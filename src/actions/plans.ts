@@ -794,7 +794,6 @@ export type PlanInstanceDetail = {
     id: string;
     name: string;
     canon: string;
-    color: string;
     icon: string;
   };
   sessions: ReadonlyArray<PlanSessionDetail>;
@@ -1107,7 +1106,6 @@ export async function getPlanInstanceDetailAction({
       id: instance.tracker.id,
       name: instance.tracker.name,
       canon: instance.tracker.canon,
-      color: instance.tracker.color,
       icon: instance.tracker.icon,
     },
     sessions,

@@ -201,7 +201,6 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
       userId: testUserId,
       name: "Original Protestant Tracker",
       canon: "protestant",
-      color: "#3B82F6",
       icon: "book-open",
       description: "Initial description",
     });

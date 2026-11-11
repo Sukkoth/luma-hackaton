@@ -29,7 +29,6 @@ export async function completeOnboardingAction({
   const parsed = v.safeParse(OnboardingTrackerSchema, {
     name: formData.get("name"),
     canon: formData.get("canon"),
-    color: formData.get("color"),
     icon: formData.get("icon"),
   });
 
@@ -50,7 +49,6 @@ export async function completeOnboardingAction({
         userId: session.user.id,
         name: parsed.output.name,
         canon: parsed.output.canon,
-        color: parsed.output.color,
         icon: parsed.output.icon,
         description: `Primary ${parsed.output.canon.replace("_", " ")} reading tracker`,
       });
