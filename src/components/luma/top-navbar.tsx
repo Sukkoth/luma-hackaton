@@ -120,7 +120,7 @@ export function TopNavbar({
                       : "border border-border bg-surface-elevated text-foreground-dim hover:text-foreground"
                   }`}
                 >
-                  <Zap className="size-3.5 lg:size-4 fill-current" />
+                  <Zap className="size-3.5 lg:size-4 fill-foreground text-foreground" />
                   <span>{streak.currentStreak}</span>
                 </button>
               )}
