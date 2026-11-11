@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { TopNavbar } from "@/components/luma/top-navbar";
+import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { getPlanInstanceDetailAction } from "@/actions/plans";
@@ -37,19 +37,20 @@ async function PlanInstanceContent({ params }: PlanInstancePageProps) {
   const displayName = session.user.name || "Reader";
 
   return (
-    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navbar */}
-      <TopNavbar
-        userName={displayName}
-        streak={streak}
-        trackers={trackersData.trackers}
-        activeTrackerId={trackersData.activeTracker?.id}
-      />
-
-      <main className="mx-auto mt-4 max-w-4xl pb-12">
-        <PlanDetailView plan={plan} />
-      </main>
-    </div>
+    <AppShell
+      userName={displayName}
+      userEmail={session.user.email}
+      userImage={session.user.image ?? undefined}
+      streak={streak}
+      trackers={trackersData.trackers}
+      activeTrackerId={trackersData.activeTracker?.id}
+    >
+      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
+        <main className="w-full pb-16">
+          <PlanDetailView plan={plan} />
+        </main>
+      </div>
+    </AppShell>
   );
 }
 
@@ -57,7 +58,7 @@ export default async function PlanInstancePage(props: PlanInstancePageProps) {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto flex min-h-screen max-w-350 items-center justify-center p-8">
+        <div className="flex min-h-screen w-full items-center justify-center p-8">
           <div className="size-8 animate-spin rounded-full border-2 border-black/10 border-t-black dark:border-white/10 dark:border-t-white" />
         </div>
       }

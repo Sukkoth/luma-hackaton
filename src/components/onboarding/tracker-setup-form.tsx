@@ -6,20 +6,10 @@ import {
   Heart,
   Flame,
   Sun,
-  Check,
   ArrowRight,
   Loader2,
 } from "lucide-react";
 import { CanonSelector } from "./canon-selector";
-
-const TRACKER_COLORS = [
-  { name: "Gold", value: "#F59E0B" },
-  { name: "Sapphire", value: "#3B82F6" },
-  { name: "Emerald", value: "#10B981" },
-  { name: "Violet", value: "#8B5CF6" },
-  { name: "Rose", value: "#F43F5E" },
-  { name: "Slate", value: "#71717A" },
-];
 
 const TRACKER_ICONS = [
   { id: "book-open", label: "Open Book", icon: BookOpen },
@@ -76,35 +66,6 @@ export function TrackerSetupForm({
               style={{ paddingLeft: "2.75rem" }}
               className="ui-input ui-input-icon-left w-full"
             />
-          </div>
-        </div>
-
-        {/* Accent Color Palette */}
-        <div>
-          <label className="block text-[12px] font-bold text-foreground">
-            Accent Color
-          </label>
-          <div className="mt-2 flex flex-wrap items-center gap-2.5">
-            {TRACKER_COLORS.map((c, idx) => (
-              <label
-                key={c.name}
-                className="group relative flex cursor-pointer items-center justify-center"
-              >
-                <input
-                  type="radio"
-                  name="color"
-                  value={c.value}
-                  defaultChecked={idx === 0}
-                  className="peer sr-only"
-                />
-                <span
-                  style={{ backgroundColor: c.value }}
-                  className="flex size-9 items-center justify-center rounded-full shadow-xs transition-all duration-150 peer-checked:scale-105 hover:scale-105 peer-checked:[&>svg]:opacity-100"
-                >
-                  <Check className="size-4 stroke-3 text-white opacity-0 drop-shadow-xs transition-opacity duration-150" />
-                </span>
-              </label>
-            ))}
           </div>
         </div>
 

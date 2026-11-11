@@ -36,6 +36,32 @@ export interface Achievement {
   };
 }
 
+export type SerializableAchievement = {
+  id: string;
+  title: string;
+  description: string;
+  category: AchievementCategory;
+  iconName: string;
+  accentColor: string;
+  bgLight: string;
+};
+
+export function toSerializableAchievement({
+  achievement,
+}: {
+  achievement: Achievement;
+}): SerializableAchievement {
+  return {
+    id: achievement.id,
+    title: achievement.title,
+    description: achievement.description,
+    category: achievement.category,
+    iconName: achievement.iconName,
+    accentColor: achievement.accentColor,
+    bgLight: achievement.bgLight,
+  };
+}
+
 const standardBookChapterLimits: Record<string, number> = {
   est: 10,
   dan: 12,

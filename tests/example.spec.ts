@@ -277,8 +277,10 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     // 3. Verified redirect to Overview/Dashboard at /home
     await page.waitForURL("/home", { timeout: 10000 });
     await expect(page).toHaveURL("/home");
-    await expect(page.getByText(`Hello, ${testUser.givenName}!`)).toBeVisible();
-    await expect(page.getByText("Bible Progress")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Progress Rings" })
+    ).toBeVisible();
 
     // Verify visiting /onboarding now redirects back to /home since onboarding is complete
     await page.goto("/onboarding");
@@ -300,9 +302,11 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     // 3. Verify user can access Settings and view their profile
     await page.goto("/settings");
     await expect(page).toHaveURL("/settings");
-    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
-    await expect(page.getByText(testUser.fullName)).toBeVisible();
-    await expect(page.getByText(testUser.email)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Settings", exact: true })
+    ).toBeVisible();
+    await expect(page.getByText(testUser.fullName).first()).toBeVisible();
+    await expect(page.getByText(testUser.email).first()).toBeVisible();
     await expect(page.getByText("Active Member")).toBeVisible();
 
     // 4. Verify user can now mark chapters on Books page
@@ -329,7 +333,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await page.getByRole("button", { name: "Sign In" }).click();
     await page.waitForURL("/home", { timeout: 10000 });
     await expect(page).toHaveURL("/home");
-    await expect(page.getByText(`Hello, ${testUser.givenName}!`)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
   });
 
   test("dark theme toggle switches classes and persists in storage", async ({

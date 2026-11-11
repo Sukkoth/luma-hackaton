@@ -67,8 +67,8 @@ export function PlanSessionNotes({
       {/* Header Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-black/6 dark:border-white/6">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
-            <FileText className="size-5 text-zinc-900 dark:text-zinc-100" />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white">
+            <FileText className="size-5 text-zinc-900 dark:text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -186,8 +186,8 @@ export function PlanSessionNotes({
       ) : (
         /* Empty State */
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 py-7 px-4 text-center dark:border-white/10">
-          <div className="flex size-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
-            <BookOpen className="size-5 text-zinc-900 dark:text-zinc-100" />
+          <div className="flex size-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white">
+            <BookOpen className="size-5 text-zinc-900 dark:text-white" />
           </div>
           <h4 className="mt-3 text-[14px] font-semibold text-black dark:text-white">
             No reflections recorded for {activeSession.title}

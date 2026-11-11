@@ -103,7 +103,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
         <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
             <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
-              <BookOpen className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+              <BookOpen className="size-3.5 text-zinc-900 dark:text-white" />
               <span>Chapters</span>
             </span>
             <p className="mt-1 text-[16px] font-semibold text-black dark:text-white">
@@ -116,7 +116,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
             <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
-              <Layers className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+              <Layers className="size-3.5 text-zinc-900 dark:text-white" />
               <span>Sessions & Parts</span>
             </span>
             <p className="mt-1 text-[16px] font-semibold text-black dark:text-white">
@@ -130,7 +130,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
             <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
-              <Bookmark className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+              <Bookmark className="size-3.5 text-zinc-900 dark:text-white" />
               <span>Reading Tracker</span>
             </span>
             <p className="mt-1 text-[16px] font-semibold text-black truncate dark:text-white">
@@ -143,7 +143,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
             <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
-              <Calendar className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+              <Calendar className="size-3.5 text-zinc-900 dark:text-white" />
               <span>Started On</span>
             </span>
             <p className="mt-1 text-[14px] font-medium text-black dark:text-white">
@@ -153,7 +153,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
 
           <div className="rounded-2xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/3">
             <span className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
-              <Trophy className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+              <Trophy className="size-3.5 text-zinc-900 dark:text-white" />
               <span>Completed</span>
             </span>
             <p className="mt-1 text-[14px] font-medium text-black dark:text-white">
@@ -167,7 +167,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
           >
             <span className="flex items-center justify-between text-[11px] font-medium text-zinc-500 uppercase tracking-wider dark:text-zinc-400">
               <span className="flex items-center gap-1.5">
-                <FileText className="size-3.5 text-zinc-900 dark:text-zinc-100" />
+                <FileText className="size-3.5 text-zinc-900 dark:text-white" />
                 <span>Study Notes</span>
               </span>
               <ExternalLink className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />

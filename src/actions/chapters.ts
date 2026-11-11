@@ -17,9 +17,16 @@ import {
   ClearAllChaptersSchema,
 } from "@/lib/schemas/chapters";
 import { syncUserStreak } from "@/lib/streak-service";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
+import type { SerializableAchievement } from "@/data/achievements";
 
 export type ToggleChapterResult =
-  | { success: true; status: "completed" | "removed"; chapter: number }
+  | {
+      success: true;
+      status: "completed" | "removed";
+      chapter: number;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
+    }
   | { success: false; error: string };
 
 export type ToggleChapterActionParams = {
@@ -121,6 +128,10 @@ export async function toggleChapterAction({
 
     await syncUserStreak({ userId: session.user.id });
 
+    const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
+    });
+
     revalidatePath("/books");
     revalidatePath("/home");
     revalidatePath("/insights");
@@ -129,6 +140,7 @@ export async function toggleChapterAction({
       success: true,
       status: "completed",
       chapter: parsed.output.chapter,
+      newlyUnlocked,
     };
   } catch (error) {
     return {
@@ -142,7 +154,12 @@ export async function toggleChapterAction({
 }
 
 export type MarkAllChaptersResult =
-  { success: true; addedCount: number } | { success: false; error: string };
+  | {
+      success: true;
+      addedCount: number;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
+    }
+  | { success: false; error: string };
 
 export type MarkAllChaptersActionParams = {
   trackerId: string;
@@ -236,14 +253,23 @@ export async function markAllChaptersAction({
       }
     });
 
+    let newlyUnlocked: ReadonlyArray<SerializableAchievement> = [];
     if (newlyInsertedCount > 0) {
       await syncUserStreak({ userId: session.user.id });
+      const evalResult = await evaluateAndUnlockAchievementsAction({
+        userId: session.user.id,
+      });
+      newlyUnlocked = evalResult.newlyUnlocked;
       revalidatePath("/books");
       revalidatePath("/home");
       revalidatePath("/insights");
     }
 
-    return { success: true, addedCount: newlyInsertedCount };
+    return {
+      success: true,
+      addedCount: newlyInsertedCount,
+      newlyUnlocked,
+    };
   } catch (error) {
     return {
       success: false,

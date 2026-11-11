@@ -116,11 +116,11 @@ export function PlanReadingFlow({
     <div className="space-y-4">
       {/* Section Header */}
       <div>
-        <h2 className="text-[17px] sm:text-[19px] font-semibold tracking-tight text-black dark:text-white">
+        <h2 className="text-[17px] sm:text-[19px] font-semibold tracking-tight text-foreground">
           Reading Flow
         </h2>
-        <p className="mt-0.5 text-[12px] text-[#777777] dark:text-[#9CA3AF]">
-          Swipe horizontally to browse each session
+        <p className="mt-0.5 text-[12px] text-foreground-secondary">
+          Select a session to view and track chapters
         </p>
       </div>
 

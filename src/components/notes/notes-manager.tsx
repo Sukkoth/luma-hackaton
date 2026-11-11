@@ -9,6 +9,7 @@ import {
   useDeferredValue,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import {
   FileText,
   Plus,
@@ -48,6 +49,7 @@ export type NotesManagerProps = {
   initialFolders: NoteFolderDetail[];
   defaultPlanId?: string;
   defaultSessionId?: number;
+  defaultFolderId?: string;
   defaultNoteId?: string;
 };
 
@@ -82,11 +84,21 @@ export function NotesManager({
   initialFolders,
   defaultPlanId,
   defaultSessionId,
+  defaultFolderId,
   defaultNoteId,
 }: NotesManagerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  const [activeFolderId, setActiveFolderId] = useQueryState(
+    "folderId",
+    parseAsString.withDefault(defaultFolderId || "all")
+  );
+  const [noteIdQuery, setNoteIdQuery] = useQueryState(
+    "noteId",
+    parseAsString.withDefault(defaultNoteId || "")
+  );
 
   const [notesList, setNotesList] = useState<NoteDetail[]>(initialNotes);
   const [folders, setFolders] = useState<NoteFolderDetail[]>(initialFolders);
@@ -108,13 +120,13 @@ export function NotesManager({
   const [activeTab, setActiveTab] = useState<"active" | "folders" | "archived">(
     "active"
   );
-  const [activeFolderId, setActiveFolderId] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [sortBy, setSortBy] = useState<NoteSortOption>("updated_desc");
 
   // Target note parameter from props or URL
-  const targetNoteId = defaultNoteId || searchParams.get("noteId");
+  const targetNoteId =
+    noteIdQuery || defaultNoteId || searchParams.get("noteId");
 
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<"list" | "editor">(() => {
@@ -243,6 +255,7 @@ export function NotesManager({
   // Switch active note implementation
   const performSelectNote = ({ noteId }: SelectNoteParams) => {
     setSelectedNoteId(noteId);
+    void setNoteIdQuery(noteId);
     setIsDirty(false);
     setMobileView("editor");
     const target = notesList.find((n) => n.id === noteId);
@@ -354,6 +367,7 @@ export function NotesManager({
       if (res.success && res.note) {
         setNotesList((prev) => [res.note, ...prev]);
         setSelectedNoteId(res.note.id);
+        void setNoteIdQuery(res.note.id);
         currentDraftRef.current = {
           title: res.note.title,
           bodyHtml: res.note.bodyHtml,
@@ -399,6 +413,7 @@ export function NotesManager({
           activeTab === "archived" ? n.isArchived : !n.isArchived
         );
         setSelectedNoteId(nextActive?.id ?? null);
+        void setNoteIdQuery(nextActive?.id ?? null);
         setIsDirty(false);
         setMobileView("list");
         router.refresh();
@@ -521,7 +536,7 @@ export function NotesManager({
   // Switch folder filter implementation
   const performSwitchFolder = ({ folderId }: SwitchFolderParams) => {
     setActiveTab("active");
-    setActiveFolderId(folderId);
+    void setActiveFolderId(folderId);
     setIsDirty(false);
 
     const notesInFolder = notesList.filter((note) => {
@@ -553,6 +568,7 @@ export function NotesManager({
 
     const first = sorted[0] ?? null;
     setSelectedNoteId(first?.id ?? null);
+    void setNoteIdQuery(first?.id ?? null);
     if (first) {
       currentDraftRef.current = {
         title: first.title,
@@ -720,7 +736,7 @@ export function NotesManager({
 
   return (
     <>
-      <div className="ui-card h-[calc(100dvh-10rem)] md:h-[calc(100dvh-5.5rem)] max-h-[1150px] overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border-subtle">
+      <div className="ui-card w-full h-[calc(100dvh-10rem)] md:h-[calc(100dvh-5.5rem)] max-h-[1150px] overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border-subtle">
         {/* ================= LEFT PANE: NOTEBOOK SHELF & EXPLORER ================= */}
         <aside
           className={`w-full md:w-[360px] lg:w-[380px] xl:w-[410px] shrink-0 flex flex-col min-h-0 bg-surface ${
@@ -1322,7 +1338,7 @@ export function NotesManager({
               {/* Scrollable Journal Canvas */}
               <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-10 pb-16 flex flex-col items-center">
                 {/* Physical Journal Page Sheet */}
-                <div className="ui-card w-full max-w-3xl shrink-0 p-6 sm:p-10 lg:p-12 space-y-5 min-h-[560px]">
+                <div className="ui-card w-full max-w-4xl lg:max-w-5xl 2xl:max-w-6xl shrink-0 p-6 sm:p-10 lg:p-12 space-y-5 min-h-[560px]">
                   {/* Journal Document Metadata Strip: Folder Selector + Plan Link + Timestamp */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-border">
                     <div className="flex flex-wrap items-center gap-2">

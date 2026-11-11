@@ -374,7 +374,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-dvh items-center justify-center">
-          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-zinc-100" />
+          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-white" />
         </div>
       }
     >

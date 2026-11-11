@@ -7,6 +7,29 @@ type StreakHeatmapCardProps = {
   data: OverviewStreakHeatmapData;
 };
 
+type FormatHeatmapDateParams = {
+  dateStr: string;
+};
+
+function formatHeatmapDate({ dateStr }: FormatHeatmapDateParams): string {
+  try {
+    const parts = dateStr.split("-");
+    const year = parseInt(parts[0] || "", 10);
+    const month = parseInt(parts[1] || "", 10);
+    const day = parseInt(parts[2] || "", 10);
+    if (!year || !month || !day) return dateStr;
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
   const {
     currentStreak,
@@ -19,6 +42,15 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
     isTodayCompleted,
     takeaway,
   } = data;
+
+  // Filter out leading month labels that only have 1 week before the next month
+  const displayMonthLabels = monthLabels.filter((ml, idx) => {
+    const next = monthLabels[idx + 1];
+    if (next && next.colIndex - ml.colIndex < 2) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="ui-card flex h-full flex-col justify-between p-4.5 sm:p-5 shadow-xs">
@@ -40,78 +72,100 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
         </div>
       </div>
 
-      {/* Top Visuals: Current Week Strip + Calendar Heatmap (pushed upward) */}
-      <div className="flex flex-col gap-2 min-[1440px]:gap-3 pt-1.5 shrink-0">
+      {/* Top Visuals: Current Week Strip + Calendar Heatmap */}
+      <div className="flex flex-col gap-2 min-[1440px]:gap-3 pt-1 shrink-0">
         {/* Mon-Sun Week Strip */}
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] sm:text-[11px] min-[1440px]:text-[12px] font-semibold uppercase tracking-wider text-foreground-dim">
-            This Week
-          </span>
-          <div className="flex items-center gap-1 sm:gap-1.5 min-[1440px]:gap-2">
-            {weekDays.map((day) => {
-              let badgeStyle =
-                "border border-border text-foreground-dim bg-transparent"; // hollow
-              if (day.isRead) {
-                badgeStyle =
-                  "bg-primary text-primary-foreground border-transparent shadow-2xs font-semibold";
-              } else if (day.isFrozen) {
-                badgeStyle =
-                  "border border-dashed border-primary/60 bg-primary/10 text-primary font-medium";
-              } else if (day.isMissed) {
-                badgeStyle =
-                  "border border-border-strong text-foreground-dim/60 bg-transparent";
-              }
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5 w-full">
+          {weekDays.map((day) => {
+            let badgeStyle =
+              "border border-border text-foreground-dim bg-transparent"; // hollow
+            if (day.isRead) {
+              badgeStyle =
+                "bg-primary text-primary-foreground border-transparent shadow-2xs font-semibold";
+            } else if (day.isFrozen) {
+              badgeStyle =
+                "border border-dashed border-primary/60 bg-primary/10 text-primary font-medium";
+            } else if (day.isMissed) {
+              badgeStyle =
+                "border border-border-strong text-foreground-dim/60 bg-transparent";
+            }
 
-              const todayOutline = day.isToday
-                ? "ring-1.5 ring-foreground ring-offset-1 ring-offset-surface"
-                : "";
+            const todayOutline = day.isToday
+              ? "ring-1.5 ring-foreground ring-offset-1 ring-offset-surface"
+              : "";
 
-              return (
+            const dayNum = parseInt(day.dateStr.split("-")[2] || "1", 10);
+
+            return (
+              <div
+                key={day.dateStr}
+                className="flex flex-col items-center gap-1"
+              >
+                <span className="text-[9.5px] sm:text-[10px] min-[1440px]:text-[11px] font-medium text-foreground-dim leading-none">
+                  {day.dayLabel.charAt(0)}
+                </span>
                 <div
-                  key={day.dateStr}
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex size-6 sm:size-6.5 min-[1440px]:size-7.5 items-center justify-center rounded-full text-[9.5px] sm:text-[10px] min-[1440px]:text-[11px] tabular-nums transition-all ${badgeStyle} ${todayOutline}`}
+                  title={`${day.dayLabel} (${formatHeatmapDate({ dateStr: day.dateStr })}): ${
+                    day.isRead
+                      ? "Read"
+                      : day.isFrozen
+                        ? "Streak Freeze Used"
+                        : day.isToday
+                          ? "Today"
+                          : "Missed"
+                  }`}
                 >
-                  <div
-                    className={`flex size-6 sm:size-6.5 min-[1440px]:size-7.5 2xl:size-8.5 items-center justify-center rounded-full text-[9px] sm:text-[10px] min-[1440px]:text-[11.5px] 2xl:text-[12px] tabular-nums transition-all ${badgeStyle} ${todayOutline}`}
-                    title={`${day.dayLabel} (${day.dateStr}): ${
-                      day.isRead
-                        ? "Read"
-                        : day.isFrozen
-                          ? "Streak Freeze Used"
-                          : day.isToday
-                            ? "Today"
-                            : "Missed"
-                    }`}
-                  >
-                    {day.dayLabel.charAt(0)}
-                  </div>
+                  {dayNum}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Mini Calendar Heatmap */}
         <div className="w-full">
           {/* Month labels header */}
-          <div className="grid grid-cols-16 gap-1 w-full text-[9px] sm:text-[10px] min-[1440px]:text-[11px] font-medium text-foreground-dim pl-4 mb-1">
-            {Array.from({ length: 16 }).map((_, col) => {
-              const ml = monthLabels.find((m) => m.colIndex === col);
-              return (
-                <span key={`month-${col}`} className="truncate">
-                  {ml ? ml.label : ""}
-                </span>
-              );
-            })}
+          <div className="flex items-center gap-1.5 w-full mb-1">
+            <div className="w-6 shrink-0" />
+            <div className="relative flex-1 h-3.5">
+              {displayMonthLabels.map((ml) => {
+                const isLateMonth = ml.colIndex >= 14;
+                return (
+                  <span
+                    key={`month-${ml.colIndex}-${ml.label}`}
+                    className="absolute text-[9px] sm:text-[10px] min-[1440px]:text-[10.5px] font-medium text-foreground-dim leading-none"
+                    style={{
+                      left: isLateMonth
+                        ? undefined
+                        : `${(ml.colIndex / 16) * 100}%`,
+                      right: isLateMonth ? 0 : undefined,
+                    }}
+                  >
+                    {ml.label}
+                  </span>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Grid: 7 rows with M/W/F labels on left, 16 columns of days */}
+          {/* Grid: 7 rows with Mon/Wed/Fri labels on left, 16 columns of days */}
           <div className="flex items-center gap-1.5 w-full">
             {/* Day of week row labels */}
-            <div className="flex flex-col justify-between text-[8.5px] sm:text-[9.5px] min-[1440px]:text-[10.5px] font-medium text-foreground-dim h-[70px] sm:h-[76px] min-[1440px]:h-[95px] 2xl:h-[115px] py-0.5">
-              <span>M</span>
-              <span>W</span>
-              <span>F</span>
+            <div className="w-6 shrink-0 grid grid-rows-7 gap-1 min-[1440px]:gap-1.5 pr-1 text-[8.5px] sm:text-[9.5px] min-[1440px]:text-[10px] font-medium text-foreground-dim h-[70px] sm:h-[76px] min-[1440px]:h-[95px] 2xl:h-[115px]">
+              <span className="flex items-center justify-end leading-none">
+                Mon
+              </span>
+              <span />
+              <span className="flex items-center justify-end leading-none">
+                Wed
+              </span>
+              <span />
+              <span className="flex items-center justify-end leading-none">
+                Fri
+              </span>
+              <span />
+              <span />
             </div>
 
             {/* Heatmap 16 Columns */}
@@ -140,11 +194,25 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
                       ? "ring-1.5 ring-foreground ring-offset-0.5 ring-offset-surface"
                       : "";
 
+                    const formattedDate = formatHeatmapDate({
+                      dateStr: cell.dateStr,
+                    });
+                    const statusText =
+                      cell.count > 0
+                        ? `${cell.count} chapter${cell.count === 1 ? "" : "s"}`
+                        : cell.isFrozen
+                          ? "Streak Freeze Used"
+                          : cell.isToday
+                            ? "Today (not read yet)"
+                            : cell.isFuture
+                              ? "Upcoming"
+                              : "No reading logged";
+
                     return (
                       <div
                         key={cell.dateStr}
                         className={`w-full h-full rounded-[2px] min-[1440px]:rounded-[3.5px] transition-colors ${cellBg} ${todayOutline}`}
-                        title={`${cell.dateStr}: ${cell.count} chapter${cell.count === 1 ? "" : "s"}${cell.isFrozen ? " (Frozen)" : ""}`}
+                        title={`${formattedDate}: ${statusText}`}
                       />
                     );
                   })}

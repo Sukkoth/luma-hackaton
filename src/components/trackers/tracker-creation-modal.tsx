@@ -57,15 +57,6 @@ const CANON_OPTIONS: ReadonlyArray<{
   },
 ];
 
-const TRACKER_COLORS = [
-  { name: "Olive Primary", value: "#DADAD6" },
-  { name: "Deep Slate", value: "#1A212D" },
-  { name: "Emerald", value: "#10B981" },
-  { name: "Amber", value: "#F59E0B" },
-  { name: "Sapphire", value: "#3B82F6" },
-  { name: "Rose", value: "#EF4444" },
-] as const;
-
 const TRACKER_ICONS = [
   { id: "book-open", label: "Open Book", icon: BookOpen },
   { id: "bookmark", label: "Bookmark", icon: Bookmark },
@@ -86,9 +77,6 @@ export function TrackerCreationModal({
 
   const [selectedCanonId, setSelectedCanonId] =
     useState<BibleCanon>("protestant");
-  const [selectedColor, setSelectedColor] = useState<string>(
-    TRACKER_COLORS[0].value
-  );
   const [selectedIcon, setSelectedIcon] = useState<string>("book-open");
 
   if (!isOpen) return null;
@@ -101,7 +89,6 @@ export function TrackerCreationModal({
     const name = (formData.get("name") as string)?.trim();
     const canon = (formData.get("canon") as BibleCanon) || "protestant";
 
-    if (!formData.get("color")) formData.set("color", selectedColor);
     if (!formData.get("icon")) formData.set("icon", selectedIcon);
     if (!formData.get("canon")) formData.set("canon", canon);
 
@@ -118,6 +105,14 @@ export function TrackerCreationModal({
       if (!result.success) {
         setErrorMessage(result.error);
         return;
+      }
+
+      if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
+        window.dispatchEvent(
+          new CustomEvent("achievement-unlocked", {
+            detail: result.newlyUnlocked,
+          })
+        );
       }
 
       onTrackerCreated?.(result);
@@ -253,59 +248,32 @@ export function TrackerCreationModal({
             </div>
           </div>
 
-          {/* Style Customization: Color and Icon */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Color Palette */}
-            <div>
-              <label className="block text-[12px] font-medium text-foreground">
-                Accent Color
-              </label>
-              <input type="hidden" name="color" value={selectedColor} />
-              <div className="mt-1.5 flex items-center gap-2">
-                {TRACKER_COLORS.map((c) => (
+          {/* Style Customization: Icon Picker */}
+          <div>
+            <label className="block text-[12px] font-medium text-foreground">
+              Tracker Icon
+            </label>
+            <input type="hidden" name="icon" value={selectedIcon} />
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              {TRACKER_ICONS.map((i) => {
+                const IconComp = i.icon;
+                const isSelected = selectedIcon === i.id;
+                return (
                   <button
-                    key={c.name}
+                    key={i.id}
                     type="button"
-                    title={c.name}
-                    onClick={() => setSelectedColor(c.value)}
-                    className={`size-6 rounded-full transition-transform cursor-pointer ${
-                      selectedColor === c.value
-                        ? "ring-2 ring-primary ring-offset-2 scale-110"
-                        : "opacity-75 hover:opacity-100"
+                    title={i.label}
+                    onClick={() => setSelectedIcon(i.id)}
+                    className={`flex size-8 items-center justify-center rounded-[10px] border transition-all cursor-pointer ${
+                      isSelected
+                        ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                        : "border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
                     }`}
-                    style={{ backgroundColor: c.value }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Icon Picker */}
-            <div>
-              <label className="block text-[12px] font-medium text-foreground">
-                Tracker Icon
-              </label>
-              <input type="hidden" name="icon" value={selectedIcon} />
-              <div className="mt-1.5 flex items-center gap-1.5">
-                {TRACKER_ICONS.map((i) => {
-                  const IconComp = i.icon;
-                  const isSelected = selectedIcon === i.id;
-                  return (
-                    <button
-                      key={i.id}
-                      type="button"
-                      title={i.label}
-                      onClick={() => setSelectedIcon(i.id)}
-                      className={`flex size-8 items-center justify-center rounded-[10px] border transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-primary text-primary-foreground shadow-xs"
-                          : "border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                      }`}
-                    >
-                      <IconComp className="size-4" />
-                    </button>
-                  );
-                })}
-              </div>
+                  >
+                    <IconComp className="size-4" />
+                  </button>
+                );
+              })}
             </div>
           </div>
 

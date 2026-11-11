@@ -1240,7 +1240,7 @@ export function CustomPlanWizardModal({
                           </span>
                         </div>
                       </div>
-                      <span className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[13px] font-bold text-zinc-900 dark:text-white">
                         ~
                         {Math.max(
                           1,
@@ -1491,7 +1491,7 @@ export function CustomPlanWizardModal({
                                   <span
                                     className={`text-[9px] leading-tight ${
                                       occurrences > 0
-                                        ? "text-zinc-900 dark:text-zinc-100 font-semibold"
+                                        ? "text-zinc-900 dark:text-white font-semibold"
                                         : "invisible select-none"
                                     }`}
                                   >
@@ -1842,7 +1842,7 @@ export function CustomPlanWizardModal({
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
                         Projected Duration
                       </span>
-                      <span className="text-[14px] font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[14px] font-bold text-zinc-900 dark:text-white">
                         ~
                         {Math.max(
                           1,
@@ -1949,7 +1949,7 @@ export function CustomPlanWizardModal({
                     >
                       <AlertTriangle className="size-4 shrink-0 mt-0.5 text-zinc-600 dark:text-zinc-400" />
                       <div className="space-y-1">
-                        <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        <p className="font-semibold text-zinc-900 dark:text-white">
                           Session Distribution Warning
                         </p>
                         <p className="leading-relaxed opacity-95">
@@ -2034,7 +2034,7 @@ export function CustomPlanWizardModal({
                           ? "Curated Sessions"
                           : "Projected Duration"}
                       </span>
-                      <span className="text-[16px] font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[16px] font-bold text-zinc-900 dark:text-white">
                         {pacingStyle === "locked_curated"
                           ? `${populatedSessions.length} Sessions`
                           : `~${Math.max(1, Math.ceil(totalPlanChapters / Math.max(1, dailyTarget)))} Days`}

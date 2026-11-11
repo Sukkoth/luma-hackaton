@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import { Search, X } from "lucide-react";
-import { TopNavbar } from "@/components/luma/top-navbar";
+import { AppShell } from "@/components/navigation/app-shell";
 import {
   type BibleCanon,
   getBibleBooks,
@@ -50,8 +51,14 @@ export function BooksView({
   const router = useRouter();
   const { data: session } = useSession();
   const [, startTransition] = useTransition();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("")
+  );
+  const [selectedCategory, setSelectedCategory] = useQueryState(
+    "category",
+    parseAsString.withDefault("All")
+  );
   const [readChapters, setReadChapters] =
     useState<Record<string, ReadonlyArray<number>>>(initialReadData);
   const [activeBook, setActiveBook] = useState<BibleBook | null>(null);
@@ -134,6 +141,12 @@ export function BooksView({
           ...prev,
           [bookId]: current,
         }));
+      } else if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
+        window.dispatchEvent(
+          new CustomEvent("achievement-unlocked", {
+            detail: result.newlyUnlocked,
+          })
+        );
       }
     });
   };
@@ -166,6 +179,12 @@ export function BooksView({
           ...prev,
           [book.id]: current,
         }));
+      } else if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
+        window.dispatchEvent(
+          new CustomEvent("achievement-unlocked", {
+            detail: result.newlyUnlocked,
+          })
+        );
       }
     });
   };
@@ -200,144 +219,145 @@ export function BooksView({
   };
 
   return (
-    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navbar */}
-      <TopNavbar
-        userName={userName || session?.user?.name || "Reader"}
-        streak={streak}
-        trackers={trackers}
-        activeTrackerId={activeTrackerId}
-      />
+    <AppShell
+      userName={userName || session?.user?.name || "Reader"}
+      userEmail={session?.user?.email}
+      userImage={session?.user?.image ?? undefined}
+      streak={streak}
+      trackers={trackers}
+      activeTrackerId={activeTrackerId}
+    >
+      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
+        {/* Top Highlight Cards: Verse of the Day & Active Reading */}
+        <VerseOfTheDayBanner
+          totalReadChapters={totalReadChapters}
+          totalChaptersAcrossCanon={totalChaptersAcrossCanon}
+          canonPercentage={canonPercentage}
+          verse={verseOfTheDay}
+        />
 
-      {/* Top Highlight Cards: Verse of the Day & Active Reading */}
-      <VerseOfTheDayBanner
-        totalReadChapters={totalReadChapters}
-        totalChaptersAcrossCanon={totalChaptersAcrossCanon}
-        canonPercentage={canonPercentage}
-        verse={verseOfTheDay}
-      />
-
-      {/* Books Section */}
-      <section className="ui-card mt-4 p-5 sm:p-6">
-        {/* Header & Controls Toolbar */}
-        <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-[20px] font-medium tracking-tight text-foreground">
-                All Books
-              </h2>
-              <span className="ui-pill text-[11px] font-medium">
-                {filteredBooks.length} Books
-              </span>
-              {trackerName && (
-                <span className="hidden rounded-full border border-border bg-surface-elevated px-2.5 py-0.5 text-[10px] font-medium text-foreground sm:inline-block">
-                  {trackerName}
+        {/* Books Section */}
+        <section className="ui-card mt-4 p-5 sm:p-6">
+          {/* Header & Controls Toolbar */}
+          <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-[20px] font-medium tracking-tight text-foreground">
+                  All Books
+                </h2>
+                <span className="ui-pill text-[11px] font-medium">
+                  {filteredBooks.length} Books
                 </span>
+                {trackerName && (
+                  <span className="hidden rounded-full border border-border bg-surface-elevated px-2.5 py-0.5 text-[10px] font-medium text-foreground sm:inline-block">
+                    {trackerName}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-[13px] font-normal text-foreground-secondary">
+                Tap any book to view chapters and toggle your reading progress.
+              </p>
+            </div>
+
+            {/* Search Box */}
+            <div className="relative w-full sm:w-64">
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search books..."
+                className="w-full rounded-[14px] border border-border bg-surface-elevated py-2 pr-3.5 pl-9 text-[13px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
+                >
+                  <X className="size-3.5" />
+                </button>
               )}
             </div>
-            <p className="mt-1 text-[13px] font-normal text-foreground-secondary">
-              Tap any book to view chapters and toggle your reading progress.
-            </p>
           </div>
 
-          {/* Search Box */}
-          <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search books..."
-              className="w-full rounded-[14px] border border-border bg-surface-elevated py-2 pr-3.5 pl-9 text-[13px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
-            />
-            {searchQuery && (
+          {/* Category Filter Pills - Horizontally scrollable on small screens */}
+          <div
+            data-testid="books-category-filter"
+            className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
+          >
+            {categoryFilters.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`shrink-0 rounded-[12px] px-3.5 py-1.5 text-[12px] transition-all cursor-pointer ${
+                    isSelected
+                      ? "border border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
+                      : "border border-border bg-surface-elevated font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground"
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 66 Books Grid */}
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {filteredBooks.map((book) => {
+              const readList = readChapters[book.id] ?? [];
+              return (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  readCount={readList.length}
+                  onSelect={({ book: selected }) => setActiveBook(selected)}
+                />
+              );
+            })}
+          </div>
+
+          {filteredBooks.length === 0 && (
+            <div className="py-16 text-center text-foreground-dim">
+              <p className="text-[15px] font-normal">
+                No Bible books found matching &ldquo;{searchQuery}&rdquo;.
+              </p>
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("All");
+                }}
+                className="mt-3 rounded-xl border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white"
               >
-                <X className="size-3.5" />
+                Reset Filters
               </button>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+        </section>
 
-        {/* Category Filter Pills - Horizontally scrollable on small screens */}
-        <div
-          data-testid="books-category-filter"
-          className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
-        >
-          {categoryFilters.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`shrink-0 rounded-[12px] px-3.5 py-1.5 text-[12px] transition-all cursor-pointer ${
-                  isSelected
-                    ? "border border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
-                    : "border border-border bg-surface-elevated font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* 66 Books Grid */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {filteredBooks.map((book) => {
-            const readList = readChapters[book.id] ?? [];
-            return (
-              <BookCard
-                key={book.id}
-                book={book}
-                readCount={readList.length}
-                onSelect={({ book: selected }) => setActiveBook(selected)}
-              />
-            );
-          })}
-        </div>
-
-        {filteredBooks.length === 0 && (
-          <div className="py-16 text-center text-foreground-dim">
-            <p className="text-[15px] font-normal">
-              No Bible books found matching &ldquo;{searchQuery}&rdquo;.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCategory("All");
-              }}
-              className="mt-3 rounded-xl border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white"
-            >
-              Reset Filters
-            </button>
-          </div>
+        {/* Chapter Selection Drawer / Modal */}
+        {activeBook && (
+          <BookChaptersModal
+            book={activeBook}
+            readChapters={readChapters[activeBook.id] ?? []}
+            onClose={() => setActiveBook(null)}
+            onToggleChapter={handleToggleChapter}
+            onMarkAll={handleMarkAllChapters}
+            onClearAll={handleClearAllChapters}
+          />
         )}
-      </section>
 
-      {/* Chapter Selection Drawer / Modal */}
-      {activeBook && (
-        <BookChaptersModal
-          book={activeBook}
-          readChapters={readChapters[activeBook.id] ?? []}
-          onClose={() => setActiveBook(null)}
-          onToggleChapter={handleToggleChapter}
-          onMarkAll={handleMarkAllChapters}
-          onClearAll={handleClearAllChapters}
+        {/* Auth Guard Modal */}
+        <BooksAuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onSignIn={() => router.push("/login?redirect=/books")}
         />
-      )}
-
-      {/* Auth Guard Modal */}
-      <BooksAuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSignIn={() => router.push("/login?redirect=/books")}
-      />
-    </div>
+      </div>
+    </AppShell>
   );
 }
