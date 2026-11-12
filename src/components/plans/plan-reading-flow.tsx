@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,13 +8,20 @@ import {
   Check,
   CheckCircle2,
   Lock,
+  BookOpen,
 } from "lucide-react";
 import type {
   PlanSessionDetail,
   PlanPartDetail,
   PlanNoteDetail,
 } from "@/actions/plans";
+import { useTheme } from "@/components/theme/theme-provider";
+import {
+  buildBibleComPath,
+  detectDefaultVersion,
+} from "@/lib/bible-versions";
 import { PlanSessionNotes } from "./plan-session-notes";
+import { PlanBibleReaderModal } from "./plan-bible-reader-modal";
 
 type PlanReadingFlowProps = {
   instanceId: string;
@@ -73,7 +80,9 @@ export function PlanReadingFlow({
   onNoteDeletedAction,
   mode,
 }: PlanReadingFlowProps) {
+  const { resolvedTheme } = useTheme();
   const carouselRef = useRef<HTMLDivElement>(null);
+  const [readingModalId, setReadingModalId] = useState<string | null>(null);
 
   const currentPart =
     parts.find((p) => p.partIndex === activePartIndex) || parts[0];
@@ -89,6 +98,29 @@ export function PlanReadingFlow({
     sessions.find((s) => s.sessionIndex === activeSessionIndex) ||
     partSessions[0] ||
     sessions[0];
+
+  // Quietly pre-warm active session readings into the server disk cache
+  useEffect(() => {
+    if (!activeSession || typeof window === "undefined") return;
+
+    const timer = setTimeout(() => {
+      const defaultVersion = detectDefaultVersion({});
+      for (const reading of activeSession.readings) {
+        const path = buildBibleComPath({
+          versionId: defaultVersion.id,
+          bookId: reading.bookId,
+          chapter: reading.chapter,
+        });
+        void fetch(
+          `/api/bible-proxy?path=${encodeURIComponent(
+            path
+          )}&theme=${resolvedTheme}`
+        );
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [activeSession, resolvedTheme]);
 
   const handlePrevPart = () => {
     if (activePartIndex > 1) {
@@ -244,22 +276,33 @@ export function PlanReadingFlow({
                       <div
                         key={reading.id}
                         data-testid="locked-reading-item"
-                        className="flex items-center gap-2 rounded-lg px-1 py-1 select-none opacity-50 cursor-not-allowed"
+                        className="flex items-center justify-between gap-2 rounded-lg px-1 py-1 select-none opacity-50 cursor-not-allowed"
                         title="Complete previous sessions to unlock"
                       >
-                        {/* Lock Icon replacing checkbox */}
-                        <div
-                          className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-surface text-foreground-dim"
-                          aria-label="Locked"
-                        >
-                          <Lock className="size-2.5" />
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {/* Lock Icon replacing checkbox */}
+                          <div
+                            className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-surface text-foreground-dim"
+                            aria-label="Locked"
+                          >
+                            <Lock className="size-2.5" />
+                          </div>
+
+                          {/* Reading Title */}
+                          <span className="truncate text-[12px] font-medium text-foreground-dim">
+                            {reading.displayText ||
+                              `${reading.bookName} ${reading.chapter}`}
+                          </span>
                         </div>
 
-                        {/* Reading Title */}
-                        <span className="truncate text-[12px] font-medium text-foreground-dim">
-                          {reading.displayText ||
-                            `${reading.bookName} ${reading.chapter}`}
-                        </span>
+                        {/* Locked Book Icon */}
+                        <div
+                          className="flex size-6 shrink-0 items-center justify-center rounded-md text-foreground-dim/40 cursor-not-allowed"
+                          title="Locked"
+                          aria-label="Locked"
+                        >
+                          <BookOpen className="size-3" />
+                        </div>
                       </div>
                     );
                   }
@@ -267,40 +310,58 @@ export function PlanReadingFlow({
                   return (
                     <div
                       key={reading.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleReadingAction(reading.id);
-                      }}
-                      role="button"
-                      aria-label={`Toggle reading ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
-                      aria-pressed={reading.isCompleted}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          onToggleReadingAction(reading.id);
-                        }
-                      }}
-                      className="group flex items-center gap-2 rounded-lg px-1 py-1 text-left transition-colors hover:bg-surface-elevated/70 cursor-pointer"
+                      className="group flex items-center justify-between gap-1.5 rounded-lg px-1 py-1 transition-colors hover:bg-surface-elevated/70"
                     >
-                      {/* Circular Checkbox */}
                       <div
-                        className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-all ${
-                          reading.isCompleted
-                            ? "bg-primary text-primary-foreground shadow-xs"
-                            : "border border-border bg-transparent group-hover:border-border-strong"
-                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleReadingAction(reading.id);
+                        }}
+                        role="button"
+                        aria-label={`Toggle reading ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                        aria-pressed={reading.isCompleted}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onToggleReadingAction(reading.id);
+                          }
+                        }}
+                        className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                       >
-                        {reading.isCompleted && (
-                          <Check className="size-2.5" strokeWidth={3} />
-                        )}
+                        {/* Circular Checkbox */}
+                        <div
+                          className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-all ${
+                            reading.isCompleted
+                              ? "bg-primary text-primary-foreground shadow-xs"
+                              : "border border-border bg-transparent group-hover:border-border-strong"
+                          }`}
+                        >
+                          {reading.isCompleted && (
+                            <Check className="size-2.5" strokeWidth={3} />
+                          )}
+                        </div>
+
+                        {/* Reading Title */}
+                        <span className="truncate text-[12px] font-medium text-foreground transition-colors">
+                          {reading.displayText ||
+                            `${reading.bookName} ${reading.chapter}`}
+                        </span>
                       </div>
 
-                      {/* Reading Title */}
-                      <span className="truncate text-[12px] font-medium text-foreground transition-colors">
-                        {reading.displayText ||
-                          `${reading.bookName} ${reading.chapter}`}
-                      </span>
+                      {/* Read Passage Book Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReadingModalId(reading.id);
+                        }}
+                        aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                        title="Read passage"
+                        className="flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent text-foreground-dim transition-all hover:border-border hover:bg-surface hover:text-foreground active:scale-95 cursor-pointer"
+                      >
+                        <BookOpen className="size-3.5" />
+                      </button>
                     </div>
                   );
                 })}
@@ -322,6 +383,16 @@ export function PlanReadingFlow({
           onNoteDeletedAction={onNoteDeletedAction}
         />
       )}
+
+      {/* Bible Reading Webview Modal */}
+      <PlanBibleReaderModal
+        isOpen={readingModalId !== null}
+        onCloseAction={() => setReadingModalId(null)}
+        allSessions={sessions}
+        currentReadingId={readingModalId}
+        onSelectReadingAction={(readingId) => setReadingModalId(readingId)}
+        onToggleReadingAction={onToggleReadingAction}
+      />
     </div>
   );
 }
