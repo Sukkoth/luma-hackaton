@@ -9,7 +9,7 @@ import sanitizeHtml from "sanitize-html";
 dns.setDefaultResultOrder("ipv4first");
 
 // Content version for cache invalidation — bump when extractor logic changes
-const CONTENT_VERSION = "v2";
+const CONTENT_VERSION = "v3";
 
 type ExtractChapterContentParams = {
   html: string;
@@ -96,6 +96,12 @@ function extractChapterContent({
       const id = frame.attribs?.id || "";
       const role = frame.attribs?.role || "";
       const style = frame.attribs?.style || "";
+      const src = frame.attribs?.src || "";
+      const dataSrc = frame.attribs?.["data-src"] || "";
+      const backgroundImage = frame.attribs?.["background-image"] || "";
+
+      // Also check for background-image in style attribute
+      const hasBackgroundImage = style.includes("background-image") || backgroundImage !== "";
 
       return (
         tag === "img" ||
@@ -114,6 +120,9 @@ function extractChapterContent({
         tag === "aside" ||
         tag === "button" ||
         tag === "form" ||
+        hasBackgroundImage ||
+        src.includes("ad") ||
+        dataSrc.includes("ad") ||
         className.includes("Ad") ||
         className.includes("ad-") ||
         className.includes("Banner") ||
@@ -332,6 +341,26 @@ function sanitizeHtmlContent({ html }: { html: string }): string {
     allowProtocolRelative: false,
     transformTags: {
       a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+    },
+    exclusiveFilter: (frame) => {
+      const tag = frame.tag;
+      const style = frame.attribs?.style || "";
+      const className = frame.attribs?.class || "";
+      return (
+        tag === "img" ||
+        tag === "picture" ||
+        tag === "source" ||
+        tag === "svg" ||
+        tag === "canvas" ||
+        tag === "video" ||
+        tag === "audio" ||
+        tag === "iframe" ||
+        style.includes("background-image") ||
+        className.includes("ad") ||
+        className.includes("Ad") ||
+        className.includes("banner") ||
+        className.includes("Banner")
+      );
     },
   });
 }
