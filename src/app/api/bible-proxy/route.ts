@@ -149,6 +149,14 @@ function extractChapterContent({
         className.includes("cta") ||
         className.includes("Interstitial") ||
         className.includes("interstitial") ||
+        className.includes("Section") ||
+        className.includes("section") ||
+        className.includes("Heading") ||
+        className.includes("heading") ||
+        className.includes("ChapterTitle") ||
+        className.includes("chapter-title") ||
+        className.includes("PassageHeader") ||
+        className.includes("passage-header") ||
         id.includes("ad") ||
         id.includes("banner") ||
         id.includes("cookie") ||
@@ -189,13 +197,22 @@ function extractChapterContent({
     // Join all matching paragraphs (verse content may span multiple <p>)
     const versesHtml = pMatches.join("");
 
-    return `<div class="luma-verse-range-card">
+    const cardHtml = `<div class="luma-verse-range-card">
       ${headingHtml}
       <div class="luma-verse-range-content">
         ${versesHtml}
       </div>
       ${copyrightHtml}
     </div>`;
+
+    // Heuristic: if the extracted card is too large (>15KB), it likely contains
+    // junk that slipped through (common for verse-1 starts with chapter headings).
+    // Fall back to plain-text extraction which is more aggressive.
+    if (cardHtml.length > 15000) {
+      return null; // triggers fallback to extractPlainTextContent
+    }
+
+    return cardHtml;
   }
 
   return null;
