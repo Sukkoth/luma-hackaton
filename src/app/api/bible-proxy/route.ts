@@ -346,6 +346,10 @@ function sanitizeHtmlContent({ html }: { html: string }): string {
       const tag = frame.tag;
       const style = frame.attribs?.style || "";
       const className = frame.attribs?.class || "";
+      // Match ad/banner as whole words or with common separators (-, _, space)
+      // to avoid false positives like "card", "heading", "sidebar", "luma-verse-range-card"
+      const adRegex = /\b(ad|banner)\b/i;
+      const hasAdClass = adRegex.test(className);
       return (
         tag === "img" ||
         tag === "picture" ||
@@ -356,10 +360,7 @@ function sanitizeHtmlContent({ html }: { html: string }): string {
         tag === "audio" ||
         tag === "iframe" ||
         style.includes("background-image") ||
-        className.includes("ad") ||
-        className.includes("Ad") ||
-        className.includes("banner") ||
-        className.includes("Banner")
+        hasAdClass
       );
     },
   });
