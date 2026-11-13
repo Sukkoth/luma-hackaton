@@ -1,10 +1,15 @@
 import dns from "node:dns";
 import fs from "node:fs/promises";
-import path from "node:path";
+import nodePath from "node:path";
+import crypto from "node:crypto";
 import { type NextRequest } from "next/server";
+import sanitizeHtml from "sanitize-html";
 
 // Force IPv4 first to prevent unreachable IPv6 timeouts in Linux environments
 dns.setDefaultResultOrder("ipv4first");
+
+// Content version for cache invalidation — bump when extractor logic changes
+const CONTENT_VERSION = "v2";
 
 type ExtractChapterContentParams = {
   html: string;
@@ -97,25 +102,103 @@ function extractHeadLinks({ html }: ExtractHeadLinksParams): string {
     .join("\n");
 }
 
-type SanitizeHtmlContentParams = {
-  html: string;
-};
+/**
+ * Extracts only text content from a page — used when structured extraction fails.
+ * Returns sanitized plain text + inline links, no layout/navigation markup.
+ */
+function extractPlainTextContent({ html }: { html: string }): string {
+  return sanitizeHtml(html, {
+    allowedTags: ["p", "span", "a", "br", "strong", "em", "b", "i", "sup", "h1", "h2", "h3", "h4"],
+    allowedAttributes: {
+      a: ["href"],
+      span: ["data-usfm"],
+      p: ["class"],
+      h1: ["class"],
+      h2: ["class"],
+      h3: ["class"],
+      h4: ["class"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    allowedSchemesByTag: { a: ["http", "https"] },
+    allowProtocolRelative: false,
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+    },
+    exclusiveFilter: (frame) => {
+      // Drop nav, header, footer, script containers, ads, etc.
+      const tag = frame.tag;
+      const className = frame.attribs?.class || "";
+      const id = frame.attribs?.id || "";
+      const role = frame.attribs?.role || "";
+      return (
+        tag === "nav" ||
+        tag === "header" ||
+        tag === "footer" ||
+        tag === "aside" ||
+        tag === "script" ||
+        tag === "style" ||
+        tag === "button" ||
+        className.includes("Nav") ||
+        className.includes("Header") ||
+        className.includes("Footer") ||
+        className.includes("Banner") ||
+        className.includes("Cookie") ||
+        className.includes("Video") ||
+        className.includes("Audio") ||
+        className.includes("Partner") ||
+        id.includes("cookie") ||
+        id.includes("onetrust") ||
+        role === "banner" ||
+        role === "navigation" ||
+        role === "contentinfo"
+      );
+    },
+  });
+}
 
 /**
- * Strips executable scripts, embeds, forms, and inline JS event handlers from external markup.
+ * Sanitizes HTML for safe embedding in the reader iframe.
+ * Uses sanitize-html (proper parser) instead of regex.
  */
-function sanitizeHtmlContent({ html }: SanitizeHtmlContentParams): string {
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
-    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
-    .replace(/<embed\b[^>]*>/gi, "")
-    .replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, "")
-    .replace(/<base\b[^>]*>/gi, "")
-    .replace(/<meta\b[^>]*http-equiv[^>]*>/gi, "")
-    .replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, "")
-    .replace(/\son[a-z]+\s*=\s*[^>\s]+/gi, "")
-    .replace(/href\s*=\s*['"](?:javascript|data):[^'"]*['"]/gi, 'href="#"');
+function sanitizeHtmlContent({ html }: { html: string }): string {
+  return sanitizeHtml(html, {
+    allowedTags: [
+      "div",
+      "p",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "span",
+      "a",
+      "em",
+      "strong",
+      "br",
+      "sup",
+      "ul",
+      "ol",
+      "li",
+      "b",
+      "i",
+      "blockquote",
+      "hr",
+    ],
+    allowedAttributes: {
+      a: ["href"],
+      span: ["data-usfm", "class"],
+      div: ["class"],
+      p: ["class"],
+      h2: ["class"],
+      h3: ["class"],
+      h4: ["class"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    allowedSchemesByTag: { a: ["http", "https"] },
+    allowProtocolRelative: false,
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+    },
+  });
 }
 
 type BuildCleanReaderDocumentParams = {
@@ -317,104 +400,38 @@ function buildCleanReaderDocument({
 </html>`;
 }
 
-type FallbackThemedHtmlParams = {
-  html: string;
-  theme: "light" | "dark";
-  fontSize?: number;
-};
-
-function fallbackThemedHtml({
-  html,
-  theme,
-  fontSize = 22,
-}: FallbackThemedHtmlParams): string {
-  const isDark = theme === "dark";
-  const clampedSize = Math.min(32, Math.max(20, fontSize));
-  const safeHtml = sanitizeHtmlContent({ html });
-
-  const customStyles = `
-    <base href="https://www.bible.com" />
-    <style id="luma-webview-fallback">
-      :root {
-        --bible-font-size: ${clampedSize}px;
-      }
-      header, footer, nav, aside,
-      [class*="Nav"], [class*="Header"], [class*="Footer"],
-      [class*="AppBanner"], [class*="Banner"], [class*="Cookie"],
-      [data-testid*="header"], [data-testid*="footer"], [data-testid*="navigation"],
-      [data-testid*="video"], [data-testid*="partner"],
-      #onetrust-consent-sdk, #cookie-banner, .ot-sdk-container,
-      [class*="ChapterNavigation_next"], [class*="ChapterNavigation_prev"],
-      [class*="ParallelSection"], [class*="VideoSection"],
-      [class*="ReaderFooter"], [aria-label="Breadcrumb"],
-      [aria-label*="audio"], [class*="AudioPlayer"],
-      a[href*="/videos/"], a[href*="/organizations/"], a[href*="skip"],
-      button:has(svg) {
-        display: none !important;
-        visibility: hidden !important;
-        height: 0 !important;
-        overflow: hidden !important;
-      }
-
-      html, body {
-        background-color: ${isDark ? "#050505" : "#f8fafc"} !important;
-        color: ${isDark ? "#f1f5f9" : "#1e293b"} !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-        margin: 0 !important;
-        padding: 1.5rem 1.25rem 5rem 1.25rem !important;
-        box-sizing: border-box !important;
-        --bible-font-size: ${clampedSize}px;
-      }
-
-      main, [role="main"], article, [class*="Reader_container"] {
-        max-width: 680px !important;
-        margin: 0 auto !important;
-        width: 100% !important;
-        background: transparent !important;
-      }
-
-      [class*="chapter"], [class*="passage"], [class*="verse"], [class*="content"] {
-        color: ${isDark ? "#f1f5f9" : "#1e293b"} !important;
-        background: transparent !important;
-        line-height: 1.85 !important;
-        font-size: var(--bible-font-size, ${clampedSize}px) !important;
-      }
-    </style>
-    <script>
-      window.addEventListener("message", function(e) {
-        if (!e || !e.data || e.origin !== window.location.origin) return;
-        if (e.data.type === "SET_FONT_SIZE") {
-          var size = Number(e.data.fontSize);
-          if (!isNaN(size)) {
-            var clamped = Math.min(32, Math.max(20, size));
-            document.documentElement.style.setProperty("--bible-font-size", clamped + "px");
-            if (document.body) {
-              document.body.style.setProperty("--bible-font-size", clamped + "px");
-            }
-          }
-        } else if (e.data.type === "SET_THEME") {
-          var newTheme = e.data.theme === "dark" ? "dark" : "light";
-          document.documentElement.className = newTheme;
-          if (document.body) {
-            document.body.className = newTheme;
-          }
-        }
-      });
-    </script>
-  `;
-
-  if (safeHtml.includes("</head>")) {
-    return safeHtml.replace("</head>", `${customStyles}</head>`);
-  }
-  return `${customStyles}${safeHtml}`;
-}
-
 type ExtractedPassageData = {
   chapterContent: string;
   headLinks: string;
 };
 
-const DISK_CACHE_DIR = path.join(process.cwd(), ".cache", "bible-passages");
+type FinalizeResponseParams = {
+  data: ExtractedPassageData;
+  theme: "light" | "dark";
+  fontSize: number;
+};
+
+/**
+ * Single point of truth for building the final HTML response.
+ * Handles both extracted fragments (run through buildCleanReaderDocument)
+ * and already-complete documents (fallback plain-text shell).
+ */
+function finalizeResponse({
+  data,
+  theme,
+  fontSize,
+}: FinalizeResponseParams): string {
+  return data.chapterContent.includes("<!DOCTYPE html>")
+    ? data.chapterContent
+    : buildCleanReaderDocument({
+        chapterContent: data.chapterContent,
+        headLinks: data.headLinks,
+        theme,
+        fontSize,
+      });
+}
+
+const DISK_CACHE_DIR = nodePath.join(process.cwd(), ".cache", "bible-passages");
 
 type ReadDiskCacheParams = {
   pathKey: string;
@@ -424,8 +441,8 @@ async function readDiskCache({
   pathKey,
 }: ReadDiskCacheParams): Promise<ExtractedPassageData | null> {
   try {
-    const safeName = pathKey.replace(/[^A-Za-z0-9._-]/g, "_") + ".json";
-    const filePath = path.join(DISK_CACHE_DIR, safeName);
+    const safeName = `${CONTENT_VERSION}-${pathKey.replace(/[^A-Za-z0-9._-]/g, "_")}.json`;
+    const filePath = nodePath.join(DISK_CACHE_DIR, safeName);
     const raw = await fs.readFile(filePath, "utf-8");
     const parsed = JSON.parse(raw) as ExtractedPassageData;
     if (parsed && typeof parsed.chapterContent === "string") {
@@ -448,12 +465,21 @@ async function writeDiskCache({
 }: WriteDiskCacheParams): Promise<void> {
   try {
     await fs.mkdir(DISK_CACHE_DIR, { recursive: true });
-    const safeName = pathKey.replace(/[^A-Za-z0-9._-]/g, "_") + ".json";
-    const filePath = path.join(DISK_CACHE_DIR, safeName);
+    const safeName = `${CONTENT_VERSION}-${pathKey.replace(/[^A-Za-z0-9._-]/g, "_")}.json`;
+    const filePath = nodePath.join(DISK_CACHE_DIR, safeName);
     await fs.writeFile(filePath, JSON.stringify(data), "utf-8");
   } catch {
     // Silently ignore disk write error in restricted filesystems
   }
+}
+
+function getCacheKey(path: string): string {
+  return `${CONTENT_VERSION}:${path}`;
+}
+
+function getETag(path: string): string {
+  // Simple content-versioned ETag — stable across deploys unless CONTENT_VERSION changes
+  return `"${CONTENT_VERSION}-${crypto.createHash("md5").update(path).digest("hex").slice(0, 12)}"`;
 }
 
 type FetchBibleComHtmlWithRetryParams = {
@@ -506,7 +532,8 @@ type CacheEntry = {
 
 const passageCache = new Map<string, CacheEntry>();
 const inFlightFetches = new Map<string, Promise<ExtractedPassageData>>();
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MEMORY_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes — short for correctness
+const DISK_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const STANDARD_HEADERS = {
   "Content-Type": "text/html; charset=utf-8",
@@ -537,22 +564,35 @@ export async function GET(request: NextRequest): Promise<Response> {
     return new Response("Invalid Bible reference path format", { status: 400 });
   }
 
+  // ETag support for conditional requests
+  const etag = getETag(path);
+  const ifNoneMatch = request.headers.get("if-none-match");
+  if (ifNoneMatch && ifNoneMatch === etag) {
+    return new Response(null, {
+      status: 304,
+      headers: {
+        ...STANDARD_HEADERS,
+        ETag: etag,
+        "X-Cache": "REVALIDATED",
+      },
+    });
+  }
+
   // 1. In-memory Cache check (< 0.1ms)
-  const cached = passageCache.get(path);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    const finalHtml = cached.data.chapterContent.includes("<!DOCTYPE html>")
-      ? cached.data.chapterContent
-      : buildCleanReaderDocument({
-          chapterContent: cached.data.chapterContent,
-          headLinks: cached.data.headLinks,
-          theme,
-          fontSize,
-        });
+  const cacheKey = getCacheKey(path);
+  const cached = passageCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < MEMORY_CACHE_TTL_MS) {
+    const finalHtml = finalizeResponse({
+      data: cached.data,
+      theme,
+      fontSize,
+    });
 
     return new Response(finalHtml, {
       status: 200,
       headers: {
         ...STANDARD_HEADERS,
+        ETag: etag,
         "X-Cache": "HIT",
       },
     });
@@ -561,27 +601,35 @@ export async function GET(request: NextRequest): Promise<Response> {
   // 2. Persistent Disk Cache check (< 0.5ms)
   const diskCached = await readDiskCache({ pathKey: path });
   if (diskCached) {
-    passageCache.set(path, {
-      data: diskCached,
-      timestamp: Date.now(),
-    });
+    // Check disk cache age
+    try {
+      const safeName = `${CONTENT_VERSION}-${path.replace(/[^A-Za-z0-9._-]/g, "_")}.json`;
+      const filePath = nodePath.join(DISK_CACHE_DIR, safeName);
+      const stat = await fs.stat(filePath);
+      if (Date.now() - stat.mtimeMs < DISK_CACHE_TTL_MS) {
+        passageCache.set(cacheKey, {
+          data: diskCached,
+          timestamp: Date.now(),
+        });
 
-    const finalHtml = diskCached.chapterContent.includes("<!DOCTYPE html>")
-      ? diskCached.chapterContent
-      : buildCleanReaderDocument({
-          chapterContent: diskCached.chapterContent,
-          headLinks: diskCached.headLinks,
+        const finalHtml = finalizeResponse({
+          data: diskCached,
           theme,
           fontSize,
         });
 
-    return new Response(finalHtml, {
-      status: 200,
-      headers: {
-        ...STANDARD_HEADERS,
-        "X-Cache": "DISK-HIT",
-      },
-    });
+        return new Response(finalHtml, {
+          status: 200,
+          headers: {
+            ...STANDARD_HEADERS,
+            ETag: etag,
+            "X-Cache": "DISK-HIT",
+          },
+        });
+      }
+    } catch {
+      // Stat failed, treat as miss
+    }
   }
 
   try {
@@ -598,13 +646,10 @@ export async function GET(request: NextRequest): Promise<Response> {
           return result;
         }
 
-        // If extraction tag not found, fall back to styled raw Bible.com page
+        // If extraction tag not found, fall back to clean plain-text extraction
+        const plainText = extractPlainTextContent({ html: originalHtml });
         return {
-          chapterContent: fallbackThemedHtml({
-            html: originalHtml,
-            theme,
-            fontSize,
-          }),
+          chapterContent: plainText,
           headLinks: "",
         };
       })();
@@ -619,24 +664,22 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
 
     // Save extracted raw data to memory cache
-    passageCache.set(path, {
+    passageCache.set(cacheKey, {
       data: extractedData,
       timestamp: Date.now(),
     });
 
-    const finalHtml = extractedData.chapterContent.includes("<!DOCTYPE html>")
-      ? extractedData.chapterContent
-      : buildCleanReaderDocument({
-          chapterContent: extractedData.chapterContent,
-          headLinks: extractedData.headLinks,
-          theme,
-          fontSize,
-        });
+    const finalHtml = finalizeResponse({
+      data: extractedData,
+      theme,
+      fontSize,
+    });
 
     return new Response(finalHtml, {
       status: 200,
       headers: {
         ...STANDARD_HEADERS,
+        ETag: etag,
         "X-Cache": "MISS",
       },
     });
