@@ -13,36 +13,69 @@ type ExtractChapterContentParams = {
 function extractChapterContent({
   html,
 }: ExtractChapterContentParams): string | null {
+  // 1. Full chapter pages contain data-testid="chapter-content"
   const startTag = 'data-testid="chapter-content"';
   const startIdx = html.indexOf(startTag);
-  if (startIdx === -1) return null;
-  const divStart = html.lastIndexOf("<div", startIdx);
-  if (divStart === -1) return null;
+  if (startIdx !== -1) {
+    const divStart = html.lastIndexOf("<div", startIdx);
+    if (divStart !== -1) {
+      let depth = 0;
+      let pos = divStart;
+      let endPos = -1;
 
-  let depth = 0;
-  let pos = divStart;
-  let endPos = -1;
+      while (pos < html.length) {
+        const nextOpen = html.indexOf("<div", pos);
+        const nextClose = html.indexOf("</div>", pos);
 
-  while (pos < html.length) {
-    const nextOpen = html.indexOf("<div", pos);
-    const nextClose = html.indexOf("</div>", pos);
+        if (nextClose === -1) break;
 
-    if (nextClose === -1) break;
-
-    if (nextOpen !== -1 && nextOpen < nextClose) {
-      depth++;
-      pos = nextOpen + 4;
-    } else {
-      depth--;
-      if (depth === 0) {
-        endPos = nextClose + 6;
-        break;
+        if (nextOpen !== -1 && nextOpen < nextClose) {
+          depth++;
+          pos = nextOpen + 4;
+        } else {
+          depth--;
+          if (depth === 0) {
+            endPos = nextClose + 6;
+            break;
+          }
+          pos = nextClose + 6;
+        }
       }
-      pos = nextClose + 6;
+
+      if (endPos !== -1) {
+        return html.substring(divStart, endPos);
+      }
     }
   }
 
-  return endPos !== -1 ? html.substring(divStart, endPos) : null;
+  // 2. Verse range pages (e.g. /bible/1/MRK.1.10-15.KJV or JHN.3.16.NIV)
+  // Verse pages present a concise card with heading and text paragraphs.
+  const h2Match = html.match(
+    /<h2[^>]*class="[^"]*font-bold[^"]*"[^>]*>([A-Za-z0-9:\-\s]+<!-- -->[\s\S]*?)<\/h2>/i
+  );
+  const pMatch = html.match(
+    /<p[^>]*class="[^"]*(?:text-16|text-20)[^"]*"[^>]*>([\s\S]*?)<\/p>/i
+  );
+
+  if (pMatch) {
+    const copyrightMatch = html.match(
+      /<div[^>]*class="[^"]*(?:version-copyright|copyright)[^"]*"[^>]*>[\s\S]*?<\/div>/i
+    );
+    const headingHtml = h2Match
+      ? `<h2 class="luma-verse-range-title">${h2Match[1].replace(/<!--[\s\S]*?-->/g, "").trim()}</h2>`
+      : "";
+    const copyrightHtml = copyrightMatch ? copyrightMatch[0] : "";
+
+    return `<div class="luma-verse-range-card">
+      ${headingHtml}
+      <div class="luma-verse-range-content">
+        ${pMatch[0]}
+      </div>
+      ${copyrightHtml}
+    </div>`;
+  }
+
+  return null;
 }
 
 type ExtractHeadLinksParams = {
@@ -64,6 +97,27 @@ function extractHeadLinks({ html }: ExtractHeadLinksParams): string {
     .join("\n");
 }
 
+type SanitizeHtmlContentParams = {
+  html: string;
+};
+
+/**
+ * Strips executable scripts, embeds, forms, and inline JS event handlers from external markup.
+ */
+function sanitizeHtmlContent({ html }: SanitizeHtmlContentParams): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
+    .replace(/<embed\b[^>]*>/gi, "")
+    .replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, "")
+    .replace(/<base\b[^>]*>/gi, "")
+    .replace(/<meta\b[^>]*http-equiv[^>]*>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, "")
+    .replace(/\son[a-z]+\s*=\s*[^>\s]+/gi, "")
+    .replace(/href\s*=\s*['"](?:javascript|data):[^'"]*['"]/gi, 'href="#"');
+}
+
 type BuildCleanReaderDocumentParams = {
   chapterContent: string;
   headLinks: string;
@@ -79,12 +133,14 @@ function buildCleanReaderDocument({
 }: BuildCleanReaderDocumentParams): string {
   const isDark = theme === "dark";
   const clampedSize = Math.min(32, Math.max(20, fontSize));
+  const safeContent = sanitizeHtmlContent({ html: chapterContent });
 
   return `<!DOCTYPE html>
 <html lang="en" class="${theme}" style="--bible-font-size: ${clampedSize}px;">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://www.bible.com https://use.typekit.net; img-src 'self' https: data:; font-src 'self' https: data:; style-src 'self' 'unsafe-inline' https:; form-action 'none'; frame-ancestors 'self';" />
   <base href="https://www.bible.com" />
   ${headLinks}
   <style id="luma-native-theme">
@@ -93,13 +149,33 @@ function buildCleanReaderDocument({
     }
 
     html, body {
-      background-color: ${isDark ? "#050505" : "#f8fafc"} !important;
-      color: ${isDark ? "#f1f5f9" : "#1e293b"} !important;
+      background-color: var(--luma-bg, ${isDark ? "#050505" : "#f8fafc"}) !important;
+      color: var(--luma-text, ${isDark ? "#f1f5f9" : "#1e293b"}) !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
       margin: 0 !important;
       padding: 0 !important;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden !important;
+    }
+
+    html.dark {
+      --luma-bg: #050505;
+      --luma-text: #f1f5f9;
+      --luma-title: #ffffff;
+      --luma-muted: #71717a;
+      --luma-note: #a1a1aa;
+      --luma-border: rgba(255, 255, 255, 0.1);
+      --luma-link: #94a3b8;
+    }
+
+    html.light {
+      --luma-bg: #f8fafc;
+      --luma-text: #1e293b;
+      --luma-title: #0f172a;
+      --luma-muted: #64748b;
+      --luma-note: #64748b;
+      --luma-border: #e2e8f0;
+      --luma-link: #475569;
     }
 
     .luma-reader-wrapper {
@@ -119,7 +195,7 @@ function buildCleanReaderDocument({
     [class*="reader"],
     [class*="ChapterContent"],
     [data-usfm] {
-      color: ${isDark ? "#f1f5f9" : "#1e293b"} !important;
+      color: var(--luma-text, ${isDark ? "#f1f5f9" : "#1e293b"}) !important;
       background: transparent !important;
       line-height: 1.85 !important;
       font-size: var(--bible-font-size, ${clampedSize}px) !important;
@@ -129,7 +205,7 @@ function buildCleanReaderDocument({
     h1, h2, h3, h4, 
     [class*="heading"], 
     [class*="section_title"] {
-      color: ${isDark ? "#ffffff" : "#0f172a"} !important;
+      color: var(--luma-title, ${isDark ? "#ffffff" : "#0f172a"}) !important;
       font-weight: 700 !important;
       letter-spacing: -0.015em !important;
       margin-top: 1.5rem !important;
@@ -142,7 +218,7 @@ function buildCleanReaderDocument({
     [class*="label"], 
     [class*="verse_number"], 
     [class*="v-num"] {
-      color: ${isDark ? "#71717a" : "#64748b"} !important;
+      color: var(--luma-muted, ${isDark ? "#71717a" : "#64748b"}) !important;
       font-weight: 600 !important;
       font-size: calc(var(--bible-font-size, ${clampedSize}px) * 0.7) !important;
       margin-right: 0.25rem !important;
@@ -153,8 +229,30 @@ function buildCleanReaderDocument({
     /* Footnotes & Cross references */
     [class*="note"], 
     [class*="footnote"] {
-      color: ${isDark ? "#a1a1aa" : "#64748b"} !important;
+      color: var(--luma-note, ${isDark ? "#a1a1aa" : "#64748b"}) !important;
       font-size: calc(var(--bible-font-size, ${clampedSize}px) * 0.8) !important;
+    }
+
+    /* Verse Range Presentation */
+    .luma-verse-range-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      padding-top: 1rem;
+    }
+
+    .luma-verse-range-title {
+      font-size: 1.25rem !important;
+      font-weight: 700 !important;
+      color: var(--luma-title, ${isDark ? "#ffffff" : "#0f172a"}) !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    .luma-verse-range-content p {
+      font-size: var(--bible-font-size, ${clampedSize}px) !important;
+      line-height: 1.85 !important;
+      color: var(--luma-text, ${isDark ? "#f1f5f9" : "#1e293b"}) !important;
+      margin: 0 !important;
     }
 
     /* Disable links inside reader from jumping externally */
@@ -177,31 +275,22 @@ function buildCleanReaderDocument({
     [class*="copyright"] {
       margin-top: 3rem !important;
       padding-top: 1.5rem !important;
-      border-top: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"} !important;
-      color: ${isDark ? "#71717a" : "#64748b"} !important;
+      border-top: 1px solid var(--luma-border, ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}) !important;
+      color: var(--luma-muted, ${isDark ? "#71717a" : "#64748b"}) !important;
       font-size: 0.8rem !important;
       line-height: 1.5 !important;
     }
 
     [class*="version-copyright"] a {
-      color: ${isDark ? "#94a3b8" : "#475569"} !important;
+      color: var(--luma-link, ${isDark ? "#94a3b8" : "#475569"}) !important;
       text-decoration: underline !important;
       pointer-events: none !important;
     }
   </style>
   <script>
-    try {
-      var saved = localStorage.getItem("luma-bible-font-size");
-      if (saved) {
-        var s = Number(saved);
-        if (!isNaN(s) && s >= 20 && s <= 32) {
-          document.documentElement.style.setProperty("--bible-font-size", s + "px");
-        }
-      }
-    } catch (e) {}
-
     window.addEventListener("message", function(e) {
-      if (e && e.data && e.data.type === "SET_FONT_SIZE") {
+      if (!e || !e.data || e.origin !== window.location.origin) return;
+      if (e.data.type === "SET_FONT_SIZE") {
         var size = Number(e.data.fontSize);
         if (!isNaN(size)) {
           var clamped = Math.min(32, Math.max(20, size));
@@ -210,13 +299,19 @@ function buildCleanReaderDocument({
             document.body.style.setProperty("--bible-font-size", clamped + "px");
           }
         }
+      } else if (e.data.type === "SET_THEME") {
+        var newTheme = e.data.theme === "dark" ? "dark" : "light";
+        document.documentElement.className = newTheme;
+        if (document.body) {
+          document.body.className = newTheme;
+        }
       }
     });
   </script>
 </head>
 <body class="${theme}">
   <div class="luma-reader-wrapper">
-    ${chapterContent}
+    ${safeContent}
   </div>
 </body>
 </html>`;
@@ -235,6 +330,7 @@ function fallbackThemedHtml({
 }: FallbackThemedHtmlParams): string {
   const isDark = theme === "dark";
   const clampedSize = Math.min(32, Math.max(20, fontSize));
+  const safeHtml = sanitizeHtmlContent({ html });
 
   const customStyles = `
     <base href="https://www.bible.com" />
@@ -285,18 +381,9 @@ function fallbackThemedHtml({
       }
     </style>
     <script>
-      try {
-        var saved = localStorage.getItem("luma-bible-font-size");
-        if (saved) {
-          var s = Number(saved);
-          if (!isNaN(s) && s >= 20 && s <= 32) {
-            document.documentElement.style.setProperty("--bible-font-size", s + "px");
-          }
-        }
-      } catch (e) {}
-
       window.addEventListener("message", function(e) {
-        if (e && e.data && e.data.type === "SET_FONT_SIZE") {
+        if (!e || !e.data || e.origin !== window.location.origin) return;
+        if (e.data.type === "SET_FONT_SIZE") {
           var size = Number(e.data.fontSize);
           if (!isNaN(size)) {
             var clamped = Math.min(32, Math.max(20, size));
@@ -305,15 +392,21 @@ function fallbackThemedHtml({
               document.body.style.setProperty("--bible-font-size", clamped + "px");
             }
           }
+        } else if (e.data.type === "SET_THEME") {
+          var newTheme = e.data.theme === "dark" ? "dark" : "light";
+          document.documentElement.className = newTheme;
+          if (document.body) {
+            document.body.className = newTheme;
+          }
         }
       });
     </script>
   `;
 
-  if (html.includes("</head>")) {
-    return html.replace("</head>", `${customStyles}</head>`);
+  if (safeHtml.includes("</head>")) {
+    return safeHtml.replace("</head>", `${customStyles}</head>`);
   }
-  return `${customStyles}${html}`;
+  return `${customStyles}${safeHtml}`;
 }
 
 type ExtractedPassageData = {
@@ -363,110 +456,6 @@ async function writeDiskCache({
   }
 }
 
-type ParseBiblePathParams = {
-  path: string;
-};
-
-type ParsedPath = {
-  versionId: number;
-  bookUsfm: string;
-  chapter: number;
-};
-
-function parseBiblePath({ path }: ParseBiblePathParams): ParsedPath | null {
-  const parts = path.split("/");
-  if (parts.length !== 2) return null;
-  const versionId = Number.parseInt(parts[0] || "", 10);
-  const refParts = (parts[1] || "").split(".");
-  const bookUsfm = refParts[0] || "";
-  const chapter = Number.parseInt(refParts[1] || "1", 10);
-  if (Number.isNaN(versionId) || !bookUsfm || Number.isNaN(chapter)) {
-    return null;
-  }
-  return { versionId, bookUsfm, chapter };
-}
-
-type FetchFallbackPassageContentParams = {
-  bookUsfm: string;
-  chapter: number;
-  versionId: number;
-};
-
-async function fetchFallbackPassageContent({
-  bookUsfm,
-  chapter,
-  versionId,
-}: FetchFallbackPassageContentParams): Promise<ExtractedPassageData | null> {
-  // Try helloao for NET (107), Amharic (3867), Oromo (3202)
-  if (versionId === 107 || versionId === 3867 || versionId === 3202) {
-    const translationId =
-      versionId === 3867
-        ? "amh_amh"
-        : versionId === 3202
-        ? "gaz_bib"
-        : "eng_net";
-    try {
-      const url = `https://bible.helloao.org/api/${translationId}/${bookUsfm.toUpperCase()}/${chapter}.json`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const data = (await res.json()) as {
-          chapter?: {
-            content?: Array<{
-              type: string;
-              number?: number;
-              content?: Array<string | object>;
-            }>;
-          };
-          book?: { name?: string };
-        };
-        const content = data.chapter?.content || [];
-        const bookName = data.book?.name || bookUsfm;
-        let versesHtml = `<div data-testid="chapter-content"><h2>${bookName} ${chapter}</h2>`;
-        for (const item of content) {
-          if (item.type === "heading" && Array.isArray(item.content)) {
-            versesHtml += `<h3>${item.content.join(" ")}</h3>`;
-          } else if (item.type === "verse" && item.number != null) {
-            const verseText = Array.isArray(item.content)
-              ? item.content
-                  .map((c) => (typeof c === "string" ? c : ""))
-                  .join(" ")
-              : "";
-            versesHtml += `<span class="verse" data-usfm="${bookUsfm}.${chapter}.${item.number}"><span class="label">${item.number}</span><span>${verseText}</span> </span>`;
-          }
-        }
-        versesHtml += `</div>`;
-        return { chapterContent: versesHtml, headLinks: "" };
-      }
-    } catch {
-      // Ignore and fallback to bible-api
-    }
-  }
-
-  // Fallback to bible-api.com for English chapters
-  try {
-    const url = `https://bible-api.com/${encodeURIComponent(bookUsfm)}+${chapter}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (res.ok) {
-      const data = (await res.json()) as {
-        reference?: string;
-        verses?: Array<{ verse: number; text: string }>;
-      };
-      if (data.verses && data.verses.length > 0) {
-        let versesHtml = `<div data-testid="chapter-content"><h2>${data.reference || `${bookUsfm} ${chapter}`}</h2><p>`;
-        for (const v of data.verses) {
-          versesHtml += `<span class="verse"><span class="label">${v.verse}</span><span>${v.text.trim()}</span> </span>`;
-        }
-        versesHtml += `</p></div>`;
-        return { chapterContent: versesHtml, headLinks: "" };
-      }
-    }
-  } catch {
-    // Fallback failed
-  }
-
-  return null;
-}
-
 type FetchBibleComHtmlWithRetryParams = {
   path: string;
 };
@@ -500,7 +489,7 @@ async function fetchBibleComHtmlWithRetry({
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       if (attempt < maxAttempts) {
-        // Short exponential backoff before retry (300ms, 600ms)
+        // Short backoff before retry (300ms, 600ms)
         await new Promise((resolve) => setTimeout(resolve, attempt * 300));
       }
     }
@@ -511,13 +500,20 @@ async function fetchBibleComHtmlWithRetry({
 
 // In-memory cache and in-flight deduplication
 type CacheEntry = {
-  html: string;
+  data: ExtractedPassageData;
   timestamp: number;
 };
 
 const passageCache = new Map<string, CacheEntry>();
 const inFlightFetches = new Map<string, Promise<ExtractedPassageData>>();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+const STANDARD_HEADERS = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "public, max-age=86400, s-maxage=604800",
+  "X-Frame-Options": "SAMEORIGIN",
+  "X-Content-Type-Options": "nosniff",
+} as const;
 
 export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = new URL(request.url);
@@ -533,25 +529,30 @@ export async function GET(request: NextRequest): Promise<Response> {
     return new Response("Missing path parameter", { status: 400 });
   }
 
-  // Validate path pattern: {versionId}/{BOOK}.{chapter}...
-  const isValidPath = /^[0-9]+\/[A-Za-z0-9._-]+$/.test(path);
+  // Strict validation to prevent SSRF and path traversal:
+  // Must match {versionId}/{USFM_BOOK}.{chapter} or {versionId}/{USFM_BOOK}.{chapter}.{verses}
+  // Example: 114/HEB.1 or 3867/GEN.1 or 111/JHN.3.16-17
+  const isValidPath = /^[0-9]{1,6}\/[1-3]?[A-Za-z]{2,5}\.[0-9]{1,3}(?:\.[0-9]{1,3}(?:-[0-9]{1,3})?)?$/.test(path);
   if (!isValidPath) {
-    return new Response("Invalid Bible reference path", { status: 400 });
+    return new Response("Invalid Bible reference path format", { status: 400 });
   }
 
   // 1. In-memory Cache check (< 0.1ms)
-  const cacheKey = `${path}:${theme}`;
-  const cached = passageCache.get(cacheKey);
+  const cached = passageCache.get(path);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    const htmlWithFontSize = cached.html.replace(
-      /--bible-font-size:\s*\d+px/g,
-      `--bible-font-size: ${fontSize}px`
-    );
-    return new Response(htmlWithFontSize, {
+    const finalHtml = cached.data.chapterContent.includes("<!DOCTYPE html>")
+      ? cached.data.chapterContent
+      : buildCleanReaderDocument({
+          chapterContent: cached.data.chapterContent,
+          headLinks: cached.data.headLinks,
+          theme,
+          fontSize,
+        });
+
+    return new Response(finalHtml, {
       status: 200,
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=86400, s-maxage=604800",
+        ...STANDARD_HEADERS,
         "X-Cache": "HIT",
       },
     });
@@ -560,74 +561,52 @@ export async function GET(request: NextRequest): Promise<Response> {
   // 2. Persistent Disk Cache check (< 0.5ms)
   const diskCached = await readDiskCache({ pathKey: path });
   if (diskCached) {
-    const finalHtml = buildCleanReaderDocument({
-      chapterContent: diskCached.chapterContent,
-      headLinks: diskCached.headLinks,
-      theme,
-      fontSize,
-    });
-
-    passageCache.set(cacheKey, {
-      html: finalHtml,
+    passageCache.set(path, {
+      data: diskCached,
       timestamp: Date.now(),
     });
+
+    const finalHtml = diskCached.chapterContent.includes("<!DOCTYPE html>")
+      ? diskCached.chapterContent
+      : buildCleanReaderDocument({
+          chapterContent: diskCached.chapterContent,
+          headLinks: diskCached.headLinks,
+          theme,
+          fontSize,
+        });
 
     return new Response(finalHtml, {
       status: 200,
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=86400, s-maxage=604800",
+        ...STANDARD_HEADERS,
         "X-Cache": "DISK-HIT",
       },
     });
   }
 
   try {
-    // 3. In-flight request deduplication to prevent duplicate concurrent network calls
+    // 3. In-flight request deduplication to prevent duplicate concurrent network calls to Bible.com
     let fetchPromise = inFlightFetches.get(path);
     if (!fetchPromise) {
       fetchPromise = (async () => {
-        try {
-          const originalHtml = await fetchBibleComHtmlWithRetry({ path });
-          const chapterContent = extractChapterContent({ html: originalHtml });
-          if (chapterContent) {
-            const headLinks = extractHeadLinks({ html: originalHtml });
-            const result: ExtractedPassageData = { chapterContent, headLinks };
-            void writeDiskCache({ pathKey: path, data: result });
-            return result;
-          }
-
-          // If extraction tag not found, attempt emergency fallback
-          const parsed = parseBiblePath({ path });
-          if (parsed) {
-            const fallbackData = await fetchFallbackPassageContent(parsed);
-            if (fallbackData) {
-              void writeDiskCache({ pathKey: path, data: fallbackData });
-              return fallbackData;
-            }
-          }
-
-          // Otherwise use raw styled fallback
-          return {
-            chapterContent: fallbackThemedHtml({
-              html: originalHtml,
-              theme,
-              fontSize,
-            }),
-            headLinks: "",
-          };
-        } catch (fetchErr) {
-          // External fetch failed after all retries; attempt emergency fallback
-          const parsed = parseBiblePath({ path });
-          if (parsed) {
-            const fallbackData = await fetchFallbackPassageContent(parsed);
-            if (fallbackData) {
-              void writeDiskCache({ pathKey: path, data: fallbackData });
-              return fallbackData;
-            }
-          }
-          throw fetchErr;
+        const originalHtml = await fetchBibleComHtmlWithRetry({ path });
+        const chapterContent = extractChapterContent({ html: originalHtml });
+        if (chapterContent) {
+          const headLinks = extractHeadLinks({ html: originalHtml });
+          const result: ExtractedPassageData = { chapterContent, headLinks };
+          void writeDiskCache({ pathKey: path, data: result });
+          return result;
         }
+
+        // If extraction tag not found, fall back to styled raw Bible.com page
+        return {
+          chapterContent: fallbackThemedHtml({
+            html: originalHtml,
+            theme,
+            fontSize,
+          }),
+          headLinks: "",
+        };
       })();
       inFlightFetches.set(path, fetchPromise);
     }
@@ -639,6 +618,12 @@ export async function GET(request: NextRequest): Promise<Response> {
       inFlightFetches.delete(path);
     }
 
+    // Save extracted raw data to memory cache
+    passageCache.set(path, {
+      data: extractedData,
+      timestamp: Date.now(),
+    });
+
     const finalHtml = extractedData.chapterContent.includes("<!DOCTYPE html>")
       ? extractedData.chapterContent
       : buildCleanReaderDocument({
@@ -648,17 +633,10 @@ export async function GET(request: NextRequest): Promise<Response> {
           fontSize,
         });
 
-    // Save to memory cache
-    passageCache.set(cacheKey, {
-      html: finalHtml,
-      timestamp: Date.now(),
-    });
-
     return new Response(finalHtml, {
       status: 200,
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=86400, s-maxage=604800",
+        ...STANDARD_HEADERS,
         "X-Cache": "MISS",
       },
     });

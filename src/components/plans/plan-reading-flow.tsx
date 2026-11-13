@@ -110,6 +110,8 @@ export function PlanReadingFlow({
           versionId: defaultVersion.id,
           bookId: reading.bookId,
           chapter: reading.chapter,
+          startVerse: reading.startVerse,
+          endVerse: reading.endVerse,
         });
         void fetch(
           `/api/bible-proxy?path=${encodeURIComponent(

@@ -712,6 +712,8 @@ export type PlanReadingSessionItem = {
   bookId: string;
   bookName: string;
   chapter: number;
+  startVerse?: number;
+  endVerse?: number;
   displayText?: string;
   order: number;
   isCompleted: boolean;
@@ -923,6 +925,8 @@ export async function getPlanInstanceDetailAction({
       bookId: r.bookId,
       bookName: r.bookName,
       chapter: r.chapter,
+      startVerse: r.startVerse,
+      endVerse: r.endVerse,
       displayText: r.displayText,
       order: r.order,
       isCompleted: completedSet.has(r.id),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   X,
   ChevronLeft,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { PlanSessionDetail } from "@/actions/plans";
 import { useTheme } from "@/components/theme/theme-provider";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import {
   BIBLE_VERSIONS,
   type BibleVersion,
@@ -68,6 +69,8 @@ type FlattenedReading = {
   bookId: string;
   bookName: string;
   chapter: number;
+  startVerse?: number;
+  endVerse?: number;
   displayText?: string | null;
   isCompleted: boolean;
   sessionIndex: number;
@@ -84,6 +87,11 @@ export function PlanBibleReaderModal({
 }: PlanBibleReaderModalProps) {
   const { resolvedTheme } = useTheme();
 
+  // Local optimistic completion overrides so the button immediately reflects toggles
+  const [optimisticCompletedMap, setOptimisticCompletedMap] = useState<
+    Record<string, boolean>
+  >({});
+
   // Version state initialized from detector (localStorage / timezone)
   const [selectedVersion, setSelectedVersion] = useState<BibleVersion>(() =>
     detectDefaultVersion({})
@@ -95,6 +103,54 @@ export function PlanBibleReaderModal({
   const [fontSize, setFontSize] = useState<number>(() => getStoredFontSize());
   const [isFontMenuOpen, setIsFontMenuOpen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const versionMenuRef = useRef<HTMLDivElement | null>(null);
+  const fontMenuRef = useRef<HTMLDivElement | null>(null);
+
+  // Close menus on outside click or window blur (clicking into iframe)
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        isVersionDropdownOpen &&
+        versionMenuRef.current &&
+        !versionMenuRef.current.contains(target)
+      ) {
+        setIsVersionDropdownOpen(false);
+      }
+      if (
+        isFontMenuOpen &&
+        fontMenuRef.current &&
+        !fontMenuRef.current.contains(target)
+      ) {
+        setIsFontMenuOpen(false);
+      }
+    }
+
+    function handleWindowBlur() {
+      setIsVersionDropdownOpen(false);
+      setIsFontMenuOpen(false);
+    }
+
+    if (isVersionDropdownOpen || isFontMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      window.addEventListener("blur", handleWindowBlur);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [isVersionDropdownOpen, isFontMenuOpen]);
+
+  // Sync theme changes to iframe without reloading
+  useEffect(() => {
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        { type: "SET_THEME", theme: resolvedTheme },
+        window.location.origin
+      );
+    }
+  }, [resolvedTheme]);
 
   type HandleUpdateFontSizeParams = {
     newSize: number;
@@ -107,7 +163,7 @@ export function PlanBibleReaderModal({
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
         { type: "SET_FONT_SIZE", fontSize: clamped },
-        "*"
+        window.location.origin
       );
     }
   };
@@ -117,20 +173,26 @@ export function PlanBibleReaderModal({
     const list: FlattenedReading[] = [];
     for (const session of allSessions) {
       for (const reading of session.readings) {
+        const isCompleted =
+          optimisticCompletedMap[reading.id] !== undefined
+            ? optimisticCompletedMap[reading.id]
+            : reading.isCompleted;
         list.push({
           id: reading.id,
           bookId: reading.bookId,
           bookName: reading.bookName,
           chapter: reading.chapter,
+          startVerse: reading.startVerse,
+          endVerse: reading.endVerse,
           displayText: reading.displayText,
-          isCompleted: reading.isCompleted,
+          isCompleted,
           sessionIndex: session.sessionIndex,
           sessionTitle: session.title,
         });
       }
     }
     return list;
-  }, [allSessions]);
+  }, [allSessions, optimisticCompletedMap]);
 
   // Current reading item
   const currentIndex = flattenedReadings.findIndex(
@@ -143,22 +205,32 @@ export function PlanBibleReaderModal({
   const hasNext =
     currentIndex >= 0 && currentIndex < flattenedReadings.length - 1;
 
-  // Bible proxy path and active src
+  // Bible proxy path and active src (decoupled from theme changes to prevent iframe remounting)
   const biblePath = currentReading
     ? buildBibleComPath({
         versionId: selectedVersion.id,
         bookId: currentReading.bookId,
         chapter: currentReading.chapter,
+        startVerse: currentReading.startVerse,
+        endVerse: currentReading.endVerse,
       })
     : "";
 
   const iframeSrc = biblePath
-    ? `/api/bible-proxy?path=${encodeURIComponent(
-        biblePath
-      )}&theme=${resolvedTheme}`
+    ? `/api/bible-proxy?path=${encodeURIComponent(biblePath)}`
     : "";
 
   const isIframeLoading = Boolean(iframeSrc) && loadedSrc !== iframeSrc;
+
+  const handleToggleCurrentReading = useCallback(() => {
+    if (!currentReading) return;
+    const nextStatus = !currentReading.isCompleted;
+    setOptimisticCompletedMap((prev) => ({
+      ...prev,
+      [currentReading.id]: nextStatus,
+    }));
+    onToggleReadingAction(currentReading.id);
+  }, [currentReading, onToggleReadingAction]);
 
   // Keyboard navigation shortcuts
   useEffect(() => {
@@ -187,9 +259,7 @@ export function PlanBibleReaderModal({
         !e.altKey
       ) {
         e.preventDefault();
-        if (currentReading) {
-          onToggleReadingAction(currentReading.id);
-        }
+        handleToggleCurrentReading();
       }
     }
 
@@ -204,7 +274,7 @@ export function PlanBibleReaderModal({
     currentReading,
     onCloseAction,
     onSelectReadingAction,
-    onToggleReadingAction,
+    handleToggleCurrentReading,
   ]);
 
   // Prevent background scroll when modal is open
@@ -224,6 +294,7 @@ export function PlanBibleReaderModal({
   useEffect(() => {
     if (!isOpen || isIframeLoading) return;
 
+    const controller = new AbortController();
     let nextTimer: ReturnType<typeof setTimeout> | null = null;
     let prevTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -235,12 +306,12 @@ export function PlanBibleReaderModal({
             versionId: selectedVersion.id,
             bookId: nextItem.bookId,
             chapter: nextItem.chapter,
+            startVerse: nextItem.startVerse,
+            endVerse: nextItem.endVerse,
           });
-          void fetch(
-            `/api/bible-proxy?path=${encodeURIComponent(
-              path
-            )}&theme=${resolvedTheme}`
-          );
+          void fetch(`/api/bible-proxy?path=${encodeURIComponent(path)}`, {
+            signal: controller.signal,
+          });
         }
       }, 800);
     }
@@ -253,17 +324,18 @@ export function PlanBibleReaderModal({
             versionId: selectedVersion.id,
             bookId: prevItem.bookId,
             chapter: prevItem.chapter,
+            startVerse: prevItem.startVerse,
+            endVerse: prevItem.endVerse,
           });
-          void fetch(
-            `/api/bible-proxy?path=${encodeURIComponent(
-              path
-            )}&theme=${resolvedTheme}`
-          );
+          void fetch(`/api/bible-proxy?path=${encodeURIComponent(path)}`, {
+            signal: controller.signal,
+          });
         }
       }, 2200);
     }
 
     return () => {
+      controller.abort();
       if (nextTimer) clearTimeout(nextTimer);
       if (prevTimer) clearTimeout(prevTimer);
     };
@@ -275,7 +347,6 @@ export function PlanBibleReaderModal({
     hasPrev,
     flattenedReadings,
     selectedVersion.id,
-    resolvedTheme,
   ]);
 
   if (!isOpen || !currentReading) return null;
@@ -308,8 +379,12 @@ export function PlanBibleReaderModal({
     setLoadedSrc(iframeSrc);
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
+        { type: "SET_THEME", theme: resolvedTheme },
+        window.location.origin
+      );
+      iframeRef.current.contentWindow.postMessage(
         { type: "SET_FONT_SIZE", fontSize },
-        "*"
+        window.location.origin
       );
     }
   };
@@ -328,21 +403,21 @@ export function PlanBibleReaderModal({
       {/* =========================================================================
           TOP TOOLBAR
           ========================================================================= */}
-      <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface/95 px-3 sm:px-6 backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex h-14 sm:h-16 shrink-0 items-center justify-between border-b border-border bg-surface/95 px-3 sm:px-6 backdrop-blur-md gap-2">
         {/* Left: Close button + Passage info */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
           <button
             type="button"
             onClick={onCloseAction}
             aria-label="Close reading view"
-            className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-[12px] border border-border bg-surface text-foreground-secondary transition-all hover:bg-surface-elevated hover:text-foreground cursor-pointer shadow-2xs"
+            className="flex size-8.5 sm:size-10 shrink-0 items-center justify-center rounded-[12px] border border-border bg-surface text-foreground-secondary transition-all hover:bg-surface-elevated hover:text-foreground cursor-pointer shadow-2xs"
           >
-            <X className="size-4.5" />
+            <X className="size-4 sm:size-4.5" />
           </button>
 
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="truncate text-[14px] sm:text-[16px] font-bold text-foreground">
+          <div className="flex flex-col min-w-0 pr-1">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="truncate text-[13px] sm:text-[16px] font-bold text-foreground">
                 {readingTitle}
               </span>
               {currentReading.isCompleted && (
@@ -352,7 +427,7 @@ export function PlanBibleReaderModal({
                 </span>
               )}
             </div>
-            <span className="truncate text-[11px] font-medium text-foreground-dim">
+            <span className="truncate text-[10px] sm:text-[11px] font-medium text-foreground-dim">
               {currentReading.sessionTitle} • Item {currentIndex + 1} of{" "}
               {flattenedReadings.length}
             </span>
@@ -360,9 +435,9 @@ export function PlanBibleReaderModal({
         </div>
 
         {/* Center: Version Selector & Font Size Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Version Selector Dropdown */}
-          <div className="relative">
+          <div ref={versionMenuRef} className="relative">
             <button
               type="button"
               onClick={() => {
@@ -371,7 +446,7 @@ export function PlanBibleReaderModal({
               }}
               aria-expanded={isVersionDropdownOpen}
               aria-haspopup="listbox"
-              className="flex items-center gap-1.5 rounded-[12px] border border-border bg-surface px-2.5 sm:px-3 py-1.5 text-[12px] sm:text-[13px] font-medium text-foreground transition-all hover:border-border-strong cursor-pointer shadow-2xs"
+              className="flex items-center gap-1 sm:gap-1.5 rounded-[12px] border border-border bg-surface px-2 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium text-foreground transition-all hover:border-border-strong cursor-pointer shadow-2xs"
             >
               <BookOpen className="size-3.5 text-primary" />
               <span className="font-semibold">
@@ -381,58 +456,52 @@ export function PlanBibleReaderModal({
             </button>
 
             {isVersionDropdownOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setIsVersionDropdownOpen(false)}
-                />
-                <div
-                  role="listbox"
-                  className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-64 max-h-80 overflow-y-auto rounded-[16px] border border-border bg-surface p-1.5 shadow-lg"
-                >
-                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
-                    Bible Version
-                  </div>
-                  {BIBLE_VERSIONS.map((v) => {
-                    const isSelected = v.id === selectedVersion.id;
-                    return (
-                      <button
-                        key={v.id}
-                        type="button"
-                        role="option"
-                        aria-selected={isSelected}
-                        onClick={() => handleSelectVersion({ version: v })}
-                        className={`flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[12.5px] transition-colors cursor-pointer ${
-                          isSelected
-                            ? "bg-primary text-primary-foreground font-semibold"
-                            : "text-foreground hover:bg-surface-elevated font-normal"
-                        }`}
-                      >
-                        <div className="flex flex-col min-w-0 pr-2">
-                          <span className="truncate">{v.name}</span>
-                          <span
-                            className={`text-[10.5px] ${
-                              isSelected
-                                ? "text-primary-foreground/80"
-                                : "text-foreground-dim"
-                            }`}
-                          >
-                            {v.abbreviation} • {v.language.toUpperCase()}
-                          </span>
-                        </div>
-                        {isSelected && (
-                          <Check className="size-4 shrink-0 text-primary-foreground" />
-                        )}
-                      </button>
-                    );
-                  })}
+              <div
+                role="listbox"
+                className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-64 max-h-80 overflow-y-auto rounded-[16px] border border-border bg-surface p-1.5 shadow-lg"
+              >
+                <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
+                  Bible Version
                 </div>
-              </>
+                {BIBLE_VERSIONS.map((v) => {
+                  const isSelected = v.id === selectedVersion.id;
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => handleSelectVersion({ version: v })}
+                      className={`flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[12.5px] transition-colors cursor-pointer ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground font-semibold"
+                          : "text-foreground hover:bg-surface-elevated font-normal"
+                      }`}
+                    >
+                      <div className="flex flex-col min-w-0 pr-2">
+                        <span className="truncate">{v.name}</span>
+                        <span
+                          className={`text-[10.5px] ${
+                            isSelected
+                              ? "text-primary-foreground/80"
+                              : "text-foreground-dim"
+                          }`}
+                        >
+                          {v.abbreviation} • {v.language.toUpperCase()}
+                        </span>
+                      </div>
+                      {isSelected && (
+                        <Check className="size-4 shrink-0 text-primary-foreground" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
 
           {/* Font Size Menu */}
-          <div className="relative">
+          <div ref={fontMenuRef} className="relative">
             <button
               type="button"
               onClick={() => {
@@ -441,7 +510,7 @@ export function PlanBibleReaderModal({
               }}
               aria-expanded={isFontMenuOpen}
               aria-label="Adjust font size"
-              className={`flex items-center gap-1.5 rounded-[12px] border px-2.5 sm:px-3 py-1.5 text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer shadow-2xs ${
+              className={`flex items-center gap-1 sm:gap-1.5 rounded-[12px] border px-2 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium transition-all cursor-pointer shadow-2xs ${
                 isFontMenuOpen
                   ? "border-primary bg-surface-elevated text-foreground"
                   : "border-border bg-surface text-foreground hover:border-border-strong"
@@ -456,16 +525,11 @@ export function PlanBibleReaderModal({
             </button>
 
             {isFontMenuOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setIsFontMenuOpen(false)}
-                />
-                <div
-                  role="region"
-                  aria-label="Font size controls"
-                  className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-60 rounded-[16px] border border-border bg-surface p-3 shadow-lg flex flex-col gap-3"
-                >
+              <div
+                role="region"
+                aria-label="Font size controls"
+                className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-60 rounded-[16px] border border-border bg-surface p-3 shadow-lg flex flex-col gap-3"
+              >
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
                       Text Size
@@ -549,21 +613,25 @@ export function PlanBibleReaderModal({
                     })}
                   </div>
                 </div>
-              </>
-            )}
+              )}
+            </div>
+
+          {/* Theme Toggle: hidden on mobile toolbar to avoid crowding, accessible on larger screens */}
+          <div className="hidden sm:flex">
+            <ThemeToggle />
           </div>
         </div>
 
         {/* Right: Mark as Read Button */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => onToggleReadingAction(currentReading.id)}
+            onClick={handleToggleCurrentReading}
             aria-pressed={currentReading.isCompleted}
             aria-label={
               currentReading.isCompleted ? "Mark as unread" : "Mark as read"
             }
-            className={`flex items-center gap-1.5 rounded-[12px] border px-2.5 sm:px-3 py-1.5 text-[12px] sm:text-[13px] font-medium transition-all cursor-pointer shadow-2xs ${
+            className={`flex items-center gap-1.5 rounded-[12px] border px-2.5 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium transition-all cursor-pointer shadow-2xs ${
               currentReading.isCompleted
                 ? "border-border bg-surface text-foreground hover:bg-surface-elevated hover:border-border-strong"
                 : "border-primary bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98]"
@@ -578,7 +646,8 @@ export function PlanBibleReaderModal({
             ) : (
               <>
                 <Check className="size-3.5 text-primary-foreground stroke-[2.5]" />
-                <span>Mark as Read</span>
+                <span className="hidden sm:inline">Mark as Read</span>
+                <span className="sm:hidden">Read</span>
               </>
             )}
           </button>
