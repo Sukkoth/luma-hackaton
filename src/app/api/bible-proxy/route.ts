@@ -54,27 +54,145 @@ function extractChapterContent({
   }
 
   // 2. Verse range pages (e.g. /bible/1/MRK.1.10-15.KJV or JHN.3.16.NIV)
-  // Verse pages present a concise card with heading and text paragraphs.
-  const h2Match = html.match(
-    /<h2[^>]*class="[^"]*font-bold[^"]*"[^>]*>([A-Za-z0-9:\-\s]+<!-- -->[\s\S]*?)<\/h2>/i
+  // Use sanitize-html to parse and extract only the passage content,
+  // filtering out ads, images, navigation, and other junk.
+  const sanitized = sanitizeHtml(html, {
+    allowedTags: [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "p",
+      "span",
+      "a",
+      "br",
+      "strong",
+      "em",
+      "b",
+      "i",
+      "sup",
+      "div",
+    ],
+    allowedAttributes: {
+      h1: ["class"],
+      h2: ["class"],
+      h3: ["class"],
+      h4: ["class"],
+      p: ["class"],
+      span: ["class", "data-usfm"],
+      a: ["href"],
+      div: ["class"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    allowedSchemesByTag: { a: ["http", "https"] },
+    allowProtocolRelative: false,
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+    },
+    exclusiveFilter: (frame) => {
+      // Aggressively filter out ads, images, navigation, promo content
+      const tag = frame.tag;
+      const className = frame.attribs?.class || "";
+      const id = frame.attribs?.id || "";
+      const role = frame.attribs?.role || "";
+      const style = frame.attribs?.style || "";
+
+      return (
+        tag === "img" ||
+        tag === "picture" ||
+        tag === "source" ||
+        tag === "svg" ||
+        tag === "canvas" ||
+        tag === "video" ||
+        tag === "audio" ||
+        tag === "iframe" ||
+        tag === "script" ||
+        tag === "style" ||
+        tag === "nav" ||
+        tag === "header" ||
+        tag === "footer" ||
+        tag === "aside" ||
+        tag === "button" ||
+        tag === "form" ||
+        className.includes("Ad") ||
+        className.includes("ad-") ||
+        className.includes("Banner") ||
+        className.includes("banner") ||
+        className.includes("Promo") ||
+        className.includes("promo") ||
+        className.includes("Sponsor") ||
+        className.includes("sponsor") ||
+        className.includes("Cookie") ||
+        className.includes("cookie") ||
+        className.includes("Modal") ||
+        className.includes("modal") ||
+        className.includes("Popup") ||
+        className.includes("popup") ||
+        className.includes("Overlay") ||
+        className.includes("overlay") ||
+        className.includes("Fullscreen") ||
+        className.includes("fullscreen") ||
+        className.includes("ImageGallery") ||
+        className.includes("image-gallery") ||
+        className.includes("Carousel") ||
+        className.includes("carousel") ||
+        className.includes("Slider") ||
+        className.includes("slider") ||
+        className.includes("Nav") ||
+        className.includes("Header") ||
+        className.includes("Footer") ||
+        className.includes("AppBanner") ||
+        className.includes("Video") ||
+        className.includes("Audio") ||
+        className.includes("Partner") ||
+        className.includes("CTA") ||
+        className.includes("cta") ||
+        className.includes("Interstitial") ||
+        className.includes("interstitial") ||
+        id.includes("ad") ||
+        id.includes("banner") ||
+        id.includes("cookie") ||
+        id.includes("onetrust") ||
+        id.includes("modal") ||
+        id.includes("popup") ||
+        role === "banner" ||
+        role === "navigation" ||
+        role === "contentinfo" ||
+        role === "dialog" ||
+        role === "alertdialog" ||
+        style.includes("display: none") ||
+        style.includes("visibility: hidden") ||
+        style.includes("opacity: 0")
+      );
+    },
+  });
+
+  // After sanitization, look for the verse range structure:
+  // heading (h2 with font-bold) + paragraph(s) with text-16/text-20
+  const h2Match = sanitized.match(
+    /<h2[^>]*class="[^"]*font-bold[^"]*"[^>]*>([\s\S]*?)<\/h2>/i
   );
-  const pMatch = html.match(
-    /<p[^>]*class="[^"]*(?:text-16|text-20)[^"]*"[^>]*>([\s\S]*?)<\/p>/i
+  // Match ALL paragraphs with text-16 or text-20 (not just first)
+  const pMatches = sanitized.match(
+    /<p[^>]*class="[^"]*(?:text-16|text-20)[^"]*"[^>]*>([\s\S]*?)<\/p>/gi
+  );
+  const copyrightMatch = sanitized.match(
+    /<div[^>]*class="[^"]*(?:version-copyright|copyright)[^"]*"[^>]*>[\s\S]*?<\/div>/i
   );
 
-  if (pMatch) {
-    const copyrightMatch = html.match(
-      /<div[^>]*class="[^"]*(?:version-copyright|copyright)[^"]*"[^>]*>[\s\S]*?<\/div>/i
-    );
+  if (pMatches && pMatches.length > 0) {
     const headingHtml = h2Match
       ? `<h2 class="luma-verse-range-title">${h2Match[1].replace(/<!--[\s\S]*?-->/g, "").trim()}</h2>`
       : "";
     const copyrightHtml = copyrightMatch ? copyrightMatch[0] : "";
 
+    // Join all matching paragraphs (verse content may span multiple <p>)
+    const versesHtml = pMatches.join("");
+
     return `<div class="luma-verse-range-card">
       ${headingHtml}
       <div class="luma-verse-range-content">
-        ${pMatch[0]}
+        ${versesHtml}
       </div>
       ${copyrightHtml}
     </div>`;
