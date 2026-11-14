@@ -9,7 +9,7 @@ import sanitizeHtml from "sanitize-html";
 dns.setDefaultResultOrder("ipv4first");
 
 // Content version for cache invalidation — bump when extractor logic changes
-const CONTENT_VERSION = "v3";
+const CONTENT_VERSION = "v4";
 
 type ExtractChapterContentParams = {
   html: string;
@@ -190,8 +190,15 @@ function extractChapterContent({
     /<h2[^>]*class="[^"]*font-bold[^"]*"[^>]*>([\s\S]*?)<\/h2>/i
   );
   // Match ALL paragraphs with text-16 or text-20 (not just first)
-  const pMatches = sanitized.match(
+  const rawPMatches = sanitized.match(
     /<p[^>]*class="[^"]*(?:text-16|text-20)[^"]*"[^>]*>([\s\S]*?)<\/p>/gi
+  );
+  // Filter out any "Compare All Versions" or promo helper paragraphs
+  const pMatches = rawPMatches?.filter(
+    (p) =>
+      !p.includes("Compare") &&
+      !p.includes("compare") &&
+      !p.includes("Save verses")
   );
   const copyrightMatch = sanitized.match(
     /<div[^>]*class="[^"]*(?:version-copyright|copyright)[^"]*"[^>]*>[\s\S]*?<\/div>/i
@@ -702,7 +709,7 @@ const DISK_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const STANDARD_HEADERS = {
   "Content-Type": "text/html; charset=utf-8",
-  "Cache-Control": "public, max-age=86400, s-maxage=604800",
+  "Cache-Control": "no-cache, must-revalidate",
   "X-Frame-Options": "SAMEORIGIN",
   "X-Content-Type-Options": "nosniff",
 } as const;

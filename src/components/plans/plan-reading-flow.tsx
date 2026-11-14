@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,7 +22,6 @@ import {
   detectDefaultVersion,
 } from "@/lib/bible-versions";
 import { PlanSessionNotes } from "./plan-session-notes";
-import { PlanBibleReaderModal } from "./plan-bible-reader-modal";
 
 type PlanReadingFlowProps = {
   instanceId: string;
@@ -82,7 +82,6 @@ export function PlanReadingFlow({
 }: PlanReadingFlowProps) {
   const { resolvedTheme } = useTheme();
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [readingModalId, setReadingModalId] = useState<string | null>(null);
 
   const currentPart =
     parts.find((p) => p.partIndex === activePartIndex) || parts[0];
@@ -144,6 +143,18 @@ export function PlanReadingFlow({
         onSelectSessionAction(nextPart.startSessionIndex);
       }
     }
+  };
+
+  // Build Bible reader URL for a reading
+  const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
+    const defaultVersion = detectDefaultVersion({});
+    const params = new URLSearchParams();
+    params.set("v", defaultVersion.id.toString());
+    params.set("plan", instanceId);
+    params.set("readingId", reading.id);
+    if (reading.startVerse != null) params.set("startVerse", reading.startVerse.toString());
+    if (reading.endVerse != null) params.set("endVerse", reading.endVerse.toString());
+    return `/bible/${reading.bookId.toLowerCase()}/${reading.chapter}?${params.toString()}`;
   };
 
   return (
@@ -309,6 +320,8 @@ export function PlanReadingFlow({
                     );
                   }
 
+                  const readerUrl = buildReaderUrl(reading);
+
                   return (
                     <div
                       key={reading.id}
@@ -351,19 +364,15 @@ export function PlanReadingFlow({
                         </span>
                       </div>
 
-                      {/* Read Passage Book Button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setReadingModalId(reading.id);
-                        }}
+                      {/* Read Passage Book Button - now a Link */}
+                      <Link
+                        href={readerUrl}
                         aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
                         title="Read passage"
                         className="flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent text-foreground-dim transition-all hover:border-border hover:bg-surface hover:text-foreground active:scale-95 cursor-pointer"
                       >
                         <BookOpen className="size-3.5" />
-                      </button>
+                      </Link>
                     </div>
                   );
                 })}
@@ -385,16 +394,6 @@ export function PlanReadingFlow({
           onNoteDeletedAction={onNoteDeletedAction}
         />
       )}
-
-      {/* Bible Reading Webview Modal */}
-      <PlanBibleReaderModal
-        isOpen={readingModalId !== null}
-        onCloseAction={() => setReadingModalId(null)}
-        allSessions={sessions}
-        currentReadingId={readingModalId}
-        onSelectReadingAction={(readingId) => setReadingModalId(readingId)}
-        onToggleReadingAction={onToggleReadingAction}
-      />
     </div>
   );
 }

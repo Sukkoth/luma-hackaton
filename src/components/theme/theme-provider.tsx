@@ -26,6 +26,10 @@ type ThemeProviderProps = {
 
 const THEME_CHANGE_EVENT = "scripture-theme-change";
 
+function isBrowser(): boolean {
+  return typeof window !== "undefined";
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -33,6 +37,10 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const subscribe = useCallback(
     (callback: () => void) => {
+      if (!isBrowser()) {
+        return () => {};
+      }
+
       const handleStorage = (e: StorageEvent) => {
         if (e.key === storageKey) {
           callback();
@@ -72,6 +80,9 @@ export function ThemeProvider({
   );
 
   const getSnapshot = useCallback((): Theme => {
+    if (!isBrowser()) {
+      return defaultTheme;
+    }
     try {
       const stored = localStorage.getItem(storageKey) as Theme | null;
       if (stored === "light" || stored === "dark" || stored === "system") {
@@ -90,13 +101,16 @@ export function ThemeProvider({
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const getResolvedSnapshot = useCallback((): "light" | "dark" => {
+    if (!isBrowser()) {
+      return defaultTheme === "dark" ? "dark" : "light";
+    }
     if (theme === "system") {
       return window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
     }
     return theme === "dark" ? "dark" : "light";
-  }, [theme]);
+  }, [theme, defaultTheme]);
 
   const getResolvedServerSnapshot = useCallback((): "light" | "dark" => {
     return defaultTheme === "dark" ? "dark" : "light";
@@ -110,6 +124,8 @@ export function ThemeProvider({
 
   const setTheme = useCallback(
     (newTheme: Theme) => {
+      if (!isBrowser()) return;
+
       try {
         localStorage.setItem(storageKey, newTheme);
       } catch {
@@ -118,6 +134,7 @@ export function ThemeProvider({
 
       const root = document.documentElement;
       let isDark = false;
+
       if (newTheme === "system") {
         isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       } else {
@@ -130,7 +147,7 @@ export function ThemeProvider({
         root.classList.remove("dark");
       }
 
-      window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+      window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT));
     },
     [storageKey]
   );
@@ -142,7 +159,7 @@ export function ThemeProvider({
   );
 }
 
-export function useTheme(): ThemeContextType {
+export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error("useTheme must be used within a ThemeProvider");
