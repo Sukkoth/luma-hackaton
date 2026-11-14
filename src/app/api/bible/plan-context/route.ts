@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
         endVerse: r.endVerse,
         sessionIndex: s.sessionIndex,
         sessionTitle: s.title,
+        isCompleted: r.isCompleted,
       }))
     );
 

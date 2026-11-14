@@ -33,16 +33,23 @@ export function RechartsPlanGauge({
     ];
   }, [clampedPercent]);
 
+  const badgeText =
+    clampedPercent === 100
+      ? "Completed"
+      : mode === "scheduled"
+        ? "Active Schedule"
+        : "Self-Paced";
+
   return (
     <div className="relative flex flex-col items-center justify-center">
-      <div className="relative w-[320px] sm:w-[350px] h-[260px] sm:h-[280px]">
+      <div className="relative w-[300px] sm:w-[330px] h-[230px] sm:h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
             cx="50%"
             cy="48%"
-            innerRadius="76%"
+            innerRadius="74%"
             outerRadius="92%"
-            barSize={16}
+            barSize={18}
             data={data}
             startAngle={215}
             endAngle={-35}
@@ -56,26 +63,26 @@ export function RechartsPlanGauge({
             <RadialBar
               background={{ fill: "var(--border, rgba(255,255,255,0.12))" }}
               dataKey="value"
-              cornerRadius={8}
+              cornerRadius={9}
               animationDuration={800}
               animationEasing="ease-out"
             />
           </RadialBarChart>
         </ResponsiveContainer>
 
-        {/* Center overlay label positioned comfortably inside the horseshoe cavity */}
-        <div className="absolute inset-x-0 top-[26%] flex flex-col items-center justify-center text-center select-none pointer-events-none">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+        {/* Center overlay: well-proportioned, natural hierarchy */}
+        <div className="absolute inset-x-0 top-[22%] flex flex-col items-center justify-center text-center select-none pointer-events-none">
+          <span className="text-xs font-medium text-foreground-dim">
             Journey
           </span>
-          <span className="text-4xl sm:text-5xl font-extrabold leading-none tracking-tight text-foreground mt-1.5">
+          <span className="text-4xl sm:text-5xl font-extrabold leading-none tracking-tight text-foreground mt-1">
             {clampedPercent}%
           </span>
-          <span className="text-xs font-semibold text-foreground-muted mt-2">
-            {completedChapters} / {totalChapters} chapters
+          <span className="text-xs font-medium text-foreground-muted mt-1.5">
+            {completedChapters} of {totalChapters} chapters
           </span>
-          <span className="mt-3 inline-flex items-center rounded-md bg-surface-elevated px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-foreground-dim border border-border/40">
-            {mode === "scheduled" ? "Active Schedule" : "Self-Paced"}
+          <span className="mt-2.5 inline-flex items-center rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-dim border border-border/50">
+            {badgeText}
           </span>
         </div>
       </div>

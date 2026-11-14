@@ -51,6 +51,7 @@ export type BibleReaderCoreProps = {
       chapter: number;
       startVerse?: number;
       endVerse?: number;
+      isCompleted?: boolean;
       sessionIndex: number;
       sessionTitle: string;
     }[];
@@ -191,7 +192,7 @@ export function BibleReaderCore({
         ...r,
         bookName: r.bookId.toUpperCase(),
         displayText: r.bookId.toUpperCase(),
-        isCompleted: planContext.reading.id === r.id ? planContext.reading.isCompleted : false,
+        isCompleted: Boolean(r.isCompleted),
       }));
     }
     return [{

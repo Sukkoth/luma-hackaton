@@ -25,6 +25,7 @@ interface FlattenedReadingItem {
   chapter: number;
   startVerse?: number;
   endVerse?: number;
+  isCompleted: boolean;
   sessionIndex: number;
   sessionTitle: string;
 }
@@ -52,6 +53,7 @@ interface PlanContextResponse {
     chapter: number;
     startVerse?: number;
     endVerse?: number;
+    isCompleted: boolean;
     sessionIndex: number;
     sessionTitle: string;
   };
@@ -210,6 +212,7 @@ interface FlattenedReadingItem {
   chapter: number;
   startVerse?: number;
   endVerse?: number;
+  isCompleted: boolean;
   sessionIndex: number;
   sessionTitle: string;
 }
@@ -237,6 +240,7 @@ interface PlanContextResponse {
     chapter: number;
     startVerse?: number;
     endVerse?: number;
+    isCompleted: boolean;
     sessionIndex: number;
     sessionTitle: string;
   };

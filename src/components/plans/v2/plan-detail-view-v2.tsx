@@ -234,9 +234,9 @@ export function PlanDetailViewV2({ plan }: PlanDetailViewV2Props) {
           {/* =========================================================================
               3. BIG PROGRESS ARCH CARD (RECHARTS INTEGRATION)
               ========================================================================= */}
-          <section className="rounded-3xl border border-border/80 bg-surface px-6 sm:px-8 py-8 sm:py-12 shadow-2xs">
+          <section className="rounded-3xl border border-border/80 bg-surface px-6 sm:px-8 py-6 sm:py-8 shadow-2xs">
             {/* Center Recharts Speedometer Arch */}
-            <div className="pb-6">
+            <div>
               <RechartsPlanGauge
                 progressPercent={progressPercent}
                 completedChapters={completedChapters}
@@ -246,51 +246,39 @@ export function PlanDetailViewV2({ plan }: PlanDetailViewV2Props) {
             </div>
 
             {/* Bottom 4-Column Metrics Row */}
-            <div className="mx-auto max-w-2xl mt-4 pt-6 border-t border-border/40 grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:gap-y-0 sm:divide-x divide-border/40 text-center">
+            <div className="mx-auto max-w-2xl mt-3 pt-5 border-t border-border/40 grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:gap-y-0 sm:divide-x divide-border/40 text-center">
               <div className="py-1 px-2">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+                <span className="block text-xs font-medium text-foreground-dim">
                   Completed
                 </span>
-                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
+                <span className="mt-1 block text-sm sm:text-base font-bold text-foreground">
                   {completedChapters} / {currentPlan.totalChapters}
                 </span>
-                <span className="mt-0.5 block text-[11px] text-foreground-dim">
-                  Chapters read
-                </span>
               </div>
               <div className="py-1 px-2">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+                <span className="block text-xs font-medium text-foreground-dim">
                   Remaining
                 </span>
-                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
+                <span className="mt-1 block text-sm sm:text-base font-bold text-foreground">
                   {remainingChapters} Ch
-                </span>
-                <span className="mt-0.5 block text-[11px] text-foreground-dim">
-                  {remainingChapters === 0 ? "Goal reached" : "To read"}
                 </span>
               </div>
               <div className="py-1 px-2">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+                <span className="block text-xs font-medium text-foreground-dim">
                   Daily Target
                 </span>
-                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
+                <span className="mt-1 block text-sm sm:text-base font-bold text-foreground">
                   {currentPlan.mode === "flexible"
                     ? "Self-Paced"
                     : `${currentPlan.dailyTarget} ch/day`}
                 </span>
-                <span className="mt-0.5 block text-[11px] text-foreground-dim">
-                  {currentPlan.mode === "flexible" ? "Open pace" : "Target pace"}
-                </span>
               </div>
               <div className="py-1 px-2">
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+                <span className="block text-xs font-medium text-foreground-dim">
                   Sessions
                 </span>
-                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
+                <span className="mt-1 block text-sm sm:text-base font-bold text-foreground">
                   {completedSessionsCount} / {sessions.length}
-                </span>
-                <span className="mt-0.5 block text-[11px] text-foreground-dim">
-                  Sessions done
                 </span>
               </div>
             </div>
