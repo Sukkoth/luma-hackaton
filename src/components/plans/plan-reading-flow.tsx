@@ -83,6 +83,15 @@ export function PlanReadingFlow({
   const { resolvedTheme } = useTheme();
   const carouselRef = useRef<HTMLDivElement>(null);
 
+  // Listen for toggle events from the Bible reader modal
+  useEffect(() => {
+    function handleToggleReading(event: CustomEvent<{ readingId: string; nextStatus: boolean }>) {
+      onToggleReadingAction(event.detail.readingId);
+    }
+    window.addEventListener("bible-reader-toggle-reading", handleToggleReading as EventListener);
+    return () => window.removeEventListener("bible-reader-toggle-reading", handleToggleReading as EventListener);
+  }, [onToggleReadingAction]);
+
   const currentPart =
     parts.find((p) => p.partIndex === activePartIndex) || parts[0];
 

@@ -25,6 +25,7 @@ import { PlanBibleReaderModal } from "../plan-bible-reader-modal";
 import { PlanSessionNotes } from "../plan-session-notes";
 import { PlanSettingsTab } from "../plan-settings-tab";
 import { celebratePlanCompletion } from "@/lib/confetti";
+import { RechartsPlanGauge } from "./recharts-plan-gauge";
 
 type PlanDetailViewV2Props = {
   plan: PlanInstanceDetail;
@@ -77,6 +78,7 @@ export function PlanDetailViewV2({ plan }: PlanDetailViewV2Props) {
   const clampedPercent = Math.min(100, Math.max(0, progressPercent));
   const strokeDashoffset = ARC_LENGTH - (ARC_LENGTH * clampedPercent) / 100;
   const remainingChapters = Math.max(0, currentPlan.totalChapters - completedChapters);
+  const completedSessionsCount = sessions.filter((s) => s.isCompleted).length;
 
   // Part navigation
   const handlePrevPart = () => {
@@ -230,84 +232,65 @@ export function PlanDetailViewV2({ plan }: PlanDetailViewV2Props) {
       {activeTab === "chapters" && (
         <>
           {/* =========================================================================
-              3. BIG PROGRESS ARCH CARD (EXACTLY LIKE THE REFERENCE SCREENSHOT)
+              3. BIG PROGRESS ARCH CARD (RECHARTS INTEGRATION)
               ========================================================================= */}
-          <section className="rounded-3xl border border-border/80 bg-surface p-6 sm:p-8 shadow-2xs">
-            {/* Center Speedometer Arch */}
-            <div className="relative flex flex-col items-center justify-center pt-2 pb-4">
-              <div className="relative w-[240px] sm:w-[260px]">
-                <svg
-                  viewBox="0 0 320 220"
-                  className="w-full overflow-visible"
-                  aria-hidden="true"
-                >
-                  {/* Background Arc Track */}
-                  <path
-                    d="M 57.8 195 A 118 118 0 1 1 262.2 195"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="16"
-                    strokeLinecap="round"
-                    className="text-border/60"
-                  />
-
-                  {/* Foreground Filled Progress Arc */}
-                  {clampedPercent > 0 && (
-                    <path
-                      d="M 57.8 195 A 118 118 0 1 1 262.2 195"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="16"
-                      strokeLinecap="round"
-                      strokeDasharray={ARC_LENGTH}
-                      strokeDashoffset={strokeDashoffset}
-                      className="text-foreground transition-all duration-700 ease-out"
-                    />
-                  )}
-                </svg>
-
-                {/* Inner Center Metrics */}
-                <div className="absolute inset-x-0 top-[35px] bottom-[15px] flex flex-col items-center justify-center text-center select-none pointer-events-none">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
-                    Journey
-                  </span>
-                  <span className="text-[44px] sm:text-[48px] font-extrabold leading-none tracking-tight text-foreground mt-0.5">
-                    {clampedPercent}%
-                  </span>
-                  <span className="text-xs font-semibold text-foreground-muted mt-1">
-                    {completedChapters} / {currentPlan.totalChapters} chapters
-                  </span>
-                  <span className="mt-2 inline-flex items-center rounded-md bg-surface-elevated px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground-dim border border-border/40">
-                    {currentPlan.mode === "scheduled" ? "Active Schedule" : "Self-Paced"}
-                  </span>
-                </div>
-              </div>
+          <section className="rounded-3xl border border-border/80 bg-surface px-6 sm:px-8 py-8 sm:py-12 shadow-2xs">
+            {/* Center Recharts Speedometer Arch */}
+            <div className="pb-6">
+              <RechartsPlanGauge
+                progressPercent={progressPercent}
+                completedChapters={completedChapters}
+                totalChapters={currentPlan.totalChapters}
+                mode={currentPlan.mode}
+              />
             </div>
 
-            {/* Bottom 3-Column Metrics Row */}
-            <div className="mx-auto max-w-lg mt-4 pt-6 border-t border-border/40 grid grid-cols-3 divide-x divide-border/40 text-center">
-              <div>
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
-                  Mode
-                </span>
-                <span className="mt-1 block text-sm sm:text-base font-bold text-foreground capitalize">
-                  {currentPlan.mode}
-                </span>
-              </div>
-              <div>
+            {/* Bottom 4-Column Metrics Row */}
+            <div className="mx-auto max-w-2xl mt-4 pt-6 border-t border-border/40 grid grid-cols-2 sm:grid-cols-4 gap-y-4 sm:gap-y-0 sm:divide-x divide-border/40 text-center">
+              <div className="py-1 px-2">
                 <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
                   Completed
                 </span>
-                <span className="mt-1 block text-sm sm:text-base font-bold text-foreground">
+                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
                   {completedChapters} / {currentPlan.totalChapters}
                 </span>
+                <span className="mt-0.5 block text-[11px] text-foreground-dim">
+                  Chapters read
+                </span>
               </div>
-              <div>
+              <div className="py-1 px-2">
                 <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
                   Remaining
                 </span>
-                <span className="mt-1 block text-sm sm:text-base font-bold text-foreground">
+                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
                   {remainingChapters} Ch
+                </span>
+                <span className="mt-0.5 block text-[11px] text-foreground-dim">
+                  {remainingChapters === 0 ? "Goal reached" : "To read"}
+                </span>
+              </div>
+              <div className="py-1 px-2">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+                  Daily Target
+                </span>
+                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
+                  {currentPlan.mode === "flexible"
+                    ? "Self-Paced"
+                    : `${currentPlan.dailyTarget} ch/day`}
+                </span>
+                <span className="mt-0.5 block text-[11px] text-foreground-dim">
+                  {currentPlan.mode === "flexible" ? "Open pace" : "Target pace"}
+                </span>
+              </div>
+              <div className="py-1 px-2">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+                  Sessions
+                </span>
+                <span className="mt-1.5 block text-sm sm:text-base font-bold text-foreground">
+                  {completedSessionsCount} / {sessions.length}
+                </span>
+                <span className="mt-0.5 block text-[11px] text-foreground-dim">
+                  Sessions done
                 </span>
               </div>
             </div>

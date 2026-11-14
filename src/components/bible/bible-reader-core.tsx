@@ -593,8 +593,51 @@ export function BibleReaderCore({
           </div>
         </div>
 
-        {/* Right: Plan indicator or empty */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0" />
+        {/* Right: Mark as Read button (only in plan context) */}
+        {planContext && (
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (planContext) {
+                  const nextStatus = !currentReading.isCompleted;
+                  // Update local optimistic state
+                  // The actual toggle is handled by the parent via the reading item click
+                  // but we can trigger it here by finding the reading in the plan
+                  // For now, we'll use the same approach as the reading list
+                  const params = new URLSearchParams(window.location.search);
+                  params.set("readingId", currentReading.id);
+                  // This is a client-side toggle - the parent component handles the actual mutation
+                  // We'll dispatch a custom event that the plan-reading-flow can listen to
+                  window.dispatchEvent(new CustomEvent("bible-reader-toggle-reading", {
+                    detail: { readingId: currentReading.id, nextStatus }
+                  }));
+                }
+              }}
+              aria-pressed={currentReading.isCompleted}
+              aria-label={currentReading.isCompleted ? "Mark as unread" : "Mark as read"}
+              className={`flex items-center gap-1.5 rounded-[12px] border px-2.5 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium transition-all cursor-pointer shadow-2xs ${
+                currentReading.isCompleted
+                  ? "border-border bg-surface text-foreground hover:bg-surface-elevated hover:border-border-strong"
+                  : "border-primary bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98]"
+              }`}
+            >
+              {currentReading.isCompleted ? (
+                <>
+                  <Check className="size-3.5 text-primary stroke-[2.5]" />
+                  <span className="hidden sm:inline">Mark as Read</span>
+                  <span className="sm:hidden">Read</span>
+                </>
+              ) : (
+                <>
+                  <Check className="size-3.5 text-primary-foreground stroke-[2.5]" />
+                  <span className="hidden sm:inline">Mark as Read</span>
+                  <span className="sm:hidden">Read</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </header>
 
       {/* =========================================================================
