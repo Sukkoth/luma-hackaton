@@ -9,6 +9,7 @@ export type BibleReaderPageProps = {
   endVerse?: number;
   versionId?: number;
   planContext?: BibleReaderCoreProps["planContext"];
+  onToggleReading?: (readingId: string) => void;
 };
 
 export function BibleReaderPage({
@@ -18,6 +19,7 @@ export function BibleReaderPage({
   endVerse,
   versionId,
   planContext,
+  onToggleReading,
 }: BibleReaderPageProps) {
   return (
     <BibleReaderCore
@@ -27,6 +29,7 @@ export function BibleReaderPage({
       endVerse={endVerse}
       versionId={versionId}
       planContext={planContext}
+      onToggleReading={onToggleReading}
     />
   );
 }

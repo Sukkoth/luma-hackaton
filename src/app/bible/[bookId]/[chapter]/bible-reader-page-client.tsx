@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { BibleReaderPage } from "@/components/bible/bible-reader-page";
 import { AppShell } from "@/components/navigation/app-shell";
+import { togglePlanReadingItemAction } from "@/actions/plans";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import type { UserTrackerSummary } from "@/actions/trackers";
 
@@ -138,6 +139,67 @@ export function BibleReaderPageClient() {
     fetchUserData();
   }, [mounted, session, sessionPending, planContext]);
 
+  // Handle Mark as Read toggle directly in this component (since we're on a separate page)
+  const handleToggleReading = async (readingId: string) => {
+    if (!planContext || !session) return;
+    
+    const nextStatus = !planContext.reading.isCompleted;
+    
+    // Optimistic update
+    setPlanContext(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        reading: {
+          ...prev.reading,
+          isCompleted: nextStatus,
+        },
+        flattenedReadings: prev.flattenedReadings.map(r => 
+          r.id === readingId ? { ...r, isCompleted: nextStatus } : r
+        ),
+      };
+    });
+
+    try {
+      const res = await togglePlanReadingItemAction({
+        instanceId: planContext.plan.id,
+        readingItemId: readingId,
+      });
+      
+      if (!res.success) {
+        // Rollback on failure
+        setPlanContext(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            reading: {
+              ...prev.reading,
+              isCompleted: !nextStatus,
+            },
+            flattenedReadings: prev.flattenedReadings.map(r => 
+              r.id === readingId ? { ...r, isCompleted: !nextStatus } : r
+            ),
+          };
+        });
+      }
+    } catch {
+      // Rollback on error
+      setPlanContext(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          reading: {
+            ...prev.reading,
+            isCompleted: !nextStatus,
+          },
+          flattenedReadings: prev.flattenedReadings.map(r => 
+            r.id === readingId ? { ...r, isCompleted: !nextStatus } : r
+          ),
+        };
+      });
+    }
+  };
+
   if (!mounted || sessionPending || loading) {
     return (
       <AppShell>
@@ -189,6 +251,7 @@ export function BibleReaderPageClient() {
           endVerse={endVerse}
           versionId={versionId}
           planContext={planContext}
+          onToggleReading={handleToggleReading}
         />
       </div>
     </AppShell>

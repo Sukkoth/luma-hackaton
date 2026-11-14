@@ -56,6 +56,7 @@ export type BibleReaderCoreProps = {
       sessionTitle: string;
     }[];
   } | null;
+  onToggleReading?: (readingId: string) => void;
 };
 
 const FONT_SIZE_STORAGE_KEY = "luma-bible-font-size";
@@ -104,6 +105,7 @@ export function BibleReaderCore({
   endVerse,
   versionId: initialVersionId,
   planContext,
+  onToggleReading,
 }: BibleReaderCoreProps) {
   const { resolvedTheme } = useTheme();
   const router = useRouter();
@@ -600,19 +602,8 @@ export function BibleReaderCore({
             <button
               type="button"
               onClick={() => {
-                if (planContext) {
-                  const nextStatus = !currentReading.isCompleted;
-                  // Update local optimistic state
-                  // The actual toggle is handled by the parent via the reading item click
-                  // but we can trigger it here by finding the reading in the plan
-                  // For now, we'll use the same approach as the reading list
-                  const params = new URLSearchParams(window.location.search);
-                  params.set("readingId", currentReading.id);
-                  // This is a client-side toggle - the parent component handles the actual mutation
-                  // We'll dispatch a custom event that the plan-reading-flow can listen to
-                  window.dispatchEvent(new CustomEvent("bible-reader-toggle-reading", {
-                    detail: { readingId: currentReading.id, nextStatus }
-                  }));
+                if (planContext && onToggleReading) {
+                  onToggleReading(currentReading.id);
                 }
               }}
               aria-pressed={currentReading.isCompleted}
