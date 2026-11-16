@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
+  Check,
   Clock,
   ArrowRight,
   Eye,
@@ -514,9 +515,19 @@ export function GroupPlansTab({
                   <div className="flex items-center justify-between pt-3 border-t border-border-subtle text-xs text-foreground-dim">
                     <span>{plan.enrolledMembersCount} waiting</span>
                     {plan.userEnrolledInstanceId ? (
-                      <span className="text-xs font-semibold text-foreground">
-                        Pre-enrolled
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated border border-border px-2 py-0.5 text-[11px] font-semibold text-foreground">
+                          <Check className="size-3 text-foreground" />
+                          Pre-enrolled
+                        </span>
+                        <Link
+                          href={`/plans/${plan.userEnrolledInstanceId}`}
+                          className="text-xs text-foreground-dim hover:text-foreground transition-colors inline-flex items-center gap-0.5"
+                        >
+                          <span>Preview</span>
+                          <ArrowRight className="size-3" />
+                        </Link>
+                      </div>
                     ) : (
                       <Button
                         type="button"
@@ -543,6 +554,7 @@ export function GroupPlansTab({
           groupId={groupId}
           groupPlanId={selectedPlanForEnroll.id}
           planTitle={selectedPlanForEnroll.templateTitle}
+          scheduledStartDate={selectedPlanForEnroll.scheduledStartDate}
           trackers={trackers}
           defaultTrackerId={activeTrackerId}
         />

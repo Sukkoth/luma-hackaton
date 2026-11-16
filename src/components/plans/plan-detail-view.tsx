@@ -15,6 +15,7 @@ import {
   Zap,
   Users,
   ArrowRight,
+  Calendar,
 } from "lucide-react";
 import {
   type PlanInstanceDetail,
@@ -115,6 +116,28 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
 
   const remainingChapters = Math.max(0, currentPlan.totalChapters - completedChapters);
   const completedSessionsCount = sessions.filter((s) => s.isCompleted).length;
+
+  // Upcoming future scheduled plan detection
+  const planStartDateObj = new Date(currentPlan.startDate);
+  const nowMidnight = new Date();
+  nowMidnight.setHours(0, 0, 0, 0);
+  const isScheduledFuture =
+    currentPlan.mode === "scheduled" &&
+    planStartDateObj.getTime() > nowMidnight.getTime();
+
+  let daysUntilStart = 0;
+  let formattedPlanStartDate = "";
+  if (isScheduledFuture) {
+    daysUntilStart = Math.ceil(
+      (planStartDateObj.getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    formattedPlanStartDate = planStartDateObj.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
 
   // Part navigation
   const handlePrevPart = () => {
@@ -283,6 +306,41 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
           </p>
         </div>
       </div>
+
+      {/* =========================================================================
+          UPCOMING SCHEDULED PLAN BANNER (PRE-ENROLLED FUTURE COHORT PLAN)
+          ========================================================================= */}
+      {isScheduledFuture && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-border bg-surface-elevated/70 p-4 text-foreground shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-surface border border-border text-foreground shrink-0">
+              <Calendar className="size-4.5" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs sm:text-sm font-bold">
+                  Cohort Plan Starts {formattedPlanStartDate}
+                </span>
+                <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] font-semibold text-foreground-secondary uppercase tracking-wider">
+                  {daysUntilStart === 1 ? "Starts Tomorrow" : `Starts in ${daysUntilStart} Days`}
+                </span>
+              </div>
+              <p className="text-[11.5px] text-foreground-dim mt-0.5">
+                You are pre-enrolled with your cohort. Day 1 readings will unlock when the start date arrives.
+              </p>
+            </div>
+          </div>
+          {currentPlan.communityInfo && (
+            <Link
+              href={`/groups/${currentPlan.communityInfo.groupId}`}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-elevated transition-colors shrink-0"
+            >
+              <Users className="size-3.5" />
+              <span>Fellowship Hub</span>
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* =========================================================================
           OVERDUE CATCH-UP BANNER (IF APPLICABLE)
