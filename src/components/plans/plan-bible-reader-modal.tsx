@@ -311,6 +311,8 @@ export function PlanBibleReaderModal({
           });
           void fetch(`/api/bible-proxy?path=${encodeURIComponent(path)}`, {
             signal: controller.signal,
+          }).catch(() => {
+            // Ignore aborts during cleanup
           });
         }
       }, 800);
@@ -329,15 +331,17 @@ export function PlanBibleReaderModal({
           });
           void fetch(`/api/bible-proxy?path=${encodeURIComponent(path)}`, {
             signal: controller.signal,
+          }).catch(() => {
+            // Ignore aborts during cleanup
           });
         }
       }, 2200);
     }
 
     return () => {
-      controller.abort();
       if (nextTimer) clearTimeout(nextTimer);
       if (prevTimer) clearTimeout(prevTimer);
+      controller.abort();
     };
   }, [
     isOpen,

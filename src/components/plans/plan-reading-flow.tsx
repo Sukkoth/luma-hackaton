@@ -116,7 +116,7 @@ export function PlanReadingFlow({
           `/api/bible-proxy?path=${encodeURIComponent(
             path
           )}&theme=${resolvedTheme}`
-        );
+        ).catch(() => {});
       }
     }, 1500);
 
