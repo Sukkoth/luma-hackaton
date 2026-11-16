@@ -34,7 +34,7 @@ import {
   ToggleLeaderboardPrivacySchema,
   ShareNoteWithCommunitySchema,
 } from "@/lib/schemas/groups";
-import { startPlanAction } from "@/actions/plans";
+import { startPlanAction, ensurePlanTemplateInDb } from "@/actions/plans";
 
 export type GroupMemberSummary = {
   id: string;
@@ -1114,6 +1114,9 @@ export async function scheduleGroupPlanAction({
     if (!caller) {
       return { success: false, error: "Only admins or owners can schedule plans." };
     }
+
+    // Ensure template exists in database (auto-sync static curated template from READING_PLANS if not yet in DB)
+    await ensurePlanTemplateInDb({ templateId: input.planTemplateId });
 
     const template = await db.query.planTemplates.findFirst({
       where: eq(planTemplates.id, input.planTemplateId),
