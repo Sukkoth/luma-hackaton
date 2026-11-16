@@ -87,6 +87,7 @@ export type LeaderboardEntry = {
   avatarUrl: string | null;
   isCurrentUser: boolean;
   isAnonymous: boolean;
+  isPrivate?: boolean;
   completedChapters: number;
   totalChapters: number;
   progressPercent: number;
@@ -1399,6 +1400,7 @@ export async function getGroupLeaderboardAction({
         avatarUrl: shouldAnonymize ? null : e.image || null,
         isCurrentUser,
         isAnonymous: shouldAnonymize,
+        isPrivate: isHidden,
         completedChapters: completedCount,
         totalChapters,
         progressPercent,

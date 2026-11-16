@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   Clock,
@@ -46,6 +47,7 @@ export function GroupPlansTab({
   onOpenScheduleModal,
   onCopyInvite,
 }: GroupPlansTabProps) {
+  const router = useRouter();
   const [selectedPlanForEnroll, setSelectedPlanForEnroll] =
     useState<GroupPlanSummary | null>(null);
   const [hideProgress, setHideProgress] = useState(currentUserHideProgress);
@@ -54,14 +56,19 @@ export function GroupPlansTab({
   async function handleTogglePrivacy() {
     setIsUpdatingPrivacy(true);
     const nextVal = !hideProgress;
+    setHideProgress(nextVal);
     try {
       const res = await toggleLeaderboardPrivacyAction({
         groupId,
         hideProgress: nextVal,
       });
       if (res.success) {
-        setHideProgress(nextVal);
+        router.refresh();
+      } else {
+        setHideProgress(!nextVal);
       }
+    } catch {
+      setHideProgress(!nextVal);
     } finally {
       setIsUpdatingPrivacy(false);
     }
@@ -249,39 +256,77 @@ export function GroupPlansTab({
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={handleTogglePrivacy}
-                      disabled={isUpdatingPrivacy}
-                      className="inline-flex items-center gap-1.5 text-[11px] text-foreground-secondary hover:text-foreground transition-colors cursor-pointer px-2.5 py-1 rounded-xl border border-border bg-surface-elevated/60"
-                      title="Toggle progress privacy"
-                    >
-                      {hideProgress ? (
-                        <>
-                          <EyeOff className="size-3 text-warning" />
-                          <span className="text-[10px] font-medium">Hidden</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="size-3 text-foreground-dim" />
-                          <span className="text-[10px] font-medium">Visible</span>
-                        </>
-                      )}
-                    </button>
+                    <span className="text-[10px] font-semibold text-foreground-dim uppercase tracking-wider px-2 py-0.5 rounded-md border border-border bg-surface-elevated/40">
+                      Cohort Momentum
+                    </span>
                   </div>
 
-                  {/* Current User Standing Chip (if in leaderboard) */}
-                  {currentUserRank && (
-                    <div className="flex items-center justify-between rounded-xl border border-border bg-surface-elevated/50 px-3.5 py-2.5 text-xs">
-                      <span className="text-foreground-secondary">
-                        Your Standing:{" "}
-                        <strong className="text-foreground font-semibold">
-                          #{currentUserRank} of {leaderboard.length}
-                        </strong>
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        {userCompleted} / {plan.totalChapters} ch ({userPercent}%)
-                      </span>
+                  {/* Current User Standing & Privacy Bar */}
+                  {currentUser && (
+                    <div
+                      className={`rounded-xl border p-3 text-xs transition-all ${
+                        hideProgress
+                          ? "border-dashed border-border bg-surface-elevated/30"
+                          : "border-border bg-surface-elevated/50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`size-2 rounded-full shrink-0 ${
+                                hideProgress ? "bg-foreground-dim" : "bg-foreground"
+                              }`}
+                            />
+                            <span className="text-foreground font-semibold truncate">
+                              {hideProgress
+                                ? "Your Progress is Hidden"
+                                : `Your Standing: #${currentUserRank} of ${leaderboard.length}`}
+                            </span>
+                            <span
+                              className={`text-[9.5px] font-semibold px-1.5 py-0.5 rounded border uppercase shrink-0 ${
+                                hideProgress
+                                  ? "border-border bg-surface text-foreground-dim"
+                                  : "border-border bg-surface text-foreground-secondary"
+                              }`}
+                            >
+                              {hideProgress ? "Private" : "Visible"}
+                            </span>
+                          </div>
+
+                          <p className="text-[10.5px] text-foreground-dim mt-1">
+                            {hideProgress
+                              ? "Other cohort members will not see your chapters or rank."
+                              : `${userCompleted} of ${plan.totalChapters} chapters read (${userPercent}%).`}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleTogglePrivacy}
+                          disabled={isUpdatingPrivacy}
+                          className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground hover:opacity-80 active:scale-[0.98] transition-all cursor-pointer px-2.5 py-1.5 rounded-lg border border-border bg-surface shrink-0 shadow-2xs disabled:opacity-50"
+                          title={
+                            hideProgress
+                              ? "Share your reading progress with the cohort"
+                              : "Hide your reading progress from fellow cohort members"
+                          }
+                        >
+                          {isUpdatingPrivacy ? (
+                            <span className="text-[10px]">Updating...</span>
+                          ) : hideProgress ? (
+                            <>
+                              <Eye className="size-3 text-foreground" />
+                              <span>Make Visible</span>
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="size-3 text-foreground-dim" />
+                              <span>Hide Progress</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -293,6 +338,10 @@ export function GroupPlansTab({
                   ) : (
                     <div className="rounded-2xl border border-border bg-surface divide-y divide-border overflow-y-auto max-h-[340px] overscroll-contain">
                       {leaderboard.map((member, index) => {
+                        const isUserHidden =
+                          member.isCurrentUser && hideProgress;
+                        const isOtherHidden =
+                          !member.isCurrentUser && member.isAnonymous;
                         const initials = member.name
                           .split(" ")
                           .map((w) => w[0])
@@ -305,17 +354,21 @@ export function GroupPlansTab({
                             key={member.userId}
                             className={`flex items-center justify-between p-3.5 text-xs transition-colors ${
                               member.isCurrentUser
-                                ? "bg-surface-elevated/80 font-medium"
+                                ? isUserHidden
+                                  ? "bg-surface-elevated/40 border-l-2 border-foreground-dim"
+                                  : "bg-surface-elevated/80 font-medium border-l-2 border-foreground"
                                 : "hover:bg-surface-elevated/30"
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <span className="text-xs font-semibold text-foreground-dim w-4 text-center shrink-0">
-                                {index + 1}
+                                {isUserHidden ? "—" : index + 1}
                               </span>
 
                               <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-surface-elevated border border-border text-[11px] font-bold text-foreground overflow-hidden shadow-2xs">
-                                {member.avatarUrl ? (
+                                {isUserHidden || isOtherHidden ? (
+                                  <EyeOff className="size-3.5 text-foreground-dim" />
+                                ) : member.avatarUrl ? (
                                   <Image
                                     src={member.avatarUrl}
                                     alt={member.name}
@@ -338,23 +391,42 @@ export function GroupPlansTab({
                                       YOU
                                     </span>
                                   )}
+                                  {isUserHidden && (
+                                    <span className="rounded-sm border border-border bg-surface px-1 text-[8.5px] font-medium text-foreground-dim">
+                                      Hidden from Cohort
+                                    </span>
+                                  )}
                                 </div>
                                 <span className="text-[10.5px] text-foreground-dim block">
-                                  {member.completedChapters} / {member.totalChapters} chapters
+                                  {isUserHidden
+                                    ? `${member.completedChapters} / ${member.totalChapters} chapters (Private to you)`
+                                    : isOtherHidden
+                                    ? "Progress hidden"
+                                    : `${member.completedChapters} / ${member.totalChapters} chapters`}
                                 </span>
                               </div>
                             </div>
 
                             {/* Progress Percent & Read Today Icon */}
                             <div className="flex items-center gap-2.5 shrink-0 ml-2">
-                              <span className="text-xs font-semibold text-foreground">
-                                {member.progressPercent}%
+                              <span
+                                className={`text-xs font-semibold ${
+                                  isUserHidden
+                                    ? "text-foreground-dim"
+                                    : "text-foreground"
+                                }`}
+                              >
+                                {isUserHidden ? "Hidden" : `${member.progressPercent}%`}
                               </span>
 
                               {member.readToday ? (
                                 <span
                                   className="flex size-6 items-center justify-center rounded-full bg-surface-elevated text-foreground border border-border"
-                                  title="Read today"
+                                  title={
+                                    isUserHidden
+                                      ? "Read today (hidden from cohort)"
+                                      : "Read today"
+                                  }
                                 >
                                   <CheckCircle2 className="size-3.5 text-foreground" />
                                 </span>
