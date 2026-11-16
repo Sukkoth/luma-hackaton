@@ -130,11 +130,11 @@ export async function resolvePlanBlueprint({
   };
 }
 
-type EnsurePlanTemplateInDbParams = {
+export type EnsurePlanTemplateInDbParams = {
   templateId: string;
 };
 
-async function ensurePlanTemplateInDb({
+export async function ensurePlanTemplateInDb({
   templateId,
 }: EnsurePlanTemplateInDbParams): Promise<void> {
   const existing = await db.query.planTemplates.findFirst({

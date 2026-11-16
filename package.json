@@ -14,6 +14,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "seed:demo": "bun src/db/seed-demo.ts",
+    "seed:community": "bun src/db/seed-community.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
