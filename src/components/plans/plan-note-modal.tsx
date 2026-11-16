@@ -108,6 +108,7 @@ export function PlanNoteModal({
           title: res.note.title,
           plainTextSnippet: res.note.plainTextSnippet,
           bodyHtml: res.note.bodyHtml,
+          isSharedWithCommunity: noteToEdit.isSharedWithCommunity,
           createdAt: res.note.createdAt,
           updatedAt: res.note.updatedAt,
         };
@@ -140,6 +141,7 @@ export function PlanNoteModal({
           title: res.note.title,
           plainTextSnippet: res.note.plainTextSnippet,
           bodyHtml: res.note.bodyHtml,
+          isSharedWithCommunity: false,
           createdAt: res.note.createdAt,
           updatedAt: res.note.updatedAt,
         };

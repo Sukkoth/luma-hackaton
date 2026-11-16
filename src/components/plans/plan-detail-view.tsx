@@ -12,6 +12,8 @@ import {
   Sliders,
   AlertCircle,
   Zap,
+  Users,
+  ArrowRight,
 } from "lucide-react";
 import {
   type PlanInstanceDetail,
@@ -227,9 +229,22 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
           <ArrowLeft className="size-4" />
         </Link>
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-            {currentPlan.title}
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              {currentPlan.title}
+            </h1>
+            {currentPlan.communityInfo && (
+              <Link
+                href={`/groups/${currentPlan.communityInfo.groupId}`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-semibold text-foreground border border-border hover:bg-surface transition-colors"
+                title="View community fellowship"
+              >
+                <Users className="size-3 text-foreground" />
+                <span>Fellowship: {currentPlan.communityInfo.groupName}</span>
+                <ArrowRight className="size-2.5 text-foreground-dim" />
+              </Link>
+            )}
+          </div>
           <p className="text-xs text-foreground-dim mt-0.5">
             Tracker: {currentPlan.tracker.name}
           </p>
@@ -529,6 +544,8 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
               instanceId={currentPlan.id}
               planTitle={currentPlan.title}
               activeSession={activeSession}
+              groupPlanId={currentPlan.communityInfo?.groupPlanId}
+              communityName={currentPlan.communityInfo?.groupName}
               notes={notes}
               onNoteCreatedAction={(newNote) => {
                 setNotes((prev) => [newNote, ...prev]);

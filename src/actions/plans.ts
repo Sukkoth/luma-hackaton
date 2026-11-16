@@ -17,6 +17,7 @@ import {
   noteFolders,
   notes,
   readingTrackers,
+  groupPlans,
 } from "@/db/schema";
 import {
   StartPlanSchema,
@@ -767,6 +768,7 @@ export type PlanNoteDetail = {
   title: string;
   plainTextSnippet: string;
   bodyHtml: string;
+  isSharedWithCommunity: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -796,6 +798,11 @@ export type PlanInstanceDetail = {
   activeDaysMask: string;
   reminderEnabled: boolean;
   reminderTime: string | null;
+  communityInfo?: {
+    groupId: string;
+    groupName: string;
+    groupPlanId: string;
+  } | null;
   tracker: {
     id: string;
     name: string;
@@ -1076,9 +1083,27 @@ export async function getPlanInstanceDetailAction({
     title: n.title,
     plainTextSnippet: n.plainTextSnippet,
     bodyHtml: n.bodyHtml,
+    isSharedWithCommunity: n.isSharedWithCommunity ?? false,
     createdAt: n.createdAt.toISOString(),
     updatedAt: n.updatedAt.toISOString(),
   }));
+
+  let communityInfo: PlanInstanceDetail["communityInfo"] = null;
+  if (instance.groupPlanId) {
+    const gp = await db.query.groupPlans.findFirst({
+      where: eq(groupPlans.id, instance.groupPlanId),
+      with: {
+        group: true,
+      },
+    });
+    if (gp?.group) {
+      communityInfo = {
+        groupId: gp.group.id,
+        groupName: gp.group.name,
+        groupPlanId: gp.id,
+      };
+    }
+  }
 
   return {
     id: instance.id,
@@ -1110,6 +1135,7 @@ export async function getPlanInstanceDetailAction({
     activeDaysMask: instance.activeDaysMask,
     reminderEnabled: instance.reminderEnabled,
     reminderTime: instance.reminderTime,
+    communityInfo,
     tracker: {
       id: instance.tracker.id,
       name: instance.tracker.name,
