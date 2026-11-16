@@ -13,6 +13,8 @@ export const metadata = {
     "Collaborative Bible reading groups, synchronized plans, and cohort accountability.",
 };
 
+export const instant = false;
+
 export default async function GroupsPage() {
   const session = await auth.api.getSession({
     headers: await headers(),

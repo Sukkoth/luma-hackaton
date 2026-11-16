@@ -11,6 +11,8 @@ export const metadata = {
   description: "Accept invitation to join a community Bible reading fellowship.",
 };
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{ code: string }>;
 };

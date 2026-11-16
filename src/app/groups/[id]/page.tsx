@@ -24,6 +24,8 @@ export async function generateMetadata({
   };
 }
 
+export const instant = false;
+
 type PageProps = {
   params: Promise<{ id: string }>;
 };
