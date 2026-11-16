@@ -61,6 +61,7 @@ export type StartPlanActionParams = {
   startDate: string;
   dailyTarget: number;
   targetEndDate?: string;
+  groupPlanId?: string;
   activeDaysMask: string;
   autoCompletePastDays?: boolean;
   reminderEnabled?: boolean;
@@ -290,6 +291,7 @@ export async function startPlanAction({
   startDate,
   dailyTarget,
   targetEndDate,
+  groupPlanId,
   activeDaysMask,
   autoCompletePastDays = true,
   reminderEnabled = false,
@@ -312,6 +314,7 @@ export async function startPlanAction({
     startDate,
     dailyTarget,
     targetEndDate,
+    groupPlanId,
     activeDaysMask,
     autoCompletePastDays,
     reminderEnabled,
@@ -499,6 +502,7 @@ export async function startPlanAction({
       dailyTarget: input.dailyTarget,
       totalChapters: blueprint.totalChapters,
       activeDaysMask: input.activeDaysMask,
+      groupPlanId: input.groupPlanId ?? null,
       pacingSegmentsJson: JSON.stringify(segments),
       reminderEnabled: input.reminderEnabled ?? false,
       reminderTime: input.reminderTime ?? "08:00",
