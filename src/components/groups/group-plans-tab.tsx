@@ -16,6 +16,7 @@ import {
   BookOpen,
   Sparkles,
   Users,
+  Calendar,
 } from "lucide-react";
 import type { GroupPlanSummary, LeaderboardEntry } from "@/actions/groups";
 import type { UserTrackerSummary } from "@/actions/trackers";
@@ -121,30 +122,39 @@ export function GroupPlansTab({
                 className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
               >
                 {/* Left: Active Plan Hero Pavilion (7 cols) */}
-                <div className="lg:col-span-7 xl:col-span-7 rounded-3xl border border-border bg-surface p-6 sm:p-8 space-y-6 shadow-xs">
-                  {/* Eyebrow */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-foreground-dim">
-                      Active Reading Plan
-                    </span>
-                    <span className="text-xs text-foreground-secondary">
-                      {plan.dailyChapterTarget}{" "}
-                      {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day
+                <div className="lg:col-span-7 xl:col-span-7 rounded-3xl border border-border/80 bg-surface p-6 sm:p-8 space-y-6 shadow-xs relative overflow-hidden">
+                  <div className="pointer-events-none absolute -right-20 -top-20 size-60 rounded-full bg-surface-elevated/40 blur-2xl" />
+
+                  {/* Header Row: Category Eyebrow & Cadence Tag */}
+                  <div className="relative flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-elevated px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase text-foreground border border-border">
+                        <BookOpen className="size-3 text-foreground-dim" />
+                        <span>Active Reading Plan</span>
+                      </span>
+                      <span className="text-[11px] font-medium text-foreground-dim hidden sm:inline">
+                        Synchronized Cohort
+                      </span>
+                    </div>
+
+                    <span className="inline-flex items-center gap-1 rounded-full bg-surface-elevated px-2.5 py-1 text-xs font-semibold text-foreground border border-border">
+                      <Clock className="size-3 text-foreground-dim" />
+                      <span>{plan.dailyChapterTarget} {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day</span>
                     </span>
                   </div>
 
                   {/* Title & Curriculum Summary */}
-                  <div>
-                    <h3 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                  <div className="relative space-y-1.5">
+                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
                       {plan.templateTitle}
                     </h3>
-                    <p className="mt-1 text-xs sm:text-[13.5px] text-foreground-secondary leading-relaxed max-w-2xl">
+                    <p className="text-xs sm:text-[13.5px] text-foreground-secondary leading-relaxed max-w-2xl">
                       A structured curriculum of {plan.totalChapters} chapters synchronized daily across all cohort readers.
                     </p>
                   </div>
 
                   {/* Personal Reading Station (Progress & Primary Action) */}
-                  <div className="rounded-2xl border border-border bg-surface-elevated/40 p-5 space-y-4">
+                  <div className="relative rounded-2xl border border-border bg-surface-elevated/40 p-5 space-y-4">
                     {isEnrolled ? (
                       <>
                         <div className="space-y-2">
@@ -181,19 +191,24 @@ export function GroupPlansTab({
                       </>
                     ) : (
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="space-y-0.5">
-                          <span className="text-xs font-semibold text-foreground block">
-                            Join Fellowship Reading Journey
-                          </span>
-                          <span className="text-xs text-foreground-dim block">
-                            Synchronize your personal reader with this cohort
-                          </span>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="flex size-7 items-center justify-center rounded-lg bg-surface border border-border text-foreground">
+                              <Sparkles className="size-3.5" />
+                            </span>
+                            <span className="text-xs sm:text-sm font-bold text-foreground">
+                              Join Fellowship Reading Journey
+                            </span>
+                          </div>
+                          <p className="text-xs text-foreground-dim max-w-md leading-relaxed">
+                            Synchronize your daily chapters, study notes, and reflections with your fellow readers.
+                          </p>
                         </div>
                         <Button
                           type="button"
                           variant="primary"
                           size="md"
-                          className="w-full sm:w-auto h-11 px-6 text-sm"
+                          className="w-full sm:w-auto h-11 px-6 text-sm shrink-0"
                           onClick={() => setSelectedPlanForEnroll(plan)}
                           leftIcon={<UserCheck className="size-4" />}
                         >
@@ -203,41 +218,40 @@ export function GroupPlansTab({
                     )}
                   </div>
 
-                  {/* Integrated Fellowship Vitals Strip */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
-                        Cohort Readers
+                  {/* Sleek Integrated Telemetry Rail */}
+                  <div className="relative rounded-2xl border border-border bg-surface-elevated/30 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
+                    <div className="p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                        Cohort Cadence
                       </span>
-                      <span className="text-base sm:text-lg font-bold text-foreground">
-                        {plan.enrolledMembersCount}{" "}
-                        {plan.enrolledMembersCount === 1 ? "reader" : "readers"}
-                      </span>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
-                        Total Length
-                      </span>
-                      <span className="text-base sm:text-lg font-bold text-foreground">
-                        {plan.totalChapters} Chapters
-                      </span>
-                    </div>
-
-                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
-                        Daily Cadence
-                      </span>
-                      <span className="text-base sm:text-lg font-bold text-foreground">
+                      <span className="text-sm sm:text-base font-bold text-foreground">
                         {plan.dailyChapterTarget} ch / day
                       </span>
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
+                    <div className="p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                        Curriculum
+                      </span>
+                      <span className="text-sm sm:text-base font-bold text-foreground">
+                        {plan.totalChapters} Chapters
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                        Cohort Readers
+                      </span>
+                      <span className="text-sm sm:text-base font-bold text-foreground">
+                        {plan.enrolledMembersCount} {plan.enrolledMembersCount === 1 ? "reader" : "readers"}
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
                         Cohort Sync
                       </span>
-                      <span className="text-base sm:text-lg font-bold text-foreground">
+                      <span className="text-sm sm:text-base font-bold text-foreground">
                         Synchronized
                       </span>
                     </div>
@@ -245,7 +259,7 @@ export function GroupPlansTab({
                 </div>
 
                 {/* Right: Fellowship Circle & Accountability Board (5 cols) */}
-                <div className="lg:col-span-5 xl:col-span-5 rounded-3xl border border-border bg-surface p-6 space-y-4 shadow-xs">
+                <div className="lg:col-span-5 xl:col-span-5 rounded-3xl border border-border/80 bg-surface p-6 space-y-4 shadow-xs">
                   {/* Board Header */}
                   <div className="flex items-center justify-between pb-3 border-b border-border">
                     <div>
@@ -287,7 +301,7 @@ export function GroupPlansTab({
                             <span
                               className={`text-[9.5px] font-semibold px-1.5 py-0.5 rounded border uppercase shrink-0 ${
                                 hideProgress
-                                  ? "border-border bg-surface text-foreground-dim"
+                                    ? "border-border bg-surface text-foreground-dim"
                                   : "border-border bg-surface text-foreground-secondary"
                               }`}
                             >
@@ -331,10 +345,46 @@ export function GroupPlansTab({
                     </div>
                   )}
 
-                  {/* Member Leaderboard Roster (Scrollable container capped at ~340px) */}
+                  {/* Member Leaderboard Roster or Inspiring Empty State */}
                   {leaderboard.length === 0 ? (
-                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-6 text-center text-xs text-foreground-dim">
-                      No readers enrolled in this plan yet.
+                    <div className="rounded-2xl border border-dashed border-border bg-surface-elevated/30 p-8 sm:p-10 text-center flex flex-col items-center justify-center space-y-3.5">
+                      <div className="relative flex items-center justify-center size-16 rounded-full border border-border bg-surface text-foreground shadow-2xs">
+                        <Users className="size-6 text-foreground" />
+                        <span className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-foreground text-background text-[10px] font-bold">
+                          +
+                        </span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-bold text-foreground">
+                          The Reading Circle Awaits
+                        </h4>
+                        <p className="text-xs text-foreground-dim max-w-xs leading-relaxed">
+                          Be the first reader to enroll in this plan. Daily reading milestones, chapter completions, and shared reflections will appear here.
+                        </p>
+                      </div>
+
+                      {!isEnrolled ? (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPlanForEnroll(plan)}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-foreground text-background px-4 py-2 text-xs font-semibold hover:opacity-90 transition-all cursor-pointer shadow-xs mt-1"
+                        >
+                          <UserCheck className="size-3.5" />
+                          <span>Enroll to Start Circle</span>
+                        </button>
+                      ) : (
+                        onCopyInvite && (
+                          <button
+                            type="button"
+                            onClick={onCopyInvite}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-4 py-2 text-xs font-semibold text-foreground hover:bg-surface-elevated transition-colors cursor-pointer mt-1"
+                          >
+                            <Users className="size-3.5" />
+                            <span>Invite Cohort Friends</span>
+                          </button>
+                        )
+                      )}
                     </div>
                   ) : (
                     <div className="rounded-2xl border border-border bg-surface divide-y divide-border overflow-y-auto max-h-[340px] overscroll-contain">
@@ -478,42 +528,76 @@ export function GroupPlansTab({
         </div>
       )}
 
-      {/* Upcoming Scheduled Plans */}
+      {/* Upcoming Scheduled Plans ("Cohort Horizon") */}
       {scheduledPlans.length > 0 && (
-        <div className="space-y-4 pt-4 border-t border-border-subtle">
-          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
-            Upcoming Scheduled Plans ({scheduledPlans.length})
-          </h2>
+        <div className="space-y-4 pt-6 border-t border-border/80">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-8 items-center justify-center rounded-xl bg-surface-elevated text-foreground border border-border shadow-2xs">
+                <Calendar className="size-4" />
+              </span>
+              <div>
+                <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                  Cohort Horizon • Upcoming Plans ({scheduledPlans.length})
+                </h2>
+                <p className="text-xs text-foreground-dim">
+                  Curricula scheduled to launch on synchronized start dates for this fellowship.
+                </p>
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {scheduledPlans.map((plan) => {
-              const startDateStr = new Date(
-                plan.scheduledStartDate
-              ).toLocaleDateString(undefined, {
+              const startDateObj = new Date(plan.scheduledStartDate);
+              const startDateStr = startDateObj.toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
               });
+              const nowMidnight = new Date();
+              nowMidnight.setHours(0, 0, 0, 0);
+              const diffDays = Math.ceil(
+                (startDateObj.getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24)
+              );
+              const countdownLabel =
+                diffDays <= 0
+                  ? "Starts Today"
+                  : diffDays === 1
+                  ? "Starts Tomorrow"
+                  : `In ${diffDays} days`;
 
               return (
                 <div
                   key={plan.id}
-                  className="ui-card flex flex-col justify-between p-5 space-y-4 transition-all duration-150 hover:border-border-strong"
+                  className="ui-card group flex flex-col justify-between p-5 space-y-4 transition-all duration-150 hover:border-border-strong hover:shadow-xs"
                 >
-                  <div>
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground-secondary border border-border uppercase mb-2">
-                      Starts {startDateStr}
-                    </span>
-                    <h3 className="text-sm font-semibold text-foreground">
-                      {plan.templateTitle}
-                    </h3>
-                    <p className="text-xs text-foreground-dim mt-1">
-                      {plan.totalChapters} chapters • {plan.dailyChapterTarget} chapters/day
-                    </p>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground-secondary border border-border">
+                        <Calendar className="size-3 text-foreground-dim" />
+                        <span>Starts {startDateStr}</span>
+                      </span>
+                      <span className="text-[10px] font-semibold text-foreground-dim px-1.5 py-0.5 rounded-md bg-surface border border-border">
+                        {countdownLabel}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                        {plan.templateTitle}
+                      </h3>
+                      <p className="text-xs text-foreground-dim mt-1">
+                        {plan.totalChapters} chapters • {plan.dailyChapterTarget} chapters/day
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-border-subtle text-xs text-foreground-dim">
-                    <span>{plan.enrolledMembersCount} waiting</span>
+                    <span className="font-medium">
+                      {plan.enrolledMembersCount}{" "}
+                      {plan.enrolledMembersCount === 1 ? "reader waiting" : "readers waiting"}
+                    </span>
                     {plan.userEnrolledInstanceId ? (
                       <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated border border-border px-2 py-0.5 text-[11px] font-semibold text-foreground">
@@ -522,7 +606,7 @@ export function GroupPlansTab({
                         </span>
                         <Link
                           href={`/plans/${plan.userEnrolledInstanceId}`}
-                          className="text-xs text-foreground-dim hover:text-foreground transition-colors inline-flex items-center gap-0.5"
+                          className="text-xs text-foreground-dim hover:text-foreground font-medium transition-colors inline-flex items-center gap-0.5"
                         >
                           <span>Preview</span>
                           <ArrowRight className="size-3" />
