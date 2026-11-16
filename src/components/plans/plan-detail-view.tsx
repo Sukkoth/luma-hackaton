@@ -44,6 +44,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   const [activeTab, setActiveTab] = useState<"chapters" | "settings">("chapters");
 
   // Core plan state
+  const [prevPlan, setPrevPlan] = useState<PlanInstanceDetail>(plan);
   const [currentPlan, setCurrentPlan] = useState<PlanInstanceDetail>(plan);
   const [sessions, setSessions] = useState<ReadonlyArray<PlanSessionDetail>>(
     plan.sessions
@@ -53,6 +54,16 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   );
   const [progressPercent, setProgressPercent] = useState(plan.progressPercent);
   const [notes, setNotes] = useState<ReadonlyArray<PlanNoteDetail>>(plan.notes);
+
+  // Synchronize internal state whenever server plan prop updates without remounting
+  if (plan !== prevPlan) {
+    setPrevPlan(plan);
+    setCurrentPlan(plan);
+    setSessions(plan.sessions);
+    setCompletedChapters(plan.completedChapters);
+    setProgressPercent(plan.progressPercent);
+    setNotes(plan.notes);
+  }
 
   // Refresh server data when navigating back via browser back/forward cache
   useEffect(() => {
@@ -65,9 +76,21 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, [router]);
 
-  // Active Part & Session navigation
-  const [activePartIndex, setActivePartIndex] = useState(1);
-  const [activeSessionIndex, setActiveSessionIndex] = useState(1);
+  // Determine initial focus session (first uncompleted session, or session 1)
+  const initialFocusSession =
+    plan.sessions.find((s) => !s.isCompleted) || plan.sessions[0];
+  const initialSessionIdx = initialFocusSession?.sessionIndex || 1;
+  const initialFocusPart =
+    plan.parts.find(
+      (p) =>
+        initialSessionIdx >= p.startSessionIndex &&
+        initialSessionIdx <= p.endSessionIndex
+    ) || plan.parts[0];
+  const initialPartIdx = initialFocusPart?.partIndex || 1;
+
+  // Active Part & Session navigation (preserves user selection across completions)
+  const [activePartIndex, setActivePartIndex] = useState(initialPartIdx);
+  const [activeSessionIndex, setActiveSessionIndex] = useState(initialSessionIdx);
 
   // Modals state
   const [isCatchUpModalOpen, setIsCatchUpModalOpen] = useState(false);
