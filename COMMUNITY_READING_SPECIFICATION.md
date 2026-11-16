@@ -246,9 +246,9 @@ All functions follow the project's named object parameters standard (`export asy
 
 ## 7. Phased Implementation Roadmap
 
-- [ ] **Phase 1: Database Migration**: Add tables & enums to `src/db/schema.ts`, run `bun run db:push`.
-- [ ] **Phase 2: Server Actions**: Implement `src/actions/groups.ts` and Valibot schemas in `src/lib/schemas/groups.ts`.
-- [ ] **Phase 3: Shell & Discovery**: Add "Groups" to `app-shell.tsx`, build `/groups` and `/groups/join/[code]`.
-- [ ] **Phase 4: Group Workspace (`/groups/[id]`)**: Build 3-tab layout (Group Plans, Members, Admin Settings).
-- [ ] **Phase 5: Plan Detail Integration (`/plans/[instanceId]`)**: Add community header badge and session reflections feed.
-- [ ] **Phase 6: Verification**: End-to-end verification (Owner creation -> Member invite -> Plan scheduling -> Tracker binding -> Reflection sharing).
+- [x] **Phase 1: Database Migration**: Add tables & enums to `src/db/schema.ts`, run `bun run db:push`.
+- [x] **Phase 2: Server Actions**: Implement `src/actions/groups.ts` and Valibot schemas in `src/lib/schemas/groups.ts`.
+- [x] **Phase 3: Shell & Discovery**: Add "Groups" to `app-shell.tsx`, build `/groups` and `/groups/join/[code]`.
+- [x] **Phase 4: Group Workspace (`/groups/[id]`)**: Build 3-tab layout (Group Plans, Members, Admin Settings).
+- [x] **Phase 5: Plan Detail Integration (`/plans/[instanceId]`)**: Add community header badge and session reflections feed.
+- [x] **Phase 6: Verification**: End-to-end verification (Owner creation -> Member invite -> Plan scheduling -> Tracker binding -> Reflection sharing).
