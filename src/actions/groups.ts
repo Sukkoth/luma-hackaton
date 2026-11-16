@@ -337,6 +337,120 @@ export async function getGroupDetailsAction({
   }
 }
 
+export type UpdateGroupSettingsParams = {
+  groupId: string;
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+  isPrivate?: boolean;
+  requiresApproval?: boolean;
+};
+
+export async function updateGroupSettingsAction({
+  groupId,
+  name,
+  description = "",
+  avatarUrl,
+  isPrivate = true,
+  requiresApproval = false,
+}: UpdateGroupSettingsParams): Promise<{ success: boolean; error?: string }> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(UpdateGroupSettingsSchema, {
+    groupId,
+    name,
+    description,
+    avatarUrl,
+    isPrivate,
+    requiresApproval,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message || "Invalid settings.",
+    };
+  }
+
+  try {
+    const caller = await db.query.groupMembers.findFirst({
+      where: and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userId, session.user.id),
+        inArray(groupMembers.role, ["owner", "admin"])
+      ),
+    });
+
+    if (!caller) {
+      return {
+        success: false,
+        error: "Only admins or owners can update fellowship settings.",
+      };
+    }
+
+    await db
+      .update(groups)
+      .set({
+        name: parsed.output.name,
+        description: parsed.output.description ?? "",
+        avatarUrl: parsed.output.avatarUrl || null,
+        isPrivate: parsed.output.isPrivate ?? true,
+        requiresApproval: parsed.output.requiresApproval ?? false,
+        updatedAt: new Date(),
+      })
+      .where(eq(groups.id, groupId));
+
+    revalidatePath(`/groups/${groupId}`);
+    revalidatePath("/groups");
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to update group settings.";
+    return { success: false, error: message };
+  }
+}
+
+export type DeleteGroupParams = {
+  groupId: string;
+};
+
+export async function deleteGroupAction({
+  groupId,
+}: DeleteGroupParams): Promise<{ success: boolean; error?: string }> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  try {
+    const groupRecord = await db.query.groups.findFirst({
+      where: eq(groups.id, groupId),
+    });
+
+    if (!groupRecord) {
+      return { success: false, error: "Group not found." };
+    }
+
+    if (groupRecord.ownerId !== session.user.id) {
+      return {
+        success: false,
+        error: "Only the group owner can delete the fellowship.",
+      };
+    }
+
+    await db.delete(groups).where(eq(groups.id, groupId));
+
+    revalidatePath("/groups");
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to delete group.";
+    return { success: false, error: message };
+  }
+}
+
 export type UserGroupSummary = {
   id: string;
   name: string;
