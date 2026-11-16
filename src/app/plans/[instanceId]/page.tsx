@@ -45,8 +45,8 @@ async function PlanInstanceContent({ params }: PlanInstancePageProps) {
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
     >
-      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
-        <main className="w-full pb-16">
+      <div className="w-full px-4 sm:px-6 md:px-8 py-4 sm:py-6">
+        <main className="mx-auto w-full max-w-5xl pb-16">
           <PlanDetailView plan={plan} />
         </main>
       </div>

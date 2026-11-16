@@ -1177,7 +1177,9 @@ export async function togglePlanReadingItemAction({
     };
   }
 
-  const blueprint = getReadingPlanById(instance.templateId);
+  const blueprint = await resolvePlanBlueprint({
+    templateId: instance.templateId,
+  });
   const readingItem = blueprint?.readings.find(
     (r) => r.id === parsed.output.readingItemId
   );
@@ -1675,7 +1677,9 @@ export async function resumePlanAction({
   });
   if (!instance) return { success: false, error: "Plan not found" };
 
-  const blueprint = getReadingPlanById(instance.templateId);
+  const blueprint = await resolvePlanBlueprint({
+    templateId: instance.templateId,
+  });
   const readings = blueprint?.readings || [];
   const dailyTarget = Math.max(1, instance.dailyTarget || 2);
   const totalSessions = Math.max(1, Math.ceil(readings.length / dailyTarget));
@@ -1749,7 +1753,9 @@ export async function catchUpShiftAction({
   });
   if (!instance) return { success: false, error: "Plan not found" };
 
-  const blueprint = getReadingPlanById(instance.templateId);
+  const blueprint = await resolvePlanBlueprint({
+    templateId: instance.templateId,
+  });
   const readings = blueprint?.readings || [];
   const dailyTarget = Math.max(1, instance.dailyTarget || 2);
   const totalSessions = Math.max(1, Math.ceil(readings.length / dailyTarget));
