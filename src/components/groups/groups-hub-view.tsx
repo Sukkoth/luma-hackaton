@@ -215,14 +215,14 @@ export function GroupsHubView({
                     <Link
                       key={group.id}
                       href={isPending ? "#" : `/groups/${group.id}`}
-                      className={`ui-card-elevated group relative flex flex-col justify-between p-5 transition-all duration-150 hover:border-border hover:bg-surface-elevated/90 ${
+                      className={`ui-card group relative isolate flex flex-col justify-between p-5 transition-all duration-150 hover:border-border-strong ${
                         isPending ? "opacity-75 cursor-default" : "cursor-pointer"
                       }`}
                     >
                       <div>
                         {/* Top Meta Row */}
                         <div className="flex items-start justify-between gap-3 mb-3.5">
-                          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-surface border border-border text-sm font-semibold text-foreground overflow-hidden">
+                          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-sm font-semibold text-foreground overflow-hidden">
                             {group.avatarUrl ? (
                               <Image
                                 src={group.avatarUrl}
@@ -243,16 +243,16 @@ export function GroupsHubView({
                               Pending Approval
                             </span>
                           ) : isOwner ? (
-                            <span className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-0.5 text-[11px] font-semibold text-foreground border border-border">
+                            <span className="inline-flex items-center gap-1 rounded-lg bg-surface-elevated px-2.5 py-0.5 text-[11px] font-semibold text-foreground border border-border">
                               <Shield className="size-3" />
                               Owner
                             </span>
                           ) : isAdmin ? (
-                            <span className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
+                            <span className="inline-flex items-center gap-1 rounded-lg bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
                               Admin
                             </span>
                           ) : (
-                            <span className="inline-flex items-center rounded-lg bg-surface px-2.5 py-0.5 text-[11px] font-medium text-foreground-dim border border-border">
+                            <span className="inline-flex items-center rounded-lg bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-dim border border-border">
                               Member
                             </span>
                           )}
@@ -344,11 +344,11 @@ export function GroupsHubView({
                 {publicGroups.map((g) => (
                   <div
                     key={g.id}
-                    className="ui-card-elevated flex flex-col justify-between p-5"
+                    className="ui-card group relative isolate flex flex-col justify-between p-5 transition-all duration-150 hover:border-border-strong"
                   >
                     <div>
                       <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex size-11 items-center justify-center rounded-2xl bg-surface border border-border text-sm font-semibold text-foreground overflow-hidden">
+                        <div className="flex size-11 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-sm font-semibold text-foreground overflow-hidden">
                           {g.avatarUrl ? (
                             <Image
                               src={g.avatarUrl}
@@ -361,7 +361,7 @@ export function GroupsHubView({
                             <span>{g.name[0]?.toUpperCase()}</span>
                           )}
                         </div>
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
                           <Users className="size-3" />
                           {g.memberCount} members
                         </span>

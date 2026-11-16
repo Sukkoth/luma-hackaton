@@ -497,10 +497,10 @@ export function GroupPlansTab({
               return (
                 <div
                   key={plan.id}
-                  className="ui-card-elevated flex flex-col justify-between p-5 space-y-4"
+                  className="ui-card flex flex-col justify-between p-5 space-y-4 transition-all duration-150 hover:border-border-strong"
                 >
                   <div>
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-surface px-2 py-0.5 text-[10px] font-semibold text-foreground-secondary border border-border uppercase mb-2">
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground-secondary border border-border uppercase mb-2">
                       Starts {startDateStr}
                     </span>
                     <h3 className="text-sm font-semibold text-foreground">

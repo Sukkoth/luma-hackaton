@@ -67,10 +67,10 @@ export function GroupMembersTab({ members }: GroupMembersTabProps) {
           return (
             <div
               key={member.id}
-              className="ui-card-elevated flex items-center justify-between p-4 transition-colors hover:border-border"
+              className="ui-card flex items-center justify-between p-4 transition-all duration-150 hover:border-border-strong"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-surface border border-border text-xs font-semibold text-foreground overflow-hidden">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-xs font-semibold text-foreground overflow-hidden">
                   {member.image ? (
                     <Image
                       src={member.image}
