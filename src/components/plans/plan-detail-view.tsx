@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -36,6 +37,7 @@ type PlanDetailViewProps = {
 };
 
 export function PlanDetailView({ plan }: PlanDetailViewProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Active top tab switcher: "chapters" vs "settings"
@@ -51,6 +53,17 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   );
   const [progressPercent, setProgressPercent] = useState(plan.progressPercent);
   const [notes, setNotes] = useState<ReadonlyArray<PlanNoteDetail>>(plan.notes);
+
+  // Refresh server data when navigating back via browser back/forward cache
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        router.refresh();
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [router]);
 
   // Active Part & Session navigation
   const [activePartIndex, setActivePartIndex] = useState(1);

@@ -387,11 +387,8 @@ export function BibleReaderCore({
             <button
               type="button"
               onClick={() => {
-                if (typeof window !== "undefined" && window.history.length > 1) {
-                  router.back();
-                } else {
-                  router.push(`/plans/${planContext.plan.id}`);
-                }
+                router.push(`/plans/${planContext.plan.id}`);
+                router.refresh();
               }}
               aria-label="Close reader and return to plan"
               className="flex size-8.5 sm:size-10 shrink-0 items-center justify-center rounded-[12px] border border-border bg-surface text-foreground-secondary transition-all hover:bg-surface-elevated hover:text-foreground cursor-pointer shadow-2xs"
