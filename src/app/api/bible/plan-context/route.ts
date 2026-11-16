@@ -22,6 +22,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Plan not found" }, { status: 404 });
   }
 
+  const nowMidnight = new Date();
+  nowMidnight.setHours(0, 0, 0, 0);
+  if (
+    plan.mode === "scheduled" &&
+    new Date(plan.startDate).getTime() > nowMidnight.getTime()
+  ) {
+    return NextResponse.json(
+      { error: "This scheduled cohort plan has not started yet." },
+      { status: 403 }
+    );
+  }
+
   const reading = plan.sessions
     .flatMap((s) => s.readings.map((r) => ({ ...r, sessionIndex: s.sessionIndex, sessionTitle: s.title })))
     .find((r) => r.id === readingId);

@@ -625,28 +625,47 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                     )
                                   )}
                                 </button>
+                                {isScheduledFuture ? (
+                                  <span
+                                    className="truncate text-foreground-dim select-none cursor-not-allowed text-xs"
+                                    title={`Locked until cohort start date (${formattedPlanStartDate})`}
+                                  >
+                                    {reading.displayText ||
+                                      `${reading.bookName} ${reading.chapter}`}
+                                  </span>
+                                ) : (
+                                  <Link
+                                    href={readerUrl}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className={`truncate hover:underline cursor-pointer ${
+                                      reading.isCompleted
+                                        ? "text-foreground-muted line-through"
+                                        : "text-foreground font-medium"
+                                    }`}
+                                  >
+                                    {reading.displayText ||
+                                      `${reading.bookName} ${reading.chapter}`}
+                                  </Link>
+                                )}
+                              </div>
+
+                              {isScheduledFuture ? (
+                                <span
+                                  className="flex size-5 shrink-0 items-center justify-center rounded text-foreground-dim/40 cursor-not-allowed select-none"
+                                  title={`Locked until cohort start date (${formattedPlanStartDate})`}
+                                >
+                                  <Lock className="size-2.5" />
+                                </span>
+                              ) : (
                                 <Link
                                   href={readerUrl}
                                   onClick={(e) => e.stopPropagation()}
-                                  className={`truncate hover:underline cursor-pointer ${
-                                    reading.isCompleted
-                                      ? "text-foreground-muted line-through"
-                                      : "text-foreground font-medium"
-                                  }`}
+                                  aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                                  className="flex size-5 shrink-0 items-center justify-center rounded text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors"
                                 >
-                                  {reading.displayText ||
-                                    `${reading.bookName} ${reading.chapter}`}
+                                  <BookOpen className="size-3" />
                                 </Link>
-                              </div>
-
-                              <Link
-                                href={readerUrl}
-                                onClick={(e) => e.stopPropagation()}
-                                aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
-                                className="flex size-5 shrink-0 items-center justify-center rounded text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors"
-                              >
-                                <BookOpen className="size-3" />
-                              </Link>
+                              )}
                             </div>
                           );
                         })}

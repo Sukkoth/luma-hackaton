@@ -103,6 +103,10 @@ export function BibleReaderPageClient() {
           { cache: "no-store" }
         );
         if (!response.ok) {
+          if (response.status === 403) {
+            router.replace(`/plans/${planId}`);
+            return;
+          }
           if (!isCancelled) setPlanContext(null);
           return;
         }
@@ -120,7 +124,7 @@ export function BibleReaderPageClient() {
     return () => {
       isCancelled = true;
     };
-  }, [mounted, session, sessionPending, planId, readingId]);
+  }, [mounted, session, sessionPending, planId, readingId, router]);
 
   useEffect(() => {
     if (!mounted || sessionPending || !session || !planId) return;
