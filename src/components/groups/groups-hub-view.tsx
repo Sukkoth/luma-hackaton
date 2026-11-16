@@ -59,11 +59,16 @@ export function GroupsHubView({
     }
   }
 
+  const totalActivePlans = myGroups.reduce(
+    (acc, g) => acc + g.activePlansCount,
+    0
+  );
+
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 animate-in fade-in duration-200">
+    <div className="w-full space-y-6 animate-in fade-in duration-200">
       {/* Top Highlights Banner */}
-      <div className="ui-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <div className="ui-card flex flex-col gap-5 p-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="max-w-xl">
           <div className="flex items-center gap-2 mb-1.5">
             <span className="flex size-7 items-center justify-center rounded-lg bg-surface-elevated text-foreground border border-border">
               <Users className="size-4 text-foreground" />
@@ -75,31 +80,52 @@ export function GroupsHubView({
           <h1 className="text-[22px] font-bold tracking-tight text-foreground sm:text-[24px]">
             Read Scripture Together in Community
           </h1>
-          <p className="mt-1 text-[13px] leading-relaxed text-foreground-secondary max-w-2xl">
+          <p className="mt-1 text-[13px] leading-relaxed text-foreground-secondary">
             Synchronize your reading journey with church cohorts, small groups, and friends with shared daily pacing and community reflections.
           </p>
         </div>
 
-        {/* Global Action Buttons */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setIsJoinCodeOpen(true)}
-            leftIcon={<KeyRound className="size-3.5" />}
-          >
-            Join with Code
-          </Button>
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={() => setIsCreateOpen(true)}
-            leftIcon={<Plus className="size-3.5" />}
-          >
-            Create Fellowship
-          </Button>
+        {/* Quick Fellowship Stats & Actions */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-4">
+            <div className="rounded-xl border border-border bg-surface-elevated px-4 py-2 text-center sm:text-left min-w-[100px]">
+              <span className="text-[10px] font-semibold text-foreground-dim uppercase tracking-wider block">
+                Fellowships
+              </span>
+              <span className="text-lg font-bold text-foreground">
+                {myGroups.length}
+              </span>
+            </div>
+            <div className="rounded-xl border border-border bg-surface-elevated px-4 py-2 text-center sm:text-left min-w-[100px]">
+              <span className="text-[10px] font-semibold text-foreground-dim uppercase tracking-wider block">
+                Active Plans
+              </span>
+              <span className="text-lg font-bold text-foreground">
+                {totalActivePlans}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsJoinCodeOpen(true)}
+              leftIcon={<KeyRound className="size-3.5" />}
+            >
+              Join with Code
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => setIsCreateOpen(true)}
+              leftIcon={<Plus className="size-3.5" />}
+            >
+              Create Fellowship
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -172,7 +198,7 @@ export function GroupsHubView({
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {myGroups.map((group) => {
                   const initials = group.name
                     .split(" ")
@@ -314,7 +340,7 @@ export function GroupsHubView({
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {publicGroups.map((g) => (
                   <div
                     key={g.id}

@@ -68,7 +68,7 @@ export function GroupWorkspaceView({
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 animate-in fade-in duration-200">
+    <div className="w-full space-y-6 animate-in fade-in duration-200">
       {/* Top Navigation Back Link */}
       <Link
         href="/groups"
@@ -79,8 +79,8 @@ export function GroupWorkspaceView({
       </Link>
 
       {/* Group Header Banner */}
-      <div className="ui-card flex flex-col gap-5 p-5 sm:p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-4">
+      <div className="ui-card flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-start gap-4 min-w-0">
           <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-base font-bold text-foreground overflow-hidden shadow-inner">
             {group.avatarUrl ? (
               <Image
@@ -95,7 +95,7 @@ export function GroupWorkspaceView({
             )}
           </div>
 
-          <div>
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <span className="inline-flex items-center gap-1 rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground uppercase tracking-wide border border-border">
                 {group.isPrivate ? (
@@ -128,7 +128,7 @@ export function GroupWorkspaceView({
               </span>
             </div>
 
-            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl truncate">
               {group.name}
             </h1>
             <p className="mt-1 text-xs text-foreground-secondary line-clamp-2 max-w-2xl leading-relaxed">
@@ -137,8 +137,8 @@ export function GroupWorkspaceView({
           </div>
         </div>
 
-        {/* Quick Action: Copy Invite */}
-        <div className="shrink-0">
+        {/* Quick Actions: Copy Invite & Schedule Plan */}
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <Button
             type="button"
             variant="outline"
@@ -154,6 +154,18 @@ export function GroupWorkspaceView({
           >
             {copied ? "Copied Link" : "Invite Link"}
           </Button>
+
+          {isAdmin && (
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => setIsScheduleModalOpen(true)}
+              leftIcon={<Calendar className="size-3.5" />}
+            >
+              Schedule Plan
+            </Button>
+          )}
         </div>
       </div>
 

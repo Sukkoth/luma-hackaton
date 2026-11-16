@@ -122,8 +122,8 @@ export function GroupPlansTab({
                 key={plan.id}
                 className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start"
               >
-                {/* Left: Active Plan Hero Card (7 cols) */}
-                <div className="lg:col-span-7 ui-card-elevated rounded-[22px] p-6 space-y-5">
+                {/* Left: Active Plan Hero Card (7 cols on lg, 8 cols on xl) */}
+                <div className="lg:col-span-7 xl:col-span-8 ui-card-elevated rounded-[22px] p-6 space-y-5">
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground border border-border uppercase">
                       Active Fellowship Plan
@@ -142,13 +142,13 @@ export function GroupPlansTab({
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                     <div className="rounded-xl border border-border bg-surface p-3 text-center">
                       <span className="text-[11px] text-foreground-dim block">
-                        Enrolled Members
+                        Enrolled
                       </span>
                       <span className="text-base font-bold text-foreground">
-                        {plan.enrolledMembersCount}
+                        {plan.enrolledMembersCount} members
                       </span>
                     </div>
                     <div className="rounded-xl border border-border bg-surface p-3 text-center">
@@ -157,6 +157,22 @@ export function GroupPlansTab({
                       </span>
                       <span className="text-base font-bold text-foreground">
                         {plan.totalChapters}
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-border bg-surface p-3 text-center">
+                      <span className="text-[11px] text-foreground-dim block">
+                        Daily Pace
+                      </span>
+                      <span className="text-base font-bold text-foreground">
+                        {plan.dailyChapterTarget} ch/day
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-border bg-surface p-3 text-center">
+                      <span className="text-[11px] text-foreground-dim block">
+                        Cohort Pacing
+                      </span>
+                      <span className="text-base font-bold text-foreground">
+                        Synchronized
                       </span>
                     </div>
                   </div>
@@ -185,8 +201,8 @@ export function GroupPlansTab({
                   </div>
                 </div>
 
-                {/* Right: Cohort Leaderboard Widget (5 cols) */}
-                <div className="lg:col-span-5 ui-card-elevated rounded-[22px] p-5 space-y-4">
+                {/* Right: Cohort Leaderboard Widget (5 cols on lg, 4 cols on xl) */}
+                <div className="lg:col-span-5 xl:col-span-4 ui-card-elevated rounded-[22px] p-5 space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
                     <div>
                       <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
@@ -310,7 +326,7 @@ export function GroupPlansTab({
             Upcoming Scheduled Plans ({scheduledPlans.length})
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {scheduledPlans.map((plan) => {
               const startDateStr = new Date(
                 plan.scheduledStartDate
