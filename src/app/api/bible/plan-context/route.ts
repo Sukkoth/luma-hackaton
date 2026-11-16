@@ -44,12 +44,19 @@ export async function GET(request: NextRequest) {
       }))
     );
 
-  return NextResponse.json({
-    plan: {
-      id: plan.id,
-      title: plan.title,
+  return NextResponse.json(
+    {
+      plan: {
+        id: plan.id,
+        title: plan.title,
+      },
+      reading,
+      flattenedReadings,
     },
-    reading,
-    flattenedReadings,
-  });
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+      },
+    }
+  );
 }

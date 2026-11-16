@@ -93,40 +93,50 @@ export function BibleReaderPageClient() {
     return () => clearTimeout(timer);
   }, [mounted, session, sessionPending, router]);
 
+  const planId = searchParams.get("plan");
+  const readingId = searchParams.get("readingId");
+
   useEffect(() => {
     if (!mounted || sessionPending || !session) return;
+    if (!planId || !readingId) {
+      setPlanContext(null);
+      return;
+    }
 
-    const planId = searchParams.get("plan");
-    const readingId = searchParams.get("readingId");
+    let isCancelled = false;
 
     async function fetchPlanContext() {
-      if (!planId || !readingId) {
-        setPlanContext(null);
-        return;
-      }
-
       try {
-        const response = await fetch(`/api/bible/plan-context?planId=${planId}&readingId=${readingId}`);
+        const response = await fetch(
+          `/api/bible/plan-context?planId=${planId}&readingId=${readingId}`,
+          { cache: "no-store" }
+        );
         if (!response.ok) {
-          setPlanContext(null);
+          if (!isCancelled) setPlanContext(null);
           return;
         }
         const data: PlanContextResponse = await response.json();
-        setPlanContext(data as BibleReaderPlanContext);
+        if (!isCancelled) {
+          setPlanContext(data as BibleReaderPlanContext);
+        }
       } catch {
-        setPlanContext(null);
+        if (!isCancelled) setPlanContext(null);
       }
     }
 
     fetchPlanContext();
-  }, [mounted, session, sessionPending, searchParams]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [mounted, session, sessionPending, planId, readingId]);
 
   useEffect(() => {
-    if (!mounted || sessionPending || !session || !planContext) return;
+    if (!mounted || sessionPending || !session || !planId) return;
 
     async function fetchUserData() {
       try {
-        const response = await fetch("/api/bible/user-data");
+        const response = await fetch("/api/bible/user-data", { cache: "no-store" });
         if (!response.ok) return;
         const data: UserDataResponse = await response.json();
         setTrackersData({ trackers: data.trackers, activeTracker: data.activeTracker });
@@ -137,24 +147,26 @@ export function BibleReaderPageClient() {
     }
 
     fetchUserData();
-  }, [mounted, session, sessionPending, planContext]);
+  }, [mounted, session, sessionPending, planId]);
 
   // Handle Mark as Read toggle directly in this component (since we're on a separate page)
   const handleToggleReading = async (readingId: string) => {
     if (!planContext || !session) return;
     
-    const nextStatus = !planContext.reading.isCompleted;
+    const targetReading = planContext.flattenedReadings.find((r) => r.id === readingId);
+    const currentStatus = targetReading ? Boolean(targetReading.isCompleted) : Boolean(planContext.reading.isCompleted);
+    const nextStatus = !currentStatus;
     
     // Optimistic update
-    setPlanContext(prev => {
+    setPlanContext((prev) => {
       if (!prev) return null;
       return {
         ...prev,
-        reading: {
-          ...prev.reading,
-          isCompleted: nextStatus,
-        },
-        flattenedReadings: prev.flattenedReadings.map(r => 
+        reading:
+          prev.reading.id === readingId
+            ? { ...prev.reading, isCompleted: nextStatus }
+            : prev.reading,
+        flattenedReadings: prev.flattenedReadings.map((r) =>
           r.id === readingId ? { ...r, isCompleted: nextStatus } : r
         ),
       };
@@ -168,32 +180,32 @@ export function BibleReaderPageClient() {
       
       if (!res.success) {
         // Rollback on failure
-        setPlanContext(prev => {
+        setPlanContext((prev) => {
           if (!prev) return null;
           return {
             ...prev,
-            reading: {
-              ...prev.reading,
-              isCompleted: !nextStatus,
-            },
-            flattenedReadings: prev.flattenedReadings.map(r => 
-              r.id === readingId ? { ...r, isCompleted: !nextStatus } : r
+            reading:
+              prev.reading.id === readingId
+                ? { ...prev.reading, isCompleted: currentStatus }
+                : prev.reading,
+            flattenedReadings: prev.flattenedReadings.map((r) =>
+              r.id === readingId ? { ...r, isCompleted: currentStatus } : r
             ),
           };
         });
       }
     } catch {
       // Rollback on error
-      setPlanContext(prev => {
+      setPlanContext((prev) => {
         if (!prev) return null;
         return {
           ...prev,
-          reading: {
-            ...prev.reading,
-            isCompleted: !nextStatus,
-          },
-          flattenedReadings: prev.flattenedReadings.map(r => 
-            r.id === readingId ? { ...r, isCompleted: !nextStatus } : r
+          reading:
+            prev.reading.id === readingId
+              ? { ...prev.reading, isCompleted: currentStatus }
+              : prev.reading,
+          flattenedReadings: prev.flattenedReadings.map((r) =>
+            r.id === readingId ? { ...r, isCompleted: currentStatus } : r
           ),
         };
       });

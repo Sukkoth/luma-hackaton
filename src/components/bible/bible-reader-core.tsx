@@ -380,12 +380,20 @@ export function BibleReaderCore({
         {/* Left: Back button + Passage info */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
           {planContext ? (
-            <a
-              href={`/plans/${planContext.plan.id}`}
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push(`/plans/${planContext.plan.id}`);
+                }
+              }}
+              aria-label="Close reader and return to plan"
               className="flex size-8.5 sm:size-10 shrink-0 items-center justify-center rounded-[12px] border border-border bg-surface text-foreground-secondary transition-all hover:bg-surface-elevated hover:text-foreground cursor-pointer shadow-2xs"
             >
               <X className="size-4 sm:size-4.5" />
-            </a>
+            </button>
           ) : (
             <Link
               href="/bible"
@@ -617,8 +625,8 @@ export function BibleReaderCore({
               {currentReading.isCompleted ? (
                 <>
                   <Check className="size-3.5 text-primary stroke-[2.5]" />
-                  <span className="hidden sm:inline">Mark as Read</span>
-                  <span className="sm:hidden">Read</span>
+                  <span className="hidden sm:inline">Completed</span>
+                  <span className="sm:hidden">Done</span>
                 </>
               ) : (
                 <>
