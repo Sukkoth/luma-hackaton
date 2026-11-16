@@ -16,6 +16,7 @@ import {
   Users,
   ArrowRight,
   Calendar,
+  Lock,
 } from "lucide-react";
 import {
   type PlanInstanceDetail,
@@ -164,6 +165,9 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
 
   // Toggle chapter reading completion
   const handleToggleReading = (readingItemId: string) => {
+    if (isScheduledFuture) {
+      return;
+    }
     if (currentPlan.status === "paused") {
       setIsPausedLockModalOpen(true);
       return;
@@ -557,7 +561,16 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          {isSelected && (
+                          {isScheduledFuture && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded bg-surface-elevated px-1.5 py-0.5 text-[9.5px] font-semibold text-foreground-dim border border-border"
+                              title={`Readings unlock on ${formattedPlanStartDate}`}
+                            >
+                              <Lock className="size-2.5" />
+                              <span>Locked</span>
+                            </span>
+                          )}
+                          {isSelected && !isScheduledFuture && (
                             <MapPin className="size-3 text-foreground-dim" />
                           )}
                           {session.isCompleted && (
@@ -579,19 +592,37 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                               <div className="flex items-center gap-2 min-w-0 flex-1">
                                 <button
                                   type="button"
+                                  disabled={isScheduledFuture}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleToggleReading(reading.id);
+                                    if (!isScheduledFuture) {
+                                      handleToggleReading(reading.id);
+                                    }
                                   }}
-                                  className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-colors cursor-pointer ${
-                                    reading.isCompleted
-                                      ? "bg-foreground text-background"
-                                      : "border border-border/80 hover:border-foreground"
+                                  className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                                    isScheduledFuture
+                                      ? "border border-border/40 opacity-40 cursor-not-allowed text-foreground-dim"
+                                      : reading.isCompleted
+                                        ? "bg-foreground text-background cursor-pointer"
+                                        : "border border-border/80 hover:border-foreground cursor-pointer"
                                   }`}
-                                  aria-label={`Mark ${reading.displayText || reading.bookName} as ${reading.isCompleted ? "unread" : "read"}`}
+                                  title={
+                                    isScheduledFuture
+                                      ? `Readings are locked until cohort start date (${formattedPlanStartDate})`
+                                      : undefined
+                                  }
+                                  aria-label={
+                                    isScheduledFuture
+                                      ? `Locked until ${formattedPlanStartDate}`
+                                      : `Mark ${reading.displayText || reading.bookName} as ${reading.isCompleted ? "unread" : "read"}`
+                                  }
                                 >
-                                  {reading.isCompleted && (
-                                    <Check className="size-3 stroke-[3]" />
+                                  {isScheduledFuture ? (
+                                    <Lock className="size-2.5 text-foreground-dim" />
+                                  ) : (
+                                    reading.isCompleted && (
+                                      <Check className="size-3 stroke-[3]" />
+                                    )
                                   )}
                                 </button>
                                 <Link

@@ -1207,6 +1207,23 @@ export async function togglePlanReadingItemAction({
     };
   }
 
+  // In scheduled pacing, prevent completing readings in upcoming plans whose start date hasn't arrived
+  const nowMidnight = new Date();
+  nowMidnight.setHours(0, 0, 0, 0);
+  const planStartMidnight = new Date(instance.startDate);
+  planStartMidnight.setHours(0, 0, 0, 0);
+
+  if (
+    instance.mode === "scheduled" &&
+    planStartMidnight.getTime() > nowMidnight.getTime()
+  ) {
+    return {
+      success: false,
+      error:
+        "This cohort plan is scheduled for a future start date. Readings will unlock when the start date arrives.",
+    };
+  }
+
   const blueprint = await resolvePlanBlueprint({
     templateId: instance.templateId,
   });
