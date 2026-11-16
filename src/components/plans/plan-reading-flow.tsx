@@ -147,9 +147,7 @@ export function PlanReadingFlow({
 
   // Build Bible reader URL for a reading
   const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
-    const defaultVersion = detectDefaultVersion({});
     const params = new URLSearchParams();
-    params.set("v", defaultVersion.id.toString());
     params.set("plan", instanceId);
     params.set("readingId", reading.id);
     if (reading.startVerse != null) params.set("startVerse", reading.startVerse.toString());

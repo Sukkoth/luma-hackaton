@@ -24,7 +24,6 @@ import {
   catchUpShiftAction,
   catchUpIncreasePaceAction,
 } from "@/actions/plans";
-import { detectDefaultVersion } from "@/lib/bible-versions";
 import { PlanSessionNotes } from "./plan-session-notes";
 import { PlanSettingsTab } from "./plan-settings-tab";
 import { PlanCatchUpModal } from "./plan-catchup-modal";
@@ -201,9 +200,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
 
   // Build Bible reader URL for dedicated reading route
   const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
-    const defaultVersion = detectDefaultVersion({});
     const params = new URLSearchParams();
-    params.set("v", defaultVersion.id.toString());
     params.set("plan", currentPlan.id);
     params.set("readingId", reading.id);
     if (reading.startVerse != null) {
