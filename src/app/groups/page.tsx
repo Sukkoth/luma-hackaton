@@ -43,10 +43,14 @@ export default async function GroupsPage() {
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
     >
-      <GroupsHubView
-        myGroups={myGroups}
-        initialPublicGroups={publicGroups}
-      />
+      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
+        <main className="mt-1 w-full">
+          <GroupsHubView
+            myGroups={myGroups}
+            initialPublicGroups={publicGroups}
+          />
+        </main>
+      </div>
     </AppShell>
   );
 }
