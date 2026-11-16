@@ -35,7 +35,7 @@ graph TD
 | **Late-Join Policy** | Configurable by Admin per plan: <br>1. `strict_locked`<br>2. `skip_ahead`<br>3. `backfill` | • `strict_locked`: Enrollment closed after start date.<br>• `skip_ahead`: Member starts on today's current reading (omits past chapters from instance).<br>• `backfill`: Member gets full plan from Day 1 and starts in "behind" status with catch-up warnings. |
 | **Tracker Binding** | User chooses personal tracker on plan enrollment | Prompt user when enrolling in each plan (with their active tracker pre-selected). Ensures their canon and matrix are respected. |
 | **Leaderboard Privacy** | Member toggle: "Hide my progress from leaderboard" | Anonymizes user on cohort leaderboard for readers who desire privacy while reading together. |
-| **Session Reflections** | Private by default with explicit "Share with Community" | In the session view, reflections are private by default; clicking "Share with [Group]" posts it to the community reflections feed. |
+| **Session Reflections** | Uses existing `notes` table with `is_shared_with_community: boolean` | Reflections are standard study notes created with our existing Markdown editor; clicking "Share with [Group]" sets `is_shared_with_community = true`, surfacing it on the cohort feed without duplicating data. |
 | **Group Hub Navigation** | 3 Tabs for Admins, 2 Tabs for regular Members | • **Tab 1: Group Plans** (All members)<br>• **Tab 2: Members** (All members)<br>• **Tab 3: Admin Settings** (Owner & Admins only) |
 
 ---
