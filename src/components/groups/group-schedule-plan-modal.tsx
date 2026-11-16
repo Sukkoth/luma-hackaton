@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   X,
@@ -14,9 +14,14 @@ import {
   Shield,
   Plus,
   Minus,
+  Search,
 } from "lucide-react";
 import * as v from "valibot";
-import { READING_PLANS } from "@/data/readingPlans";
+import {
+  READING_PLANS,
+  isPlanCanonCompatible,
+} from "@/data/readingPlans";
+import type { BibleCanon } from "@/data/bibleData";
 import { ScheduleGroupPlanSchema } from "@/lib/schemas/groups";
 import { scheduleGroupPlanAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
@@ -80,8 +85,42 @@ export function GroupSchedulePlanModal({
     "strict_locked" | "skip_ahead" | "backfill"
   >("skip_ahead");
 
+  // Step 1 Search & Category Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCanon, setSelectedCanon] = useState<string>("all");
+  const [selectedSection, setSelectedSection] = useState<string>("all");
+
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const filteredPlans = useMemo(() => {
+    return READING_PLANS.filter((plan) => {
+      // 1. Search Query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesTitle = plan.title.toLowerCase().includes(q);
+        const matchesSubtitle = plan.subtitle?.toLowerCase().includes(q);
+        const matchesDesc = plan.description?.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesSubtitle && !matchesDesc) return false;
+      }
+
+      // 2. Canon Compatibility Filter
+      if (selectedCanon !== "all") {
+        const isCompat = isPlanCanonCompatible({
+          plan,
+          trackerCanon: selectedCanon as BibleCanon,
+        });
+        if (!isCompat) return false;
+      }
+
+      // 3. Bible Section / Category Filter
+      if (selectedSection !== "all") {
+        if (plan.category !== selectedSection) return false;
+      }
+
+      return true;
+    });
+  }, [searchQuery, selectedCanon, selectedSection]);
 
   if (!isOpen) return null;
 
@@ -245,54 +284,141 @@ export function GroupSchedulePlanModal({
                   Select a Plan Template
                 </h3>
                 <p className="text-xs text-foreground-dim mt-0.5">
-                  Choose from {READING_PLANS.length} curated biblical reading curricula.
+                  Showing {filteredPlans.length} of {READING_PLANS.length} curated biblical reading curricula.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
-                {READING_PLANS.map((plan) => {
-                  const isSelected = selectedPlanId === plan.id;
-
-                  return (
+              {/* Search Bar & Filters */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                {/* Search Input */}
+                <div className="relative flex-1">
+                  <Search className="size-3.5 text-foreground-dim absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search templates by title or keyword..."
+                    className="w-full h-9 pl-8.5 pr-8 text-xs rounded-xl border border-border bg-surface-elevated text-foreground placeholder:text-foreground-dim focus:outline-hidden focus:ring-1 focus:ring-foreground transition-all"
+                  />
+                  {searchQuery && (
                     <button
-                      key={plan.id}
                       type="button"
-                      onClick={() => setSelectedPlanId(plan.id)}
-                      className={`ui-card-elevated flex flex-col justify-between p-4 text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-primary/5 text-foreground ring-1 ring-primary"
-                          : "hover:border-border hover:bg-surface-elevated"
-                      }`}
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
+                      aria-label="Clear search query"
                     >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="rounded-lg bg-surface px-2 py-0.5 text-[10px] font-semibold text-foreground uppercase tracking-wide border border-border">
-                            {plan.category}
-                          </span>
-                          <span className="text-[11px] text-foreground-dim font-medium">
-                            {plan.totalChapters} chapters
-                          </span>
-                        </div>
-
-                        <h4 className="text-[14px] font-semibold text-foreground line-clamp-1">
-                          {plan.title}
-                        </h4>
-                        <p className="mt-1 text-xs text-foreground-secondary line-clamp-2 leading-relaxed">
-                          {plan.description}
-                        </p>
-                      </div>
-
-                      <div className="mt-3 pt-2.5 border-t border-border-subtle flex items-center justify-between text-[11px] text-foreground-dim">
-                        <span>~{plan.recommendedDays} days standard</span>
-                        {isSelected && (
-                          <span className="flex items-center gap-1 font-semibold text-primary">
-                            <Check className="size-3.5 stroke-[3]" /> Selected
-                          </span>
-                        )}
-                      </div>
+                      <X className="size-3.5" />
                     </button>
-                  );
-                })}
+                  )}
+                </div>
+
+                {/* Canon Filter */}
+                <div className="relative shrink-0">
+                  <select
+                    value={selectedCanon}
+                    onChange={(e) => setSelectedCanon(e.target.value)}
+                    aria-label="Filter by Bible Canon"
+                    className="h-9 px-3 text-xs rounded-xl border border-border bg-surface-elevated text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground cursor-pointer"
+                  >
+                    <option value="all">All Canons</option>
+                    <option value="protestant">Protestant (66)</option>
+                    <option value="catholic">Catholic (73)</option>
+                    <option value="eastern_orthodox">Eastern Orthodox</option>
+                    <option value="ethiopian_orthodox">Ethiopian Orthodox</option>
+                  </select>
+                </div>
+
+                {/* Bible Section Filter */}
+                <div className="relative shrink-0">
+                  <select
+                    value={selectedSection}
+                    onChange={(e) => setSelectedSection(e.target.value)}
+                    aria-label="Filter by Bible Section"
+                    className="h-9 px-3 text-xs rounded-xl border border-border bg-surface-elevated text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground cursor-pointer"
+                  >
+                    <option value="all">All Sections</option>
+                    <option value="Gospels">Gospels</option>
+                    <option value="Epistles">Epistles</option>
+                    <option value="Wisdom & Poetry">Wisdom &amp; Poetry</option>
+                    <option value="Old Testament">Old Testament</option>
+                    <option value="New Testament">New Testament</option>
+                    <option value="Whole Bible">Whole Bible</option>
+                    <option value="Chronological">Chronological</option>
+                    <option value="Multi-Track">Multi-Track</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Scrollable Templates Grid with Padded Bounds to Prevent Border Cutting */}
+              <div className="max-h-[380px] overflow-y-auto p-1.5 sm:p-2 rounded-2xl border border-border/60 bg-surface-elevated/20 overscroll-contain">
+                {filteredPlans.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <Search className="size-8 text-foreground-dim mb-2" />
+                    <p className="text-sm font-semibold text-foreground">
+                      No matching plans found
+                    </p>
+                    <p className="text-xs text-foreground-dim mt-1 max-w-xs leading-relaxed">
+                      Try clearing or adjusting your search keywords, canon, or section filters.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedCanon("all");
+                        setSelectedSection("all");
+                      }}
+                      className="mt-4 px-3.5 py-1.5 rounded-lg border border-border bg-surface text-xs font-medium text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+                    >
+                      Reset Filters
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {filteredPlans.map((plan) => {
+                      const isSelected = selectedPlanId === plan.id;
+
+                      return (
+                        <button
+                          key={plan.id}
+                          type="button"
+                          onClick={() => setSelectedPlanId(plan.id)}
+                          className={`ui-card group relative isolate flex flex-col justify-between p-4 text-left transition-all duration-150 cursor-pointer ${
+                            isSelected
+                              ? "border-foreground bg-surface-elevated ring-1 ring-inset ring-foreground shadow-xs"
+                              : "hover:border-border-strong hover:bg-surface-elevated/80"
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <span className="rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground uppercase tracking-wide border border-border">
+                                {plan.category}
+                              </span>
+                              <span className="text-[11px] text-foreground-dim font-medium">
+                                {plan.totalChapters} chapters
+                              </span>
+                            </div>
+
+                            <h4 className="text-[14px] font-semibold text-foreground line-clamp-1">
+                              {plan.title}
+                            </h4>
+                            <p className="mt-1 text-xs text-foreground-secondary line-clamp-2 leading-relaxed">
+                              {plan.description}
+                            </p>
+                          </div>
+
+                          <div className="mt-3 pt-2.5 border-t border-border-subtle flex items-center justify-between text-[11px] text-foreground-dim">
+                            <span>~{plan.recommendedDays} days standard</span>
+                            {isSelected && (
+                              <span className="flex items-center gap-1 font-semibold text-foreground">
+                                <Check className="size-3.5 stroke-[3]" /> Selected
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -322,29 +448,36 @@ export function GroupSchedulePlanModal({
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full h-11 rounded-xl border border-border bg-surface-elevated px-4 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary transition-all"
+                  className="w-full h-11 rounded-xl border border-border bg-surface-elevated px-4 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground transition-all"
                 />
                 <p className="mt-1 text-[11.5px] text-foreground-dim">
                   All members will see day-by-day readings synchronized from this start date.
                 </p>
               </div>
 
-              {/* Daily Chapter Target Stepper */}
-              <div>
-                <label className="block text-[13px] font-semibold text-foreground mb-1.5">
-                  Daily Chapter Goal
-                </label>
-                <div className="flex items-center gap-3">
+              {/* Daily Chapter Target Stepper - Centered */}
+              <div className="rounded-2xl border border-border bg-surface p-5 space-y-3">
+                <div className="text-center">
+                  <label className="text-[13px] font-semibold text-foreground block">
+                    Daily Chapter Goal
+                  </label>
+                  <p className="text-[11.5px] text-foreground-dim mt-0.5">
+                    Chapters to read on each active cohort reading day
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
                     onClick={() => setDailyTarget((prev) => Math.max(1, prev - 1))}
                     disabled={dailyTarget <= 1}
-                    className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-40 cursor-pointer"
+                    aria-label="Decrease daily chapter goal"
+                    className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground hover:bg-surface transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
                   >
                     <Minus className="size-4" />
                   </button>
 
-                  <div className="h-11 px-5 min-w-[80px] rounded-xl border border-border bg-surface flex items-center justify-center text-base font-bold text-foreground">
+                  <div className="h-11 px-6 min-w-[120px] rounded-xl border border-border bg-surface-elevated flex items-center justify-center text-base font-bold text-foreground shadow-2xs">
                     {dailyTarget} {dailyTarget === 1 ? "ch/day" : "ch/day"}
                   </div>
 
@@ -352,23 +485,30 @@ export function GroupSchedulePlanModal({
                     type="button"
                     onClick={() => setDailyTarget((prev) => Math.min(30, prev + 1))}
                     disabled={dailyTarget >= 30}
-                    className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-40 cursor-pointer"
+                    aria-label="Increase daily chapter goal"
+                    className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground hover:bg-surface transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
                   >
                     <Plus className="size-4" />
                   </button>
-
-                  <span className="text-xs text-foreground-dim ml-2">
-                    Estimated duration: ~{estimatedDays} days ({estimatedWeeks} weeks)
-                  </span>
                 </div>
+
+                <p className="text-center text-xs text-foreground-dim">
+                  Estimated duration: ~{estimatedDays} days ({estimatedWeeks} {estimatedWeeks === 1 ? "week" : "weeks"})
+                </p>
               </div>
 
-              {/* Reading Days Mask Pills */}
-              <div>
-                <label className="block text-[13px] font-semibold text-foreground mb-1.5">
-                  Active Reading Days
-                </label>
-                <div className="flex flex-wrap items-center gap-2">
+              {/* Reading Days Mask Pills - Centered */}
+              <div className="rounded-2xl border border-border bg-surface p-5 space-y-3">
+                <div className="text-center">
+                  <label className="text-[13px] font-semibold text-foreground block">
+                    Active Reading Days
+                  </label>
+                  <p className="text-[11.5px] text-foreground-dim mt-0.5">
+                    {activeDaysPerWeek} active {activeDaysPerWeek === 1 ? "day" : "days"} / {7 - activeDaysPerWeek} rest
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-center gap-2 sm:gap-2.5">
                   {WEEKDAYS.map((day) => {
                     const isActive = activeWeekdays[day.index];
                     return (
@@ -376,10 +516,10 @@ export function GroupSchedulePlanModal({
                         key={day.index}
                         type="button"
                         onClick={() => toggleWeekday(day.index)}
-                        className={`h-10 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                        className={`flex size-10 sm:size-11 items-center justify-center rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                           isActive
-                            ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                            : "bg-surface-elevated text-foreground-dim border-border hover:text-foreground"
+                            ? "bg-foreground text-background border-foreground shadow-xs font-bold"
+                            : "bg-surface-elevated text-foreground-dim border-border hover:text-foreground hover:border-border-strong"
                         }`}
                       >
                         {day.label}
@@ -387,7 +527,8 @@ export function GroupSchedulePlanModal({
                     );
                   })}
                 </div>
-                <p className="mt-1.5 text-[11.5px] text-foreground-dim">
+
+                <p className="text-center text-[11.5px] text-foreground-dim">
                   Days turned off will be scheduled as rest/catch-up days.
                 </p>
               </div>
@@ -488,7 +629,7 @@ export function GroupSchedulePlanModal({
                 </p>
               </div>
 
-              <div className="ui-card-elevated p-5 space-y-4 rounded-2xl">
+              <div className="ui-card p-5 space-y-4 rounded-2xl">
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
                   <span className="text-xs text-foreground-dim">Plan Template</span>
                   <span className="text-sm font-semibold text-foreground">
