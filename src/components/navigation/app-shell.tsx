@@ -18,6 +18,7 @@ import {
   LogOut,
   Loader2,
   BookmarkCheck,
+  Users,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -43,6 +44,7 @@ const MENU_ITEMS = [
   { label: "Overview", href: "/home", icon: LayoutDashboard },
   { label: "Books", href: "/books", icon: BookOpen },
   { label: "Plans", href: "/plans", icon: Calendar },
+  { label: "Groups", href: "/groups", icon: Users },
   { label: "Notes", href: "/notes", icon: FileText },
   { label: "Insights", href: "/insights", icon: TrendingUp },
 ] as const;
@@ -92,6 +94,8 @@ export function AppShell({
     viewTitle = "Bible Books";
   } else if (pathname.startsWith("/plans")) {
     viewTitle = "Reading Plans";
+  } else if (pathname.startsWith("/groups")) {
+    viewTitle = "Community Fellowships";
   } else if (pathname.startsWith("/notes")) {
     viewTitle = "Study Notes";
   } else if (pathname.startsWith("/insights")) {
