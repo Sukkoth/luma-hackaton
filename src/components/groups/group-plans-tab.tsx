@@ -99,118 +99,88 @@ export function GroupPlansTab({
           {activePlans.map((plan) => {
             const leaderboard = leaderboardsByPlanId[plan.id] || [];
             const isEnrolled = Boolean(plan.userEnrolledInstanceId);
-            const currentUser = leaderboard.find((m) => m.isCurrentUser);
+            const currentUserIndex = leaderboard.findIndex((m) => m.isCurrentUser);
+            const currentUser =
+              currentUserIndex >= 0 ? leaderboard[currentUserIndex] : undefined;
+            const currentUserRank =
+              currentUserIndex >= 0 ? currentUserIndex + 1 : undefined;
             const userCompleted = currentUser?.completedChapters ?? 0;
             const userPercent = currentUser?.progressPercent ?? 0;
 
             return (
               <div
                 key={plan.id}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
+                className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
               >
-                {/* Left: Active Plan Hero Pavilion (7 cols on lg, 8 cols on xl) */}
-                <div className="lg:col-span-7 xl:col-span-8 rounded-3xl border border-border bg-surface p-6 sm:p-8 space-y-6 shadow-xs flex flex-col justify-between">
-                  <div className="space-y-5">
-                    {/* Eyebrow */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold tracking-wider uppercase text-foreground-dim">
-                        Active Reading Plan
-                      </span>
-                      <span className="text-xs text-foreground-secondary">
-                        {plan.dailyChapterTarget} {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day
-                      </span>
-                    </div>
-
-                    {/* Title & Curriculum Summary */}
-                    <div>
-                      <h3 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-                        {plan.templateTitle}
-                      </h3>
-                      <p className="mt-1 text-xs sm:text-[13.5px] text-foreground-secondary leading-relaxed max-w-2xl">
-                        A structured curriculum of {plan.totalChapters} chapters synchronized daily across all cohort readers.
-                      </p>
-                    </div>
-
-                    {/* Personal Progress Barometer (If Enrolled) */}
-                    {isEnrolled && (
-                      <div className="space-y-2 pt-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-medium text-foreground-secondary">
-                            Your Progress
-                          </span>
-                          <span className="font-semibold text-foreground">
-                            {userCompleted} of {plan.totalChapters} chapters ({userPercent}%)
-                          </span>
-                        </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated border border-border-subtle">
-                          <div
-                            style={{
-                              width: `${Math.min(100, Math.max(userPercent, 2))}%`,
-                            }}
-                            className="h-full rounded-full bg-foreground transition-all duration-300"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Integrated Fellowship Vitals Strip */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                      <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                        <span className="text-[10.5px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
-                          Cohort Readers
-                        </span>
-                        <span className="text-base sm:text-lg font-bold text-foreground">
-                          {plan.enrolledMembersCount}{" "}
-                          {plan.enrolledMembersCount === 1 ? "reader" : "readers"}
-                        </span>
-                      </div>
-
-                      <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                        <span className="text-[10.5px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
-                          Total Length
-                        </span>
-                        <span className="text-base sm:text-lg font-bold text-foreground">
-                          {plan.totalChapters} Chapters
-                        </span>
-                      </div>
-
-                      <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                        <span className="text-[10.5px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
-                          Daily Cadence
-                        </span>
-                        <span className="text-base sm:text-lg font-bold text-foreground">
-                          {plan.dailyChapterTarget} ch / day
-                        </span>
-                      </div>
-
-                      <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
-                        <span className="text-[10.5px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
-                          Cohort Sync
-                        </span>
-                        <span className="text-base sm:text-lg font-bold text-foreground">
-                          Synchronized
-                        </span>
-                      </div>
-                    </div>
+                {/* Left: Active Plan Hero Pavilion (7 cols) */}
+                <div className="lg:col-span-7 xl:col-span-7 rounded-3xl border border-border bg-surface p-6 sm:p-8 space-y-6 shadow-xs">
+                  {/* Eyebrow */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-foreground-dim">
+                      Active Reading Plan
+                    </span>
+                    <span className="text-xs text-foreground-secondary">
+                      {plan.dailyChapterTarget}{" "}
+                      {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day
+                    </span>
                   </div>
 
-                  {/* Action Footer */}
-                  <div className="pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  {/* Title & Curriculum Summary */}
+                  <div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                      {plan.templateTitle}
+                    </h3>
+                    <p className="mt-1 text-xs sm:text-[13.5px] text-foreground-secondary leading-relaxed max-w-2xl">
+                      A structured curriculum of {plan.totalChapters} chapters synchronized daily across all cohort readers.
+                    </p>
+                  </div>
+
+                  {/* Personal Reading Station (Progress & Primary Action) */}
+                  <div className="rounded-2xl border border-border bg-surface-elevated/40 p-5 space-y-4">
                     {isEnrolled ? (
                       <>
-                        <Link
-                          href={`/plans/${plan.userEnrolledInstanceId}`}
-                          className="inline-flex items-center justify-center gap-2 h-11 px-6 text-xs sm:text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:opacity-90 shadow-xs transition-all w-full sm:w-auto cursor-pointer"
-                        >
-                          <span>Continue Reading {plan.templateTitle}</span>
-                          <ArrowRight className="size-4" />
-                        </Link>
-                        <span className="text-xs text-foreground-dim text-center sm:text-right">
-                          Includes shared fellowship reflections &amp; notes
-                        </span>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-foreground">
+                              Your Reading Milestone
+                            </span>
+                            <span className="font-semibold text-foreground">
+                              {userCompleted} of {plan.totalChapters} chapters ({userPercent}%)
+                            </span>
+                          </div>
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-surface border border-border-subtle">
+                            <div
+                              style={{
+                                width: `${Math.min(100, Math.max(userPercent, 2))}%`,
+                              }}
+                              className="h-full rounded-full bg-foreground transition-all duration-300"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-border-subtle">
+                          <Link
+                            href={`/plans/${plan.userEnrolledInstanceId}`}
+                            className="inline-flex items-center justify-center gap-2 h-11 px-6 text-xs sm:text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98] shadow-xs transition-all w-full sm:w-auto cursor-pointer"
+                          >
+                            <span>Continue Reading {plan.templateTitle}</span>
+                            <ArrowRight className="size-4" />
+                          </Link>
+                          <span className="text-xs text-foreground-dim text-center sm:text-right">
+                            Includes shared fellowship reflections &amp; notes
+                          </span>
+                        </div>
                       </>
                     ) : (
-                      <>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-0.5">
+                          <span className="text-xs font-semibold text-foreground block">
+                            Join Fellowship Reading Journey
+                          </span>
+                          <span className="text-xs text-foreground-dim block">
+                            Synchronize your personal reader with this cohort
+                          </span>
+                        </div>
                         <Button
                           type="button"
                           variant="primary"
@@ -221,137 +191,187 @@ export function GroupPlansTab({
                         >
                           Enroll &amp; Read With Fellowship
                         </Button>
-                        <span className="text-xs text-foreground-dim">
-                          Synchronize your personal reader with this cohort
-                        </span>
-                      </>
+                      </div>
                     )}
+                  </div>
+
+                  {/* Integrated Fellowship Vitals Strip */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
+                        Cohort Readers
+                      </span>
+                      <span className="text-base sm:text-lg font-bold text-foreground">
+                        {plan.enrolledMembersCount}{" "}
+                        {plan.enrolledMembersCount === 1 ? "reader" : "readers"}
+                      </span>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
+                        Total Length
+                      </span>
+                      <span className="text-base sm:text-lg font-bold text-foreground">
+                        {plan.totalChapters} Chapters
+                      </span>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
+                        Daily Cadence
+                      </span>
+                      <span className="text-base sm:text-lg font-bold text-foreground">
+                        {plan.dailyChapterTarget} ch / day
+                      </span>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-3.5 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-0.5">
+                        Cohort Sync
+                      </span>
+                      <span className="text-base sm:text-lg font-bold text-foreground">
+                        Synchronized
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Right: Fellowship Circle & Accountability Board (5 cols on lg, 4 cols on xl) */}
-                <div className="lg:col-span-5 xl:col-span-4 rounded-3xl border border-border bg-surface p-6 flex flex-col justify-between shadow-xs space-y-5">
-                  <div className="space-y-4">
-                    {/* Board Header */}
-                    <div className="flex items-center justify-between pb-3 border-b border-border">
-                      <div>
-                        <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                          Fellowship Circle
-                        </h4>
-                        <p className="text-[11px] text-foreground-dim mt-0.5">
-                          Cohort reading momentum
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleTogglePrivacy}
-                        disabled={isUpdatingPrivacy}
-                        className="inline-flex items-center gap-1.5 text-[11px] text-foreground-secondary hover:text-foreground transition-colors cursor-pointer px-2.5 py-1 rounded-xl border border-border bg-surface-elevated/60"
-                        title="Toggle progress privacy"
-                      >
-                        {hideProgress ? (
-                          <>
-                            <EyeOff className="size-3 text-warning" />
-                            <span className="text-[10px] font-medium">Hidden</span>
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="size-3 text-foreground-dim" />
-                            <span className="text-[10px] font-medium">Visible</span>
-                          </>
-                        )}
-                      </button>
+                {/* Right: Fellowship Circle & Accountability Board (5 cols) */}
+                <div className="lg:col-span-5 xl:col-span-5 rounded-3xl border border-border bg-surface p-6 space-y-4 shadow-xs">
+                  {/* Board Header */}
+                  <div className="flex items-center justify-between pb-3 border-b border-border">
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                        Fellowship Circle
+                      </h4>
+                      <p className="text-[11px] text-foreground-dim mt-0.5">
+                        {leaderboard.length} enrolled {leaderboard.length === 1 ? "reader" : "readers"}
+                      </p>
                     </div>
 
-                    {/* Member Leaderboard Roster */}
-                    {leaderboard.length === 0 ? (
-                      <div className="rounded-2xl border border-border bg-surface-elevated/40 p-6 text-center text-xs text-foreground-dim">
-                        No readers enrolled in this plan yet.
-                      </div>
-                    ) : (
-                      <div className="rounded-2xl border border-border bg-surface divide-y divide-border overflow-hidden">
-                        {leaderboard.map((member, index) => {
-                          const initials = member.name
-                            .split(" ")
-                            .map((w) => w[0])
-                            .slice(0, 2)
-                            .join("")
-                            .toUpperCase();
+                    <button
+                      type="button"
+                      onClick={handleTogglePrivacy}
+                      disabled={isUpdatingPrivacy}
+                      className="inline-flex items-center gap-1.5 text-[11px] text-foreground-secondary hover:text-foreground transition-colors cursor-pointer px-2.5 py-1 rounded-xl border border-border bg-surface-elevated/60"
+                      title="Toggle progress privacy"
+                    >
+                      {hideProgress ? (
+                        <>
+                          <EyeOff className="size-3 text-warning" />
+                          <span className="text-[10px] font-medium">Hidden</span>
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="size-3 text-foreground-dim" />
+                          <span className="text-[10px] font-medium">Visible</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
 
-                          return (
-                            <div
-                              key={member.userId}
-                              className={`flex items-center justify-between p-3.5 text-xs transition-colors ${
-                                member.isCurrentUser
-                                  ? "bg-surface-elevated/60"
-                                  : "hover:bg-surface-elevated/30"
-                              }`}
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="text-xs font-medium text-foreground-dim w-4 text-center">
-                                  {index + 1}
-                                </span>
+                  {/* Current User Standing Chip (if in leaderboard) */}
+                  {currentUserRank && (
+                    <div className="flex items-center justify-between rounded-xl border border-border bg-surface-elevated/50 px-3.5 py-2.5 text-xs">
+                      <span className="text-foreground-secondary">
+                        Your Standing:{" "}
+                        <strong className="text-foreground font-semibold">
+                          #{currentUserRank} of {leaderboard.length}
+                        </strong>
+                      </span>
+                      <span className="font-semibold text-foreground">
+                        {userCompleted} / {plan.totalChapters} ch ({userPercent}%)
+                      </span>
+                    </div>
+                  )}
 
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-surface-elevated border border-border text-[11px] font-bold text-foreground overflow-hidden shadow-2xs">
-                                  {member.avatarUrl ? (
-                                    <Image
-                                      src={member.avatarUrl}
-                                      alt={member.name}
-                                      width={32}
-                                      height={32}
-                                      className="size-full object-cover"
-                                    />
-                                  ) : (
-                                    <span>{initials}</span>
-                                  )}
-                                </div>
+                  {/* Member Leaderboard Roster (Scrollable container capped at ~340px) */}
+                  {leaderboard.length === 0 ? (
+                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-6 text-center text-xs text-foreground-dim">
+                      No readers enrolled in this plan yet.
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-border bg-surface divide-y divide-border overflow-y-auto max-h-[340px] overscroll-contain">
+                      {leaderboard.map((member, index) => {
+                        const initials = member.name
+                          .split(" ")
+                          .map((w) => w[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase();
 
-                                <div className="truncate">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-semibold text-foreground text-xs truncate">
-                                      {member.name}
-                                    </span>
-                                    {member.isCurrentUser && (
-                                      <span className="rounded-sm bg-foreground text-background px-1 text-[8.5px] font-bold">
-                                        YOU
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="text-[10.5px] text-foreground-dim block">
-                                    {member.completedChapters} / {member.totalChapters} chapters
-                                  </span>
-                                </div>
-                              </div>
+                        return (
+                          <div
+                            key={member.userId}
+                            className={`flex items-center justify-between p-3.5 text-xs transition-colors ${
+                              member.isCurrentUser
+                                ? "bg-surface-elevated/80 font-medium"
+                                : "hover:bg-surface-elevated/30"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className="text-xs font-semibold text-foreground-dim w-4 text-center shrink-0">
+                                {index + 1}
+                              </span>
 
-                              {/* Progress Percent & Read Today Icon */}
-                              <div className="flex items-center gap-2.5 shrink-0 ml-2">
-                                <span className="text-xs font-semibold text-foreground">
-                                  {member.progressPercent}%
-                                </span>
-
-                                {member.readToday ? (
-                                  <span
-                                    className="flex size-6 items-center justify-center rounded-full bg-surface-elevated text-foreground border border-border"
-                                    title="Read today"
-                                  >
-                                    <CheckCircle2 className="size-3.5 text-foreground" />
-                                  </span>
+                              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-surface-elevated border border-border text-[11px] font-bold text-foreground overflow-hidden shadow-2xs">
+                                {member.avatarUrl ? (
+                                  <Image
+                                    src={member.avatarUrl}
+                                    alt={member.name}
+                                    width={32}
+                                    height={32}
+                                    className="size-full object-cover"
+                                  />
                                 ) : (
-                                  <span
-                                    className="flex size-6 items-center justify-center rounded-full bg-surface-subtle text-foreground-dim border border-border"
-                                    title="Reading pending"
-                                  >
-                                    <Clock className="size-3.5" />
-                                  </span>
+                                  <span>{initials}</span>
                                 )}
                               </div>
+
+                              <div className="truncate">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-semibold text-foreground text-xs truncate">
+                                    {member.name}
+                                  </span>
+                                  {member.isCurrentUser && (
+                                    <span className="rounded-sm bg-foreground text-background px-1 text-[8.5px] font-bold">
+                                      YOU
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[10.5px] text-foreground-dim block">
+                                  {member.completedChapters} / {member.totalChapters} chapters
+                                </span>
+                              </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
+
+                            {/* Progress Percent & Read Today Icon */}
+                            <div className="flex items-center gap-2.5 shrink-0 ml-2">
+                              <span className="text-xs font-semibold text-foreground">
+                                {member.progressPercent}%
+                              </span>
+
+                              {member.readToday ? (
+                                <span
+                                  className="flex size-6 items-center justify-center rounded-full bg-surface-elevated text-foreground border border-border"
+                                  title="Read today"
+                                >
+                                  <CheckCircle2 className="size-3.5 text-foreground" />
+                                </span>
+                              ) : (
+                                <span
+                                  className="flex size-6 items-center justify-center rounded-full bg-surface-subtle text-foreground-dim border border-border"
+                                  title="Reading pending"
+                                >
+                                  <Clock className="size-3.5" />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {/* Fellowship Encouragement & Invite Card (Eliminates dead space) */}
                   <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4 space-y-3">
