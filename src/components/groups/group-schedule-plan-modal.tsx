@@ -215,7 +215,7 @@ export function GroupSchedulePlanModal({
                   }`}
                 >
                   <span
-                    className={`font-mono text-[11px] font-bold ${
+                    className={`text-[11px] font-bold ${
                       isActive ? "text-primary-foreground" : "text-foreground-dim"
                     }`}
                   >
@@ -344,7 +344,7 @@ export function GroupSchedulePlanModal({
                     <Minus className="size-4" />
                   </button>
 
-                  <div className="h-11 px-5 min-w-[80px] rounded-xl border border-border bg-surface flex items-center justify-center text-base font-bold text-foreground font-mono">
+                  <div className="h-11 px-5 min-w-[80px] rounded-xl border border-border bg-surface flex items-center justify-center text-base font-bold text-foreground">
                     {dailyTarget} {dailyTarget === 1 ? "ch/day" : "ch/day"}
                   </div>
 
@@ -498,7 +498,7 @@ export function GroupSchedulePlanModal({
 
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
                   <span className="text-xs text-foreground-dim">Total Chapters</span>
-                  <span className="text-sm font-semibold text-foreground font-mono">
+                  <span className="text-sm font-semibold text-foreground">
                     {selectedPlan.totalChapters} chapters
                   </span>
                 </div>
@@ -516,7 +516,7 @@ export function GroupSchedulePlanModal({
 
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
                   <span className="text-xs text-foreground-dim">Pacing Goal</span>
-                  <span className="text-sm font-semibold text-foreground font-mono">
+                  <span className="text-sm font-semibold text-foreground">
                     {dailyTarget} chapters / active day
                   </span>
                 </div>

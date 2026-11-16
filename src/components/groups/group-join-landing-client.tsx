@@ -145,7 +145,7 @@ export function GroupJoinLandingClient({
 
           {/* Success State */}
           {isJoined && (
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-success animate-in fade-in">
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-foreground animate-in fade-in">
               <CheckCircle2 className="size-4" />
               <span>Joined! Redirecting to fellowship...</span>
             </div>

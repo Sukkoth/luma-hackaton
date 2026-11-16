@@ -164,7 +164,7 @@ export function GroupWorkspaceView({
               onClick={handleCopyInvite}
               leftIcon={
                 copied ? (
-                  <Check className="size-4 text-success" />
+                  <Check className="size-4 text-foreground" />
                 ) : (
                   <Copy className="size-4" />
                 )

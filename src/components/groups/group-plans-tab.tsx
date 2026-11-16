@@ -102,7 +102,6 @@ export function GroupPlansTab({
             const currentUser = leaderboard.find((m) => m.isCurrentUser);
             const userCompleted = currentUser?.completedChapters ?? 0;
             const userPercent = currentUser?.progressPercent ?? 0;
-            const readToday = currentUser?.readToday ?? false;
 
             return (
               <div
@@ -112,20 +111,13 @@ export function GroupPlansTab({
                 {/* Left: Active Plan Hero Pavilion (7 cols on lg, 8 cols on xl) */}
                 <div className="lg:col-span-7 xl:col-span-8 rounded-3xl border border-border bg-surface p-6 sm:p-8 space-y-6 shadow-xs flex flex-col justify-between">
                   <div className="space-y-5">
-                    {/* Eyebrow & Pace Badge */}
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="flex size-7 items-center justify-center rounded-lg bg-surface-elevated border border-border text-foreground">
-                          <BookOpen className="size-3.5 text-foreground" />
-                        </span>
-                        <span className="text-[11px] font-bold text-foreground uppercase tracking-wider">
-                          Active Fellowship Curriculum
-                        </span>
-                      </div>
-
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-3 py-1 text-xs font-semibold text-foreground border border-border">
-                        <Clock className="size-3 text-foreground-dim" />
-                        <span>{plan.dailyChapterTarget} ch / day • Synchronized Pace</span>
+                    {/* Eyebrow */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold tracking-wider uppercase text-foreground-dim">
+                        Active Reading Plan
+                      </span>
+                      <span className="text-xs text-foreground-secondary">
+                        {plan.dailyChapterTarget} {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day
                       </span>
                     </div>
 
@@ -141,37 +133,21 @@ export function GroupPlansTab({
 
                     {/* Personal Progress Barometer (If Enrolled) */}
                     {isEnrolled && (
-                      <div className="rounded-2xl border border-border bg-surface-elevated/50 p-4 sm:p-5 space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">
-                              Your Reading Milestone:
-                            </span>
-                            {readToday ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success bg-success/10 border border-success/20 px-2.5 py-0.5 rounded-full">
-                                <CheckCircle2 className="size-3" />
-                                <span>Read Today</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground-dim bg-surface px-2.5 py-0.5 rounded-full border border-border">
-                                <Clock className="size-3" />
-                                <span>Today Pending</span>
-                              </span>
-                            )}
-                          </div>
-
-                          <span className="font-mono text-xs font-bold text-foreground">
-                            {userCompleted} of {plan.totalChapters} Chapters ({userPercent}%)
+                      <div className="space-y-2 pt-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium text-foreground-secondary">
+                            Your Progress
+                          </span>
+                          <span className="font-semibold text-foreground">
+                            {userCompleted} of {plan.totalChapters} chapters ({userPercent}%)
                           </span>
                         </div>
-
-                        {/* Progress Track */}
-                        <div className="h-2.5 w-full rounded-full bg-surface border border-border overflow-hidden">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated border border-border-subtle">
                           <div
-                            className="h-full rounded-full bg-foreground transition-all duration-300"
                             style={{
                               width: `${Math.min(100, Math.max(userPercent, 2))}%`,
                             }}
+                            className="h-full rounded-full bg-foreground transition-all duration-300"
                           />
                         </div>
                       </div>
@@ -313,7 +289,7 @@ export function GroupPlansTab({
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <span className="font-mono text-xs font-bold text-foreground-dim w-4 text-center">
+                                <span className="text-xs font-medium text-foreground-dim w-4 text-center">
                                   {index + 1}
                                 </span>
 
@@ -350,21 +326,21 @@ export function GroupPlansTab({
 
                               {/* Progress Percent & Read Today Icon */}
                               <div className="flex items-center gap-2.5 shrink-0 ml-2">
-                                <span className="font-mono text-xs font-bold text-foreground">
+                                <span className="text-xs font-semibold text-foreground">
                                   {member.progressPercent}%
                                 </span>
 
                                 {member.readToday ? (
                                   <span
-                                    className="flex size-6 items-center justify-center rounded-full bg-success/10 text-success border border-success/20"
-                                    title="Read today's scripture"
+                                    className="flex size-6 items-center justify-center rounded-full bg-surface-elevated text-foreground border border-border"
+                                    title="Read today"
                                   >
-                                    <CheckCircle2 className="size-3.5" />
+                                    <CheckCircle2 className="size-3.5 text-foreground" />
                                   </span>
                                 ) : (
                                   <span
                                     className="flex size-6 items-center justify-center rounded-full bg-surface-subtle text-foreground-dim border border-border"
-                                    title="Reading pending today"
+                                    title="Reading pending"
                                   >
                                     <Clock className="size-3.5" />
                                   </span>
@@ -446,7 +422,7 @@ export function GroupPlansTab({
                   <div className="flex items-center justify-between pt-3 border-t border-border-subtle text-xs text-foreground-dim">
                     <span>{plan.enrolledMembersCount} waiting</span>
                     {plan.userEnrolledInstanceId ? (
-                      <span className="text-xs font-semibold text-success">
+                      <span className="text-xs font-semibold text-foreground">
                         Pre-enrolled
                       </span>
                     ) : (
