@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Users,
@@ -14,7 +13,6 @@ import {
   Clock,
   ArrowRight,
   Shield,
-  Compass,
 } from "lucide-react";
 import type { UserGroupSummary } from "@/actions/groups";
 import { searchPublicGroupsAction } from "@/actions/groups";
@@ -39,7 +37,6 @@ export function GroupsHubView({
   myGroups,
   initialPublicGroups,
 }: GroupsHubViewProps) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"my" | "explore">("my");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isJoinCodeOpen, setIsJoinCodeOpen] = useState(false);
@@ -63,9 +60,9 @@ export function GroupsHubView({
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="mx-auto w-full max-w-6xl space-y-6 animate-in fade-in duration-200">
       {/* Top Highlights Banner */}
-      <div className="ui-card flex flex-col gap-4 p-5 sm:p-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="ui-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="flex size-7 items-center justify-center rounded-lg bg-surface-elevated text-foreground border border-border">

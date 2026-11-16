@@ -68,7 +68,7 @@ export function GroupWorkspaceView({
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="mx-auto w-full max-w-6xl space-y-6 animate-in fade-in duration-200">
       {/* Top Navigation Back Link */}
       <Link
         href="/groups"

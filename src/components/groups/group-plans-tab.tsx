@@ -64,12 +64,17 @@ export function GroupPlansTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Active Plans Header / Action */}
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
-          Active Fellowship Plans ({activePlans.length})
-        </h2>
+        <div>
+          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            Active Fellowship Plans ({activePlans.length})
+          </h2>
+          <p className="text-xs text-foreground-dim mt-0.5">
+            Synchronized reading schedules followed by cohort members.
+          </p>
+        </div>
         {isAdmin && (
           <Button
             type="button"
@@ -115,33 +120,52 @@ export function GroupPlansTab({
             return (
               <div
                 key={plan.id}
-                className="ui-card-elevated rounded-[22px] p-5 sm:p-6 space-y-6"
+                className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start"
               >
-                {/* Plan Overview Card Top */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border-subtle pb-5">
+                {/* Left: Active Plan Hero Card (7 cols) */}
+                <div className="lg:col-span-7 ui-card-elevated rounded-[22px] p-6 space-y-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-1 text-[11px] font-semibold text-foreground border border-border uppercase">
+                      Active Fellowship Plan
+                    </span>
+                    <span className="text-xs text-foreground-dim">
+                      Target: {plan.dailyChapterTarget} ch/day
+                    </span>
+                  </div>
+
                   <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-0.5 text-[10px] font-semibold text-foreground border border-border uppercase">
-                        Active Group Plan
-                      </span>
-                      <span className="text-xs text-foreground-dim">
-                        Target: {plan.dailyChapterTarget} chapters/day
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground tracking-tight">
+                    <h3 className="text-xl font-bold text-foreground tracking-tight">
                       {plan.templateTitle}
                     </h3>
-                    <p className="text-xs text-foreground-secondary mt-0.5">
-                      {plan.totalChapters} total chapters • {plan.enrolledMembersCount} members enrolled
+                    <p className="text-xs text-foreground-secondary mt-1 leading-relaxed">
+                      Curriculum of {plan.totalChapters} chapters synchronized across the fellowship.
                     </p>
                   </div>
 
-                  {/* Enrollment Action Button */}
-                  <div>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="rounded-xl border border-border bg-surface p-3 text-center">
+                      <span className="text-[11px] text-foreground-dim block">
+                        Enrolled Members
+                      </span>
+                      <span className="text-base font-bold text-foreground">
+                        {plan.enrolledMembersCount}
+                      </span>
+                    </div>
+                    <div className="rounded-xl border border-border bg-surface p-3 text-center">
+                      <span className="text-[11px] text-foreground-dim block">
+                        Total Chapters
+                      </span>
+                      <span className="text-base font-bold text-foreground">
+                        {plan.totalChapters}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-border-subtle flex items-center justify-between">
                     {isEnrolled ? (
                       <Link
                         href={`/plans/${plan.userEnrolledInstanceId}`}
-                        className="inline-flex items-center justify-center gap-2 h-9 px-4 text-xs font-semibold rounded-[12px] bg-primary text-primary-foreground hover:opacity-90 shadow-xs transition-all"
+                        className="inline-flex items-center justify-center gap-2 h-10 px-5 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:opacity-90 shadow-xs transition-all w-full sm:w-auto"
                       >
                         <span>Continue Reading</span>
                         <ArrowRight className="size-3.5" />
@@ -150,9 +174,10 @@ export function GroupPlansTab({
                       <Button
                         type="button"
                         variant="primary"
-                        size="sm"
+                        size="md"
+                        className="w-full sm:w-auto"
                         onClick={() => setSelectedPlanForEnroll(plan)}
-                        leftIcon={<UserCheck className="size-3.5" />}
+                        leftIcon={<UserCheck className="size-4" />}
                       >
                         Enroll in Plan
                       </Button>
@@ -160,34 +185,34 @@ export function GroupPlansTab({
                   </div>
                 </div>
 
-                {/* Cohort Leaderboard & Progress Matrix */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                {/* Right: Cohort Leaderboard Widget (5 cols) */}
+                <div className="lg:col-span-5 ui-card-elevated rounded-[22px] p-5 space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
                     <div>
                       <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                        Cohort Progress Leaderboard
+                        Cohort Leaderboard
                       </h4>
                       <p className="text-[11px] text-foreground-dim">
-                        Real-time completion percentage and today&apos;s reading activity.
+                        Ranked by chapters read
                       </p>
                     </div>
 
-                    {/* Privacy Toggle */}
                     <button
                       type="button"
                       onClick={handleTogglePrivacy}
                       disabled={isUpdatingPrivacy}
                       className="inline-flex items-center gap-1.5 text-[11px] text-foreground-secondary hover:text-foreground transition-colors cursor-pointer"
+                      title="Toggle leaderboard privacy"
                     >
                       {hideProgress ? (
                         <>
                           <EyeOff className="size-3.5 text-warning" />
-                          <span>Progress hidden from peers</span>
+                          <span className="text-[10px]">Hidden</span>
                         </>
                       ) : (
                         <>
                           <Eye className="size-3.5" />
-                          <span>Progress visible to peers</span>
+                          <span className="text-[10px]">Visible</span>
                         </>
                       )}
                     </button>
@@ -195,10 +220,10 @@ export function GroupPlansTab({
 
                   {leaderboard.length === 0 ? (
                     <div className="rounded-xl border border-border bg-surface p-6 text-center text-xs text-foreground-dim">
-                      No members have enrolled in this plan yet. Be the first to start reading!
+                      No members enrolled yet.
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-border bg-surface divide-y divide-border overflow-hidden">
+                    <div className="rounded-xl border border-border bg-surface divide-y divide-border overflow-hidden max-h-[360px] overflow-y-auto">
                       {leaderboard.map((member, index) => {
                         const initials = member.name
                           .split(" ")
@@ -210,24 +235,24 @@ export function GroupPlansTab({
                         return (
                           <div
                             key={member.userId}
-                            className={`flex items-center justify-between p-3.5 text-xs transition-colors ${
+                            className={`flex items-center justify-between p-3 text-xs transition-colors ${
                               member.isCurrentUser
                                 ? "bg-primary/5"
                                 : "hover:bg-surface-elevated/40"
                             }`}
                           >
-                            <div className="flex items-center gap-3">
-                              <span className="font-mono text-[11px] font-bold text-foreground-dim w-4 text-center">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className="font-mono text-[10px] font-bold text-foreground-dim w-3.5 text-center">
                                 {index + 1}
                               </span>
 
-                              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-surface-elevated border border-border text-[11px] font-semibold text-foreground overflow-hidden">
+                              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface-elevated border border-border text-[10px] font-semibold text-foreground overflow-hidden">
                                 {member.avatarUrl ? (
                                   <Image
                                     src={member.avatarUrl}
                                     alt={member.name}
-                                    width={32}
-                                    height={32}
+                                    width={28}
+                                    height={28}
                                     className="size-full object-cover"
                                   />
                                 ) : (
@@ -235,50 +260,36 @@ export function GroupPlansTab({
                                 )}
                               </div>
 
-                              <div>
-                                <span className="font-semibold text-foreground flex items-center gap-1.5">
+                              <div className="truncate">
+                                <span className="font-semibold text-foreground flex items-center gap-1 truncate text-xs">
                                   {member.name}
                                   {member.isCurrentUser && (
-                                    <span className="rounded-sm bg-surface-elevated px-1 text-[9px] font-bold text-foreground-dim border border-border">
+                                    <span className="rounded-sm bg-surface-elevated px-1 text-[8.5px] font-bold text-foreground-dim border border-border">
                                       YOU
                                     </span>
                                   )}
                                 </span>
-                                <span className="text-[11px] text-foreground-dim block">
-                                  {member.completedChapters} of {member.totalChapters} chapters
+                                <span className="text-[10px] text-foreground-dim block">
+                                  {member.completedChapters} / {member.totalChapters} ch
                                 </span>
                               </div>
                             </div>
 
-                            {/* Progress Bar & Status Badge */}
-                            <div className="flex items-center gap-4">
-                              <div className="hidden sm:flex flex-col items-end gap-1 w-28">
-                                <span className="text-[11px] font-mono font-medium text-foreground">
-                                  {member.progressPercent}%
-                                </span>
-                                <div className="w-full h-1.5 rounded-full bg-surface-elevated overflow-hidden border border-border-subtle">
-                                  <div
-                                    className="h-full bg-primary rounded-full transition-all duration-300"
-                                    style={{
-                                      width: `${member.progressPercent}%`,
-                                    }}
-                                  />
-                                </div>
-                              </div>
+                            {/* Status Badge */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-mono text-[11px] font-medium text-foreground">
+                                {member.progressPercent}%
+                              </span>
 
-                              <div>
-                                {member.readToday ? (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-success/10 text-success px-2 py-0.5 text-[10px] font-semibold border border-success/20">
-                                    <CheckCircle2 className="size-3" />
-                                    Read Today
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-surface-subtle text-foreground-dim px-2 py-0.5 text-[10px] font-medium border border-border">
-                                    <Clock className="size-3" />
-                                    Not Yet
-                                  </span>
-                                )}
-                              </div>
+                              {member.readToday ? (
+                                <span className="flex size-5 items-center justify-center rounded-full bg-success/10 text-success border border-success/20" title="Read today">
+                                  <CheckCircle2 className="size-3" />
+                                </span>
+                              ) : (
+                                <span className="flex size-5 items-center justify-center rounded-full bg-surface-subtle text-foreground-dim border border-border" title="Not yet read today">
+                                  <Clock className="size-3" />
+                                </span>
+                              )}
                             </div>
                           </div>
                         );
@@ -299,7 +310,7 @@ export function GroupPlansTab({
             Upcoming Scheduled Plans ({scheduledPlans.length})
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {scheduledPlans.map((plan) => {
               const startDateStr = new Date(
                 plan.scheduledStartDate
@@ -327,7 +338,7 @@ export function GroupPlansTab({
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-border-subtle text-xs text-foreground-dim">
-                    <span>{plan.enrolledMembersCount} members waiting</span>
+                    <span>{plan.enrolledMembersCount} waiting</span>
                     {plan.userEnrolledInstanceId ? (
                       <span className="text-xs font-semibold text-success">
                         Pre-enrolled

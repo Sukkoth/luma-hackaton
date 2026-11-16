@@ -9,17 +9,6 @@ import { togglePlanReadingItemAction } from "@/actions/plans";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import type { UserTrackerSummary } from "@/actions/trackers";
 
-interface PlanReadingItem {
-  id: string;
-  bookId: string;
-  chapter: number;
-  startVerse?: number;
-  endVerse?: number;
-  displayText?: string | null;
-  isCompleted: boolean;
-  order: number;
-}
-
 interface FlattenedReadingItem {
   id: string;
   bookId: string;
@@ -76,7 +65,7 @@ export function BibleReaderPageClient() {
   const [planContext, setPlanContext] = useState<BibleReaderPlanContext | null>(null);
   const [trackersData, setTrackersData] = useState<{ trackers: readonly UserTrackerSummary[]; activeTracker?: UserTrackerSummary | null }>({ trackers: [] });
   const [streak, setStreak] = useState<StreakData | undefined>(undefined);
-  const [mounted, setMounted] = useState(() => typeof window !== "undefined");
+  const [mounted] = useState(() => typeof window !== "undefined");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -99,8 +88,10 @@ export function BibleReaderPageClient() {
   useEffect(() => {
     if (!mounted || sessionPending || !session) return;
     if (!planId || !readingId) {
-      setPlanContext(null);
-      return;
+      const timer = setTimeout(() => {
+        setPlanContext(null);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     let isCancelled = false;
@@ -268,17 +259,6 @@ export function BibleReaderPageClient() {
       </div>
     </AppShell>
   );
-}
-
-interface PlanReadingItem {
-  id: string;
-  bookId: string;
-  chapter: number;
-  startVerse?: number;
-  endVerse?: number;
-  displayText?: string | null;
-  isCompleted: boolean;
-  order: number;
 }
 
 interface FlattenedReadingItem {

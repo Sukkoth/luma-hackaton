@@ -20,7 +20,6 @@ export type GroupJoinLandingClientProps = {
 };
 
 export function GroupJoinLandingClient({
-  groupId,
   name,
   description,
   avatarUrl,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -73,19 +73,20 @@ export function PlanSessionNotes({
   useEffect(() => {
     let isCancelled = false;
     if (groupPlanId) {
-      setIsLoadingPeers(true);
-      getGroupSessionNotesAction({
-        groupPlanId,
-        sessionIndex: activeSession.sessionIndex,
-      })
-        .then((res) => {
+      startTransition(async () => {
+        setIsLoadingPeers(true);
+        try {
+          const res = await getGroupSessionNotesAction({
+            groupPlanId,
+            sessionIndex: activeSession.sessionIndex,
+          });
           if (!isCancelled && res.success && res.notes) {
             setPeerNotes(res.notes);
           }
-        })
-        .finally(() => {
+        } finally {
           if (!isCancelled) setIsLoadingPeers(false);
-        });
+        }
+      });
     }
     return () => {
       isCancelled = true;

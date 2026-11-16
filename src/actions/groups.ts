@@ -1265,7 +1265,7 @@ export async function enrollInGroupPlanAction({
     // Format start date string
     const startDateStr = scheduledStart.toISOString().slice(0, 10);
 
-    // Call startPlanAction with groupPlanId
+    // Call startPlanAction with groupPlanId - never auto-complete items on enrollment
     const startResult = await startPlanAction({
       templateId: groupPlan.planTemplateId,
       trackerId,
@@ -1275,7 +1275,7 @@ export async function enrollInGroupPlanAction({
       dailyTarget: groupPlan.dailyChapterTarget,
       activeDaysMask: groupPlan.activeWeekdaysMask,
       groupPlanId: groupPlan.id,
-      autoCompletePastDays: groupPlan.lateJoinPolicy === "skip_ahead",
+      autoCompletePastDays: false,
     });
 
     if (!startResult.success) {
