@@ -688,6 +688,8 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
               groupPlanId={currentPlan.communityInfo?.groupPlanId}
               communityName={currentPlan.communityInfo?.groupName}
               notes={notes}
+              isLocked={isScheduledFuture}
+              unlockDateLabel={formattedPlanStartDate}
               onNoteCreatedAction={(newNote) => {
                 setNotes((prev) => [newNote, ...prev]);
                 setCurrentPlan((prev) => ({

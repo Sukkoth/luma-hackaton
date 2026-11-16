@@ -30,6 +30,8 @@ export type PlanSessionNotesProps = {
   groupPlanId?: string;
   communityName?: string;
   notes: ReadonlyArray<PlanNoteDetail>;
+  isLocked?: boolean;
+  unlockDateLabel?: string;
   onNoteCreatedAction: (note: PlanNoteDetail) => void;
   onNoteUpdatedAction: (note: PlanNoteDetail) => void;
   onNoteDeletedAction: (noteId: string) => void;
@@ -52,6 +54,8 @@ export function PlanSessionNotes({
   groupPlanId,
   communityName,
   notes,
+  isLocked = false,
+  unlockDateLabel,
   onNoteCreatedAction,
   onNoteUpdatedAction,
   onNoteDeletedAction,
@@ -153,25 +157,41 @@ export function PlanSessionNotes({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={handleOpenCreateModal}
-            data-testid="add-plan-note-button"
-            className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-semibold rounded-[10px] bg-primary text-primary-foreground hover:opacity-90 transition-all cursor-pointer shadow-xs"
-          >
-            <Plus className="size-3.5" />
-            <span>Add Note</span>
-          </button>
+          {isLocked ? (
+            <div
+              className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-semibold rounded-[10px] border border-border bg-surface-elevated text-foreground-dim cursor-not-allowed select-none"
+              title={
+                unlockDateLabel
+                  ? `Notes and reflections unlock when this cohort starts on ${unlockDateLabel}`
+                  : "Notes and reflections are locked until reading begins"
+              }
+            >
+              <Lock className="size-3.5" />
+              <span>Notes Locked</span>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleOpenCreateModal}
+                data-testid="add-plan-note-button"
+                className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-semibold rounded-[10px] bg-primary text-primary-foreground hover:opacity-90 transition-all cursor-pointer shadow-xs"
+              >
+                <Plus className="size-3.5" />
+                <span>Add Note</span>
+              </button>
 
-          <Link
-            href={`/notes?planId=${instanceId}&session=${activeSession.sessionIndex}`}
-            data-testid="open-full-journal-link"
-            className="flex size-8 items-center justify-center rounded-xl border border-border bg-surface text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
-            title="Open in full notes studio"
-            aria-label="Open in full notes studio"
-          >
-            <ExternalLink className="size-3.5 shrink-0" />
-          </Link>
+              <Link
+                href={`/notes?planId=${instanceId}&session=${activeSession.sessionIndex}`}
+                data-testid="open-full-journal-link"
+                className="flex size-8 items-center justify-center rounded-xl border border-border bg-surface text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+                title="Open in full notes studio"
+                aria-label="Open in full notes studio"
+              >
+                <ExternalLink className="size-3.5 shrink-0" />
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -299,6 +319,20 @@ export function PlanSessionNotes({
                 );
               })}
             </div>
+          ) : isLocked ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-8 px-4 text-center bg-surface-elevated/30">
+              <div className="flex size-10 items-center justify-center rounded-2xl border border-border bg-surface text-foreground-dim">
+                <Lock className="size-5" />
+              </div>
+              <h4 className="mt-3 text-sm font-semibold text-foreground">
+                Reflections Locked for {activeSession.title}
+              </h4>
+              <p className="mt-1 max-w-sm text-xs leading-relaxed text-foreground-dim">
+                {unlockDateLabel
+                  ? `Personal reflections and study journal entries for this scheduled cohort unlock on ${unlockDateLabel}.`
+                  : "Personal reflections and study journal entries unlock once this scheduled cohort begins."}
+              </p>
+            </div>
           ) : (
             /* Empty State */
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-8 px-4 text-center bg-surface-elevated/30">
@@ -330,6 +364,18 @@ export function PlanSessionNotes({
           {isLoadingPeers ? (
             <div className="rounded-2xl border border-border bg-surface-elevated/40 p-8 text-center text-xs text-foreground-dim">
               Loading fellowship reflections...
+            </div>
+          ) : isLocked ? (
+            <div className="rounded-2xl border border-dashed border-border bg-surface-elevated/30 p-8 text-center space-y-2">
+              <Lock className="size-6 text-foreground-dim mx-auto" />
+              <h4 className="text-xs font-semibold text-foreground">
+                Fellowship Sharing Unlocks on Start Date
+              </h4>
+              <p className="text-[11px] text-foreground-dim max-w-xs mx-auto">
+                {unlockDateLabel
+                  ? `Peer reflections and community discussions will open when the cohort starts on ${unlockDateLabel}.`
+                  : "Peer reflections and community discussions will open when reading begins."}
+              </p>
             </div>
           ) : peerNotes.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-surface-elevated/30 p-8 text-center space-y-2">
