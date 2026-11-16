@@ -173,7 +173,7 @@ export function GroupAdminTab({
       {/* Left Column: Profile Settings & Danger Zone */}
       <div className="space-y-6">
         {/* Fellowship Profile & Privacy Settings */}
-        <section className="ui-card-elevated p-6 space-y-4 rounded-2xl">
+        <section className="rounded-3xl border border-border bg-surface p-6 sm:p-7 space-y-4 shadow-xs">
           <div>
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
               Fellowship Profile & Privacy
@@ -291,7 +291,7 @@ export function GroupAdminTab({
 
         {/* Danger Zone (Owner Only) */}
         {isOwner && (
-          <section className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 space-y-4">
+          <section className="rounded-3xl border border-destructive/20 bg-destructive/5 p-6 sm:p-7 space-y-4">
             <div>
               <h3 className="text-sm font-bold text-destructive uppercase tracking-wider flex items-center gap-1.5">
                 <AlertTriangle className="size-4" />
@@ -318,7 +318,7 @@ export function GroupAdminTab({
       {/* Right Column: Invite Link, Pending Approvals, Member Roles */}
       <div className="space-y-6">
         {/* Invite Link Controls */}
-        <section className="ui-card-elevated p-6 space-y-4 rounded-2xl">
+        <section className="rounded-3xl border border-border bg-surface p-6 sm:p-7 space-y-4 shadow-xs">
           <div>
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
               Fellowship Invitation Link
@@ -352,7 +352,7 @@ export function GroupAdminTab({
 
         {/* Pending Approvals Queue (If Any) */}
         {pendingMembers.length > 0 && (
-          <section className="ui-card-elevated p-6 space-y-4 rounded-2xl border-warning/30">
+          <section className="rounded-3xl border border-warning/30 bg-surface p-6 sm:p-7 space-y-4 shadow-xs">
             <div className="flex items-center gap-2">
               <span className="flex size-7 items-center justify-center rounded-lg bg-warning/10 text-warning border border-warning/20">
                 <UserCheck className="size-4" />
@@ -409,7 +409,7 @@ export function GroupAdminTab({
         )}
 
         {/* Member Directory & Role Controls */}
-        <section className="ui-card-elevated p-6 space-y-4 rounded-2xl">
+        <section className="rounded-3xl border border-border bg-surface p-6 sm:p-7 space-y-4 shadow-xs">
           <div>
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
               Member Roles & Permissions
