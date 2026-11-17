@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AchievementCelebrationListener } from "@/components/achievements/achievement-celebration-listener";
 import "./globals.css";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Bible Tracker & Planner",
@@ -26,7 +19,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${poppins.variable} h-full antialiased`}
+      className={`${GeistSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -50,7 +43,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${poppins.className} min-h-full font-sans antialiased transition-colors duration-200`}
+        className={`${GeistSans.className} min-h-full font-sans antialiased transition-colors duration-200`}
       >
         <NuqsAdapter>
           <ThemeProvider defaultTheme="system">

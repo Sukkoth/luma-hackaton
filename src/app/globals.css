@@ -39,7 +39,7 @@
   --bg-gradient: #f8fafc;
   --bg-gradient-dark: #050505;
   --font-sans:
-    var(--font-poppins), "Poppins", -apple-system, BlinkMacSystemFont,
+    var(--font-geist-sans), "Geist", -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -114,7 +114,7 @@ html.dark {
   --color-info: var(--info);
 
   --font-sans:
-    var(--font-poppins), "Poppins", -apple-system, BlinkMacSystemFont,
+    var(--font-geist-sans), "Geist", -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -122,8 +122,8 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family:
-    var(--font-poppins),
-    "Poppins",
+    var(--font-geist-sans),
+    "Geist",
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
