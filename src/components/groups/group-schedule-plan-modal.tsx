@@ -198,9 +198,9 @@ export function GroupSchedulePlanModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="ui-card relative w-full max-w-2xl flex flex-col max-h-[90vh] shadow-2xl transition-all overflow-hidden"
+        className="ui-card relative w-full max-w-2xl flex flex-col max-h-[92vh] shadow-2xl transition-all overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="schedule-wizard-title"

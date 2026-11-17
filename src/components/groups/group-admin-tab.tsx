@@ -6,20 +6,21 @@ import {
   Copy,
   Check,
   UserX,
-  UserCheck,
   Trash2,
   AlertTriangle,
+  QrCode,
+  ArrowRightLeft,
 } from "lucide-react";
 import type { GroupMemberSummary } from "@/actions/groups";
 import {
-  approveMemberAction,
-  rejectMemberAction,
   updateMemberRoleAction,
   removeMemberAction,
   updateGroupSettingsAction,
   deleteGroupAction,
 } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import { GroupInviteModal } from "@/components/groups/group-invite-modal";
+import { GroupTransferOwnershipModal } from "@/components/groups/group-transfer-ownership-modal";
 
 export type GroupAdminTabProps = {
   groupId: string;
@@ -31,7 +32,6 @@ export type GroupAdminTabProps = {
   requiresApproval: boolean;
   isOwner: boolean;
   members: ReadonlyArray<GroupMemberSummary>;
-  pendingMembers: ReadonlyArray<GroupMemberSummary>;
 };
 
 export function GroupAdminTab({
@@ -44,15 +44,16 @@ export function GroupAdminTab({
   requiresApproval: initialRequiresApproval,
   isOwner,
   members,
-  pendingMembers,
 }: GroupAdminTabProps) {
   const router = useRouter();
 
+  // Invite link state
   const [copied, setCopied] = useState(false);
   const [origin] = useState(() =>
     typeof window !== "undefined" ? window.location.origin : ""
   );
 
+  // Group settings state
   const [isPrivate, setIsPrivate] = useState(initialIsPrivate);
   const [requiresApproval, setRequiresApproval] = useState(
     initialRequiresApproval
@@ -60,10 +61,19 @@ export function GroupAdminTab({
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
 
+  // Member management state
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<GroupMemberSummary | null>(null);
 
+  // Delete modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Transfer ownership modal state
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+
+  // Invite & QR modal state
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   const inviteLink = `${origin}/groups/join/${inviteCode}`;
 
@@ -71,26 +81,6 @@ export function GroupAdminTab({
     navigator.clipboard.writeText(inviteLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }
-
-  async function handleApprove(userId: string) {
-    setLoadingUserId(userId);
-    try {
-      await approveMemberAction({ groupId, targetUserId: userId });
-      router.refresh();
-    } finally {
-      setLoadingUserId(null);
-    }
-  }
-
-  async function handleReject(userId: string) {
-    setLoadingUserId(userId);
-    try {
-      await rejectMemberAction({ groupId, targetUserId: userId });
-      router.refresh();
-    } finally {
-      setLoadingUserId(null);
-    }
   }
 
   async function handleRoleChange(
@@ -106,11 +96,15 @@ export function GroupAdminTab({
     }
   }
 
-  async function handleRemoveMember(userId: string) {
-    if (!confirm("Are you sure you want to remove this member?")) return;
-    setLoadingUserId(userId);
+  async function handleConfirmRemoveMember() {
+    if (!memberToRemove) return;
+    setLoadingUserId(memberToRemove.userId);
     try {
-      await removeMemberAction({ groupId, targetUserId: userId });
+      await removeMemberAction({
+        groupId,
+        targetUserId: memberToRemove.userId,
+      });
+      setMemberToRemove(null);
       router.refresh();
     } finally {
       setLoadingUserId(null);
@@ -138,7 +132,7 @@ export function GroupAdminTab({
       });
 
       if (res.success) {
-        setSettingsMessage("Settings saved.");
+        setSettingsMessage("Settings saved successfully.");
         router.refresh();
       } else {
         setSettingsMessage(res.error || "Failed to save settings.");
@@ -165,100 +159,20 @@ export function GroupAdminTab({
   }
 
   return (
-    <div className="max-w-2xl space-y-8">
-      {/* ── Invite Link ── */}
-      <section>
-        <h3 className="text-sm font-semibold text-foreground mb-1">
-          Invite Link
-        </h3>
-        <p className="text-xs text-foreground-dim mb-3">
-          Share to invite members directly.
-        </p>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 rounded-lg border border-border bg-surface-elevated px-3 py-2 text-xs font-mono text-foreground truncate select-all">
-            {inviteLink}
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleCopyInvite}
-            leftIcon={
-              copied ? (
-                <Check className="size-3.5" />
-              ) : (
-                <Copy className="size-3.5" />
-              )
-            }
-          >
-            {copied ? "Copied" : "Copy"}
-          </Button>
-        </div>
-      </section>
-
-      {/* ── Pending Approvals ── */}
-      {pendingMembers.length > 0 && (
-        <section>
-          <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
-            <UserCheck className="size-4 text-warning" />
-            Pending Requests ({pendingMembers.length})
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      {/* ── Left Column: Fellowship Settings Form ── */}
+      <section className="rounded-2xl border border-border bg-surface p-6 sm:p-7 space-y-5 shadow-2xs">
+        <div>
+          <h3 className="text-base font-bold text-foreground">
+            Fellowship Settings
           </h3>
-          <p className="text-xs text-foreground-dim mb-3">
-            Review users requesting to join.
+          <p className="text-xs text-foreground-dim mt-0.5">
+            Update name, description, and join accessibility.
           </p>
-
-          <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
-            {pendingMembers.map((member) => (
-              <div
-                key={member.userId}
-                className="flex items-center justify-between px-4 py-3 text-sm"
-              >
-                <div>
-                  <span className="font-medium text-foreground block">
-                    {member.name}
-                  </span>
-                  <span className="text-xs text-foreground-dim block">
-                    {member.email}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={loadingUserId === member.userId}
-                    onClick={() => handleReject(member.userId)}
-                  >
-                    Reject
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="sm"
-                    disabled={loadingUserId === member.userId}
-                    onClick={() => handleApprove(member.userId)}
-                  >
-                    Approve
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Group Settings ── */}
-      <section>
-        <h3 className="text-sm font-semibold text-foreground mb-1">
-          Fellowship Settings
-        </h3>
-        <p className="text-xs text-foreground-dim mb-4">
-          Update name, description, and access controls.
-        </p>
+        </div>
 
         {settingsMessage && (
-          <div className="rounded-lg border border-border bg-surface-elevated px-3 py-2 text-xs text-foreground mb-4">
+          <div className="rounded-xl border border-border bg-surface-elevated p-3 text-xs text-foreground">
             {settingsMessage}
           </div>
         )}
@@ -267,9 +181,9 @@ export function GroupAdminTab({
           <div>
             <label
               htmlFor="edit-group-name"
-              className="block text-xs font-medium text-foreground mb-1.5"
+              className="block text-xs font-semibold text-foreground mb-1.5"
             >
-              Name
+              Group Name
             </label>
             <input
               id="edit-group-name"
@@ -277,14 +191,14 @@ export function GroupAdminTab({
               type="text"
               defaultValue={name}
               required
-              className="w-full h-10 rounded-lg border border-border bg-surface px-3 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-border-strong transition-all"
+              className="w-full h-10 rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground transition-all"
             />
           </div>
 
           <div>
             <label
               htmlFor="edit-group-desc"
-              className="block text-xs font-medium text-foreground mb-1.5"
+              className="block text-xs font-semibold text-foreground mb-1.5"
             >
               Description
             </label>
@@ -293,69 +207,69 @@ export function GroupAdminTab({
               name="description"
               rows={3}
               defaultValue={description}
-              className="w-full rounded-lg border border-border bg-surface p-3 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-border-strong transition-all resize-none"
+              className="w-full rounded-xl border border-border bg-surface p-3 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground transition-all resize-none"
             />
           </div>
 
           <div>
             <label
               htmlFor="edit-group-avatar"
-              className="block text-xs font-medium text-foreground mb-1.5"
+              className="block text-xs font-semibold text-foreground mb-1.5"
             >
-              Avatar URL
+              Avatar Image URL
             </label>
             <input
               id="edit-group-avatar"
               name="avatarUrl"
               type="url"
               defaultValue={avatarUrl || ""}
-              placeholder="https://…"
-              className="w-full h-10 rounded-lg border border-border bg-surface px-3 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-border-strong transition-all"
+              placeholder="https://..."
+              className="w-full h-10 rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground transition-all"
             />
           </div>
 
-          {/* Toggles */}
-          <div className="space-y-3">
-            <label className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer hover:bg-surface-elevated/30 transition-colors">
+          {/* Privacy & Approval Controls */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-surface-elevated/40">
               <div>
-                <span className="text-sm font-medium text-foreground block">
-                  Private
+                <span className="text-xs font-semibold text-foreground block">
+                  Private Fellowship
                 </span>
-                <span className="text-xs text-foreground-dim block">
-                  Only people with the invite link can join.
+                <span className="text-[11.5px] text-foreground-dim block">
+                  Only users with the invite link can view and join.
                 </span>
               </div>
               <input
                 type="checkbox"
                 checked={isPrivate}
                 onChange={(e) => setIsPrivate(e.target.checked)}
-                className="size-4 rounded border-border text-primary focus:ring-primary cursor-pointer accent-primary"
+                className="size-4.5 rounded border-border text-foreground focus:ring-foreground cursor-pointer accent-foreground"
               />
-            </label>
+            </div>
 
-            <label className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer hover:bg-surface-elevated/30 transition-colors">
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-surface-elevated/40">
               <div>
-                <span className="text-sm font-medium text-foreground block">
-                  Require Approval
+                <span className="text-xs font-semibold text-foreground block">
+                  Require Admin Approval
                 </span>
-                <span className="text-xs text-foreground-dim block">
-                  New requests need admin approval.
+                <span className="text-[11.5px] text-foreground-dim block">
+                  New join requests must be approved by an administrator.
                 </span>
               </div>
               <input
                 type="checkbox"
                 checked={requiresApproval}
                 onChange={(e) => setRequiresApproval(e.target.checked)}
-                className="size-4 rounded border-border text-primary focus:ring-primary cursor-pointer accent-primary"
+                className="size-4.5 rounded border-border text-foreground focus:ring-foreground cursor-pointer accent-foreground"
               />
-            </label>
+            </div>
           </div>
 
-          <div className="flex justify-end pt-1">
+          <div className="flex justify-end pt-2">
             <Button
               type="submit"
               variant="primary"
-              size="sm"
+              size="md"
               isLoading={isSavingSettings}
             >
               Save Settings
@@ -364,124 +278,255 @@ export function GroupAdminTab({
         </form>
       </section>
 
-      {/* ── Member Roles ── */}
-      <section>
-        <h3 className="text-sm font-semibold text-foreground mb-1">
-          Member Roles
-        </h3>
-        <p className="text-xs text-foreground-dim mb-3">
-          Manage roles and permissions.
-        </p>
+      {/* ── Right Column: Invite Link, Member Roles & Danger Zone ── */}
+      <div className="space-y-6">
+        {/* Invite Link Card */}
+        <section className="rounded-2xl border border-border bg-surface p-6 space-y-3 shadow-2xs">
+          <div>
+            <h3 className="text-sm font-bold text-foreground">
+              Fellowship Invitation Link
+            </h3>
+            <p className="text-xs text-foreground-dim mt-0.5">
+              Share this link to invite members directly to this fellowship.
+            </p>
+          </div>
 
-        <div className="rounded-xl border border-border overflow-hidden divide-y divide-border max-h-[380px] overflow-y-auto">
-          {members.map((member) => {
-            const isTargetOwner = member.role === "owner";
-            const isTargetAdmin = member.role === "admin";
-
-            return (
-              <div
-                key={member.userId}
-                className="flex items-center justify-between px-4 py-3 text-sm"
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div className="flex-1 rounded-xl border border-border bg-surface-elevated px-3.5 sm:px-4 py-2 text-xs font-mono text-foreground truncate select-all">
+              {inviteLink}
+            </div>
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setIsInviteModalOpen(true)}
+                leftIcon={<QrCode className="size-4" />}
+                className="w-full sm:w-auto justify-center"
               >
-                <div className="min-w-0 pr-2">
-                  <span className="font-medium text-foreground flex items-center gap-2 truncate">
-                    {member.name}
-                    {isTargetOwner && (
-                      <span className="text-[10px] font-medium text-foreground-dim shrink-0">
-                        Owner
-                      </span>
-                    )}
-                    {isTargetAdmin && (
-                      <span className="text-[10px] font-medium text-foreground-dim shrink-0">
-                        Admin
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-xs text-foreground-dim block truncate">
-                    {member.email}
-                  </span>
-                </div>
-
-                {!isTargetOwner && (
-                  <div className="flex items-center gap-2 shrink-0">
-                    {isOwner && (
-                      <select
-                        value={member.role}
-                        disabled={loadingUserId === member.userId}
-                        onChange={(e) =>
-                          handleRoleChange(
-                            member.userId,
-                            e.target.value as "owner" | "admin" | "member"
-                          )
-                        }
-                        className="h-8 rounded-lg border border-border bg-surface-elevated px-2 text-xs text-foreground focus:outline-hidden"
-                      >
-                        <option value="member">Member</option>
-                        <option value="admin">Admin</option>
-                        <option value="owner">Transfer Ownership</option>
-                      </select>
-                    )}
-
-                    <button
-                      type="button"
-                      disabled={loadingUserId === member.userId}
-                      onClick={() => handleRemoveMember(member.userId)}
-                      className="p-1.5 rounded-lg text-foreground-dim hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-                      title="Remove member"
-                    >
-                      <UserX className="size-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ── Danger Zone ── */}
-      {isOwner && (
-        <section className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
-          <h3 className="text-sm font-semibold text-destructive flex items-center gap-1.5 mb-1">
-            <AlertTriangle className="size-4" />
-            Danger Zone
-          </h3>
-          <p className="text-xs text-foreground-secondary mb-3">
-            Permanently delete this fellowship and unenroll all members.
-          </p>
-
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={() => setIsDeleteModalOpen(true)}
-            leftIcon={<Trash2 className="size-3.5" />}
-          >
-            Delete Fellowship
-          </Button>
+                QR Code
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleCopyInvite}
+                leftIcon={
+                  copied ? (
+                    <Check className="size-4" />
+                  ) : (
+                    <Copy className="size-4" />
+                  )
+                }
+                className="w-full sm:w-auto justify-center"
+              >
+                {copied ? "Copied" : "Copy Link"}
+              </Button>
+            </div>
+          </div>
         </section>
+
+        {/* Member Roles & Permissions */}
+        <section className="rounded-2xl border border-border bg-surface p-4 sm:p-6 space-y-4 shadow-2xs">
+          <div>
+            <h3 className="text-sm font-bold text-foreground">
+              Member Roles &amp; Permissions
+            </h3>
+            <p className="text-xs text-foreground-dim mt-0.5">
+              Manage member roles and permissions.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface divide-y divide-border overflow-hidden max-h-[350px] overflow-y-auto">
+            {members.map((member) => {
+              const isTargetOwner = member.role === "owner";
+              const isTargetAdmin = member.role === "admin";
+
+              return (
+                <div
+                  key={member.userId}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 text-xs gap-2.5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <span className="font-semibold text-foreground flex items-center gap-2 truncate">
+                      <span className="truncate">{member.name}</span>
+                      {isTargetOwner && (
+                        <span className="rounded-sm bg-surface-elevated text-foreground px-1.5 py-0.2 text-[9.5px] font-bold border border-border shrink-0">
+                          Owner
+                        </span>
+                      )}
+                      {isTargetAdmin && (
+                        <span className="rounded-sm bg-surface-elevated text-foreground-secondary px-1.5 py-0.2 text-[9.5px] font-medium border border-border shrink-0">
+                          Admin
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-[11px] text-foreground-dim block truncate">
+                      {member.email}
+                    </span>
+                  </div>
+
+                  {!isTargetOwner && (
+                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 w-full sm:w-auto">
+                      {isOwner && (
+                        <select
+                          value={member.role}
+                          disabled={loadingUserId === member.userId}
+                          onChange={(e) =>
+                            handleRoleChange(
+                              member.userId,
+                              e.target.value as "owner" | "admin" | "member"
+                            )
+                          }
+                          className="h-9 rounded-lg border border-border bg-surface-elevated px-2.5 text-xs text-foreground focus:outline-hidden flex-1 sm:flex-none cursor-pointer"
+                        >
+                          <option value="member">Member</option>
+                          <option value="admin">Admin</option>
+                          <option value="owner">Transfer Ownership</option>
+                        </select>
+                      )}
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={loadingUserId === member.userId}
+                        onClick={() => setMemberToRemove(member)}
+                        className="text-foreground-dim hover:text-destructive hover:border-destructive/40 text-xs transition-colors shrink-0"
+                        leftIcon={<UserX className="size-3.5" />}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Transfer Ownership (Owner Only) */}
+        {isOwner && (
+          <section className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 space-y-3">
+            <div>
+              <h3 className="text-sm font-bold text-amber-500 flex items-center gap-1.5">
+                <ArrowRightLeft className="size-4" />
+                <span>Transfer Fellowship Ownership</span>
+              </h3>
+              <p className="text-xs text-foreground-secondary mt-0.5">
+                Transfer primary ownership to another active member. You will remain in the fellowship as an Administrator.
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="md"
+              onClick={() => setIsTransferModalOpen(true)}
+              leftIcon={<ArrowRightLeft className="size-4" />}
+            >
+              Transfer Ownership
+            </Button>
+          </section>
+        )}
+
+        {/* Danger Zone */}
+        {isOwner && (
+          <section className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 space-y-3">
+            <div>
+              <h3 className="text-sm font-bold text-destructive flex items-center gap-1.5">
+                <AlertTriangle className="size-4" />
+                <span>Danger Zone</span>
+              </h3>
+              <p className="text-xs text-foreground-secondary mt-0.5">
+                Permanently delete this fellowship and unenroll all members.
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              variant="destructive"
+              size="md"
+              onClick={() => setIsDeleteModalOpen(true)}
+              leftIcon={<Trash2 className="size-4" />}
+            >
+              Delete Fellowship
+            </Button>
+          </section>
+        )}
+      </div>
+
+      {/* Transfer Ownership Modal */}
+      {isOwner && (
+        <GroupTransferOwnershipModal
+          isOpen={isTransferModalOpen}
+          onClose={() => setIsTransferModalOpen(false)}
+          groupId={groupId}
+          groupName={name}
+          members={members}
+          currentOwnerId={members.find((m) => m.role === "owner")?.userId || ""}
+        />
       )}
 
-      {/* Delete Modal */}
+      {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
           <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive mx-auto">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive mx-auto border border-destructive/20">
               <AlertTriangle className="size-6" />
             </div>
-            <h4 className="text-base font-semibold text-foreground">
-              Delete &quot;{name}&quot;?
+            <h4 className="text-base font-bold text-foreground">
+              Delete Fellowship?
             </h4>
-            <p className="text-sm text-foreground-secondary">
-              All members will be unlinked and scheduled plans permanently removed.
+            <p className="text-xs text-foreground-secondary">
+              Are you sure you want to delete &quot;{name}&quot;? All members will be unlinked and scheduled group plans will be permanently removed.
             </p>
-            <div className="flex items-center justify-center gap-2 pt-1">
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeleting}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="md"
+                isLoading={isDeleting}
+                onClick={handleDeleteGroup}
+                className="flex-1"
+              >
+                Confirm Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Member Confirmation Modal */}
+      {memberToRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive mx-auto border border-destructive/20">
+              <UserX className="size-6" />
+            </div>
+            <h4 className="text-base font-bold text-foreground">
+              Remove Member?
+            </h4>
+            <p className="text-xs text-foreground-secondary leading-relaxed">
+              Are you sure you want to remove &quot;{memberToRemove.name}&quot; from this fellowship? They will lose access to cohort plans and reading accountability.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setIsDeleteModalOpen(false)}
-                disabled={isDeleting}
+                onClick={() => setMemberToRemove(null)}
+                disabled={loadingUserId !== null}
               >
                 Cancel
               </Button>
@@ -489,15 +534,25 @@ export function GroupAdminTab({
                 type="button"
                 variant="destructive"
                 size="sm"
-                isLoading={isDeleting}
-                onClick={handleDeleteGroup}
+                isLoading={loadingUserId === memberToRemove.userId}
+                onClick={handleConfirmRemoveMember}
               >
-                Delete
+                Confirm Remove
               </Button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Fellowship Invitation & QR Code Modal */}
+      <GroupInviteModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        groupId={groupId}
+        groupName={name}
+        initialInviteCode={inviteCode}
+        isAdmin={true}
+      />
     </div>
   );
 }

@@ -2,24 +2,31 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  CheckCircle2,
   Check,
   Clock,
   ArrowRight,
-  Eye,
-  EyeOff,
   UserCheck,
   Plus,
   BookOpen,
-  Users,
   Calendar,
+  LogOut,
+  CheckCircle2,
+  XCircle,
+  Play,
+  RotateCcw,
+  Trash2,
+  Archive,
+  AlertTriangle,
 } from "lucide-react";
-import type { GroupPlanSummary, LeaderboardEntry } from "@/actions/groups";
+import type { GroupPlanSummary } from "@/actions/groups";
+import {
+  leaveGroupPlanAction,
+  updateGroupPlanStatusAction,
+  deleteGroupPlanAction,
+} from "@/actions/groups";
 import type { UserTrackerSummary } from "@/actions/trackers";
-import { toggleLeaderboardPrivacyAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
 import { GroupPlanEnrollModal } from "@/components/groups/group-plan-enroll-modal";
 
@@ -27,154 +34,352 @@ export type GroupPlansTabProps = {
   groupId: string;
   activePlans: ReadonlyArray<GroupPlanSummary>;
   scheduledPlans: ReadonlyArray<GroupPlanSummary>;
-  leaderboardsByPlanId: Record<string, ReadonlyArray<LeaderboardEntry>>;
+  completedPlans?: ReadonlyArray<GroupPlanSummary>;
   trackers: ReadonlyArray<UserTrackerSummary>;
   activeTrackerId?: string;
-  currentUserHideProgress: boolean;
   isAdmin: boolean;
   onOpenScheduleModal: () => void;
-  onCopyInvite?: () => void;
+  selectedPlanForEnroll?: GroupPlanSummary | null;
+  onSelectPlanForEnroll?: (plan: GroupPlanSummary | null) => void;
 };
 
 export function GroupPlansTab({
   groupId,
   activePlans,
   scheduledPlans,
-  leaderboardsByPlanId,
+  completedPlans = [],
   trackers,
   activeTrackerId,
-  currentUserHideProgress,
   isAdmin,
   onOpenScheduleModal,
-  onCopyInvite,
+  selectedPlanForEnroll: externalSelectedPlan,
+  onSelectPlanForEnroll: externalSetSelectedPlan,
 }: GroupPlansTabProps) {
   const router = useRouter();
-  const [selectedPlanForEnroll, setSelectedPlanForEnroll] =
+  const [internalSelectedPlan, setInternalSelectedPlan] =
     useState<GroupPlanSummary | null>(null);
-  const [hideProgress, setHideProgress] = useState(currentUserHideProgress);
-  const [isUpdatingPrivacy, setIsUpdatingPrivacy] = useState(false);
+  const [planToLeave, setPlanToLeave] = useState<GroupPlanSummary | null>(null);
+  const [isLeavingPlan, setIsLeavingPlan] = useState(false);
 
-  async function handleTogglePrivacy() {
-    setIsUpdatingPrivacy(true);
-    const nextVal = !hideProgress;
-    setHideProgress(nextVal);
+  // Group Plan Lifecycle state
+  const [planToComplete, setPlanToComplete] =
+    useState<GroupPlanSummary | null>(null);
+  const [planToCancel, setPlanToCancel] =
+    useState<GroupPlanSummary | null>(null);
+  const [planToDelete, setPlanToDelete] =
+    useState<GroupPlanSummary | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  const selectedPlanForEnroll =
+    externalSelectedPlan !== undefined
+      ? externalSelectedPlan
+      : internalSelectedPlan;
+  const setSelectedPlanForEnroll =
+    externalSetSelectedPlan || setInternalSelectedPlan;
+
+  async function handleConfirmLeavePlan() {
+    if (!planToLeave) return;
+    setIsLeavingPlan(true);
     try {
-      const res = await toggleLeaderboardPrivacyAction({
-        groupId,
-        hideProgress: nextVal,
+      const res = await leaveGroupPlanAction({ groupPlanId: planToLeave.id });
+      if (res.success) {
+        setPlanToLeave(null);
+        router.refresh();
+      } else {
+        alert(res.error || "Failed to leave group plan.");
+      }
+    } finally {
+      setIsLeavingPlan(false);
+    }
+  }
+
+  async function handleStartPlanNow(plan: GroupPlanSummary) {
+    setIsUpdatingStatus(true);
+    try {
+      const res = await updateGroupPlanStatusAction({
+        groupPlanId: plan.id,
+        status: "active",
       });
       if (res.success) {
         router.refresh();
       } else {
-        setHideProgress(!nextVal);
+        alert(res.error || "Failed to start plan.");
       }
-    } catch {
-      setHideProgress(!nextVal);
     } finally {
-      setIsUpdatingPrivacy(false);
+      setIsUpdatingStatus(false);
+    }
+  }
+
+  async function handleConfirmCompletePlan() {
+    if (!planToComplete) return;
+    setIsUpdatingStatus(true);
+    try {
+      const res = await updateGroupPlanStatusAction({
+        groupPlanId: planToComplete.id,
+        status: "completed",
+      });
+      if (res.success) {
+        setPlanToComplete(null);
+        router.refresh();
+      } else {
+        alert(res.error || "Failed to complete plan.");
+      }
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  }
+
+  async function handleConfirmCancelPlan() {
+    if (!planToCancel) return;
+    setIsUpdatingStatus(true);
+    try {
+      const res = await updateGroupPlanStatusAction({
+        groupPlanId: planToCancel.id,
+        status: "cancelled",
+      });
+      if (res.success) {
+        setPlanToCancel(null);
+        router.refresh();
+      } else {
+        alert(res.error || "Failed to cancel plan.");
+      }
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  }
+
+  async function handleReopenPlan(plan: GroupPlanSummary) {
+    setIsUpdatingStatus(true);
+    try {
+      const res = await updateGroupPlanStatusAction({
+        groupPlanId: plan.id,
+        status: "active",
+      });
+      if (res.success) {
+        router.refresh();
+      } else {
+        alert(res.error || "Failed to reopen plan.");
+      }
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  }
+
+  async function handleConfirmDeletePlan() {
+    if (!planToDelete) return;
+    setIsUpdatingStatus(true);
+    try {
+      const res = await deleteGroupPlanAction({
+        groupPlanId: planToDelete.id,
+      });
+      if (res.success) {
+        setPlanToDelete(null);
+        router.refresh();
+      } else {
+        alert(res.error || "Failed to delete plan.");
+      }
+    } finally {
+      setIsUpdatingStatus(false);
     }
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
+      {/* ── Active Plans Section ── */}
       {activePlans.length === 0 ? (
-        /* ── Empty State ── */
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-surface-elevated border border-border text-foreground mb-4">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface p-12 text-center">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-surface-elevated text-foreground border border-border mb-3 shadow-2xs">
             <BookOpen className="size-5" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-1">
-            No active plan
+          <h3 className="text-base font-semibold text-foreground mb-1">
+            No Active Fellowship Plan
           </h3>
-          <p className="text-sm text-foreground-dim max-w-sm mb-6 leading-relaxed">
+          <p className="text-xs sm:text-sm text-foreground-secondary max-w-sm mb-5 leading-relaxed">
             {isAdmin
-              ? "Schedule a reading plan so your fellowship can read through scripture together."
-              : "Your fellowship leaders haven't started a plan yet. Check back soon."}
+              ? "Schedule your fellowship's reading plan so members can read scripture together on a shared cadence."
+              : "No plan is currently active. Check back when cohort leaders schedule a curriculum."}
           </p>
           {isAdmin && (
             <Button
               type="button"
               variant="primary"
-              size="md"
+              size="sm"
               onClick={onOpenScheduleModal}
-              leftIcon={<Plus className="size-4" />}
+              leftIcon={<Plus className="size-3.5" />}
             >
               Schedule Plan
             </Button>
           )}
         </div>
       ) : (
-        /* ── Active Plans ── */
-        <div className="space-y-12">
-          {activePlans.map((plan) => {
-            const leaderboard = leaderboardsByPlanId[plan.id] || [];
-            const isEnrolled = Boolean(plan.userEnrolledInstanceId);
-            const currentUserIndex = leaderboard.findIndex((m) => m.isCurrentUser);
-            const currentUser =
-              currentUserIndex >= 0 ? leaderboard[currentUserIndex] : undefined;
-            const userCompleted = currentUser?.completedChapters ?? 0;
-            const userPercent = currentUser?.progressPercent ?? 0;
+        <div className="space-y-8">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-foreground truncate">
+                Active Reading Plans ({activePlans.length})
+              </h2>
+              <p className="text-xs text-foreground-dim mt-0.5 line-clamp-1">
+                Curricula currently active and synchronized across all cohort readers.
+              </p>
+            </div>
 
-            return (
-              <div key={plan.id} className="space-y-8">
-                {/* ── Plan Hero ── */}
-                <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
-                  {/* Header row */}
-                  <div className="flex items-start justify-between gap-4 mb-6">
-                    <div className="space-y-1 min-w-0">
-                      <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-                        {plan.templateTitle}
-                      </h2>
-                      <p className="text-sm text-foreground-dim">
-                        {plan.totalChapters} chapters · {plan.dailyChapterTarget} per day · {plan.enrolledMembersCount} {plan.enrolledMembersCount === 1 ? "reader" : "readers"}
-                      </p>
+            {isAdmin && (
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={onOpenScheduleModal}
+                leftIcon={<Plus className="size-4" />}
+                className="shrink-0 whitespace-nowrap"
+              >
+                Add Plan
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            {activePlans.map((plan) => {
+              const isEnrolled = Boolean(plan.userEnrolledInstanceId);
+
+              return (
+                <div
+                  key={plan.id}
+                  className="rounded-2xl border border-border bg-surface p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 shadow-xs relative overflow-hidden"
+                >
+                  {/* Top Bar: Eyebrow & Cadence */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-elevated px-2.5 py-1 text-[10.5px] font-bold tracking-wider uppercase text-foreground border border-border">
+                        <BookOpen className="size-3 text-foreground-dim" />
+                        <span>Active Curriculum</span>
+                      </span>
+                      <span className="text-xs font-medium text-foreground-dim">
+                        Synchronized Cohort Pace
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-3 py-1 text-xs font-semibold text-foreground border border-border">
+                        <Clock className="size-3.5 text-foreground-dim" />
+                        <span>{plan.dailyChapterTarget} {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day</span>
+                      </span>
+
+                      {isAdmin && (
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPlanToComplete(plan)}
+                            className="text-xs h-9 px-3"
+                            leftIcon={<CheckCircle2 className="size-3.5 text-emerald-500" />}
+                          >
+                            Complete
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPlanToCancel(plan)}
+                            className="text-xs text-foreground-dim hover:text-destructive h-9 px-2.5"
+                            title="Cancel Plan"
+                          >
+                            <XCircle className="size-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Enrollment / Progress */}
+                  {/* Plan Title & Narrative */}
+                  <div className="space-y-1.5">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+                      {plan.templateTitle}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-foreground-secondary leading-relaxed max-w-2xl">
+                      A structured curriculum of {plan.totalChapters} chapters synchronized daily across all cohort readers.
+                    </p>
+                  </div>
+
+                  {/* 4-Cell Telemetry Rail (Full Width Efficient Use) */}
+                  <div className="rounded-xl border border-border bg-border grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden [&>*]:bg-surface-elevated/40">
+                    <div className="p-3.5 sm:p-4 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                        Daily Cadence
+                      </span>
+                      <span className="text-xs sm:text-base font-bold text-foreground">
+                        {plan.dailyChapterTarget} ch / day
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 sm:p-4 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                        Total Scope
+                      </span>
+                      <span className="text-xs sm:text-base font-bold text-foreground">
+                        {plan.totalChapters} Chapters
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 sm:p-4 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                        Cohort Readers
+                      </span>
+                      <span className="text-xs sm:text-base font-bold text-foreground">
+                        {plan.enrolledMembersCount} {plan.enrolledMembersCount === 1 ? "reader" : "readers"}
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 sm:p-4 text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                        Sync Rhythm
+                      </span>
+                      <span className="text-xs sm:text-base font-bold text-foreground">
+                        Daily Lockstep
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Reading Status & Action Area */}
                   {isEnrolled ? (
-                    <div className="space-y-4">
-                      {/* Progress */}
-                      <div className="space-y-2">
-                        <div className="flex items-baseline justify-between text-sm">
-                          <span className="font-medium text-foreground">
-                            {userCompleted} of {plan.totalChapters} chapters
-                          </span>
-                          <span className="text-foreground-dim tabular-nums">
-                            {userPercent}%
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
-                          <div
-                            style={{
-                              width: `${Math.min(100, Math.max(userPercent, 1))}%`,
-                            }}
-                            className="h-full rounded-full bg-foreground transition-all duration-500"
-                          />
-                        </div>
+                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-t border-border/60">
+                      <div className="flex items-center gap-2 text-xs text-foreground-dim">
+                        <span className="size-2 rounded-full bg-foreground shrink-0" />
+                        <span>You are enrolled in this plan with fellowship notes &amp; reflections enabled.</span>
                       </div>
 
-                      {/* CTA */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                      <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="md"
+                          onClick={() => setPlanToLeave(plan)}
+                          className="text-foreground-dim hover:text-destructive text-xs shrink-0 whitespace-nowrap"
+                          leftIcon={<LogOut className="size-4" />}
+                        >
+                          Leave Plan
+                        </Button>
+
                         <Link
                           href={`/plans/${plan.userEnrolledInstanceId}`}
-                          className="inline-flex items-center justify-center gap-2 h-10 px-5 text-sm font-medium rounded-xl bg-foreground text-background hover:opacity-90 active:scale-[0.98] transition-all w-full sm:w-auto cursor-pointer"
+                          className="inline-flex items-center justify-center gap-2 h-10.5 px-4.5 text-xs sm:text-sm font-semibold rounded-xl bg-foreground text-background hover:opacity-90 active:scale-[0.98] shadow-xs transition-all flex-1 sm:flex-none whitespace-nowrap cursor-pointer"
                         >
-                          Continue Reading
+                          <span>Continue Reading</span>
                           <ArrowRight className="size-4" />
                         </Link>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-surface-elevated/50 p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-surface-elevated/40 p-4 sm:p-5">
                       <div className="space-y-0.5">
-                        <span className="text-sm font-medium text-foreground">
-                          Join this reading plan
-                        </span>
-                        <p className="text-xs text-foreground-dim">
-                          Sync your daily chapters and reflections with fellow readers.
+                        <h4 className="text-sm font-semibold text-foreground">
+                          Join Fellowship Reading Journey
+                        </h4>
+                        <p className="text-xs text-foreground-dim max-w-md leading-relaxed">
+                          Synchronize your personal reader with this cohort to share daily milestones, study notes, and reflections.
                         </p>
                       </div>
+
                       <Button
                         type="button"
                         variant="primary"
@@ -183,202 +388,30 @@ export function GroupPlansTab({
                         onClick={() => setSelectedPlanForEnroll(plan)}
                         leftIcon={<UserCheck className="size-4" />}
                       >
-                        Enroll
+                        Enroll &amp; Read With Fellowship
                       </Button>
                     </div>
                   )}
                 </div>
-
-                {/* ── Fellowship Circle ── */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Fellowship Circle
-                      </h3>
-                      <span className="text-xs text-foreground-dim">
-                        {leaderboard.length} {leaderboard.length === 1 ? "reader" : "readers"}
-                      </span>
-                    </div>
-
-                    {currentUser && (
-                      <button
-                        type="button"
-                        onClick={handleTogglePrivacy}
-                        disabled={isUpdatingPrivacy}
-                        className="inline-flex items-center gap-1.5 text-xs text-foreground-dim hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        {isUpdatingPrivacy ? (
-                          <span>Updating…</span>
-                        ) : hideProgress ? (
-                          <>
-                            <EyeOff className="size-3" />
-                            <span>Hidden</span>
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="size-3" />
-                            <span>Visible</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-
-                  {leaderboard.length === 0 ? (
-                    /* Empty fellowship */
-                    <div className="rounded-xl border border-dashed border-border py-10 text-center">
-                      <p className="text-sm text-foreground-dim mb-1">
-                        No readers enrolled yet.
-                      </p>
-                      <p className="text-xs text-foreground-dim max-w-xs mx-auto mb-4">
-                        Be the first to join, or invite friends to read together.
-                      </p>
-                      {!isEnrolled ? (
-                        <Button
-                          type="button"
-                          variant="primary"
-                          size="sm"
-                          onClick={() => setSelectedPlanForEnroll(plan)}
-                          leftIcon={<UserCheck className="size-3.5" />}
-                        >
-                          Enroll
-                        </Button>
-                      ) : (
-                        onCopyInvite && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={onCopyInvite}
-                            leftIcon={<Users className="size-3.5" />}
-                          >
-                            Invite Friends
-                          </Button>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    /* Reader roster — clean table-like layout */
-                    <div className="rounded-xl border border-border overflow-hidden">
-                      <div className="divide-y divide-border max-h-[360px] overflow-y-auto overscroll-contain">
-                        {leaderboard.map((member, index) => {
-                          const isUserHidden =
-                            member.isCurrentUser && hideProgress;
-                          const isOtherHidden =
-                            !member.isCurrentUser && member.isAnonymous;
-                          const memberInitials = member.name
-                            .split(" ")
-                            .map((w) => w[0])
-                            .slice(0, 2)
-                            .join("")
-                            .toUpperCase();
-
-                          return (
-                            <div
-                              key={member.userId}
-                              className={`flex items-center justify-between px-4 py-3 text-sm ${
-                                member.isCurrentUser
-                                  ? "bg-surface-elevated/60"
-                                  : "hover:bg-surface-elevated/30"
-                              } transition-colors`}
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                {/* Rank */}
-                                <span className="text-xs font-medium text-foreground-dim w-5 text-right tabular-nums shrink-0">
-                                  {isUserHidden ? "—" : index + 1}
-                                </span>
-
-                                {/* Avatar */}
-                                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-elevated border border-border text-xs font-medium text-foreground overflow-hidden">
-                                  {isUserHidden || isOtherHidden ? (
-                                    <EyeOff className="size-3.5 text-foreground-dim" />
-                                  ) : member.avatarUrl ? (
-                                    <Image
-                                      src={member.avatarUrl}
-                                      alt={member.name}
-                                      width={32}
-                                      height={32}
-                                      className="size-full object-cover"
-                                    />
-                                  ) : (
-                                    <span>{memberInitials}</span>
-                                  )}
-                                </div>
-
-                                {/* Name */}
-                                <div className="truncate">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-sm font-medium text-foreground truncate">
-                                      {member.name}
-                                    </span>
-                                    {member.isCurrentUser && (
-                                      <span className="text-[10px] font-medium text-foreground-dim">
-                                        you
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="text-xs text-foreground-dim block">
-                                    {isUserHidden
-                                      ? "Progress hidden"
-                                      : isOtherHidden
-                                      ? "Progress hidden"
-                                      : `${member.completedChapters} / ${member.totalChapters} chapters`}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Right: progress + today indicator */}
-                              <div className="flex items-center gap-3 shrink-0 ml-3">
-                                <span className="text-xs font-medium text-foreground-dim tabular-nums">
-                                  {isUserHidden || isOtherHidden
-                                    ? "—"
-                                    : `${member.progressPercent}%`}
-                                </span>
-
-                                {member.readToday ? (
-                                  <span title="Read today">
-                                    <CheckCircle2 className="size-4 text-foreground" />
-                                  </span>
-                                ) : (
-                                  <span title="Hasn't read today">
-                                    <Clock className="size-4 text-foreground-dim/40" />
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Invite strip */}
-                  {onCopyInvite && leaderboard.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={onCopyInvite}
-                      className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-foreground-dim hover:text-foreground transition-colors cursor-pointer rounded-lg hover:bg-surface-elevated/50"
-                    >
-                      <Users className="size-3.5" />
-                      <span>Invite more readers</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* ── Upcoming Plans ── */}
+      {/* ── Upcoming Scheduled Plans ("Cohort Horizon") ── */}
       {scheduledPlans.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4">
-            Upcoming
-          </h3>
+        <div className="space-y-4 pt-6 border-t border-border">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">
+              Upcoming Scheduled Plans ({scheduledPlans.length})
+            </h3>
+            <p className="text-xs text-foreground-dim mt-0.5">
+              Curricula scheduled to launch on synchronized start dates for this fellowship.
+            </p>
+          </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {scheduledPlans.map((plan) => {
               const startDateObj = new Date(plan.scheduledStartDate);
               const startDateStr = startDateObj.toLocaleDateString(undefined, {
@@ -393,51 +426,54 @@ export function GroupPlansTab({
               );
               const countdownLabel =
                 diffDays <= 0
-                  ? "Starts today"
+                  ? "Starts Today"
                   : diffDays === 1
-                  ? "Tomorrow"
+                  ? "Starts Tomorrow"
                   : `In ${diffDays} days`;
 
               return (
                 <div
                   key={plan.id}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-border bg-surface p-4 hover:border-border-strong transition-colors"
+                  className="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between gap-4 hover:border-border-strong transition-all shadow-2xs"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="text-sm font-medium text-foreground truncate">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="inline-flex items-center gap-1.5 text-foreground-dim font-medium">
+                        <Calendar className="size-3.5" />
+                        <span>Starts {startDateStr}</span>
+                      </span>
+                      <span className="text-[10px] font-semibold text-foreground-secondary px-2 py-0.5 rounded-md bg-surface-elevated border border-border">
+                        {countdownLabel}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="text-base font-bold text-foreground">
                         {plan.templateTitle}
                       </h4>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-foreground-dim">
-                      <span>{plan.totalChapters} chapters</span>
-                      <span>·</span>
-                      <span>{plan.dailyChapterTarget}/day</span>
-                      <span>·</span>
-                      <span className="inline-flex items-center gap-1">
-                        <Calendar className="size-3" />
-                        {startDateStr}
-                      </span>
-                      <span>·</span>
-                      <span>{countdownLabel}</span>
+                      <p className="text-xs text-foreground-dim mt-1">
+                        {plan.totalChapters} chapters • {plan.dailyChapterTarget} chapters / day
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-foreground-dim">
-                      {plan.enrolledMembersCount} waiting
+                  <div className="flex items-center justify-between pt-3 border-t border-border/60 text-xs">
+                    <span className="text-foreground-dim font-medium">
+                      {plan.enrolledMembersCount}{" "}
+                      {plan.enrolledMembersCount === 1 ? "reader waiting" : "readers waiting"}
                     </span>
+
                     {plan.userEnrolledInstanceId ? (
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-foreground">
-                          <Check className="size-3" />
-                          Enrolled
+                        <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated border border-border px-2 py-0.5 text-[11px] font-semibold text-foreground">
+                          <Check className="size-3 text-foreground" />
+                          Pre-enrolled
                         </span>
                         <Link
                           href={`/plans/${plan.userEnrolledInstanceId}`}
                           className="text-xs text-foreground-dim hover:text-foreground font-medium transition-colors inline-flex items-center gap-0.5"
                         >
-                          Preview
+                          <span>Preview</span>
                           <ArrowRight className="size-3" />
                         </Link>
                       </div>
@@ -452,6 +488,120 @@ export function GroupPlansTab({
                       </Button>
                     )}
                   </div>
+
+                  {isAdmin && (
+                    <div className="flex items-center gap-2 pt-2.5 border-t border-border/40">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isUpdatingStatus}
+                        onClick={() => handleStartPlanNow(plan)}
+                        leftIcon={<Play className="size-3 text-emerald-500" />}
+                        className="text-xs h-9 px-3 flex-1"
+                      >
+                        Start Now
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={isUpdatingStatus}
+                        onClick={() => setPlanToCancel(plan)}
+                        className="text-xs text-foreground-dim hover:text-destructive h-9 px-2.5"
+                        title="Cancel Schedule"
+                      >
+                        <XCircle className="size-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Completed & Archived Plans ── */}
+      {completedPlans.length > 0 && (
+        <div className="space-y-4 pt-6 border-t border-border">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">
+              Completed &amp; Archived Plans ({completedPlans.length})
+            </h3>
+            <p className="text-xs text-foreground-dim mt-0.5">
+              Previous curricula that were concluded or archived for this fellowship.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {completedPlans.map((plan) => {
+              const isCompleted = plan.status === "completed";
+              return (
+                <div
+                  key={plan.id}
+                  className="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between gap-4 opacity-90 hover:opacity-100 transition-all shadow-2xs"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold ${
+                          isCompleted
+                            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                            : "bg-surface-elevated text-foreground-dim border border-border"
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle2 className="size-3" />
+                        ) : (
+                          <Archive className="size-3" />
+                        )}
+                        <span>{isCompleted ? "Completed" : "Cancelled"}</span>
+                      </span>
+                      <span className="text-[11px] text-foreground-dim">
+                        {plan.totalChapters} Chapters
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="text-base font-bold text-foreground line-clamp-1">
+                        {plan.templateTitle}
+                      </h4>
+                      <p className="text-xs text-foreground-dim mt-0.5">
+                        {plan.enrolledMembersCount}{" "}
+                        {plan.enrolledMembersCount === 1
+                          ? "reader participated"
+                          : "readers participated"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {isAdmin && (
+                    <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/60">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isUpdatingStatus}
+                        onClick={() => handleReopenPlan(plan)}
+                        leftIcon={<RotateCcw className="size-3" />}
+                        className="text-xs h-9 px-3"
+                      >
+                        Reopen
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={isUpdatingStatus}
+                        onClick={() => setPlanToDelete(plan)}
+                        className="text-xs text-foreground-dim hover:text-destructive h-9 px-2.5"
+                        title="Delete Plan"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -471,6 +621,160 @@ export function GroupPlansTab({
           trackers={trackers}
           defaultTrackerId={activeTrackerId}
         />
+      )}
+
+      {/* Leave Plan Confirmation Modal */}
+      {planToLeave && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-surface-elevated text-foreground border border-border mx-auto shadow-2xs">
+              <LogOut className="size-6" />
+            </div>
+            <h4 className="text-base font-bold text-foreground">
+              Leave Reading Plan?
+            </h4>
+            <p className="text-xs text-foreground-secondary leading-relaxed">
+              Are you sure you want to unenroll from &ldquo;{planToLeave.templateTitle}&rdquo;? Your reading progress will be unlinked from the fellowship leaderboard. Your personal reading tracker will remain intact.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPlanToLeave(null)}
+                disabled={isLeavingPlan}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                isLoading={isLeavingPlan}
+                onClick={handleConfirmLeavePlan}
+              >
+                Confirm &amp; Leave
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Complete Plan Confirmation Modal */}
+      {planToComplete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mx-auto">
+              <CheckCircle2 className="size-6" />
+            </div>
+            <h4 className="text-base font-bold text-foreground">
+              Complete Reading Plan?
+            </h4>
+            <p className="text-xs text-foreground-secondary leading-relaxed">
+              Mark &ldquo;{planToComplete.templateTitle}&rdquo; as completed for this fellowship? It will move to the Completed &amp; Archived section.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setPlanToComplete(null)}
+                disabled={isUpdatingStatus}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                isLoading={isUpdatingStatus}
+                onClick={handleConfirmCompletePlan}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+              >
+                Confirm Complete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Plan Confirmation Modal */}
+      {planToCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 mx-auto">
+              <AlertTriangle className="size-6" />
+            </div>
+            <h4 className="text-base font-bold text-foreground">
+              Cancel Reading Plan?
+            </h4>
+            <p className="text-xs text-foreground-secondary leading-relaxed">
+              Are you sure you want to cancel &ldquo;{planToCancel.templateTitle}&rdquo;? It will be deactivated and moved to archived plans.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setPlanToCancel(null)}
+                disabled={isUpdatingStatus}
+                className="flex-1"
+              >
+                Keep Active
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="md"
+                isLoading={isUpdatingStatus}
+                onClick={handleConfirmCancelPlan}
+                className="flex-1"
+              >
+                Cancel Plan
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Plan Confirmation Modal */}
+      {planToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive border border-destructive/20 mx-auto">
+              <Trash2 className="size-6" />
+            </div>
+            <h4 className="text-base font-bold text-foreground">
+              Permanently Delete Plan?
+            </h4>
+            <p className="text-xs text-foreground-secondary leading-relaxed">
+              Are you sure you want to delete &ldquo;{planToDelete.templateTitle}&rdquo;? This will remove all associated cohort enrollment records.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setPlanToDelete(null)}
+                disabled={isUpdatingStatus}
+                className="flex-1"
+              >
+                Keep Plan
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="md"
+                isLoading={isUpdatingStatus}
+                onClick={handleConfirmDeletePlan}
+                className="flex-1"
+              >
+                Confirm Delete
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
