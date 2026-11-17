@@ -19,41 +19,31 @@ export function GroupMembersTab({ members }: GroupMembersTabProps) {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Search Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
-            Fellowship Directory ({members.length})
-          </h2>
-          <p className="text-xs text-foreground-dim mt-0.5">
-            Readers, teachers, and admins participating in this community.
-          </p>
-        </div>
-
-        <div className="relative w-full sm:w-64">
-          <Search className="size-3.5 text-foreground-dim absolute left-3.5 top-1/2 -translate-y-1/2" />
+    <div>
+      {/* Search */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="size-3.5 text-foreground-dim absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search members..."
-            className="w-full h-10 rounded-xl border border-border bg-surface-elevated pl-9 pr-3.5 text-xs text-foreground placeholder:text-foreground-dim focus:outline-hidden focus:ring-1 focus:ring-primary transition-all"
+            placeholder="Search members…"
+            className="w-full h-9 rounded-lg border border-border bg-surface pl-9 pr-3 text-sm text-foreground placeholder:text-foreground-dim focus:outline-hidden focus:ring-1 focus:ring-border-strong transition-all"
           />
         </div>
+        <span className="text-xs text-foreground-dim">
+          {filtered.length} of {members.length}
+        </span>
       </div>
 
-      {/* Members Multi-Column Grid */}
+      {/* List */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-10 text-center bg-surface-elevated/30">
-          <Search className="size-8 text-foreground-dim mb-2" />
-          <p className="text-sm font-semibold text-foreground">No members found</p>
-          <p className="text-xs text-foreground-dim mt-1">
-            Try adjusting your search query for name or email.
-          </p>
+        <div className="py-12 text-center">
+          <p className="text-sm text-foreground-dim">No members found.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5">
+        <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
           {filtered.map((member) => {
             const initials = member.name
               .split(" ")
@@ -76,16 +66,16 @@ export function GroupMembersTab({ members }: GroupMembersTabProps) {
             return (
               <div
                 key={member.id}
-                className="ui-card flex items-center justify-between p-4 transition-all duration-150 hover:border-border-strong hover:shadow-2xs"
+                className="flex items-center justify-between px-4 py-3 hover:bg-surface-elevated/30 transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-xs font-semibold text-foreground overflow-hidden shadow-2xs">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-elevated border border-border text-xs font-medium text-foreground overflow-hidden">
                     {member.image ? (
                       <Image
                         src={member.image}
                         alt={member.name}
-                        width={40}
-                        height={40}
+                        width={36}
+                        height={36}
                         className="size-full object-cover"
                       />
                     ) : (
@@ -94,29 +84,28 @@ export function GroupMembersTab({ members }: GroupMembersTabProps) {
                   </div>
 
                   <div className="truncate">
-                    <span className="font-semibold text-foreground block text-xs truncate">
+                    <span className="text-sm font-medium text-foreground block truncate">
                       {member.name}
                     </span>
-                    <span className="text-[11px] text-foreground-dim block">
+                    <span className="text-xs text-foreground-dim block">
                       Joined {joinedStr}
                     </span>
                   </div>
                 </div>
 
-                {/* Role Badge */}
-                <div className="shrink-0 ml-2">
+                <div className="shrink-0 ml-3">
                   {isOwner ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface px-2.5 py-1 text-[10px] font-semibold text-foreground border border-border">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-foreground-secondary">
                       <Shield className="size-3" />
                       Owner
                     </span>
                   ) : isAdmin ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated px-2.5 py-1 text-[10px] font-medium text-foreground-secondary border border-border">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-foreground-dim">
                       <ShieldCheck className="size-3" />
                       Admin
                     </span>
                   ) : (
-                    <span className="inline-flex items-center rounded-md bg-surface-elevated text-foreground-dim px-2.5 py-1 text-[10px] font-medium border border-border">
+                    <span className="text-xs text-foreground-dim">
                       Member
                     </span>
                   )}

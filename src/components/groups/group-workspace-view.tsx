@@ -71,150 +71,120 @@ export function GroupWorkspaceView({
   const totalPlansCount =
     group.activePlans.length + group.scheduledPlans.length;
 
+  const tabs = [
+    { id: "plans" as const, label: "Plans", count: totalPlansCount, icon: BookOpen },
+    { id: "members" as const, label: "Members", count: members.length, icon: Users },
+    ...(isAdmin
+      ? [{ id: "admin" as const, label: "Settings", count: pendingMembers.length > 0 ? pendingMembers.length : undefined, icon: Settings }]
+      : []),
+  ];
+
   return (
-    <div className="w-full space-y-6 animate-in fade-in duration-200">
-      {/* Top Context Breadcrumb */}
-      <div className="flex items-center justify-between">
+    <div className="w-full animate-in fade-in duration-200">
+      {/* Breadcrumb — quiet, functional */}
+      <div className="mb-8">
         <Link
           href="/groups"
-          className="inline-flex items-center gap-2 text-xs font-medium text-foreground-dim hover:text-foreground transition-colors group"
+          className="inline-flex items-center gap-1.5 text-xs text-foreground-dim hover:text-foreground transition-colors group"
         >
-          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+          <ArrowLeft className="size-3 transition-transform group-hover:-translate-x-0.5" />
           <span>Fellowships</span>
-          <span className="text-foreground-dim/40">/</span>
-          <span className="text-foreground font-semibold truncate max-w-[200px] sm:max-w-xs">
-            {group.name}
-          </span>
         </Link>
-
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
-          {group.isPrivate ? (
-            <>
-              <Lock className="size-3 text-foreground-dim" />
-              <span>Private Cohort</span>
-            </>
-          ) : (
-            <>
-              <Globe className="size-3 text-foreground-dim" />
-              <span>Open Fellowship</span>
-            </>
-          )}
-        </span>
       </div>
 
-      {/* Modern Fellowship Chapterhouse Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface p-6 sm:p-8 shadow-xs">
-        {/* Subtle decorative atmosphere */}
-        <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-surface-elevated/60 blur-3xl" />
-
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-5 min-w-0">
-            {/* Fellowship Crest / Avatar */}
-            <div className="relative flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl sm:rounded-3xl bg-surface-elevated border border-border text-lg sm:text-xl font-bold text-foreground overflow-hidden shadow-xs ring-1 ring-border/50">
+      {/* Editorial Header — the group identity breathes */}
+      <div className="mb-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-4 min-w-0">
+            {/* Avatar */}
+            <div className="relative flex size-14 shrink-0 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-base font-semibold text-foreground overflow-hidden">
               {group.avatarUrl ? (
                 <Image
                   src={group.avatarUrl}
                   alt={group.name}
-                  width={80}
-                  height={80}
+                  width={56}
+                  height={56}
                   className="size-full object-cover"
                 />
               ) : (
-                <span className="tracking-wider">{initials}</span>
+                <span className="tracking-wide">{initials}</span>
               )}
             </div>
 
-            <div className="min-w-0 space-y-2.5">
-              {/* Eyebrow & Status Tags */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-bold tracking-wider uppercase text-foreground-dim">
-                  Scripture Fellowship Cohort
-                </span>
-
-                <span className="size-1 rounded-full bg-foreground-dim/40" />
-
-                {isOwner ? (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated text-foreground px-2 py-0.5 text-[11px] font-semibold border border-border">
-                    <Shield className="size-3" />
-                    <span>Owner</span>
-                  </span>
-                ) : isAdmin ? (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated text-foreground px-2 py-0.5 text-[11px] font-medium border border-border">
-                    <ShieldCheck className="size-3 text-foreground-secondary" />
-                    <span>Admin</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center rounded-md bg-surface-elevated text-foreground-dim px-2 py-0.5 text-[11px] font-medium border border-border">
-                    Fellow Reader
-                  </span>
-                )}
-              </div>
-
-              {/* Fellowship Title */}
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+            <div className="min-w-0 space-y-1.5">
+              {/* Title */}
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
                 {group.name}
               </h1>
 
-              {/* Fellowship Description */}
-              <p className="text-xs sm:text-[13.5px] leading-relaxed text-foreground-secondary max-w-2xl">
-                {group.description || "Community scripture reading fellowship."}
-              </p>
+              {/* Meta line */}
+              <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-dim">
+                <span className="inline-flex items-center gap-1">
+                  {group.isPrivate ? (
+                    <Lock className="size-3" />
+                  ) : (
+                    <Globe className="size-3" />
+                  )}
+                  {group.isPrivate ? "Private" : "Open"}
+                </span>
 
-              {/* Quick Fellowship Metrics Strip */}
-              <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-foreground-dim">
-                <div className="inline-flex items-center gap-1.5 font-medium">
-                  <Users className="size-3.5 text-foreground-dim" />
-                  <span className="text-foreground font-semibold">{group.memberCount}</span>
-                  <span>{group.memberCount === 1 ? "reader enrolled" : "readers enrolled"}</span>
-                </div>
+                <span className="text-border-strong">·</span>
 
-                <span className="size-1 rounded-full bg-foreground-dim/40" />
+                <span>{group.memberCount} {group.memberCount === 1 ? "member" : "members"}</span>
 
-                <div className="inline-flex items-center gap-1.5 font-medium">
-                  <BookOpen className="size-3.5 text-foreground-dim" />
-                  <span className="text-foreground font-semibold">{group.activePlans.length}</span>
-                  <span>active {group.activePlans.length === 1 ? "plan" : "plans"}</span>
-                </div>
-
-                {group.scheduledPlans.length > 0 && (
+                {isOwner ? (
                   <>
-                    <span className="size-1 rounded-full bg-foreground-dim/40" />
-                    <div className="inline-flex items-center gap-1.5 font-medium">
-                      <Calendar className="size-3.5 text-foreground-dim" />
-                      <span className="text-foreground font-semibold">{group.scheduledPlans.length}</span>
-                      <span>scheduled</span>
-                    </div>
+                    <span className="text-border-strong">·</span>
+                    <span className="inline-flex items-center gap-1 font-medium text-foreground-secondary">
+                      <Shield className="size-3" />
+                      Owner
+                    </span>
                   </>
-                )}
+                ) : isAdmin ? (
+                  <>
+                    <span className="text-border-strong">·</span>
+                    <span className="inline-flex items-center gap-1 font-medium text-foreground-secondary">
+                      <ShieldCheck className="size-3" />
+                      Admin
+                    </span>
+                  </>
+                ) : null}
               </div>
+
+              {/* Description */}
+              {group.description && (
+                <p className="text-sm text-foreground-secondary max-w-xl leading-relaxed pt-0.5">
+                  {group.description}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Action Cluster */}
-          <div className="flex items-center gap-2.5 shrink-0 self-start lg:self-center pt-2 lg:pt-0">
+          {/* Actions */}
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               type="button"
               variant="outline"
-              size="md"
+              size="sm"
               onClick={handleCopyInvite}
               leftIcon={
                 copied ? (
-                  <Check className="size-4 text-foreground" />
+                  <Check className="size-3.5" />
                 ) : (
-                  <Copy className="size-4" />
+                  <Copy className="size-3.5" />
                 )
               }
             >
-              {copied ? "Invite Copied!" : "Invite Link"}
+              {copied ? "Copied" : "Invite"}
             </Button>
 
             {isAdmin && (
               <Button
                 type="button"
                 variant="primary"
-                size="md"
+                size="sm"
                 onClick={() => setIsScheduleModalOpen(true)}
-                leftIcon={<Calendar className="size-4" />}
+                leftIcon={<Calendar className="size-3.5" />}
               >
                 Schedule Plan
               </Button>
@@ -223,96 +193,69 @@ export function GroupWorkspaceView({
         </div>
       </div>
 
-      {/* Navigation Tabs - Modern Architectural Segmented Bar */}
-      <div className="flex items-center gap-1.5 rounded-2xl bg-surface p-1.5 border border-border w-fit shadow-2xs">
-        <button
-          type="button"
-          onClick={() => setActiveTab("plans")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-            activeTab === "plans"
-              ? "bg-foreground text-background shadow-xs"
-              : "text-foreground-secondary hover:text-foreground hover:bg-surface-elevated/60"
-          }`}
-        >
-          <BookOpen className="size-3.5" />
-          <span>Cohort Plans ({totalPlansCount})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("members")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-            activeTab === "members"
-              ? "bg-foreground text-background shadow-xs"
-              : "text-foreground-secondary hover:text-foreground hover:bg-surface-elevated/60"
-          }`}
-        >
-          <Users className="size-3.5" />
-          <span>Members Directory ({members.length})</span>
-        </button>
-
-        {isAdmin && (
+      {/* Tab Navigation — underline style, minimal */}
+      <div className="flex items-center gap-6 border-b border-border mb-8">
+        {tabs.map((tab) => (
           <button
+            key={tab.id}
             type="button"
-            onClick={() => setActiveTab("admin")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-              activeTab === "admin"
-                ? "bg-foreground text-background shadow-xs"
-                : "text-foreground-secondary hover:text-foreground hover:bg-surface-elevated/60"
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative flex items-center gap-1.5 pb-3 text-sm font-medium transition-colors cursor-pointer ${
+              activeTab === tab.id
+                ? "text-foreground"
+                : "text-foreground-dim hover:text-foreground-secondary"
             }`}
           >
-            <Settings className="size-3.5" />
-            <span>Administration</span>
-            {pendingMembers.length > 0 && (
-              <span className="flex size-4 items-center justify-center rounded-full bg-warning text-[9px] font-bold text-black">
-                {pendingMembers.length}
+            <span>{tab.label}</span>
+            {tab.count !== undefined && tab.count > 0 && (
+              <span className={`text-xs tabular-nums ${
+                activeTab === tab.id ? "text-foreground-secondary" : "text-foreground-dim"
+              }`}>
+                {tab.count}
               </span>
             )}
+            {/* Active indicator */}
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground rounded-full" />
+            )}
           </button>
-        )}
+        ))}
       </div>
 
-      {/* Active Tab Panel */}
-      <div className="mt-2">
-        {/* Tab 1: Group Plans */}
-        {activeTab === "plans" && (
-          <GroupPlansTab
-            groupId={group.id}
-            activePlans={group.activePlans}
-            scheduledPlans={group.scheduledPlans}
-            leaderboardsByPlanId={leaderboardsByPlanId}
-            trackers={trackers}
-            activeTrackerId={activeTrackerId}
-            currentUserHideProgress={group.currentUserHideProgress}
-            isAdmin={isAdmin}
-            onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
-            onCopyInvite={handleCopyInvite}
-          />
-        )}
+      {/* Tab Content */}
+      {activeTab === "plans" && (
+        <GroupPlansTab
+          groupId={group.id}
+          activePlans={group.activePlans}
+          scheduledPlans={group.scheduledPlans}
+          leaderboardsByPlanId={leaderboardsByPlanId}
+          trackers={trackers}
+          activeTrackerId={activeTrackerId}
+          currentUserHideProgress={group.currentUserHideProgress}
+          isAdmin={isAdmin}
+          onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
+          onCopyInvite={handleCopyInvite}
+        />
+      )}
 
-        {/* Tab 2: Members */}
-        {activeTab === "members" && (
-          <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8 shadow-xs">
-            <GroupMembersTab members={members} />
-          </div>
-        )}
+      {activeTab === "members" && (
+        <GroupMembersTab members={members} />
+      )}
 
-        {/* Tab 3: Admin Settings */}
-        {activeTab === "admin" && isAdmin && (
-          <GroupAdminTab
-            groupId={group.id}
-            name={group.name}
-            description={group.description}
-            avatarUrl={group.avatarUrl}
-            inviteCode={group.inviteCode}
-            isPrivate={group.isPrivate}
-            requiresApproval={group.requiresApproval}
-            isOwner={isOwner}
-            members={members}
-            pendingMembers={pendingMembers}
-          />
-        )}
-      </div>
+      {activeTab === "admin" && isAdmin && (
+        <GroupAdminTab
+          groupId={group.id}
+          name={group.name}
+          description={group.description}
+          avatarUrl={group.avatarUrl}
+          inviteCode={group.inviteCode}
+          isPrivate={group.isPrivate}
+          requiresApproval={group.requiresApproval}
+          isOwner={isOwner}
+          members={members}
+          pendingMembers={pendingMembers}
+        />
+      )}
 
       {/* Schedule Plan Modal */}
       <GroupSchedulePlanModal
