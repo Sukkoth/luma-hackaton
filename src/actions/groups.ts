@@ -6,6 +6,7 @@ import { and, eq, desc, ilike, inArray, sql } from "drizzle-orm";
 import * as v from "valibot";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
+import { generateRandomInviteCode } from "@/lib/tokens";
 import {
   groups,
   groupMembers,
@@ -33,6 +34,13 @@ import {
   ApproveMemberSchema,
   ToggleLeaderboardPrivacySchema,
   ShareNoteWithCommunitySchema,
+  LeaveGroupSchema,
+  LeaveGroupPlanSchema,
+  SetGroupPinnedNoticeSchema,
+  ClearGroupPinnedNoticeSchema,
+  TransferGroupOwnershipSchema,
+  UpdateGroupPlanStatusSchema,
+  DeleteGroupPlanSchema,
 } from "@/lib/schemas/groups";
 import { startPlanAction, ensurePlanTemplateInDb } from "@/actions/plans";
 
@@ -63,6 +71,15 @@ export type GroupPlanSummary = {
   createdAt: Date;
 };
 
+export type GroupPinnedNotice = {
+  title: string | null;
+  content: string;
+  expiresAt: string;
+  updatedAt: string;
+  authorId: string | null;
+  authorName: string | null;
+};
+
 export type GroupDetails = {
   id: string;
   name: string;
@@ -75,6 +92,8 @@ export type GroupDetails = {
   currentUserRole: GroupRole | null;
   currentUserMembershipStatus: GroupMembershipStatus | null;
   currentUserHideProgress: boolean;
+  currentUserPrivacyUpdatedAt: string | null;
+  pinnedNotice: GroupPinnedNotice | null;
   memberCount: number;
   activePlans: ReadonlyArray<GroupPlanSummary>;
   scheduledPlans: ReadonlyArray<GroupPlanSummary>;
@@ -104,17 +123,6 @@ export type GroupSessionNote = {
   plainTextSnippet: string;
   updatedAt: Date;
 };
-
-function generateInviteCode({ groupName }: { groupName: string }): string {
-  const clean = groupName
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 16)
-    .replace(/^-|-$/g, "");
-  const randomSuffix = Math.random().toString(36).slice(2, 6);
-  return `${clean || "group"}-${randomSuffix}`;
-}
 
 // ---------------------------------------------------------------------------
 // Group CRUD
@@ -160,7 +168,7 @@ export async function createGroupAction({
   }
 
   const input = parsed.output;
-  const inviteCode = generateInviteCode({ groupName: input.name });
+  const inviteCode = generateRandomInviteCode({ length: 10 });
 
   try {
     const [newGroup] = await db
@@ -307,7 +315,34 @@ export async function getGroupDetailsAction({
 
       if (p.status === "active") activePlans.push(summary);
       else if (p.status === "scheduled") scheduledPlans.push(summary);
-      else if (p.status === "completed") completedPlans.push(summary);
+      else if (p.status === "completed" || p.status === "cancelled")
+        completedPlans.push(summary);
+    }
+
+    let pinnedNotice: GroupPinnedNotice | null = null;
+    if (
+      groupRecord.pinnedNoticeContent &&
+      groupRecord.pinnedNoticeExpiresAt &&
+      new Date(groupRecord.pinnedNoticeExpiresAt) > now
+    ) {
+      let authorName: string | null = null;
+      if (groupRecord.pinnedNoticeAuthorId) {
+        const authorUser = await db.query.user.findFirst({
+          where: eq(user.id, groupRecord.pinnedNoticeAuthorId),
+          columns: { name: true },
+        });
+        authorName = authorUser?.name || null;
+      }
+      pinnedNotice = {
+        title: groupRecord.pinnedNoticeTitle,
+        content: groupRecord.pinnedNoticeContent,
+        expiresAt: groupRecord.pinnedNoticeExpiresAt.toISOString(),
+        updatedAt: (
+          groupRecord.pinnedNoticeUpdatedAt || groupRecord.updatedAt
+        ).toISOString(),
+        authorId: groupRecord.pinnedNoticeAuthorId,
+        authorName,
+      };
     }
 
     return {
@@ -325,6 +360,9 @@ export async function getGroupDetailsAction({
         currentUserMembershipStatus:
           (membership?.status as GroupMembershipStatus) || null,
         currentUserHideProgress: membership?.hideProgress ?? false,
+        currentUserPrivacyUpdatedAt:
+          membership?.privacyUpdatedAt?.toISOString() ?? null,
+        pinnedNotice,
         memberCount,
         activePlans,
         scheduledPlans,
@@ -409,6 +447,56 @@ export async function updateGroupSettingsAction({
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to update group settings.";
+    return { success: false, error: message };
+  }
+}
+
+export type RegenerateInviteCodeParams = {
+  groupId: string;
+};
+
+export async function regenerateInviteCodeAction({
+  groupId,
+}: RegenerateInviteCodeParams): Promise<{
+  success: boolean;
+  newInviteCode?: string;
+  error?: string;
+}> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  try {
+    const caller = await db.query.groupMembers.findFirst({
+      where: and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userId, session.user.id),
+        inArray(groupMembers.role, ["owner", "admin"])
+      ),
+    });
+
+    if (!caller) {
+      return {
+        success: false,
+        error: "Only admins or owners can regenerate fellowship invitation links.",
+      };
+    }
+
+    const newInviteCode = generateRandomInviteCode({ length: 10 });
+    await db
+      .update(groups)
+      .set({
+        inviteCode: newInviteCode,
+        updatedAt: new Date(),
+      })
+      .where(eq(groups.id, groupId));
+
+    revalidatePath(`/groups/${groupId}`);
+    return { success: true, newInviteCode };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to regenerate invite code.";
     return { success: false, error: message };
   }
 }
@@ -993,6 +1081,34 @@ export async function removeMemberAction({
       }
     }
 
+    // Clean up all plan enrollments and unbind instance links for this group
+    const groupPlanList = await db.query.groupPlans.findMany({
+      where: eq(groupPlans.groupId, groupId),
+      columns: { id: true },
+    });
+
+    if (groupPlanList.length > 0) {
+      const planIds = groupPlanList.map((p) => p.id);
+      await db
+        .delete(groupMemberEnrollments)
+        .where(
+          and(
+            inArray(groupMemberEnrollments.groupPlanId, planIds),
+            eq(groupMemberEnrollments.userId, targetUserId)
+          )
+        );
+
+      await db
+        .update(planInstances)
+        .set({ groupPlanId: null })
+        .where(
+          and(
+            inArray(planInstances.groupPlanId, planIds),
+            eq(planInstances.userId, targetUserId)
+          )
+        );
+    }
+
     await db
       .delete(groupMembers)
       .where(
@@ -1011,6 +1127,86 @@ export async function removeMemberAction({
   }
 }
 
+export type LeaveGroupParams = {
+  groupId: string;
+};
+
+export async function leaveGroupAction({
+  groupId,
+}: LeaveGroupParams): Promise<{ success: boolean; error?: string }> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(LeaveGroupSchema, { groupId });
+  if (!parsed.success) return { success: false, error: "Invalid group ID." };
+
+  return removeMemberAction({ groupId: parsed.output.groupId, targetUserId: session.user.id });
+}
+
+export type LeaveGroupPlanParams = {
+  groupPlanId: string;
+};
+
+export async function leaveGroupPlanAction({
+  groupPlanId,
+}: LeaveGroupPlanParams): Promise<{ success: boolean; error?: string }> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(LeaveGroupPlanSchema, { groupPlanId });
+  if (!parsed.success) return { success: false, error: "Invalid plan ID." };
+
+  try {
+    const enrollment = await db.query.groupMemberEnrollments.findFirst({
+      where: and(
+        eq(groupMemberEnrollments.groupPlanId, parsed.output.groupPlanId),
+        eq(groupMemberEnrollments.userId, session.user.id)
+      ),
+      with: {
+        groupPlan: true,
+      },
+    });
+
+    if (!enrollment) {
+      return { success: false, error: "You are not enrolled in this plan." };
+    }
+
+    // Delete enrollment mapping
+    await db
+      .delete(groupMemberEnrollments)
+      .where(
+        and(
+          eq(groupMemberEnrollments.groupPlanId, parsed.output.groupPlanId),
+          eq(groupMemberEnrollments.userId, session.user.id)
+        )
+      );
+
+    // Unlink the groupPlanId from their personal plan instance so it doesn't dangle
+    if (enrollment.planInstanceId) {
+      await db
+        .update(planInstances)
+        .set({ groupPlanId: null })
+        .where(eq(planInstances.id, enrollment.planInstanceId));
+      revalidatePath(`/plans/${enrollment.planInstanceId}`);
+    }
+
+    if (enrollment.groupPlan?.groupId) {
+      revalidatePath(`/groups/${enrollment.groupPlan.groupId}`);
+    }
+    revalidatePath("/plans");
+
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to leave group plan.";
+    return { success: false, error: message };
+  }
+}
+
 export type ToggleLeaderboardPrivacyParams = {
   groupId: string;
   hideProgress: boolean;
@@ -1022,6 +1218,7 @@ export async function toggleLeaderboardPrivacyAction({
 }: ToggleLeaderboardPrivacyParams): Promise<{
   success: boolean;
   error?: string;
+  privacyUpdatedAt?: string;
 }> {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -1035,9 +1232,46 @@ export async function toggleLeaderboardPrivacyAction({
   if (!parsed.success) return { success: false, error: "Invalid parameters." };
 
   try {
+    const member = await db.query.groupMembers.findFirst({
+      where: and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userId, session.user.id)
+      ),
+    });
+
+    if (!member) {
+      return { success: false, error: "Membership not found." };
+    }
+
+    // 24-hour rate limit verification
+    const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    if (member.privacyUpdatedAt) {
+      const now = Date.now();
+      const lastUpdated = new Date(member.privacyUpdatedAt).getTime();
+      const elapsed = now - lastUpdated;
+
+      if (elapsed < COOLDOWN_MS) {
+        const remainingMs = COOLDOWN_MS - elapsed;
+        const hoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
+        const minutesLeft = Math.max(
+          1,
+          Math.ceil((remainingMs % (1000 * 60 * 60)) / (1000 * 60))
+        );
+        return {
+          success: false,
+          error: `Visibility can only be updated once every 24 hours. Please wait ${hoursLeft}h ${minutesLeft}m before changing it again.`,
+        };
+      }
+    }
+
+    const now = new Date();
     await db
       .update(groupMembers)
-      .set({ hideProgress: parsed.output.hideProgress, updatedAt: new Date() })
+      .set({
+        hideProgress: parsed.output.hideProgress,
+        privacyUpdatedAt: now,
+        updatedAt: now,
+      })
       .where(
         and(
           eq(groupMembers.groupId, groupId),
@@ -1046,7 +1280,7 @@ export async function toggleLeaderboardPrivacyAction({
       );
 
     revalidatePath(`/groups/${groupId}`);
-    return { success: true };
+    return { success: true, privacyUpdatedAt: now.toISOString() };
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to update leaderboard privacy.";
@@ -1376,12 +1610,17 @@ export async function getGroupLeaderboardAction({
     const hideProgressMap = new Map<string, boolean>();
     members.forEach((m) => hideProgressMap.set(m.userId, m.hideProgress));
 
+    const currentUserHideProgress =
+      hideProgressMap.get(session.user.id) ?? false;
+
     const todayStr = new Date().toISOString().slice(0, 10);
 
     const entries: LeaderboardEntry[] = enrollments.map((e) => {
       const isCurrentUser = e.userId === session.user.id;
       const isHidden = hideProgressMap.get(e.userId) ?? false;
-      const shouldAnonymize = isHidden && !isCurrentUser;
+      // If a user hides their own visibility, they cannot see others' names (reciprocal anonymity)
+      const shouldAnonymize =
+        !isCurrentUser && (isHidden || currentUserHideProgress);
 
       const userReadings = readingsByInstance.get(e.planInstanceId) || [];
       const totalChapters = e.totalChapters || 1;
@@ -1553,6 +1792,440 @@ export async function getGroupSessionNotesAction({
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to load group session notes.";
+    return { success: false, error: message };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pinned Notice (Bulletin Board)
+// ---------------------------------------------------------------------------
+
+export type SetGroupPinnedNoticeParams = {
+  groupId: string;
+  title?: string;
+  content: string;
+  expiresAt: string;
+};
+
+export async function setGroupPinnedNoticeAction({
+  groupId,
+  title,
+  content,
+  expiresAt,
+}: SetGroupPinnedNoticeParams): Promise<{ success: boolean; error?: string }> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(SetGroupPinnedNoticeSchema, {
+    groupId,
+    title,
+    content,
+    expiresAt,
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message || "Invalid notice parameters.",
+    };
+  }
+
+  const expDate = new Date(parsed.output.expiresAt);
+  if (isNaN(expDate.getTime()) || expDate <= new Date()) {
+    return {
+      success: false,
+      error: "Expiration date must be in the future.",
+    };
+  }
+
+  const groupRecord = await db.query.groups.findFirst({
+    where: eq(groups.id, groupId),
+    columns: { ownerId: true },
+  });
+
+  if (!groupRecord) {
+    return { success: false, error: "Group not found." };
+  }
+
+  const membership = await db.query.groupMembers.findFirst({
+    where: and(
+      eq(groupMembers.groupId, groupId),
+      eq(groupMembers.userId, session.user.id),
+      eq(groupMembers.status, "active")
+    ),
+  });
+
+  const isOwner = groupRecord.ownerId === session.user.id;
+  const isAdmin = membership?.role === "admin" || isOwner;
+
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "Only admins and group owners can pin announcements.",
+    };
+  }
+
+  try {
+    await db
+      .update(groups)
+      .set({
+        pinnedNoticeTitle: parsed.output.title ? parsed.output.title.trim() : null,
+        pinnedNoticeContent: parsed.output.content.trim(),
+        pinnedNoticeExpiresAt: expDate,
+        pinnedNoticeAuthorId: session.user.id,
+        pinnedNoticeUpdatedAt: new Date(),
+      })
+      .where(eq(groups.id, groupId));
+
+    revalidatePath(`/groups/${groupId}`);
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to save pinned notice.";
+    return { success: false, error: message };
+  }
+}
+
+export type ClearGroupPinnedNoticeParams = {
+  groupId: string;
+};
+
+export async function clearGroupPinnedNoticeAction({
+  groupId,
+}: ClearGroupPinnedNoticeParams): Promise<{ success: boolean; error?: string }> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(ClearGroupPinnedNoticeSchema, { groupId });
+  if (!parsed.success) {
+    return { success: false, error: "Invalid group ID." };
+  }
+
+  const groupRecord = await db.query.groups.findFirst({
+    where: eq(groups.id, groupId),
+    columns: { ownerId: true },
+  });
+
+  if (!groupRecord) {
+    return { success: false, error: "Group not found." };
+  }
+
+  const membership = await db.query.groupMembers.findFirst({
+    where: and(
+      eq(groupMembers.groupId, groupId),
+      eq(groupMembers.userId, session.user.id),
+      eq(groupMembers.status, "active")
+    ),
+  });
+
+  const isOwner = groupRecord.ownerId === session.user.id;
+  const isAdmin = membership?.role === "admin" || isOwner;
+
+  if (!isAdmin) {
+    return {
+      success: false,
+      error: "Only admins and group owners can remove pinned announcements.",
+    };
+  }
+
+  try {
+    await db
+      .update(groups)
+      .set({
+        pinnedNoticeTitle: null,
+        pinnedNoticeContent: null,
+        pinnedNoticeExpiresAt: null,
+        pinnedNoticeAuthorId: null,
+        pinnedNoticeUpdatedAt: null,
+      })
+      .where(eq(groups.id, groupId));
+
+    revalidatePath(`/groups/${groupId}`);
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to clear pinned notice.";
+    return { success: false, error: message };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Transfer Ownership
+// ---------------------------------------------------------------------------
+
+export type TransferGroupOwnershipParams = {
+  groupId: string;
+  newOwnerUserId: string;
+};
+
+export async function transferGroupOwnershipAction({
+  groupId,
+  newOwnerUserId,
+}: TransferGroupOwnershipParams): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(TransferGroupOwnershipSchema, {
+    groupId,
+    newOwnerUserId,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message || "Invalid parameters.",
+    };
+  }
+
+  if (newOwnerUserId === session.user.id) {
+    return {
+      success: false,
+      error: "You are already the owner of this fellowship.",
+    };
+  }
+
+  try {
+    const groupRecord = await db.query.groups.findFirst({
+      where: eq(groups.id, groupId),
+    });
+
+    if (!groupRecord) {
+      return { success: false, error: "Group not found." };
+    }
+
+    if (groupRecord.ownerId !== session.user.id) {
+      return {
+        success: false,
+        error: "Only the current fellowship owner can transfer ownership.",
+      };
+    }
+
+    // Verify target user is an active member of this group
+    const targetMember = await db.query.groupMembers.findFirst({
+      where: and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userId, newOwnerUserId),
+        eq(groupMembers.status, "active")
+      ),
+    });
+
+    if (!targetMember) {
+      return {
+        success: false,
+        error: "The chosen member is not an active member of this fellowship.",
+      };
+    }
+
+    const now = new Date();
+
+    // Use transaction to atomically update group owner and member roles
+    await db.transaction(async (tx) => {
+      // 1. Demote current owner to admin in groupMembers
+      await tx
+        .update(groupMembers)
+        .set({
+          role: "admin",
+          updatedAt: now,
+        })
+        .where(
+          and(
+            eq(groupMembers.groupId, groupId),
+            eq(groupMembers.userId, session.user.id)
+          )
+        );
+
+      // 2. Promote target member to owner in groupMembers
+      await tx
+        .update(groupMembers)
+        .set({
+          role: "owner",
+          updatedAt: now,
+        })
+        .where(
+          and(
+            eq(groupMembers.groupId, groupId),
+            eq(groupMembers.userId, newOwnerUserId)
+          )
+        );
+
+      // 3. Update ownerId in groups table
+      await tx
+        .update(groups)
+        .set({
+          ownerId: newOwnerUserId,
+          updatedAt: now,
+        })
+        .where(eq(groups.id, groupId));
+    });
+
+    revalidatePath(`/groups/${groupId}`);
+    revalidatePath("/groups");
+
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : "Failed to transfer fellowship ownership.";
+    return { success: false, error: message };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Group Plan Lifecycle
+// ---------------------------------------------------------------------------
+
+export type UpdateGroupPlanStatusParams = {
+  groupPlanId: string;
+  status: GroupPlanStatus;
+};
+
+export async function updateGroupPlanStatusAction({
+  groupPlanId,
+  status,
+}: UpdateGroupPlanStatusParams): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(UpdateGroupPlanStatusSchema, {
+    groupPlanId,
+    status,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message || "Invalid parameters.",
+    };
+  }
+
+  try {
+    const plan = await db.query.groupPlans.findFirst({
+      where: eq(groupPlans.id, groupPlanId),
+      with: { group: true },
+    });
+
+    if (!plan) {
+      return { success: false, error: "Group plan not found." };
+    }
+
+    const membership = await db.query.groupMembers.findFirst({
+      where: and(
+        eq(groupMembers.groupId, plan.groupId),
+        eq(groupMembers.userId, session.user.id),
+        eq(groupMembers.status, "active")
+      ),
+    });
+
+    const isOwner = plan.group?.ownerId === session.user.id;
+    const isAdmin = membership?.role === "admin" || isOwner;
+
+    if (!isAdmin) {
+      return {
+        success: false,
+        error: "Only fellowship leaders can change plan status.",
+      };
+    }
+
+    const now = new Date();
+    const updates: Partial<typeof groupPlans.$inferInsert> = {
+      status,
+      updatedAt: now,
+    };
+
+    if (status === "active") {
+      updates.activatedAt = plan.activatedAt || now;
+      updates.completedAt = null;
+    } else if (status === "completed") {
+      updates.completedAt = now;
+    } else if (status === "cancelled") {
+      updates.completedAt = null;
+    } else if (status === "scheduled") {
+      updates.activatedAt = null;
+      updates.completedAt = null;
+    }
+
+    await db
+      .update(groupPlans)
+      .set(updates)
+      .where(eq(groupPlans.id, groupPlanId));
+
+    revalidatePath(`/groups/${plan.groupId}`);
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to update group plan status.";
+    return { success: false, error: message };
+  }
+}
+
+export type DeleteGroupPlanParams = {
+  groupPlanId: string;
+};
+
+export async function deleteGroupPlanAction({
+  groupPlanId,
+}: DeleteGroupPlanParams): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(DeleteGroupPlanSchema, { groupPlanId });
+  if (!parsed.success) {
+    return { success: false, error: "Invalid group plan ID." };
+  }
+
+  try {
+    const plan = await db.query.groupPlans.findFirst({
+      where: eq(groupPlans.id, groupPlanId),
+      with: { group: true },
+    });
+
+    if (!plan) {
+      return { success: false, error: "Group plan not found." };
+    }
+
+    const membership = await db.query.groupMembers.findFirst({
+      where: and(
+        eq(groupMembers.groupId, plan.groupId),
+        eq(groupMembers.userId, session.user.id),
+        eq(groupMembers.status, "active")
+      ),
+    });
+
+    const isOwner = plan.group?.ownerId === session.user.id;
+    const isAdmin = membership?.role === "admin" || isOwner;
+
+    if (!isAdmin) {
+      return {
+        success: false,
+        error: "Only fellowship leaders can delete a group plan.",
+      };
+    }
+
+    await db.delete(groupPlans).where(eq(groupPlans.id, groupPlanId));
+
+    revalidatePath(`/groups/${plan.groupId}`);
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to delete group plan.";
     return { success: false, error: message };
   }
 }

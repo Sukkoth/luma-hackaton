@@ -649,6 +649,11 @@ export const groups = pgTable(
       .references(() => user.id, { onDelete: "restrict" }),
     isPrivate: boolean("is_private").default(true).notNull(),
     requiresApproval: boolean("requires_approval").default(false).notNull(),
+    pinnedNoticeTitle: varchar("pinned_notice_title", { length: 150 }),
+    pinnedNoticeContent: text("pinned_notice_content"),
+    pinnedNoticeExpiresAt: timestamp("pinned_notice_expires_at", { withTimezone: true }),
+    pinnedNoticeAuthorId: text("pinned_notice_author_id").references(() => user.id, { onDelete: "set null" }),
+    pinnedNoticeUpdatedAt: timestamp("pinned_notice_updated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -667,6 +672,10 @@ export const groups = pgTable(
 export const groupsRelations = relations(groups, ({ one, many }) => ({
   owner: one(user, {
     fields: [groups.ownerId],
+    references: [user.id],
+  }),
+  pinnedNoticeAuthor: one(user, {
+    fields: [groups.pinnedNoticeAuthorId],
     references: [user.id],
   }),
   members: many(groupMembers),
@@ -688,6 +697,7 @@ export const groupMembers = pgTable(
     role: varchar("role", { length: 20 }).default("member").notNull(), // 'owner' | 'admin' | 'member'
     status: varchar("status", { length: 20 }).default("active").notNull(), // 'active' | 'pending_approval'
     hideProgress: boolean("hide_progress").default(false).notNull(),
+    privacyUpdatedAt: timestamp("privacy_updated_at", { withTimezone: true }),
     joinedAt: timestamp("joined_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

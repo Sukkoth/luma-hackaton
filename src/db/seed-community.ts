@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import { generateRandomInviteCode } from "@/lib/tokens";
 import {
   user,
   account,
@@ -362,7 +363,7 @@ export async function seedCommunityData(): Promise<void> {
     const gDef = SEED_GROUPS[gIdx]!;
     const owner = userMap.get(gDef.ownerEmail)!;
     const groupId = crypto.randomUUID();
-    const inviteCode = `lum_${gIdx + 1}_${Math.random().toString(36).slice(2, 7)}`;
+    const inviteCode = generateRandomInviteCode({ length: 10 });
 
     await db.insert(groups).values({
       id: groupId,

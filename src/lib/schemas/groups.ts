@@ -128,6 +128,67 @@ export const ShareNoteWithCommunitySchema = v.object({
   isSharedWithCommunity: v.boolean(),
 });
 
+export const LeaveGroupSchema = v.object({
+  groupId: v.pipe(v.string(), v.trim(), v.minLength(1)),
+});
+
+export const LeaveGroupPlanSchema = v.object({
+  groupPlanId: v.pipe(v.string(), v.trim(), v.minLength(1)),
+});
+
+export const SetGroupPinnedNoticeSchema = v.object({
+  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  title: v.optional(
+    v.pipe(
+      v.string(),
+      v.trim(),
+      v.maxLength(150, "Title must be at most 150 characters.")
+    ),
+    ""
+  ),
+  content: v.pipe(
+    v.string("Notice content is required."),
+    v.trim(),
+    v.minLength(1, "Notice content cannot be empty."),
+    v.maxLength(2000, "Notice content must be at most 2000 characters.")
+  ),
+  expiresAt: v.pipe(
+    v.string("Expiration date/time is required."),
+    v.trim(),
+    v.minLength(1, "Expiration date/time is required.")
+  ),
+});
+
+export const ClearGroupPinnedNoticeSchema = v.object({
+  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+});
+
+export const TransferGroupOwnershipSchema = v.object({
+  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  newOwnerUserId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Target user ID is required.")
+  ),
+});
+
+export const UpdateGroupPlanStatusSchema = v.object({
+  groupPlanId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group Plan ID is required.")
+  ),
+  status: GroupPlanStatusEnumSchema,
+});
+
+export const DeleteGroupPlanSchema = v.object({
+  groupPlanId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group Plan ID is required.")
+  ),
+});
+
 export type CreateGroupInput = v.InferOutput<typeof CreateGroupSchema>;
 export type UpdateGroupSettingsInput = v.InferOutput<
   typeof UpdateGroupSettingsSchema
@@ -137,4 +198,19 @@ export type ScheduleGroupPlanInput = v.InferOutput<
 >;
 export type EnrollInGroupPlanInput = v.InferOutput<
   typeof EnrollInGroupPlanSchema
+>;
+export type SetGroupPinnedNoticeInput = v.InferOutput<
+  typeof SetGroupPinnedNoticeSchema
+>;
+export type ClearGroupPinnedNoticeInput = v.InferOutput<
+  typeof ClearGroupPinnedNoticeSchema
+>;
+export type TransferGroupOwnershipInput = v.InferOutput<
+  typeof TransferGroupOwnershipSchema
+>;
+export type UpdateGroupPlanStatusInput = v.InferOutput<
+  typeof UpdateGroupPlanStatusSchema
+>;
+export type DeleteGroupPlanInput = v.InferOutput<
+  typeof DeleteGroupPlanSchema
 >;
