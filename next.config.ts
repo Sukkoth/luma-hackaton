@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   experimental: {
     agentUpgrade: "security",
   },
+  "allowedDevOrigins": ["2f.taileb1574.ts.net"],
   images: {
     remotePatterns: [
       {
