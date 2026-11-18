@@ -43,6 +43,7 @@ export type OverviewActivityRingsData = {
   avgDay30d: number;
   projectedFinishDate: string;
   nextReading: {
+    bookId: string;
     bookName: string;
     chapter: number;
     displayText: string;
@@ -379,6 +380,7 @@ export async function getOverviewData({
 
   // Next reading
   let nextReading: {
+    bookId: string;
     bookName: string;
     chapter: number;
     displayText: string;
@@ -387,6 +389,7 @@ export async function getOverviewData({
     for (let c = 1; c <= book.chapters; c++) {
       if (!completedKeysSet.has(`${book.id}:${c}`)) {
         nextReading = {
+          bookId: book.id,
           bookName: book.name,
           chapter: c,
           displayText: `${book.name} ${c}`,

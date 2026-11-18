@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, Flame, Clock } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import type {
   OverviewActivityRingsData,
   OverviewStreakHeatmapData,
@@ -23,7 +23,6 @@ export function ProgressStreakMergedCard({
     currentStreak,
     longestStreak,
     weekDays,
-    heatmapWeeks,
     timeLeftUntilMidnight,
     isTodayCompleted,
     takeaway,
@@ -31,19 +30,19 @@ export function ProgressStreakMergedCard({
 
   const ringConfigs = [
     { key: "bible", radius: 58, strokeWidth: 6, opacity: 1.0 },
-    { key: "ot", radius: 49, strokeWidth: 6, opacity: 0.7 },
-    { key: "nt", radius: 40, strokeWidth: 6, opacity: 0.45 },
-    { key: "today", radius: 31, strokeWidth: 6, opacity: 0.25 },
+    { key: "ot", radius: 49, strokeWidth: 6, opacity: 0.75 },
+    { key: "nt", radius: 40, strokeWidth: 6, opacity: 0.5 },
+    { key: "today", radius: 31, strokeWidth: 6, opacity: 0.28 },
   ];
 
   return (
     <div className="ui-card flex h-full flex-col justify-between p-4.5 sm:p-5 shadow-xs">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-border-subtle shrink-0">
-        <h3 className="text-[13.5px] font-medium tracking-tight text-foreground">
+      <div className="flex items-center justify-between pb-2 border-b border-border/60 shrink-0">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground">
           Progress & Streak
         </h3>
-        <span className="text-[11px] font-medium text-foreground-dim tabular-nums">
+        <span className="text-xs font-medium text-muted-foreground tabular-nums">
           Best: {longestStreak}d
         </span>
       </div>
@@ -75,14 +74,14 @@ export function ProgressStreakMergedCard({
                       strokeWidth={cfg.strokeWidth}
                       fill="none"
                       strokeLinecap="round"
-                      className="opacity-70"
+                      className="opacity-60"
                     />
                     {arcLength > 0 && (
                       <circle
                         cx="70"
                         cy="70"
                         r={cfg.radius}
-                        stroke="var(--foreground)"
+                        stroke="var(--primary)"
                         strokeWidth={cfg.strokeWidth}
                         fill="none"
                         strokeDasharray={`${arcLength} ${circumference}`}
@@ -98,117 +97,78 @@ export function ProgressStreakMergedCard({
             </svg>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-              <span className="text-[18px] font-bold leading-none tracking-tight text-foreground tabular-nums">
+              <span className="text-xl font-bold leading-none tracking-tight text-foreground tabular-nums">
                 {overallPercentage}%
               </span>
-              <span className="mt-0.5 text-[9.5px] text-foreground-secondary tabular-nums">
-                {readChapters} / {totalChapters.toLocaleString()}
+              <span className="mt-0.5 text-[10px] text-muted-foreground tabular-nums">
+                {readChapters}/{totalChapters}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Streak & Heatmap */}
-        <div className="flex flex-col justify-center min-h-0 border-l border-border-subtle pl-3">
-          <div className="flex items-baseline gap-1.5">
-            <Flame className="size-3.5 text-foreground shrink-0 self-center" />
-            <span className="text-[28px] font-bold leading-none tracking-tight text-foreground tabular-nums">
-              {currentStreak}
-            </span>
-            <span className="text-[12px] font-medium text-foreground-dim">
-              {currentStreak === 1 ? "day" : "days"}
-            </span>
+        {/* Right Column: Streak Hero */}
+        <div className="flex flex-col justify-center gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+              <Flame className="size-5 fill-primary" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold leading-none text-foreground tabular-nums">
+                {currentStreak}
+              </span>
+              <span className="text-[10px] font-medium text-muted-foreground mt-0.5">
+                Day Streak
+              </span>
+            </div>
           </div>
 
-          {/* Mon-Sun Week Strip */}
-          <div className="mt-2 flex items-center justify-between gap-1">
-            {weekDays.map((day) => {
-              let badgeStyle =
-                "border border-border text-foreground-dim bg-transparent";
-              if (day.isRead) {
-                badgeStyle =
-                  "bg-primary text-primary-foreground border-transparent shadow-2xs font-semibold";
-              } else if (day.isFrozen) {
-                badgeStyle =
-                  "border border-dashed border-primary/60 bg-primary/10 text-primary font-medium";
-              } else if (day.isMissed) {
-                badgeStyle =
-                  "border border-border-strong text-foreground-dim/60 bg-transparent";
-              }
-
-              const todayOutline = day.isToday
-                ? "ring-1.5 ring-foreground ring-offset-0.5 ring-offset-surface"
-                : "";
-
-              return (
-                <div
-                  key={day.dateStr}
-                  className="flex flex-1 flex-col items-center gap-0.5"
-                >
-                  <div
-                    className={`flex size-5.5 items-center justify-center rounded-full text-[8.5px] tabular-nums transition-all ${badgeStyle} ${todayOutline}`}
-                  >
-                    {day.dayLabel.charAt(0)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Mini Heatmap Strip (Last 8 weeks) */}
-          <div className="grid grid-cols-8 gap-0.5 mt-2 h-[32px]">
-            {heatmapWeeks.slice(-8).map((week, wIdx) => (
+          {/* Week Dots */}
+          <div className="flex items-center gap-1">
+            {weekDays.map((d) => (
               <div
-                key={`merged-w-${wIdx}`}
-                className="grid grid-rows-7 gap-0.5 h-full"
+                key={d.dateStr}
+                className={`size-4 rounded-full flex items-center justify-center text-[8px] font-bold ${
+                  d.isRead
+                    ? "bg-primary text-primary-foreground"
+                    : d.isFrozen
+                      ? "border border-dashed border-primary bg-primary/20 text-primary"
+                      : "bg-muted text-muted-foreground"
+                }`}
+                title={d.dayLabel}
               >
-                {week.map((cell) => {
-                  let cellBg = "bg-foreground/10";
-                  if (cell.isFrozen) cellBg = "bg-primary/40";
-                  else if (cell.level === 4) cellBg = "bg-foreground";
-                  else if (cell.level === 3) cellBg = "bg-foreground/75";
-                  else if (cell.level === 2) cellBg = "bg-foreground/50";
-                  else if (cell.level === 1) cellBg = "bg-foreground/30";
-
-                  return (
-                    <div
-                      key={cell.dateStr}
-                      className={`w-full h-full rounded-[1px] ${cellBg}`}
-                    />
-                  );
-                })}
+                {d.dayLabel.charAt(0)}
               </div>
             ))}
           </div>
 
-          {/* Status line */}
-          <div className="short-laptop-hide max-h-[759px]:hidden mt-2 pt-1 border-t border-border-subtle text-[10.5px] text-foreground-secondary truncate flex items-center gap-1">
+          <p className="text-[11px] text-muted-foreground">
             {!isTodayCompleted && timeLeftUntilMidnight ? (
-              <>
-                <Clock className="size-2.5 text-foreground-dim shrink-0" />
-                <span className="tabular-nums font-medium text-foreground">
-                  {timeLeftUntilMidnight}
-                </span>
-              </>
+              <span className="text-amber-700 dark:text-amber-400 font-medium">
+                {timeLeftUntilMidnight} left today
+              </span>
             ) : (
-              <span>{takeaway}</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                Completed today
+              </span>
             )}
-          </div>
+          </p>
         </div>
       </div>
 
-      {/* Primary CTA Button */}
-      <div className="mt-2 shrink-0">
-        <Link
-          href="/books"
-          className="ui-btn-primary flex h-8.5 w-full items-center justify-center gap-1.5 rounded-[10px] text-[11.5px] font-medium shadow-xs transition-all active:scale-[0.99]"
-        >
-          <BookOpen className="size-3.5" />
-          <span className="truncate">
-            Continue reading · {nextReading?.displayText ?? "Genesis 1"}
-          </span>
-          <ArrowRight className="size-3.5 shrink-0 opacity-70" />
-        </Link>
+      {/* Footer / Next Up */}
+      <div className="border-t border-border/60 pt-2 shrink-0">
+        {nextReading ? (
+          <Link
+            href={`/bible/${nextReading.bookId}/${nextReading.chapter}`}
+            className="flex items-center justify-between text-xs text-foreground font-medium hover:text-primary transition-colors"
+          >
+            <span className="truncate">Next: {nextReading.bookName} {nextReading.chapter}</span>
+            <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
+          </Link>
+        ) : (
+          <p className="text-xs text-muted-foreground truncate">{takeaway}</p>
+        )}
       </div>
     </div>
   );

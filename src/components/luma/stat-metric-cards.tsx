@@ -47,7 +47,7 @@ export function StatMetricCards({
             <span className="text-[13px] font-normal text-foreground-secondary">
               {item.title}
             </span>
-            <span className="ui-pill text-[10px]">{item.badge}</span>
+            <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[10px] font-medium text-foreground-secondary">{item.badge}</span>
           </div>
           <div className="mt-3">
             <span className="text-[36px] font-light leading-none tracking-tight text-foreground sm:text-[40px]">

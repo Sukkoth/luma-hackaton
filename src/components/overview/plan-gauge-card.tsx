@@ -15,6 +15,7 @@ import type {
   OverviewPlanGaugeData,
   PlanBurnUpPoint,
 } from "@/actions/overview";
+import { cn } from "@/lib/utils";
 
 type PlanGaugeCardProps = {
   data: OverviewPlanGaugeData;
@@ -32,33 +33,33 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
   if (!hasActivePlans || !activePlan) {
     return (
       <div className="ui-card flex h-full flex-col justify-between p-4.5 sm:p-5 shadow-xs">
-        <div className="flex items-center justify-between pb-2 border-b border-border-subtle shrink-0">
-          <h3 className="text-[13.5px] font-medium tracking-tight text-foreground">
+        <div className="flex items-center justify-between pb-2 border-b border-border/60 shrink-0">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
             Plan Progress
           </h3>
         </div>
 
         {/* Empty State */}
         <div className="flex flex-1 flex-col items-center justify-center text-center p-4">
-          <div className="flex size-9 items-center justify-center rounded-full bg-surface-elevated border border-border text-foreground-dim mb-2.5">
-            <Compass className="size-4" />
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-2.5">
+            <Compass className="size-5" />
           </div>
-          <h4 className="text-[13px] font-semibold text-foreground">
+          <h4 className="text-sm font-semibold text-foreground">
             No Active Reading Plans
           </h4>
-          <p className="mt-1 text-[11px] text-foreground-dim max-w-[200px]">
-            Enroll in a curated or custom plan to track pacing.
+          <p className="mt-1 text-xs text-muted-foreground max-w-[200px]">
+            Enroll in a curated or custom plan to track daily pacing.
           </p>
           <Link
             href="/plans"
-            className="ui-btn-primary mt-3.5 flex h-8 items-center px-4 rounded-[10px] text-[11.5px] font-medium shadow-xs"
+            className="mt-3.5 inline-flex h-9 items-center px-4 rounded-xl bg-primary text-xs font-semibold text-primary-foreground hover:opacity-90 shadow-2xs transition-all"
           >
             Browse Plans
           </Link>
         </div>
 
-        <div className="short-laptop-hide max-h-[759px]:hidden mt-2 border-t border-border-subtle pt-2 shrink-0">
-          <p className="text-[12px] font-normal text-foreground-dim truncate">
+        <div className="mt-2 border-t border-border/60 pt-2 shrink-0">
+          <p className="text-xs text-muted-foreground truncate">
             No active plan trajectory
           </p>
         </div>
@@ -94,30 +95,31 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
   return (
     <div className="ui-card flex h-full flex-col justify-between p-4.5 sm:p-5 shadow-xs">
       {/* Header with Plan Switcher if multiple */}
-      <div className="flex items-center justify-between pb-2 border-b border-border-subtle shrink-0">
-        <h3 className="text-[13.5px] font-medium tracking-tight text-foreground truncate">
+      <div className="flex items-center justify-between pb-2 border-b border-border/60 shrink-0">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground truncate">
           Plan Progress
         </h3>
 
         {plans.length > 1 ? (
-          <div className="flex items-center rounded-full border border-border bg-surface-elevated p-0.5 max-w-[150px] truncate">
+          <div className="flex items-center rounded-xl border border-border bg-muted p-0.5 max-w-[150px] truncate">
             {plans.map((p) => (
               <button
                 key={p.instanceId}
                 type="button"
                 onClick={() => setSelectedPlanId(p.instanceId)}
-                className={`rounded-full px-2 py-0.5 text-[10px] font-medium truncate transition-all cursor-pointer ${
+                className={cn(
+                  "rounded-lg px-2 py-0.5 text-[10px] font-semibold truncate transition-all cursor-pointer",
                   p.instanceId === activePlan.instanceId
-                    ? "bg-primary text-primary-foreground shadow-2xs"
-                    : "text-foreground-secondary hover:text-foreground"
-                }`}
+                    ? "bg-card text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 {p.planName}
               </button>
             ))}
           </div>
         ) : (
-          <span className="text-[11px] font-medium text-foreground-dim truncate max-w-[130px]">
+          <span className="text-xs font-medium text-muted-foreground truncate max-w-[140px]">
             {activePlan.planName}
           </span>
         )}
@@ -141,11 +143,11 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
               className="opacity-70"
             />
 
-            {/* Actual Progress Arc */}
+            {/* Actual Progress Arc with Warm Amber Accent */}
             {actualArc > 0 && (
               <path
                 d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
-                stroke="var(--foreground)"
+                stroke="var(--primary)"
                 strokeWidth={strokeWidth}
                 fill="none"
                 strokeDasharray={`${actualArc} ${semiCircumference * 2}`}
@@ -162,7 +164,7 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
                 y1={expectedTick.y1}
                 x2={expectedTick.x2}
                 y2={expectedTick.y2}
-                stroke="var(--foreground)"
+                stroke="var(--foreground-dim)"
                 strokeWidth={2}
                 strokeLinecap="round"
                 className="transition-all duration-500"
@@ -172,22 +174,22 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
 
           {/* Center Info inside Semicircle */}
           <div className="absolute bottom-1 flex flex-col items-center text-center">
-            <span className="text-[15px] font-bold text-foreground leading-tight">
+            <span className="text-sm font-bold text-foreground leading-tight">
               {activePlan.statusText}
             </span>
-            <span className="text-[10px] text-foreground-secondary tabular-nums">
+            <span className="text-[10px] text-muted-foreground tabular-nums">
               {activePlan.completedChapters} of {activePlan.totalChapters} ch (
               {activePlan.actualPercent}%)
             </span>
           </div>
         </div>
 
-        {/* Bottom Half: Burn-up Line Chart */}
-        <div className="relative flex-1 min-h-[60px] w-full pt-1">
+        {/* Bottom Half: Burn-up Chart */}
+        <div className="relative flex-1 min-h-[70px] w-full pt-1">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={activePlan.burnUpPoints}
-              margin={{ top: 4, right: 10, left: -22, bottom: 0 }}
+              margin={{ top: 4, right: 6, left: -22, bottom: 0 }}
             >
               <XAxis
                 dataKey="label"
@@ -195,7 +197,14 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
                 fontSize={9.5}
                 tickLine={false}
                 axisLine={false}
-                interval="preserveStartEnd"
+                ticks={[
+                  activePlan.burnUpPoints[0]?.label || "",
+                  activePlan.burnUpPoints[
+                    Math.floor(activePlan.burnUpPoints.length / 2)
+                  ]?.label || "",
+                  activePlan.burnUpPoints[activePlan.burnUpPoints.length - 1]
+                    ?.label || "",
+                ].filter(Boolean)}
               />
               <YAxis
                 stroke="var(--foreground-dim)"
@@ -203,62 +212,60 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
                 tickLine={false}
                 axisLine={false}
                 domain={[0, activePlan.totalChapters]}
+                tickFormatter={(v) => `${v}`}
               />
               <Tooltip
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
-                  const pt = payload[0]?.payload as PlanBurnUpPoint;
+                  const p = payload[0]?.payload as PlanBurnUpPoint;
+                  if (!p) return null;
+
                   return (
-                    <div className="rounded-lg border border-border bg-surface p-2 shadow-md text-[10.5px]">
-                      <p className="font-semibold text-foreground">
-                        {pt.label}
+                    <div className="rounded-xl border border-border bg-card p-2 shadow-lg text-[10px] backdrop-blur-md">
+                      <p className="font-semibold text-foreground mb-0.5">
+                        {p.label}
                       </p>
-                      {pt.actual !== null && (
-                        <p className="text-foreground-secondary">
+                      {p.actual !== null && (
+                        <p className="text-muted-foreground">
                           Actual:{" "}
-                          <span className="font-semibold text-foreground">
-                            {pt.actual} ch
+                          <span className="font-semibold text-primary">
+                            {p.actual} ch
                           </span>
                         </p>
                       )}
-                      {pt.expected !== null && (
-                        <p className="text-foreground-dim">
-                          Expected: {pt.expected} ch
-                        </p>
-                      )}
+                      <p className="text-muted-foreground">
+                        Target:{" "}
+                        <span className="font-semibold text-foreground">
+                          {p.expected} ch
+                        </span>
+                      </p>
                     </div>
                   );
                 }}
               />
 
-              {/* Expected Line (Dashed) */}
-              {!activePlan.isSelfPaced && (
-                <Line
-                  type="monotone"
-                  dataKey="expected"
-                  name="Expected"
-                  stroke="var(--foreground)"
-                  strokeWidth={1.5}
-                  strokeDasharray="3 3"
-                  strokeOpacity={0.4}
-                  dot={false}
-                  isAnimationActive={true}
-                  animationDuration={600}
-                />
-              )}
-
-              {/* Actual Line (Solid) */}
+              {/* Target / Expected Pace Line */}
               <Line
                 type="monotone"
-                dataKey="actual"
-                name="Actual"
-                stroke="var(--foreground)"
+                dataKey="expectedCumulative"
+                stroke="var(--foreground-dim)"
+                strokeWidth={1.5}
+                strokeDasharray="3 3"
+                strokeOpacity={0.6}
+                dot={false}
+                isAnimationActive={false}
+              />
+
+              {/* Actual Completed Line with Amber Primary */}
+              <Line
+                type="monotone"
+                dataKey="actualCumulative"
+                stroke="var(--primary)"
                 strokeWidth={2}
-                dot={{ r: 2, fill: "var(--foreground)" }}
-                activeDot={{ r: 4, fill: "var(--foreground)" }}
-                connectNulls={false}
+                dot={false}
                 isAnimationActive={true}
-                animationDuration={600}
+                animationDuration={500}
+                connectNulls={false}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -266,8 +273,8 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
       </div>
 
       {/* Takeaway line */}
-      <div className="short-laptop-hide max-h-[759px]:hidden mt-1.5 border-t border-border-subtle pt-1.5 shrink-0">
-        <p className="text-[11.5px] font-normal text-foreground-secondary truncate">
+      <div className="mt-2 border-t border-border/60 pt-2 shrink-0">
+        <p className="text-xs text-muted-foreground truncate">
           {takeaway}
         </p>
       </div>

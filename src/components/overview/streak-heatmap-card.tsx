@@ -2,6 +2,7 @@
 
 import { Flame, Clock, Trophy, Snowflake } from "lucide-react";
 import type { OverviewStreakHeatmapData } from "@/actions/overview";
+import { cn } from "@/lib/utils";
 
 type StreakHeatmapCardProps = {
   data: OverviewStreakHeatmapData;
@@ -43,7 +44,6 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
     takeaway,
   } = data;
 
-  // Filter out leading month labels that only have 1 week before the next month
   const displayMonthLabels = monthLabels.filter((ml, idx) => {
     const next = monthLabels[idx + 1];
     if (next && next.colIndex - ml.colIndex < 2) {
@@ -55,19 +55,21 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
   return (
     <div className="ui-card flex h-full flex-col justify-between p-4.5 sm:p-5 shadow-xs">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-border-subtle shrink-0">
-        <h3 className="text-[13.5px] sm:text-[14.5px] font-semibold tracking-tight text-foreground flex items-center gap-1.5">
-          <Flame className="size-4 text-foreground" />
+      <div className="flex items-center justify-between pb-2 border-b border-border/60 shrink-0">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground flex items-center gap-1.5">
+          <Flame className="size-4 text-primary fill-primary" />
           <span>Reading Streak</span>
         </h3>
-        <div className="flex items-center gap-1.5 text-[11px] sm:text-[11.5px] font-medium text-foreground-dim">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           {!isTodayCompleted && timeLeftUntilMidnight ? (
-            <span className="flex items-center gap-1 text-foreground-secondary shrink-0">
+            <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 shrink-0">
               <Clock className="size-3.5" />
-              <span className="tabular-nums">{timeLeftUntilMidnight}</span>
+              <span className="tabular-nums font-semibold">{timeLeftUntilMidnight} left</span>
             </span>
           ) : (
-            <span className="text-foreground shrink-0">Today completed</span>
+            <span className="text-emerald-700 dark:text-emerald-400 font-semibold shrink-0">
+              Completed today
+            </span>
           )}
         </div>
       </div>
@@ -78,7 +80,7 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
         <div className="grid grid-cols-7 gap-1 sm:gap-1.5 w-full">
           {weekDays.map((day) => {
             let badgeStyle =
-              "border border-border text-foreground-dim bg-transparent"; // hollow
+              "border border-border text-muted-foreground bg-transparent";
             if (day.isRead) {
               badgeStyle =
                 "bg-primary text-primary-foreground border-transparent shadow-2xs font-semibold";
@@ -87,11 +89,11 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
                 "border border-dashed border-primary/60 bg-primary/10 text-primary font-medium";
             } else if (day.isMissed) {
               badgeStyle =
-                "border border-border-strong text-foreground-dim/60 bg-transparent";
+                "border border-border/80 text-muted-foreground/60 bg-transparent";
             }
 
             const todayOutline = day.isToday
-              ? "ring-1.5 ring-foreground ring-offset-1 ring-offset-surface"
+              ? "ring-2 ring-primary ring-offset-1 ring-offset-card"
               : "";
 
             const dayNum = parseInt(day.dateStr.split("-")[2] || "1", 10);
@@ -101,11 +103,15 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
                 key={day.dateStr}
                 className="flex flex-col items-center gap-1"
               >
-                <span className="text-[9.5px] sm:text-[10px] min-[1440px]:text-[11px] font-medium text-foreground-dim leading-none">
+                <span className="text-[10px] min-[1440px]:text-xs font-medium text-muted-foreground leading-none">
                   {day.dayLabel.charAt(0)}
                 </span>
                 <div
-                  className={`flex size-6 sm:size-6.5 min-[1440px]:size-7.5 items-center justify-center rounded-full text-[9.5px] sm:text-[10px] min-[1440px]:text-[11px] tabular-nums transition-all ${badgeStyle} ${todayOutline}`}
+                  className={cn(
+                    "flex size-6 sm:size-7 min-[1440px]:size-8 items-center justify-center rounded-full text-[10px] min-[1440px]:text-xs tabular-nums transition-all",
+                    badgeStyle,
+                    todayOutline
+                  )}
                   title={`${day.dayLabel} (${formatHeatmapDate({ dateStr: day.dateStr })}): ${
                     day.isRead
                       ? "Read"
@@ -134,7 +140,7 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
                 return (
                   <span
                     key={`month-${ml.colIndex}-${ml.label}`}
-                    className="absolute text-[9px] sm:text-[10px] min-[1440px]:text-[10.5px] font-medium text-foreground-dim leading-none"
+                    className="absolute text-[10px] font-medium text-muted-foreground leading-none"
                     style={{
                       left: isLateMonth
                         ? undefined
@@ -151,8 +157,7 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
 
           {/* Grid: 7 rows with Mon/Wed/Fri labels on left, 16 columns of days */}
           <div className="flex items-center gap-1.5 w-full">
-            {/* Day of week row labels */}
-            <div className="w-6 shrink-0 grid grid-rows-7 gap-1 min-[1440px]:gap-1.5 pr-1 text-[8.5px] sm:text-[9.5px] min-[1440px]:text-[10px] font-medium text-foreground-dim h-[70px] sm:h-[76px] min-[1440px]:h-[95px] 2xl:h-[115px]">
+            <div className="w-6 shrink-0 grid grid-rows-7 gap-1 min-[1440px]:gap-1.5 pr-1 text-[9px] min-[1440px]:text-[10px] font-medium text-muted-foreground h-[70px] sm:h-[76px] min-[1440px]:h-[95px] 2xl:h-[115px]">
               <span className="flex items-center justify-end leading-none">
                 Mon
               </span>
@@ -176,22 +181,22 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
                   className="grid grid-rows-7 gap-1 min-[1440px]:gap-1.5 h-full"
                 >
                   {week.map((cell) => {
-                    let cellBg = "bg-foreground/10 border border-border";
+                    let cellBg = "bg-muted border border-border/50";
                     if (cell.isFrozen) {
                       cellBg =
-                        "border border-dashed border-primary/60 bg-primary/10";
+                        "border border-dashed border-primary/60 bg-primary/20";
                     } else if (cell.level === 4) {
-                      cellBg = "bg-foreground border border-transparent";
+                      cellBg = "bg-primary border border-primary";
                     } else if (cell.level === 3) {
-                      cellBg = "bg-foreground/75 border border-transparent";
+                      cellBg = "bg-primary/80 border border-transparent";
                     } else if (cell.level === 2) {
-                      cellBg = "bg-foreground/50 border border-transparent";
+                      cellBg = "bg-primary/50 border border-transparent";
                     } else if (cell.level === 1) {
-                      cellBg = "bg-foreground/30 border border-transparent";
+                      cellBg = "bg-primary/25 border border-transparent";
                     }
 
                     const todayOutline = cell.isToday
-                      ? "ring-1.5 ring-foreground ring-offset-0.5 ring-offset-surface"
+                      ? "ring-1.5 ring-primary ring-offset-1 ring-offset-card"
                       : "";
 
                     const formattedDate = formatHeatmapDate({
@@ -211,7 +216,11 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
                     return (
                       <div
                         key={cell.dateStr}
-                        className={`w-full h-full rounded-[2px] min-[1440px]:rounded-[3.5px] transition-colors ${cellBg} ${todayOutline}`}
+                        className={cn(
+                          "w-full h-full rounded-[2.5px] transition-colors",
+                          cellBg,
+                          todayOutline
+                        )}
                         title={`${formattedDate}: ${statusText}`}
                       />
                     );
@@ -223,66 +232,51 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
         </div>
       </div>
 
-      {/* 3 Metric KPI Tiles: Perfectly centered vertical axis (Icon -> Number -> Label) */}
-      <div className="grid grid-cols-3 divide-x divide-border-subtle border-t border-border-subtle pt-3 sm:pt-4 min-[1440px]:pt-6 my-auto">
+      {/* 3 Metric KPI Tiles */}
+      <div className="grid grid-cols-3 divide-x divide-border/60 border-t border-border/60 pt-3 sm:pt-4 my-auto">
         {/* Metric 1: Current Streak */}
         <div className="flex flex-col items-center text-center px-1">
-          <div className="flex size-9 sm:size-10 min-[1440px]:size-12 items-center justify-center rounded-xl bg-surface-elevated border border-border text-foreground mb-1.5 min-[1440px]:mb-2.5 shadow-2xs">
-            <Flame
-              className="size-4.5 sm:size-5 min-[1440px]:size-6 text-foreground"
-              strokeWidth={1.9}
-            />
+          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-1.5 shadow-2xs">
+            <Flame className="size-4.5 sm:size-5 fill-primary" />
           </div>
-          <div className="flex items-baseline justify-center">
-            <span className="text-[22px] sm:text-[24px] min-[1440px]:text-[32px] font-bold leading-none tracking-tight text-foreground tabular-nums">
-              {currentStreak}
-            </span>
-          </div>
-          <span className="text-[9px] sm:text-[10px] min-[1440px]:text-[11px] font-semibold text-foreground-dim uppercase tracking-wider mt-1 truncate max-w-full">
+          <span className="text-xl sm:text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums">
+            {currentStreak}
+          </span>
+          <span className="text-[10px] font-medium text-muted-foreground mt-1">
             Current Days
           </span>
         </div>
 
         {/* Metric 2: Best Streak */}
         <div className="flex flex-col items-center text-center px-1">
-          <div className="flex size-9 sm:size-10 min-[1440px]:size-12 items-center justify-center rounded-xl bg-surface-elevated border border-border text-foreground mb-1.5 min-[1440px]:mb-2.5 shadow-2xs">
-            <Trophy
-              className="size-4.5 sm:size-5 min-[1440px]:size-6 text-foreground"
-              strokeWidth={1.9}
-            />
+          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-muted border border-border text-foreground mb-1.5 shadow-2xs">
+            <Trophy className="size-4.5 sm:size-5 text-amber-600 dark:text-amber-400" />
           </div>
-          <div className="flex items-baseline justify-center">
-            <span className="text-[22px] sm:text-[24px] min-[1440px]:text-[32px] font-bold leading-none tracking-tight text-foreground tabular-nums">
-              {longestStreak}
-            </span>
-          </div>
-          <span className="text-[9px] sm:text-[10px] min-[1440px]:text-[11px] font-semibold text-foreground-dim uppercase tracking-wider mt-1 truncate max-w-full">
+          <span className="text-xl sm:text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums">
+            {longestStreak}
+          </span>
+          <span className="text-[10px] font-medium text-muted-foreground mt-1">
             Best Record
           </span>
         </div>
 
         {/* Metric 3: Streak Freezes */}
         <div className="flex flex-col items-center text-center px-1">
-          <div className="flex size-9 sm:size-10 min-[1440px]:size-12 items-center justify-center rounded-xl bg-surface-elevated border border-border text-foreground mb-1.5 min-[1440px]:mb-2.5 shadow-2xs">
-            <Snowflake
-              className="size-4.5 sm:size-5 min-[1440px]:size-6 text-foreground"
-              strokeWidth={1.9}
-            />
+          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-muted border border-border text-sky-600 dark:text-sky-400 mb-1.5 shadow-2xs">
+            <Snowflake className="size-4.5 sm:size-5" />
           </div>
-          <div className="flex items-baseline justify-center">
-            <span className="text-[22px] sm:text-[24px] min-[1440px]:text-[32px] font-bold leading-none tracking-tight text-foreground tabular-nums">
-              {streakFreezes}
-            </span>
-          </div>
-          <span className="text-[9px] sm:text-[10px] min-[1440px]:text-[11px] font-semibold text-foreground-dim uppercase tracking-wider mt-1 truncate max-w-full">
-            Freeze Shields
+          <span className="text-xl sm:text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums">
+            {streakFreezes}
+          </span>
+          <span className="text-[10px] font-medium text-muted-foreground mt-1">
+            Freezes Left
           </span>
         </div>
       </div>
 
-      {/* Countdown / Takeaway Line */}
-      <div className="short-laptop-hide max-h-[799px]:hidden border-t border-border-subtle pt-1.5 shrink-0">
-        <p className="text-[12px] sm:text-[13px] font-normal text-foreground-secondary truncate">
+      {/* Takeaway Line */}
+      <div className="border-t border-border/60 pt-1.5 shrink-0">
+        <p className="text-xs text-muted-foreground truncate">
           {takeaway}
         </p>
       </div>

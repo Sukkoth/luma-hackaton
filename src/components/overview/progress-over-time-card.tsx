@@ -12,6 +12,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import type { OverviewStackedProgressData } from "@/actions/overview";
+import { cn } from "@/lib/utils";
 
 type ProgressOverTimeCardProps = {
   data: OverviewStackedProgressData;
@@ -36,23 +37,24 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
   return (
     <div className="ui-card flex h-full flex-col justify-between p-4.5 sm:p-5 shadow-xs">
       {/* Header with Range Toggle */}
-      <div className="flex items-center justify-between pb-2 border-b border-border-subtle shrink-0">
-        <h3 className="text-[13.5px] font-medium tracking-tight text-foreground">
-          Progress Over Time
+      <div className="flex items-center justify-between pb-2 border-b border-border/60 shrink-0">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground">
+          Reading Velocity & Progress
         </h3>
 
         {/* 14d | 30d | 90d Toggle */}
-        <div className="flex items-center rounded-full border border-border bg-surface-elevated p-0.5">
+        <div className="flex items-center rounded-xl border border-border bg-muted p-0.5">
           {(["14d", "30d", "90d"] as const).map((rng) => (
             <button
               key={rng}
               type="button"
               onClick={() => setSelectedRange(rng)}
-              className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-all cursor-pointer ${
+              className={cn(
+                "rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-all cursor-pointer",
                 selectedRange === rng
-                  ? "bg-primary text-primary-foreground shadow-2xs"
-                  : "text-foreground-secondary hover:text-foreground"
-              }`}
+                  ? "bg-card text-foreground shadow-2xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               {rng}
             </button>
@@ -61,7 +63,7 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
       </div>
 
       {/* Hero Stacked Area Chart */}
-      <div className="relative flex-1 min-h-0 w-full pt-1">
+      <div className="relative flex-1 min-h-0 w-full pt-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={points}
@@ -69,13 +71,13 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
           >
             <CartesianGrid
               stroke="var(--border)"
-              strokeOpacity={0.4}
+              strokeOpacity={0.6}
               vertical={false}
             />
             <XAxis
               dataKey="label"
               stroke="var(--foreground-dim)"
-              fontSize={10.5}
+              fontSize={11}
               tickLine={false}
               axisLine={false}
               ticks={points
@@ -84,7 +86,7 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
             />
             <YAxis
               stroke="var(--foreground-dim)"
-              fontSize={10.5}
+              fontSize={11}
               tickLine={false}
               axisLine={false}
               domain={[
@@ -97,10 +99,10 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
             />
             <Tooltip
               cursor={{
-                stroke: "var(--foreground)",
-                strokeWidth: 1,
+                stroke: "var(--primary)",
+                strokeWidth: 1.5,
                 strokeDasharray: "3 3",
-                strokeOpacity: 0.5,
+                strokeOpacity: 0.6,
               }}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null;
@@ -110,52 +112,53 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
                 const isProjected =
                   d.projected !== null && d.totalActual === null;
                 return (
-                  <div className="rounded-lg border border-border bg-surface p-2 shadow-md text-[11px] backdrop-blur-md">
-                    <p className="font-semibold text-foreground mb-1">
+                  <div className="rounded-xl border border-border bg-card p-3 shadow-lg text-xs backdrop-blur-md">
+                    <p className="font-semibold text-foreground mb-1.5">
                       {d.label} {isProjected && "(Projected)"}
                     </p>
                     {isProjected ? (
-                      <p className="text-foreground-secondary">
+                      <p className="text-muted-foreground">
                         Projected Total:{" "}
                         <span className="font-semibold text-foreground">
                           {d.projected?.toLocaleString()} ch
                         </span>
                       </p>
                     ) : (
-                      <>
-                        <p className="text-foreground-secondary">
-                          Old Testament:{" "}
+                      <div className="space-y-1">
+                        <p className="text-muted-foreground flex justify-between gap-3">
+                          <span>Old Testament:</span>
                           <span className="font-semibold text-foreground">
                             {d.otActual?.toLocaleString()} ch
                           </span>
                         </p>
-                        <p className="text-foreground-secondary">
-                          New Testament:{" "}
+                        <p className="text-muted-foreground flex justify-between gap-3">
+                          <span>New Testament:</span>
                           <span className="font-semibold text-foreground">
                             {d.ntActual?.toLocaleString()} ch
                           </span>
                         </p>
-                        <div className="mt-1 pt-1 border-t border-border-subtle flex justify-between font-bold text-foreground">
+                        <div className="mt-1.5 pt-1.5 border-t border-border flex justify-between font-bold text-foreground">
                           <span>Total:</span>
-                          <span>{d.totalActual?.toLocaleString()} ch</span>
+                          <span className="text-primary font-bold">
+                            {d.totalActual?.toLocaleString()} ch
+                          </span>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 );
               }}
             />
 
-            {/* Stacked Old Testament Area */}
+            {/* Stacked Old Testament Area with Warm Amber Theme */}
             <Area
               type="monotone"
               dataKey="otActual"
               stackId="progress"
               name="Old Testament"
-              stroke="var(--foreground)"
-              strokeWidth={1.5}
-              fill="var(--foreground)"
-              fillOpacity={0.8}
+              stroke="var(--primary)"
+              strokeWidth={2}
+              fill="url(#overviewAreaGradient)"
               isAnimationActive={true}
               animationDuration={600}
             />
@@ -166,10 +169,10 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
               dataKey="ntActual"
               stackId="progress"
               name="New Testament"
-              stroke="var(--foreground)"
+              stroke="var(--primary)"
               strokeWidth={1.5}
-              fill="var(--foreground)"
-              fillOpacity={0.3}
+              fill="var(--primary)"
+              fillOpacity={0.15}
               isAnimationActive={true}
               animationDuration={600}
             />
@@ -179,10 +182,10 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
               type="monotone"
               dataKey="projected"
               name="Projected Pace"
-              stroke="var(--foreground)"
+              stroke="var(--foreground-dim)"
               strokeWidth={2}
               strokeDasharray="4 4"
-              strokeOpacity={0.7}
+              strokeOpacity={0.8}
               dot={false}
               isAnimationActive={true}
               animationDuration={600}
@@ -192,8 +195,8 @@ export function ProgressOverTimeCard({ data }: ProgressOverTimeCardProps) {
       </div>
 
       {/* Takeaway line */}
-      <div className="short-laptop-hide max-h-[759px]:hidden mt-2 border-t border-border-subtle pt-2 shrink-0">
-        <p className="text-[12px] font-normal text-foreground-secondary truncate">
+      <div className="mt-2 border-t border-border/60 pt-2 shrink-0">
+        <p className="text-xs text-muted-foreground truncate">
           {takeaway}
         </p>
       </div>
