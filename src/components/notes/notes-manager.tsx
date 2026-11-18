@@ -1150,7 +1150,7 @@ export function NotesManager({
                           </h3>
                           <div className="flex items-center gap-1 shrink-0">
                             {note.isArchived && (
-                              <span className="ui-pill text-[9.5px] font-medium text-warning">
+                              <span className="rounded-md border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
                                 Archived
                               </span>
                             )}

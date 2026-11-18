@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Calendar, Bookmark, X } from "lucide-react";
+import { BookOpen, Calendar, Bookmark, X } from "lucide-react";
 import type { VerseOfTheDayData } from "@/lib/youversion";
 
 type Props = {
@@ -28,97 +28,91 @@ export function VerseOfTheDayBanner({
 
   return (
     <>
-      <section className="mt-3 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* Verse of the Day */}
-        <div className="ui-card relative flex flex-col justify-between overflow-hidden p-6 sm:col-span-2">
+        <div className="ui-card relative flex flex-col justify-between overflow-hidden p-5 sm:p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-[10px] border border-border bg-primary-muted text-primary">
-                  <Sparkles className="size-3.5" />
+                <span className="flex size-7 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
+                  <BookOpen className="size-3.5" />
                 </span>
-                <span className="text-[12.5px] font-medium tracking-wide text-foreground-secondary">
-                  Verse of the Day
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="ui-pill text-[10px] font-medium">
-                  YouVersion
-                </span>
-                <span className="ui-pill-primary text-[10px] font-medium uppercase tracking-wider">
-                  Daily Light
+                <span className="text-xs font-semibold text-foreground">
+                  Daily Scripture
                 </span>
               </div>
+              <span className="text-xs text-muted-foreground font-medium">
+                YouVersion
+              </span>
             </div>
 
             {verse?.imageUrl ? (
               <button
                 type="button"
                 onClick={() => setShowArtworkModal(true)}
-                className="group mt-4 block w-full cursor-pointer text-left transition-opacity hover:opacity-85 focus:outline-hidden"
+                className="group mt-3.5 block w-full cursor-pointer text-left transition-opacity hover:opacity-90 focus:outline-none"
                 aria-label="View verse artwork"
                 title="Click to view artwork"
               >
-                <blockquote className="text-[20px] font-normal leading-relaxed text-foreground transition-colors group-hover:text-foreground-secondary sm:text-[22px]">
+                <blockquote className="text-lg sm:text-xl font-normal leading-relaxed text-foreground tracking-tight transition-colors group-hover:text-foreground/80">
                   &ldquo;{text}&rdquo;
                 </blockquote>
               </button>
             ) : (
-              <blockquote className="mt-4 text-[20px] font-normal leading-relaxed text-foreground sm:text-[22px]">
+              <blockquote className="mt-3.5 text-lg sm:text-xl font-normal leading-relaxed text-foreground tracking-tight">
                 &ldquo;{text}&rdquo;
               </blockquote>
             )}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-3 text-[13px] text-foreground-dim">
-            <span className="font-semibold text-foreground">{reference}</span>
-            <div className="flex items-center gap-3">
-              <span>{version}</span>
-            </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs">
+            <span className="font-semibold text-primary">{reference}</span>
+            <span className="text-muted-foreground">{version}</span>
           </div>
         </div>
 
         {/* Today's Active Plan Reading */}
-        <div className="ui-card flex flex-col justify-between p-6">
+        <div className="ui-card flex flex-col justify-between p-5 sm:p-6">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12.5px] font-medium text-foreground-secondary">
+              <span className="flex items-center gap-2 text-xs font-semibold text-foreground">
                 <Calendar className="size-3.5 text-primary" />
                 <span>Today&apos;s Reading</span>
               </span>
               <Link
                 href="/plans"
-                className="text-[12px] font-medium text-primary underline-offset-4 hover:underline"
+                className="text-xs font-semibold text-primary hover:underline"
               >
                 View Plans
               </Link>
             </div>
 
-            <div className="mt-4 rounded-[14px] border border-border-subtle bg-surface-elevated p-4">
+            <div className="mt-3.5 rounded-xl border border-border/60 bg-muted/50 p-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-7 items-center justify-center rounded-[10px] bg-primary text-primary-foreground">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
                     <Bookmark className="size-3.5" />
                   </div>
                   <div>
-                    <h4 className="text-[14px] font-medium text-foreground">
-                      Romans 8:1–39
+                    <h4 className="text-xs font-semibold text-foreground">
+                      Romans 8
                     </h4>
-                    <p className="text-[11px] text-foreground-dim">
-                      Bible in a Year • Day 212
+                    <p className="text-[11px] text-muted-foreground">
+                      Assigned Reading
                     </p>
                   </div>
                 </div>
-                <span className="ui-pill text-[10px] font-medium">94%</span>
+                <span className="text-xs font-bold text-primary tabular-nums">
+                  Day 1
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between border-t border-border-subtle pt-3 text-[12px] text-foreground-dim">
-            <span>Bible Tracker Total</span>
-            <span className="font-medium text-foreground">
-              {totalReadChapters} / {totalChaptersAcrossCanon} ch (
-              {canonPercentage}%)
+          <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs">
+            <span className="text-muted-foreground">Canon Progress</span>
+            <span className="font-semibold text-foreground tabular-nums">
+              {totalReadChapters} / {totalChaptersAcrossCanon} ({canonPercentage}%)
             </span>
           </div>
         </div>
@@ -130,29 +124,29 @@ export function VerseOfTheDayBanner({
           role="dialog"
           aria-modal="true"
           aria-label="Verse of the Day Artwork"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md animate-in fade-in"
         >
           <div className="ui-card relative max-h-[90vh] w-full max-w-lg overflow-hidden p-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-[14px] font-medium text-foreground">
+                <span className="text-sm font-semibold text-foreground">
                   {reference}
                 </span>
-                <span className="ui-pill text-[10px] font-medium text-foreground-dim">
+                <span className="text-xs text-muted-foreground">
                   {version}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowArtworkModal(false)}
-                className="flex size-7 items-center justify-center rounded-full bg-surface-elevated text-foreground-secondary transition-colors hover:text-foreground cursor-pointer"
+                className="flex size-7 items-center justify-center rounded-lg bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
                 aria-label="Close"
               >
                 <X className="size-4" />
               </button>
             </div>
 
-            <div className="relative mt-4 aspect-square w-full overflow-hidden rounded-[14px] bg-surface-elevated">
+            <div className="relative mt-4 aspect-square w-full overflow-hidden rounded-xl bg-muted">
               <Image
                 src={verse.imageUrl}
                 alt={`${reference} Verse of the Day Artwork`}
@@ -165,7 +159,7 @@ export function VerseOfTheDayBanner({
             </div>
 
             {verse.attribution && (
-              <p className="mt-3 text-center text-[11px] text-foreground-dim">
+              <p className="mt-3 text-center text-xs text-muted-foreground">
                 {verse.attribution}
               </p>
             )}

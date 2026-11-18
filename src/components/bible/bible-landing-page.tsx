@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   BookOpen,
@@ -12,7 +11,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { BIBLE_VERSIONS, detectDefaultVersion } from "@/lib/bible-versions";
-import { useTheme } from "@/components/theme/theme-provider";
 
 const OLD_TESTAMENT_BOOKS = [
   { id: "gen", name: "Genesis", chapters: 50 },
@@ -113,7 +111,6 @@ export function BibleLandingPage() {
   const [activeTab, setActiveTab] = useState<"ot" | "nt" | "search">("ot");
   const [lastRead, setLastRead] = useState<LastRead | null>(null);
   const [selectedVersion] = useState(() => detectDefaultVersion({}));
-  const router = useRouter();
 
   // Initialize lastRead from localStorage on mount
   useEffect(() => {
@@ -137,23 +134,17 @@ export function BibleLandingPage() {
 
   const booksForTab = activeTab === "ot" ? OLD_TESTAMENT_BOOKS : NEW_TESTAMENT_BOOKS;
 
-  const navigateToBible = useCallback((bookId: string, chapter: number = 1) => {
-    const params = new URLSearchParams();
-    params.set("v", selectedVersion.id.toString());
-    router.push(`/bible/${bookId}/${chapter}?${params.toString()}`);
-  }, [router, selectedVersion.id]);
-
   const continueReading = lastRead ? (
     <Link
       href={`/bible/${lastRead.bookId}/${lastRead.chapter}?v=${lastRead.versionId}`}
       className="ui-card flex items-center gap-4 p-4 shadow-xs border-primary/20 bg-primary/5"
     >
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-primary text-primary-foreground">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
         <BookOpen className="size-6" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+          <span className="text-xs font-semibold text-primary">
             Continue Reading
           </span>
         </div>
@@ -242,7 +233,7 @@ export function BibleLandingPage() {
           href={`/bible/rom/8?v=${selectedVersion.id}`}
           className="ui-card flex flex-col items-center gap-3 p-5 text-center shadow-xs hover:shadow-sm transition-shadow cursor-pointer"
         >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-purple-500/10 text-purple-600 dark:text-purple-400">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <Clock className="size-5" />
           </div>
           <span className="text-[13px] font-medium text-foreground">Romans 8</span>

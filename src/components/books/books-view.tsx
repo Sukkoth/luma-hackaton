@@ -24,6 +24,7 @@ import { BooksAuthModal } from "./books-auth-modal";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import type { VerseOfTheDayData } from "@/lib/youversion";
+import { cn } from "@/lib/utils";
 
 type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
@@ -67,7 +68,6 @@ export function BooksView({
   const canonBooks = getBibleBooks(canon);
   const canonStats = getCanonTestamentChapters(canon);
 
-  // Dynamically compute category filters based on books present in this canon
   const availableCategories = Array.from(
     new Set(canonBooks.map((b) => b.category))
   );
@@ -78,7 +78,6 @@ export function BooksView({
     ...availableCategories,
   ];
 
-  // Filter books
   const filteredBooks = canonBooks.filter((book) => {
     const matchesSearch =
       book.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,7 +91,6 @@ export function BooksView({
     return book.category === selectedCategory;
   });
 
-  // Calculate totals
   const totalChaptersAcrossCanon = canonStats.total;
   const totalReadChapters = Object.values(readChapters).reduce(
     (acc, chs) => acc + chs.length,
@@ -102,7 +100,6 @@ export function BooksView({
     (totalReadChapters / totalChaptersAcrossCanon) * 100
   );
 
-  // Handle chapter toggle for active book - requires authenticated active tracker
   const handleToggleChapter = ({
     bookId,
     bookName,
@@ -151,7 +148,6 @@ export function BooksView({
     });
   };
 
-  // Mark all chapters as read for active book
   const handleMarkAllChapters = ({ book }: { book: BibleBook }) => {
     if (!activeTrackerId) {
       setShowAuthModal(true);
@@ -189,7 +185,6 @@ export function BooksView({
     });
   };
 
-  // Reset all chapters for active book
   const handleClearAllChapters = ({ bookId }: { bookId: string }) => {
     if (!activeTrackerId) {
       setShowAuthModal(true);
@@ -197,7 +192,6 @@ export function BooksView({
     }
 
     const current = readChapters[bookId] ?? [];
-
     setReadChapters((prev) => ({
       ...prev,
       [bookId]: [],
@@ -227,8 +221,8 @@ export function BooksView({
       trackers={trackers}
       activeTrackerId={activeTrackerId}
     >
-      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
-        {/* Top Highlight Cards: Verse of the Day & Active Reading */}
+      <div className="w-full max-w-7xl mx-auto space-y-6">
+        {/* Top Highlight Cards */}
         <VerseOfTheDayBanner
           totalReadChapters={totalReadChapters}
           totalChaptersAcrossCanon={totalChaptersAcrossCanon}
@@ -237,43 +231,43 @@ export function BooksView({
         />
 
         {/* Books Section */}
-        <section className="ui-card mt-4 p-5 sm:p-6">
+        <section className="ui-card p-5 sm:p-6">
           {/* Header & Controls Toolbar */}
-          <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4 border-b border-border/60 pb-5 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-[20px] font-medium tracking-tight text-foreground">
-                  All Books
+                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  Scripture Books
                 </h2>
-                <span className="ui-pill text-[11px] font-medium">
-                  {filteredBooks.length} Books
+                <span className="text-xs text-muted-foreground font-semibold">
+                  {filteredBooks.length} of {canonBooks.length} Books
                 </span>
                 {trackerName && (
-                  <span className="hidden rounded-full border border-border bg-surface-elevated px-2.5 py-0.5 text-[10px] font-medium text-foreground sm:inline-block">
+                  <span className="hidden sm:inline-block rounded-lg bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">
                     {trackerName}
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-[13px] font-normal text-foreground-secondary">
-                Tap any book to view chapters and toggle your reading progress.
+              <p className="mt-1 text-xs text-muted-foreground">
+                Select any book to check off chapters or open the Scripture reader.
               </p>
             </div>
 
             {/* Search Box */}
             <div className="relative w-full sm:w-64">
-              <Search className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
+              <Search className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search books..."
-                className="w-full rounded-[14px] border border-border bg-surface-elevated py-2 pr-3.5 pl-9 text-[13px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
+                className="w-full rounded-xl border border-input bg-card py-2 pr-3.5 pl-9 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -284,7 +278,7 @@ export function BooksView({
           {/* Category Filter Pills - Horizontally scrollable on small screens */}
           <div
             data-testid="books-category-filter"
-            className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
+            className="mt-4 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
           >
             {categoryFilters.map((cat) => {
               const isSelected = selectedCategory === cat;
@@ -293,11 +287,12 @@ export function BooksView({
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`shrink-0 rounded-[12px] px-3.5 py-1.5 text-[12px] transition-all cursor-pointer ${
+                  className={cn(
+                    "shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
                     isSelected
-                      ? "border border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
-                      : "border border-border bg-surface-elevated font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                  }`}
+                      ? "bg-primary text-primary-foreground shadow-2xs"
+                      : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
                 >
                   {cat}
                 </button>
@@ -305,8 +300,8 @@ export function BooksView({
             })}
           </div>
 
-          {/* 66 Books Grid */}
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          {/* Books Grid */}
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {filteredBooks.map((book) => {
               const readList = readChapters[book.id] ?? [];
               return (
@@ -321,8 +316,8 @@ export function BooksView({
           </div>
 
           {filteredBooks.length === 0 && (
-            <div className="py-16 text-center text-foreground-dim">
-              <p className="text-[15px] font-normal">
+            <div className="py-16 text-center text-muted-foreground">
+              <p className="text-sm">
                 No Bible books found matching &ldquo;{searchQuery}&rdquo;.
               </p>
               <button
@@ -331,7 +326,7 @@ export function BooksView({
                   setSearchQuery("");
                   setSelectedCategory("All");
                 }}
-                className="mt-3 rounded-xl border border-white/80 bg-white/80 px-4 py-1.5 text-[13px] font-medium text-black shadow-2xs hover:bg-white"
+                className="mt-3 rounded-xl border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
               >
                 Reset Filters
               </button>
