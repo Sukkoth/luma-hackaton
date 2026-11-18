@@ -192,7 +192,7 @@ export function TrackerEditModal({
                   Bible Canon (Locked)
                 </span>
               </div>
-              <span className="ui-pill text-[10px] font-medium">
+              <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[10px] font-medium text-foreground-secondary">
                 {currentCanon.totalBooks} Books
               </span>
             </div>
