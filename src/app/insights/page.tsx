@@ -192,7 +192,7 @@ export default async function InsightsPage({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="ui-pill text-[12px] font-normal">
+              <span className="rounded-full bg-surface-elevated border border-border px-3 py-1 text-[12px] font-medium text-foreground-secondary">
                 Active: {activeTrackerName}
               </span>
             </div>

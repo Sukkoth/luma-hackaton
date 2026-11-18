@@ -3,20 +3,24 @@
 import { Check, Lock, Share2 } from "lucide-react";
 import type { UserAchievementItem } from "@/actions/achievements";
 import { AchievementIcon } from "./achievement-icon";
+import { cn } from "@/lib/utils";
 
 export type AchievementCardProps = {
-  achievement: UserAchievementItem;
-  onSelectAction: ({
-    achievement,
-  }: {
-    achievement: UserAchievementItem;
-  }) => void;
+  item?: UserAchievementItem;
+  achievement?: UserAchievementItem;
+  onSelectAction?: (params: { achievement: UserAchievementItem }) => void;
+  onSelect?: () => void;
 };
 
 export function AchievementCard({
-  achievement,
+  item,
+  achievement: passedAchievement,
   onSelectAction,
+  onSelect,
 }: AchievementCardProps) {
+  const achievement = item || passedAchievement;
+  if (!achievement) return null;
+
   const {
     title,
     description,
@@ -28,32 +32,42 @@ export function AchievementCard({
     percentage,
   } = achievement;
 
+  const handleClick = () => {
+    if (onSelectAction) {
+      onSelectAction({ achievement });
+    } else if (onSelect) {
+      onSelect();
+    }
+  };
+
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => onSelectAction({ achievement })}
+      onClick={handleClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onSelectAction({ achievement });
+          handleClick();
         }
       }}
-      className={`group ui-card flex flex-col justify-between p-5 rounded-[22px] transition-all duration-200 cursor-pointer text-left ${
+      className={cn(
+        "group ui-card flex flex-col justify-between p-4.5 sm:p-5 rounded-2xl transition-all duration-200 cursor-pointer text-left",
         isUnlocked
-          ? "border-border-strong hover:border-foreground/30 hover:shadow-md bg-surface"
-          : "hover:border-border-strong hover:bg-surface-elevated/40"
-      }`}
+          ? "border-primary/30 hover:border-primary/60 hover:shadow-md bg-card"
+          : "hover:border-border hover:bg-muted/40"
+      )}
     >
       <div>
-        {/* Top Header: Icon & Status Pill */}
-        <div className="flex items-center justify-between gap-3 mb-3.5">
+        {/* Top Header: Icon & Status */}
+        <div className="flex items-center justify-between gap-3 mb-3">
           <div
-            className={`flex size-11 shrink-0 items-center justify-center rounded-[14px] border transition-transform duration-200 group-hover:scale-105 ${
+            className={cn(
+              "flex size-10 shrink-0 items-center justify-center rounded-xl border transition-transform duration-200 group-hover:scale-105",
               isUnlocked
-                ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                : "bg-surface-elevated text-foreground-dim border-border"
-            }`}
+                ? "bg-primary/10 text-primary border-primary/20 shadow-2xs"
+                : "bg-muted text-muted-foreground border-border"
+            )}
           >
             <AchievementIcon name={iconName} className="size-5" />
           </div>
@@ -61,21 +75,21 @@ export function AchievementCard({
           <div className="flex items-center gap-1.5">
             {isUnlocked ? (
               <div className="flex items-center gap-1.5">
-                <span className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[10.5px] font-semibold text-primary-foreground shadow-2xs">
+                <span className="flex items-center gap-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                   <Check className="size-3" strokeWidth={2.5} />
-                  <span>UNLOCKED</span>
+                  <span>Unlocked</span>
                 </span>
                 <span
                   title="Share Milestone"
-                  className="flex size-6 items-center justify-center rounded-full text-foreground-dim opacity-70 transition-opacity hover:opacity-100"
+                  className="flex size-6 items-center justify-center rounded-lg text-muted-foreground opacity-70 transition-opacity hover:opacity-100"
                 >
                   <Share2 className="size-3.5" />
                 </span>
               </div>
             ) : (
-              <span className="flex items-center gap-1 rounded-full border border-border bg-surface-elevated px-2 py-0.5 text-[10px] font-medium text-foreground-secondary">
-                <Lock className="size-2.5" />
-                <span>{percentage > 0 ? "IN PROGRESS" : "LOCKED"}</span>
+              <span className="flex items-center gap-1 rounded-lg border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                <Lock className="size-3" />
+                <span>{percentage > 0 ? `${percentage}%` : "Locked"}</span>
               </span>
             )}
           </div>
@@ -83,42 +97,43 @@ export function AchievementCard({
 
         {/* Title & Description */}
         <h3
-          className={`text-[15px] font-semibold tracking-tight transition-colors ${
+          className={cn(
+            "text-sm font-semibold tracking-tight transition-colors",
             isUnlocked
               ? "text-foreground"
-              : "text-foreground-secondary group-hover:text-foreground"
-          }`}
+              : "text-muted-foreground group-hover:text-foreground"
+          )}
         >
           {title}
         </h3>
-        <p className="mt-1 text-[12px] leading-relaxed text-foreground-dim line-clamp-2">
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-2">
           {description}
         </p>
       </div>
 
       {/* Progress Footer */}
-      <div className="mt-4 pt-3 border-t border-border-subtle">
-        <div className="flex items-center justify-between text-[11px] mb-1.5">
-          <span className="font-semibold text-foreground-dim uppercase tracking-wider text-[9.5px]">
+      <div className="mt-4 pt-3 border-t border-border/60">
+        <div className="flex items-center justify-between text-xs mb-1.5">
+          <span className="text-muted-foreground font-medium text-[11px]">
             {category}
           </span>
           <span
-            className={`font-semibold tabular-nums text-[11.5px] ${
-              isUnlocked
-                ? "text-foreground font-bold"
-                : "text-foreground-secondary"
-            }`}
+            className={cn(
+              "font-semibold tabular-nums text-xs",
+              isUnlocked ? "text-primary" : "text-muted-foreground"
+            )}
           >
             {current} / {total}
           </span>
         </div>
 
         {/* Track */}
-        <div className="h-1.5 w-full rounded-full bg-surface-elevated overflow-hidden border border-border-subtle">
+        <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-500 ease-out ${
-              isUnlocked ? "bg-primary" : "bg-foreground-secondary/40"
-            }`}
+            className={cn(
+              "h-full rounded-full transition-all duration-500 ease-out",
+              isUnlocked ? "bg-primary" : "bg-muted-foreground/30"
+            )}
             style={{
               width: `${percentage}%`,
             }}

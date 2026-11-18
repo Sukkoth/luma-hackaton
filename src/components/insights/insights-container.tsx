@@ -8,6 +8,7 @@ import type { UserAchievementsData } from "@/actions/achievements";
 import { InsightsKpiCards } from "@/components/insights/insights-kpi-cards";
 import { CanonCoverageSection } from "@/components/insights/canon-coverage-section";
 import { AchievementsView } from "@/components/achievements/achievements-view";
+import { cn } from "@/lib/utils";
 
 export type InsightsTab = "coverage" | "achievements";
 
@@ -44,15 +45,16 @@ export function InsightsContainer({
   return (
     <div className="w-full space-y-6">
       {/* Top Segmented Tab Switcher */}
-      <div className="flex items-center gap-1.5 rounded-[18px] border border-border bg-surface p-1 w-fit shadow-xs">
+      <div className="flex items-center gap-1 rounded-2xl border border-border bg-card p-1 w-fit shadow-2xs">
         <button
           type="button"
           onClick={() => setActiveTab("coverage")}
-          className={`flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] font-medium transition-all cursor-pointer ${
+          className={cn(
+            "flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-medium transition-all cursor-pointer",
             activeTab === "coverage"
-              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-              : "bg-transparent text-foreground-secondary hover:text-foreground hover:bg-surface-elevated"
-          }`}
+              ? "bg-primary text-primary-foreground shadow-2xs font-semibold"
+              : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted"
+          )}
         >
           <TrendingUp className="size-4" />
           <span>Scripture Coverage</span>
@@ -61,20 +63,22 @@ export function InsightsContainer({
         <button
           type="button"
           onClick={() => setActiveTab("achievements")}
-          className={`flex items-center gap-2 rounded-[14px] px-4 py-2 text-[13px] font-medium transition-all cursor-pointer ${
+          className={cn(
+            "flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-medium transition-all cursor-pointer",
             activeTab === "achievements"
-              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-              : "bg-transparent text-foreground-secondary hover:text-foreground hover:bg-surface-elevated"
-          }`}
+              ? "bg-primary text-primary-foreground shadow-2xs font-semibold"
+              : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted"
+          )}
         >
           <Award className="size-4" />
-          <span>Badges & Achievements</span>
+          <span>Badges & Milestones</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold tabular-nums ${
+            className={cn(
+              "rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums",
               activeTab === "achievements"
                 ? "bg-primary-foreground/20 text-primary-foreground"
-                : "bg-surface-elevated text-foreground-dim"
-            }`}
+                : "bg-muted text-muted-foreground"
+            )}
           >
             {achievementsData.stats.unlocked}/{achievementsData.stats.total}
           </span>

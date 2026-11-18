@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
-import { Award, CheckCircle2, Lock, Sparkles } from "lucide-react";
+import { Award, CheckCircle2, Lock, Flame } from "lucide-react";
 import type {
   UserAchievementItem,
   UserAchievementsStats,
@@ -10,6 +10,7 @@ import type {
 import type { AchievementCategory } from "@/data/achievements";
 import { AchievementCard } from "./achievement-card";
 import { ShareMilestoneModal } from "./share-milestone-modal";
+import { cn } from "@/lib/utils";
 
 export type StatusFilter = "All" | "Unlocked" | "Locked";
 
@@ -25,14 +26,21 @@ const CATEGORIES: ReadonlyArray<AchievementCategory> = [
 ];
 
 export type AchievementsViewProps = {
-  achievements: ReadonlyArray<UserAchievementItem>;
+  achievements?: ReadonlyArray<UserAchievementItem>;
+  unlockedList?: ReadonlyArray<UserAchievementItem>;
   stats: UserAchievementsStats;
+  categories?: ReadonlyArray<unknown>;
 };
 
 export function AchievementsView({
-  achievements,
+  achievements: passedAchievements,
+  unlockedList,
   stats,
 }: AchievementsViewProps) {
+  const achievements = useMemo(
+    () => passedAchievements || unlockedList || [],
+    [passedAchievements, unlockedList]
+  );
   const [statusFilter, setStatusFilter] = useQueryState(
     "status",
     parseAsStringLiteral(["All", "Unlocked", "Locked"] as const).withDefault(
@@ -48,15 +56,11 @@ export function AchievementsView({
 
   const filteredAchievements = useMemo(() => {
     return achievements.filter((ach) => {
-      // 1. Status Filter
       if (statusFilter === "Unlocked" && !ach.isUnlocked) return false;
       if (statusFilter === "Locked" && ach.isUnlocked) return false;
-
-      // 2. Category Filter
       if (categoryFilter !== "All" && ach.category !== categoryFilter) {
         return false;
       }
-
       return true;
     });
   }, [achievements, statusFilter, categoryFilter]);
@@ -64,72 +68,72 @@ export function AchievementsView({
   return (
     <section className="space-y-6">
       {/* KPI Overview Tiles */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="ui-card p-4 rounded-[20px]">
-          <div className="flex items-center gap-2 text-foreground-dim mb-1">
-            <Award className="size-4" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="ui-card p-4.5 rounded-2xl">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
+            <Award className="size-4 text-primary" />
+            <span className="text-xs font-semibold text-foreground">
               Total Badges
             </span>
           </div>
-          <span className="text-[26px] font-bold tracking-tight text-foreground tabular-nums">
+          <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {stats.total}
           </span>
         </div>
 
-        <div className="ui-card p-4 rounded-[20px]">
-          <div className="flex items-center gap-2 text-foreground-dim mb-1">
-            <CheckCircle2 className="size-4" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+        <div className="ui-card p-4.5 rounded-2xl">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
+            <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-xs font-semibold text-foreground">
               Unlocked
             </span>
           </div>
-          <span className="text-[26px] font-bold tracking-tight text-foreground tabular-nums">
+          <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {stats.unlocked}
           </span>
         </div>
 
-        <div className="ui-card p-4 rounded-[20px]">
-          <div className="flex items-center gap-2 text-foreground-dim mb-1">
-            <Lock className="size-4" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+        <div className="ui-card p-4.5 rounded-2xl">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
+            <Lock className="size-4 text-muted-foreground" />
+            <span className="text-xs font-semibold text-foreground">
               In Progress
             </span>
           </div>
-          <span className="text-[26px] font-bold tracking-tight text-foreground tabular-nums">
+          <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {stats.locked}
           </span>
         </div>
 
-        <div className="ui-card p-4 rounded-[20px]">
-          <div className="flex items-center gap-2 text-foreground-secondary mb-1">
-            <Sparkles className="size-4" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
-              Completion
+        <div className="ui-card p-4.5 rounded-2xl">
+          <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
+            <Flame className="size-4 text-primary fill-primary" />
+            <span className="text-xs font-semibold text-foreground">
+              Completion Rate
             </span>
           </div>
-          <span className="text-[26px] font-bold tracking-tight text-foreground tabular-nums">
+          <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums">
             {stats.percentage}%
           </span>
         </div>
       </div>
 
       {/* Main Filter & Navigation Block */}
-      <div className="ui-card p-5 sm:p-6 rounded-[22px] space-y-4">
+      <div className="ui-card p-5 sm:p-6 rounded-2xl space-y-4">
         {/* Status Filter Segmented Bar */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border-subtle pb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 pb-4">
           <div>
-            <h2 className="text-[18px] font-semibold tracking-tight text-foreground">
-              Badges & Achievements
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
+              Milestone Gallery
             </h2>
-            <p className="text-[12.5px] text-foreground-secondary">
-              Unlock milestones as you read and build consistency across canons.
+            <p className="text-xs text-muted-foreground">
+              Earn distinctive badges as you read and build consistency across canons.
             </p>
           </div>
 
           <div
             data-testid="achievement-status-filter"
-            className="flex items-center gap-1 rounded-[16px] border border-border bg-surface-elevated p-1 self-start sm:self-auto"
+            className="flex items-center gap-1 rounded-xl border border-border bg-muted p-0.5 self-start sm:self-auto"
           >
             {(
               [
@@ -140,7 +144,7 @@ export function AchievementsView({
                 },
                 {
                   id: "Locked" as const,
-                  label: `In Progress (${stats.locked})`,
+                  label: `Locked (${stats.locked})`,
                 },
               ] as const
             ).map((status) => {
@@ -150,11 +154,12 @@ export function AchievementsView({
                   key={status.id}
                   type="button"
                   onClick={() => setStatusFilter(status.id)}
-                  className={`flex items-center rounded-[12px] px-3 py-1.5 text-[11.5px] font-medium transition-all cursor-pointer ${
+                  className={cn(
+                    "flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
                     isSelected
-                      ? "bg-primary text-primary-foreground shadow-xs"
-                      : "bg-transparent text-foreground-secondary hover:text-foreground"
-                  }`}
+                      ? "bg-card text-foreground shadow-2xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
                 >
                   {status.label}
                 </button>
@@ -168,11 +173,12 @@ export function AchievementsView({
           <button
             type="button"
             onClick={() => setCategoryFilter("All")}
-            className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-all cursor-pointer ${
+            className={cn(
+              "shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
               categoryFilter === "All"
-                ? "bg-foreground text-background shadow-2xs font-semibold"
-                : "border border-border bg-surface-elevated text-foreground-secondary hover:text-foreground hover:border-border-strong"
-            }`}
+                ? "bg-primary text-primary-foreground shadow-2xs"
+                : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
+            )}
           >
             All Categories
           </button>
@@ -183,11 +189,12 @@ export function AchievementsView({
                 key={cat}
                 type="button"
                 onClick={() => setCategoryFilter(cat)}
-                className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-all cursor-pointer ${
+                className={cn(
+                  "shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
                   isCatSelected
-                    ? "bg-foreground text-background shadow-2xs font-semibold"
-                    : "border border-border bg-surface-elevated text-foreground-secondary hover:text-foreground hover:border-border-strong"
-                }`}
+                    ? "bg-primary text-primary-foreground shadow-2xs"
+                    : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
               >
                 {cat}
               </button>
@@ -195,42 +202,32 @@ export function AchievementsView({
           })}
         </div>
 
-        {/* Achievements Grid */}
-        {filteredAchievements.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 pt-2">
-            {filteredAchievements.map((achievement) => (
-              <AchievementCard
-                key={achievement.id}
-                achievement={achievement}
-                onSelectAction={({ achievement: selected }) =>
-                  setSelectedAchievement(selected)
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="py-12 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-foreground-dim mb-3">
-              <Award className="size-6" />
-            </div>
-            <h3 className="text-[16px] font-medium text-foreground">
-              No achievements found
-            </h3>
-            <p className="mt-1 text-[12px] text-foreground-dim max-w-sm mx-auto">
-              {statusFilter === "Unlocked"
-                ? "You haven't unlocked any badges in this category yet. Start reading to unlock your first!"
-                : "No achievements match your selected filter criteria."}
-            </p>
+        {/* Badges Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 pt-2">
+          {filteredAchievements.map((item) => (
+            <AchievementCard
+              key={item.id}
+              item={item}
+              onSelect={() => setSelectedAchievement(item)}
+            />
+          ))}
+        </div>
+
+        {filteredAchievements.length === 0 && (
+          <div className="py-12 text-center text-muted-foreground">
+            <p className="text-sm">No milestones found in this category.</p>
           </div>
         )}
       </div>
 
-      {/* Share Milestone Modal */}
-      <ShareMilestoneModal
-        achievement={selectedAchievement}
-        isOpen={Boolean(selectedAchievement)}
-        onCloseAction={() => setSelectedAchievement(null)}
-      />
+      {/* Share Modal */}
+      {selectedAchievement && (
+        <ShareMilestoneModal
+          achievement={selectedAchievement}
+          isOpen={!!selectedAchievement}
+          onCloseAction={() => setSelectedAchievement(null)}
+        />
+      )}
     </section>
   );
 }

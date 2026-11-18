@@ -12,13 +12,13 @@ export function MilestonesSection() {
             Achievements unlocked through consistent Bible reading.
           </p>
         </div>
-        <span className="ui-pill text-[11px] font-medium gap-1">
-          <Sparkles className="size-3 text-foreground" />
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+          <Sparkles className="size-3 text-primary" />
           <span>Coming Soon</span>
         </span>
       </div>
 
-      <div className="mt-6 flex flex-col items-center justify-center rounded-[22px] border border-dashed border-border bg-surface-elevated py-14 text-center">
+      <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-elevated py-14 text-center">
         <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-surface text-foreground shadow-2xs">
           <Award className="size-7" strokeWidth={1.75} />
         </div>
