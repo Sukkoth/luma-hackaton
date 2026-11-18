@@ -132,15 +132,15 @@ export function GroupPlanEnrollModal({
               </p>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface-elevated/40 p-3.5 text-xs text-foreground-secondary space-y-1 text-left">
+            <div className="rounded-xl border border-border bg-muted/20 p-3.5 text-xs text-muted-foreground space-y-1 text-left">
               <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                <Calendar className="size-3.5" />
+                <Calendar className="size-3.5 text-primary" />
                 <span>Cohort Starts: {formattedStartDate}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded border border-border bg-surface text-foreground-dim uppercase ml-auto">
+                <span className="text-xs px-2 py-0.5 rounded-lg border border-border bg-card text-muted-foreground ml-auto font-medium">
                   {relativeDaysStr}
                 </span>
               </div>
-              <p className="text-[11.5px] text-foreground-dim leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Your reading tracker is linked. When Day 1 arrives, readings will automatically unlock and synchronize with your fellowship.
               </p>
             </div>
@@ -210,14 +210,14 @@ export function GroupPlanEnrollModal({
 
             {/* Scheduled Future Date Notice */}
             {isFuture && (
-              <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-elevated/50 p-3 text-xs text-foreground">
+              <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 p-3 text-xs text-foreground">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Calendar className="size-4 text-foreground-dim shrink-0" />
+                  <Calendar className="size-4 text-primary shrink-0" />
                   <span className="font-semibold truncate">
                     Starts {formattedStartDate}
                   </span>
                 </div>
-                <span className="shrink-0 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md border border-border bg-surface text-foreground-secondary">
+                <span className="shrink-0 text-xs font-semibold px-2 py-0.5 rounded-lg border border-border bg-card text-muted-foreground">
                   {relativeDaysStr}
                 </span>
               </div>

@@ -112,12 +112,12 @@ export function GroupTransferOwnershipModal({
         <div className="space-y-2">
           <label
             htmlFor="new-owner-select"
-            className="block text-xs font-semibold text-foreground-secondary uppercase tracking-wider"
+            className="block text-xs font-semibold text-foreground"
           >
             Select New Owner
           </label>
           {eligibleMembers.length === 0 ? (
-            <p className="text-xs text-foreground-dim italic py-2">
+            <p className="text-xs text-muted-foreground italic py-2">
               No other active members available to transfer ownership to.
             </p>
           ) : (
@@ -128,7 +128,7 @@ export function GroupTransferOwnershipModal({
                 setSelectedUserId(e.target.value);
                 setErrorMessage(null);
               }}
-              className="w-full h-10.5 px-3 rounded-xl border border-border bg-surface-elevated text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
             >
               <option value="">-- Choose an active member --</option>
               {eligibleMembers.map((m) => (

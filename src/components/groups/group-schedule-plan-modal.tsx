@@ -280,10 +280,10 @@ export function GroupSchedulePlanModal({
           {step === "template" && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-foreground">
                   Select a Plan Template
                 </h3>
-                <p className="text-xs text-foreground-dim mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Showing {filteredPlans.length} of {READING_PLANS.length} curated biblical reading curricula.
                 </p>
               </div>
@@ -384,32 +384,32 @@ export function GroupSchedulePlanModal({
                           onClick={() => setSelectedPlanId(plan.id)}
                           className={`ui-card group relative isolate flex flex-col justify-between p-4 text-left transition-all duration-150 cursor-pointer ${
                             isSelected
-                              ? "border-foreground bg-surface-elevated ring-1 ring-inset ring-foreground shadow-xs"
-                              : "hover:border-border-strong hover:bg-surface-elevated/80"
+                              ? "border-primary bg-primary/5 ring-1 ring-inset ring-primary/40 shadow-xs"
+                              : "hover:border-border-strong hover:bg-muted/40"
                           }`}
                         >
                           <div>
                             <div className="flex items-center justify-between gap-2 mb-2">
-                              <span className="rounded-lg bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-foreground uppercase tracking-wide border border-border">
+                              <span className="rounded-lg bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
                                 {plan.category}
                               </span>
-                              <span className="text-[11px] text-foreground-dim font-medium">
+                              <span className="text-xs text-muted-foreground font-medium">
                                 {plan.totalChapters} chapters
                               </span>
                             </div>
 
-                            <h4 className="text-[14px] font-semibold text-foreground line-clamp-1">
+                            <h4 className="text-sm font-semibold text-foreground line-clamp-1">
                               {plan.title}
                             </h4>
-                            <p className="mt-1 text-xs text-foreground-secondary line-clamp-2 leading-relaxed">
+                            <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                               {plan.description}
                             </p>
                           </div>
 
-                          <div className="mt-3 pt-2.5 border-t border-border-subtle flex items-center justify-between text-[11px] text-foreground-dim">
+                          <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
                             <span>~{plan.recommendedDays} days standard</span>
                             {isSelected && (
-                              <span className="flex items-center gap-1 font-semibold text-foreground">
+                              <span className="flex items-center gap-1 font-semibold text-primary">
                                 <Check className="size-3.5 stroke-[3]" /> Selected
                               </span>
                             )}
@@ -427,10 +427,10 @@ export function GroupSchedulePlanModal({
           {step === "pacing" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                  Schedule Pacing & Active Days
+                <h3 className="text-sm font-bold text-foreground">
+                  Schedule Pacing &amp; Active Days
                 </h3>
-                <p className="text-xs text-foreground-dim mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Set start date and reading rhythm for {selectedPlan.title}.
                 </p>
               </div>
@@ -539,10 +539,10 @@ export function GroupSchedulePlanModal({
           {step === "policy" && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-foreground">
                   Late-Join Cohort Policy
                 </h3>
-                <p className="text-xs text-foreground-dim mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   How should the schedule handle members who join after the plan has already started?
                 </p>
               </div>
@@ -621,10 +621,10 @@ export function GroupSchedulePlanModal({
           {step === "review" && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                  Review & Schedule Plan
+                <h3 className="text-sm font-bold text-foreground">
+                  Review &amp; Schedule Plan
                 </h3>
-                <p className="text-xs text-foreground-dim mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Confirm the parameters before publishing to the fellowship.
                 </p>
               </div>

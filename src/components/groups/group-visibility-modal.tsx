@@ -84,9 +84,9 @@ export function GroupVisibilityModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3.5 sm:p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150">
       <div
-        className="ui-card relative w-full max-w-md p-4 sm:p-6 shadow-2xl transition-all border border-border bg-surface max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-md p-5 sm:p-6 shadow-2xl transition-all border border-border bg-card rounded-2xl max-h-[92vh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="visibility-modal-title"
@@ -96,7 +96,7 @@ export function GroupVisibilityModal({
           type="button"
           onClick={onClose}
           disabled={isSubmitting}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
         >
           <X className="size-4" />
           <span className="sr-only">Close</span>
@@ -105,7 +105,7 @@ export function GroupVisibilityModal({
         {isCooldownActive ? (
           /* Cooldown Locked View */
           <div className="space-y-4">
-            <div className="flex size-11 items-center justify-center rounded-2xl bg-surface-elevated text-foreground border border-border shadow-2xs">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
               <Clock className="size-5" />
             </div>
 
@@ -116,22 +116,22 @@ export function GroupVisibilityModal({
               >
                 Visibility Cooldown Active
               </h3>
-              <p className="text-xs text-foreground-secondary mt-1 leading-relaxed">
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 To protect fellowship accountability and prevent gaming reading records,
                 visibility can only be changed once every 24 hours.
               </p>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface-elevated/40 p-3.5 space-y-2 text-xs">
+            <div className="rounded-xl border border-border bg-muted/30 p-3.5 space-y-2 text-xs">
               <div className="flex items-center justify-between text-foreground">
-                <span className="text-foreground-dim">Current status</span>
+                <span className="text-muted-foreground">Current status</span>
                 <span className="font-semibold">
                   {currentHideProgress ? "Hidden (Anonymous)" : "Visible to Cohort"}
                 </span>
               </div>
               <div className="flex items-center justify-between text-foreground">
-                <span className="text-foreground-dim">Next change allowed in</span>
-                <span className="font-semibold tabular-nums">
+                <span className="text-muted-foreground">Next change allowed in</span>
+                <span className="font-semibold tabular-nums text-primary">
                   {hoursLeft}h {minutesLeft}m
                 </span>
               </div>
@@ -146,7 +146,7 @@ export function GroupVisibilityModal({
         ) : (
           /* Confirmation View */
           <div className="space-y-4">
-            <div className="flex size-11 items-center justify-center rounded-2xl bg-surface-elevated text-foreground border border-border shadow-2xs">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
               {currentHideProgress ? (
                 <Eye className="size-5" />
               ) : (
@@ -163,7 +163,7 @@ export function GroupVisibilityModal({
                   ? "Make Your Progress Visible?"
                   : "Hide Your Reading Progress?"}
               </h3>
-              <p className="text-xs text-foreground-secondary mt-1 leading-relaxed">
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 {currentHideProgress
                   ? "Your name, avatar, and completed chapters will be visible to fellow cohort readers, and you will see everyone's actual names on the leaderboard."
                   : "Your name and avatar will be replaced with 'Anonymous Reader' on the fellowship leaderboard."}
@@ -171,10 +171,10 @@ export function GroupVisibilityModal({
             </div>
 
             {/* Reciprocal Anonymity & Rate Limit Notice */}
-            <div className="rounded-xl border border-border bg-surface-elevated/40 p-3.5 space-y-2 text-xs text-foreground-secondary">
+            <div className="rounded-xl border border-border bg-muted/30 p-3.5 space-y-2 text-xs text-muted-foreground">
               {!currentHideProgress ? (
                 <div className="flex items-start gap-2">
-                  <ShieldAlert className="size-4 text-foreground shrink-0 mt-0.5" />
+                  <ShieldAlert className="size-4 text-primary shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
                     <span className="font-semibold text-foreground">
                       Reciprocal Anonymity:
@@ -185,7 +185,7 @@ export function GroupVisibilityModal({
                 </div>
               ) : (
                 <div className="flex items-start gap-2">
-                  <Eye className="size-4 text-foreground shrink-0 mt-0.5" />
+                  <Eye className="size-4 text-primary shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
                     <span className="font-semibold text-foreground">
                       Cohort Transparency:
@@ -196,9 +196,9 @@ export function GroupVisibilityModal({
                 </div>
               )}
 
-              <div className="flex items-start gap-2 pt-1 border-t border-border">
-                <Clock className="size-4 text-foreground-dim shrink-0 mt-0.5" />
-                <p className="leading-relaxed text-[11px] text-foreground-dim">
+              <div className="flex items-start gap-2 pt-1 border-t border-border/60">
+                <Clock className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="leading-relaxed text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">
                     24-hour lock:
                   </span>{" "}
@@ -208,8 +208,8 @@ export function GroupVisibilityModal({
             </div>
 
             {errorMessage && (
-              <div className="flex items-center gap-2 rounded-xl border border-border bg-surface-elevated p-3 text-xs text-foreground">
-                <AlertCircle className="size-4 text-foreground shrink-0" />
+              <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive font-medium">
+                <AlertCircle className="size-4 text-destructive shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -226,7 +226,7 @@ export function GroupVisibilityModal({
               </Button>
               <Button
                 type="button"
-                variant="primary"
+                variant="default"
                 size="sm"
                 onClick={handleConfirm}
                 disabled={isSubmitting}

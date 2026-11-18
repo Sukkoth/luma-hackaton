@@ -19,6 +19,7 @@ import {
   Trash2,
   Archive,
   AlertTriangle,
+  UserPlus,
 } from "lucide-react";
 import type { GroupPlanSummary } from "@/actions/groups";
 import {
@@ -38,9 +39,11 @@ export type GroupPlansTabProps = {
   trackers: ReadonlyArray<UserTrackerSummary>;
   activeTrackerId?: string;
   isAdmin: boolean;
+  isMember?: boolean;
   onOpenScheduleModal: () => void;
   selectedPlanForEnroll?: GroupPlanSummary | null;
   onSelectPlanForEnroll?: (plan: GroupPlanSummary | null) => void;
+  onJoinGroupClick?: () => void;
 };
 
 export function GroupPlansTab({
@@ -51,9 +54,11 @@ export function GroupPlansTab({
   trackers,
   activeTrackerId,
   isAdmin,
+  isMember = true,
   onOpenScheduleModal,
   selectedPlanForEnroll: externalSelectedPlan,
   onSelectPlanForEnroll: externalSetSelectedPlan,
+  onJoinGroupClick,
 }: GroupPlansTabProps) {
   const router = useRouter();
   const [internalSelectedPlan, setInternalSelectedPlan] =
@@ -187,14 +192,14 @@ export function GroupPlansTab({
     <div className="space-y-10">
       {/* ── Active Plans Section ── */}
       {activePlans.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface p-12 text-center">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-surface-elevated text-foreground border border-border mb-3 shadow-2xs">
-            <BookOpen className="size-5" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 p-12 text-center">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 mb-3 shadow-2xs">
+            <BookOpen className="size-6" />
           </div>
           <h3 className="text-base font-semibold text-foreground mb-1">
             No Active Fellowship Plan
           </h3>
-          <p className="text-xs sm:text-sm text-foreground-secondary max-w-sm mb-5 leading-relaxed">
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mb-5 leading-relaxed">
             {isAdmin
               ? "Schedule your fellowship's reading plan so members can read scripture together on a shared cadence."
               : "No plan is currently active. Check back when cohort leaders schedule a curriculum."}
@@ -202,7 +207,7 @@ export function GroupPlansTab({
           {isAdmin && (
             <Button
               type="button"
-              variant="primary"
+              variant="default"
               size="sm"
               onClick={onOpenScheduleModal}
               leftIcon={<Plus className="size-3.5" />}
@@ -212,13 +217,13 @@ export function GroupPlansTab({
           )}
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-base sm:text-lg font-bold text-foreground truncate">
                 Active Reading Plans ({activePlans.length})
               </h2>
-              <p className="text-xs text-foreground-dim mt-0.5 line-clamp-1">
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                 Curricula currently active and synchronized across all cohort readers.
               </p>
             </div>
@@ -227,9 +232,9 @@ export function GroupPlansTab({
               <Button
                 type="button"
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={onOpenScheduleModal}
-                leftIcon={<Plus className="size-4" />}
+                leftIcon={<Plus className="size-3.5" />}
                 className="shrink-0 whitespace-nowrap"
               >
                 Add Plan
@@ -237,30 +242,30 @@ export function GroupPlansTab({
             )}
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             {activePlans.map((plan) => {
               const isEnrolled = Boolean(plan.userEnrolledInstanceId);
 
               return (
                 <div
                   key={plan.id}
-                  className="rounded-2xl border border-border bg-surface p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 shadow-xs relative overflow-hidden"
+                  className="rounded-2xl border border-border bg-card p-6 sm:p-7 space-y-6 shadow-xs relative overflow-hidden transition-all hover:border-border-strong"
                 >
                   {/* Top Bar: Eyebrow & Cadence */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-elevated px-2.5 py-1 text-[10.5px] font-bold tracking-wider uppercase text-foreground border border-border">
-                        <BookOpen className="size-3 text-foreground-dim" />
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/20 px-2.5 py-1 text-xs font-semibold text-primary">
+                        <BookOpen className="size-3.5" />
                         <span>Active Curriculum</span>
                       </span>
-                      <span className="text-xs font-medium text-foreground-dim">
+                      <span className="text-xs font-medium text-muted-foreground">
                         Synchronized Cohort Pace
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-3 py-1 text-xs font-semibold text-foreground border border-border">
-                        <Clock className="size-3.5 text-foreground-dim" />
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-3 py-1 text-xs font-semibold text-foreground border border-border/70 shadow-2xs">
+                        <Clock className="size-3 text-muted-foreground" />
                         <span>{plan.dailyChapterTarget} {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day</span>
                       </span>
 
@@ -271,8 +276,8 @@ export function GroupPlansTab({
                             variant="outline"
                             size="sm"
                             onClick={() => setPlanToComplete(plan)}
-                            className="text-xs h-9 px-3"
-                            leftIcon={<CheckCircle2 className="size-3.5 text-emerald-500" />}
+                            className="text-xs h-8 px-2.5 rounded-lg"
+                            leftIcon={<CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />}
                           >
                             Complete
                           </Button>
@@ -281,10 +286,10 @@ export function GroupPlansTab({
                             variant="ghost"
                             size="sm"
                             onClick={() => setPlanToCancel(plan)}
-                            className="text-xs text-foreground-dim hover:text-destructive h-9 px-2.5"
+                            className="text-xs text-muted-foreground hover:text-destructive h-8 px-2 rounded-lg"
                             title="Cancel Plan"
                           >
-                            <XCircle className="size-4" />
+                            <XCircle className="size-3.5" />
                           </Button>
                         </div>
                       )}
@@ -293,103 +298,132 @@ export function GroupPlansTab({
 
                   {/* Plan Title & Narrative */}
                   <div className="space-y-1.5">
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+                    <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                       {plan.templateTitle}
                     </h3>
-                    <p className="text-xs sm:text-sm text-foreground-secondary leading-relaxed max-w-2xl">
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl">
                       A structured curriculum of {plan.totalChapters} chapters synchronized daily across all cohort readers.
                     </p>
                   </div>
 
-                  {/* 4-Cell Telemetry Rail (Full Width Efficient Use) */}
-                  <div className="rounded-xl border border-border bg-border grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden [&>*]:bg-surface-elevated/40">
-                    <div className="p-3.5 sm:p-4 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
-                        Daily Cadence
+                  {/* Fluid Metric Horizon Strip (Airy, non-boxed cadence metrics) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 p-4 rounded-xl bg-muted/30 border border-border/50">
+                    <div>
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground block mb-0.5">
+                        Daily Pace
                       </span>
-                      <span className="text-xs sm:text-base font-bold text-foreground">
-                        {plan.dailyChapterTarget} ch / day
-                      </span>
+                      <div className="text-sm sm:text-base font-bold text-foreground flex items-baseline gap-1">
+                        <span>{plan.dailyChapterTarget}</span>
+                        <span className="text-xs font-normal text-muted-foreground">ch / day</span>
+                      </div>
                     </div>
 
-                    <div className="p-3.5 sm:p-4 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                    <div>
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground block mb-0.5">
                         Total Scope
                       </span>
-                      <span className="text-xs sm:text-base font-bold text-foreground">
-                        {plan.totalChapters} Chapters
-                      </span>
+                      <div className="text-sm sm:text-base font-bold text-foreground flex items-baseline gap-1">
+                        <span>{plan.totalChapters}</span>
+                        <span className="text-xs font-normal text-muted-foreground">chapters</span>
+                      </div>
                     </div>
 
-                    <div className="p-3.5 sm:p-4 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                    <div>
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground block mb-0.5">
                         Cohort Readers
                       </span>
-                      <span className="text-xs sm:text-base font-bold text-foreground">
-                        {plan.enrolledMembersCount} {plan.enrolledMembersCount === 1 ? "reader" : "readers"}
-                      </span>
+                      <div className="text-sm sm:text-base font-bold text-primary flex items-baseline gap-1">
+                        <span>{plan.enrolledMembersCount}</span>
+                        <span className="text-xs font-normal text-muted-foreground">
+                          {plan.enrolledMembersCount === 1 ? "reader" : "readers"} in sync
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="p-3.5 sm:p-4 text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim block mb-1">
+                    <div>
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground block mb-0.5">
                         Sync Rhythm
                       </span>
-                      <span className="text-xs sm:text-base font-bold text-foreground">
+                      <div className="text-sm sm:text-base font-bold text-foreground">
                         Daily Lockstep
-                      </span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Reading Status & Action Area */}
                   {isEnrolled ? (
                     <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-t border-border/60">
-                      <div className="flex items-center gap-2 text-xs text-foreground-dim">
-                        <span className="size-2 rounded-full bg-foreground shrink-0" />
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="size-2 rounded-full bg-primary shrink-0 animate-pulse" />
                         <span>You are enrolled in this plan with fellowship notes &amp; reflections enabled.</span>
                       </div>
 
-                      <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
                         <Button
                           type="button"
                           variant="ghost"
-                          size="md"
+                          size="sm"
                           onClick={() => setPlanToLeave(plan)}
-                          className="text-foreground-dim hover:text-destructive text-xs shrink-0 whitespace-nowrap"
-                          leftIcon={<LogOut className="size-4" />}
+                          className="text-muted-foreground hover:text-destructive text-xs shrink-0 whitespace-nowrap rounded-xl"
+                          leftIcon={<LogOut className="size-3.5" />}
                         >
                           Leave Plan
                         </Button>
 
                         <Link
                           href={`/plans/${plan.userEnrolledInstanceId}`}
-                          className="inline-flex items-center justify-center gap-2 h-10.5 px-4.5 text-xs sm:text-sm font-semibold rounded-xl bg-foreground text-background hover:opacity-90 active:scale-[0.98] shadow-xs transition-all flex-1 sm:flex-none whitespace-nowrap cursor-pointer"
+                          className="inline-flex items-center justify-center gap-1.5 h-9 px-4 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98] shadow-xs transition-all flex-1 sm:flex-none whitespace-nowrap cursor-pointer"
                         >
                           <span>Continue Reading</span>
-                          <ArrowRight className="size-4" />
+                          <ArrowRight className="size-3.5" />
                         </Link>
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-surface-elevated/40 p-4 sm:p-5">
+                  ) : isMember ? (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-muted/20 p-4 sm:p-5">
                       <div className="space-y-0.5">
                         <h4 className="text-sm font-semibold text-foreground">
                           Join Fellowship Reading Journey
                         </h4>
-                        <p className="text-xs text-foreground-dim max-w-md leading-relaxed">
+                        <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
                           Synchronize your personal reader with this cohort to share daily milestones, study notes, and reflections.
                         </p>
                       </div>
 
                       <Button
                         type="button"
-                        variant="primary"
-                        size="md"
-                        className="w-full sm:w-auto shrink-0"
+                        variant="default"
+                        size="sm"
+                        className="w-full sm:w-auto shrink-0 rounded-xl font-semibold shadow-xs"
                         onClick={() => setSelectedPlanForEnroll(plan)}
-                        leftIcon={<UserCheck className="size-4" />}
+                        leftIcon={<UserCheck className="size-3.5" />}
                       >
                         Enroll &amp; Read With Fellowship
                       </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-4.5">
+                      <div className="space-y-0.5">
+                        <h4 className="text-sm font-semibold text-foreground">
+                          Curriculum Open to Fellowship Members
+                        </h4>
+                        <p className="text-xs text-muted-foreground max-w-lg leading-relaxed">
+                          Join this fellowship to follow this reading plan, sync your chapter progress, and read together with the community.
+                        </p>
+                      </div>
+
+                      {onJoinGroupClick && (
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          onClick={onJoinGroupClick}
+                          leftIcon={<UserPlus className="size-3.5" />}
+                          className="w-full sm:w-auto shrink-0 font-semibold shadow-xs rounded-xl"
+                        >
+                          Join Fellowship to Read
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -401,12 +435,12 @@ export function GroupPlansTab({
 
       {/* ── Upcoming Scheduled Plans ("Cohort Horizon") ── */}
       {scheduledPlans.length > 0 && (
-        <div className="space-y-4 pt-6 border-t border-border">
+        <div className="space-y-4 pt-6 border-t border-border/60">
           <div>
-            <h3 className="text-lg font-bold text-foreground">
+            <h3 className="text-base sm:text-lg font-bold text-foreground">
               Upcoming Scheduled Plans ({scheduledPlans.length})
             </h3>
-            <p className="text-xs text-foreground-dim mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Curricula scheduled to launch on synchronized start dates for this fellowship.
             </p>
           </div>
@@ -434,15 +468,15 @@ export function GroupPlansTab({
               return (
                 <div
                   key={plan.id}
-                  className="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between gap-4 hover:border-border-strong transition-all shadow-2xs"
+                  className="ui-card p-4 sm:p-5 flex flex-col justify-between gap-4 hover:border-border-strong transition-all shadow-xs"
                 >
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="inline-flex items-center gap-1.5 text-foreground-dim font-medium">
+                      <span className="inline-flex items-center gap-1.5 text-muted-foreground font-medium">
                         <Calendar className="size-3.5" />
                         <span>Starts {startDateStr}</span>
                       </span>
-                      <span className="text-[10px] font-semibold text-foreground-secondary px-2 py-0.5 rounded-md bg-surface-elevated border border-border">
+                      <span className="text-xs font-semibold text-primary px-2 py-0.5 rounded-lg bg-primary/10 border border-primary/20">
                         {countdownLabel}
                       </span>
                     </div>
@@ -451,33 +485,33 @@ export function GroupPlansTab({
                       <h4 className="text-base font-bold text-foreground">
                         {plan.templateTitle}
                       </h4>
-                      <p className="text-xs text-foreground-dim mt-1">
-                        {plan.totalChapters} chapters • {plan.dailyChapterTarget} chapters / day
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {plan.totalChapters} chapters • {plan.dailyChapterTarget} ch / day
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-border/60 text-xs">
-                    <span className="text-foreground-dim font-medium">
+                    <span className="text-muted-foreground font-medium">
                       {plan.enrolledMembersCount}{" "}
                       {plan.enrolledMembersCount === 1 ? "reader waiting" : "readers waiting"}
                     </span>
 
                     {plan.userEnrolledInstanceId ? (
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-surface-elevated border border-border px-2 py-0.5 text-[11px] font-semibold text-foreground">
-                          <Check className="size-3 text-foreground" />
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-muted border border-border px-2 py-0.5 text-xs font-semibold text-foreground">
+                          <Check className="size-3 text-primary" />
                           Pre-enrolled
                         </span>
                         <Link
                           href={`/plans/${plan.userEnrolledInstanceId}`}
-                          className="text-xs text-foreground-dim hover:text-foreground font-medium transition-colors inline-flex items-center gap-0.5"
+                          className="text-xs text-muted-foreground hover:text-foreground font-medium transition-colors inline-flex items-center gap-0.5"
                         >
                           <span>Preview</span>
                           <ArrowRight className="size-3" />
                         </Link>
                       </div>
-                    ) : (
+                    ) : isMember ? (
                       <Button
                         type="button"
                         variant="outline"
@@ -486,6 +520,10 @@ export function GroupPlansTab({
                       >
                         Pre-enroll
                       </Button>
+                    ) : (
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        Scheduled
+                      </span>
                     )}
                   </div>
 
@@ -497,8 +535,8 @@ export function GroupPlansTab({
                         size="sm"
                         disabled={isUpdatingStatus}
                         onClick={() => handleStartPlanNow(plan)}
-                        leftIcon={<Play className="size-3 text-emerald-500" />}
-                        className="text-xs h-9 px-3 flex-1"
+                        leftIcon={<Play className="size-3 text-emerald-600 dark:text-emerald-400" />}
+                        className="text-xs h-8 px-3 flex-1"
                       >
                         Start Now
                       </Button>
@@ -508,7 +546,7 @@ export function GroupPlansTab({
                         size="sm"
                         disabled={isUpdatingStatus}
                         onClick={() => setPlanToCancel(plan)}
-                        className="text-xs text-foreground-dim hover:text-destructive h-9 px-2.5"
+                        className="text-xs text-muted-foreground hover:text-destructive h-8 px-2"
                         title="Cancel Schedule"
                       >
                         <XCircle className="size-3.5" />
@@ -524,12 +562,12 @@ export function GroupPlansTab({
 
       {/* ── Completed & Archived Plans ── */}
       {completedPlans.length > 0 && (
-        <div className="space-y-4 pt-6 border-t border-border">
+        <div className="space-y-4 pt-6 border-t border-border/60">
           <div>
-            <h3 className="text-lg font-bold text-foreground">
+            <h3 className="text-base sm:text-lg font-bold text-foreground">
               Completed &amp; Archived Plans ({completedPlans.length})
             </h3>
-            <p className="text-xs text-foreground-dim mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Previous curricula that were concluded or archived for this fellowship.
             </p>
           </div>
@@ -540,15 +578,15 @@ export function GroupPlansTab({
               return (
                 <div
                   key={plan.id}
-                  className="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between gap-4 opacity-90 hover:opacity-100 transition-all shadow-2xs"
+                  className="ui-card p-4 sm:p-5 flex flex-col justify-between gap-4 opacity-90 hover:opacity-100 transition-all shadow-xs"
                 >
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${
                           isCompleted
-                            ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                            : "bg-surface-elevated text-foreground-dim border border-border"
+                            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
+                            : "bg-muted text-muted-foreground border border-border"
                         }`}
                       >
                         {isCompleted ? (
@@ -558,7 +596,7 @@ export function GroupPlansTab({
                         )}
                         <span>{isCompleted ? "Completed" : "Cancelled"}</span>
                       </span>
-                      <span className="text-[11px] text-foreground-dim">
+                      <span className="text-xs text-muted-foreground">
                         {plan.totalChapters} Chapters
                       </span>
                     </div>
@@ -567,7 +605,7 @@ export function GroupPlansTab({
                       <h4 className="text-base font-bold text-foreground line-clamp-1">
                         {plan.templateTitle}
                       </h4>
-                      <p className="text-xs text-foreground-dim mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {plan.enrolledMembersCount}{" "}
                         {plan.enrolledMembersCount === 1
                           ? "reader participated"
@@ -585,7 +623,7 @@ export function GroupPlansTab({
                         disabled={isUpdatingStatus}
                         onClick={() => handleReopenPlan(plan)}
                         leftIcon={<RotateCcw className="size-3" />}
-                        className="text-xs h-9 px-3"
+                        className="text-xs h-8 px-3"
                       >
                         Reopen
                       </Button>
@@ -595,7 +633,7 @@ export function GroupPlansTab({
                         size="sm"
                         disabled={isUpdatingStatus}
                         onClick={() => setPlanToDelete(plan)}
-                        className="text-xs text-foreground-dim hover:text-destructive h-9 px-2.5"
+                        className="text-xs text-muted-foreground hover:text-destructive h-8 px-2"
                         title="Delete Plan"
                       >
                         <Trash2 className="size-3.5" />
@@ -626,14 +664,14 @@ export function GroupPlansTab({
       {/* Leave Plan Confirmation Modal */}
       {planToLeave && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-surface-elevated text-foreground border border-border mx-auto shadow-2xs">
+          <div className="rounded-2xl border border-border bg-card max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive border border-destructive/20 mx-auto">
               <LogOut className="size-6" />
             </div>
             <h4 className="text-base font-bold text-foreground">
               Leave Reading Plan?
             </h4>
-            <p className="text-xs text-foreground-secondary leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to unenroll from &ldquo;{planToLeave.templateTitle}&rdquo;? Your reading progress will be unlinked from the fellowship leaderboard. Your personal reading tracker will remain intact.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
@@ -643,6 +681,7 @@ export function GroupPlansTab({
                 size="sm"
                 onClick={() => setPlanToLeave(null)}
                 disabled={isLeavingPlan}
+                className="flex-1"
               >
                 Cancel
               </Button>
@@ -652,6 +691,7 @@ export function GroupPlansTab({
                 size="sm"
                 isLoading={isLeavingPlan}
                 onClick={handleConfirmLeavePlan}
+                className="flex-1"
               >
                 Confirm &amp; Leave
               </Button>
@@ -663,21 +703,21 @@ export function GroupPlansTab({
       {/* Complete Plan Confirmation Modal */}
       {planToComplete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mx-auto">
+          <div className="rounded-2xl border border-border bg-card max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mx-auto">
               <CheckCircle2 className="size-6" />
             </div>
             <h4 className="text-base font-bold text-foreground">
               Complete Reading Plan?
             </h4>
-            <p className="text-xs text-foreground-secondary leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Mark &ldquo;{planToComplete.templateTitle}&rdquo; as completed for this fellowship? It will move to the Completed &amp; Archived section.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={() => setPlanToComplete(null)}
                 disabled={isUpdatingStatus}
                 className="flex-1"
@@ -686,11 +726,11 @@ export function GroupPlansTab({
               </Button>
               <Button
                 type="button"
-                variant="primary"
-                size="md"
+                variant="default"
+                size="sm"
                 isLoading={isUpdatingStatus}
                 onClick={handleConfirmCompletePlan}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white border-transparent"
               >
                 Confirm Complete
               </Button>
@@ -702,21 +742,21 @@ export function GroupPlansTab({
       {/* Cancel Plan Confirmation Modal */}
       {planToCancel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 mx-auto">
+          <div className="rounded-2xl border border-border bg-card max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 mx-auto">
               <AlertTriangle className="size-6" />
             </div>
             <h4 className="text-base font-bold text-foreground">
               Cancel Reading Plan?
             </h4>
-            <p className="text-xs text-foreground-secondary leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to cancel &ldquo;{planToCancel.templateTitle}&rdquo;? It will be deactivated and moved to archived plans.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={() => setPlanToCancel(null)}
                 disabled={isUpdatingStatus}
                 className="flex-1"
@@ -726,7 +766,7 @@ export function GroupPlansTab({
               <Button
                 type="button"
                 variant="destructive"
-                size="md"
+                size="sm"
                 isLoading={isUpdatingStatus}
                 onClick={handleConfirmCancelPlan}
                 className="flex-1"
@@ -741,21 +781,21 @@ export function GroupPlansTab({
       {/* Delete Plan Confirmation Modal */}
       {planToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
+          <div className="rounded-2xl border border-border bg-card max-w-sm w-full p-6 space-y-4 text-center shadow-lg">
             <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive border border-destructive/20 mx-auto">
               <Trash2 className="size-6" />
             </div>
             <h4 className="text-base font-bold text-foreground">
               Permanently Delete Plan?
             </h4>
-            <p className="text-xs text-foreground-secondary leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to delete &ldquo;{planToDelete.templateTitle}&rdquo;? This will remove all associated cohort enrollment records.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={() => setPlanToDelete(null)}
                 disabled={isUpdatingStatus}
                 className="flex-1"
@@ -765,7 +805,7 @@ export function GroupPlansTab({
               <Button
                 type="button"
                 variant="destructive"
-                size="md"
+                size="sm"
                 isLoading={isUpdatingStatus}
                 onClick={handleConfirmDeletePlan}
                 className="flex-1"

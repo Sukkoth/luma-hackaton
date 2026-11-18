@@ -116,10 +116,12 @@ export function GroupInviteModal({
     }
   }
 
+  if (!isOpen || !inviteCode) return null;
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="ui-card relative w-full max-w-md p-4 sm:p-6 shadow-2xl transition-all border border-border bg-surface max-h-[92vh] overflow-y-auto"
+        className="ui-card relative w-full max-w-md p-5 sm:p-6 shadow-2xl transition-all border border-border bg-card max-h-[92vh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="invite-modal-title"
@@ -128,7 +130,7 @@ export function GroupInviteModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
         >
           <X className="size-4" />
           <span className="sr-only">Close</span>
@@ -136,7 +138,7 @@ export function GroupInviteModal({
 
         {/* Modal Header */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="flex size-10 items-center justify-center rounded-2xl bg-surface-elevated text-foreground border border-border shadow-2xs">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
             <Share2 className="size-5" />
           </div>
           <div>
@@ -146,7 +148,7 @@ export function GroupInviteModal({
             >
               Invite to Fellowship
             </h3>
-            <p className="text-xs text-foreground-dim line-clamp-1">
+            <p className="text-xs text-muted-foreground line-clamp-1">
               {groupName}
             </p>
           </div>
@@ -154,7 +156,7 @@ export function GroupInviteModal({
 
         <div className="space-y-4">
           {/* ── QR Code Section (In-Person Scanning & Bulletin Display) ── */}
-          <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-border bg-surface-elevated/40">
+          <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-border bg-muted/20">
             <div className="p-3 bg-white rounded-xl shadow-xs border border-border/80">
               <canvas
                 ref={canvasRef}
@@ -163,15 +165,15 @@ export function GroupInviteModal({
             </div>
 
             <div className="flex items-center justify-between w-full mt-3 px-1">
-              <span className="text-[11px] text-foreground-dim flex items-center gap-1.5">
-                <QrCode className="size-3.5 text-foreground" />
+              <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <QrCode className="size-3.5 text-primary" />
                 <span>Scan with phone to join immediately</span>
               </span>
 
               <button
                 type="button"
                 onClick={handleDownloadQr}
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-foreground hover:text-primary transition-colors cursor-pointer"
               >
                 <Download className="size-3" />
                 <span>Download QR</span>
@@ -181,16 +183,16 @@ export function GroupInviteModal({
 
           {/* ── Random Character Link Field ── */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-foreground-secondary uppercase tracking-wider block">
+            <label className="text-xs font-semibold text-foreground block">
               Direct Invitation Link
             </label>
             <div className="flex items-center gap-2">
-              <div className="flex-1 rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs font-mono text-foreground truncate select-all">
+              <div className="flex-1 rounded-xl border border-border bg-muted/30 px-3 py-2 text-xs font-mono text-foreground truncate select-all">
                 {inviteUrl}
               </div>
               <Button
                 type="button"
-                variant="primary"
+                variant="default"
                 size="sm"
                 onClick={handleCopyLink}
                 leftIcon={
@@ -209,44 +211,44 @@ export function GroupInviteModal({
           {/* ── Pre-formatted Message Copy ── */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-semibold text-foreground-secondary uppercase tracking-wider block">
+              <label className="text-xs font-semibold text-foreground block">
                 Shareable Message
               </label>
               <button
                 type="button"
                 onClick={handleCopyMessage}
-                className="inline-flex items-center gap-1 text-xs text-foreground font-medium hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline cursor-pointer"
               >
                 {copiedMessage ? (
                   <>
-                    <Check className="size-3 text-foreground" />
+                    <Check className="size-3" />
                     <span>Message Copied</span>
                   </>
                 ) : (
                   <>
-                    <MessageSquare className="size-3 text-foreground-dim" />
+                    <MessageSquare className="size-3 text-muted-foreground" />
                     <span>Copy Message</span>
                   </>
                 )}
               </button>
             </div>
-            <div className="p-3 rounded-xl border border-border bg-surface-elevated/40 text-xs text-foreground-secondary leading-relaxed">
+            <div className="p-3 rounded-xl border border-border bg-muted/20 text-xs text-muted-foreground leading-relaxed">
               &ldquo;Join our Scripture reading fellowship &ldquo;{groupName}&rdquo; on Luma Bible: {inviteUrl}&rdquo;
             </div>
           </div>
 
           {/* ── Admin Link Regeneration (Cycle Random Code) ── */}
           {isAdmin && (
-            <div className="pt-2 border-t border-border space-y-3">
+            <div className="pt-2 border-t border-border/60 space-y-3">
               {isConfirmingRegenerate ? (
-                <div className="rounded-xl border border-border bg-surface-elevated/70 p-3.5 space-y-2.5 animate-in fade-in duration-150">
+                <div className="rounded-xl border border-border bg-muted/40 p-3.5 space-y-2.5 animate-in fade-in duration-150">
                   <div className="flex items-start gap-2.5">
-                    <AlertTriangle className="size-4 text-foreground shrink-0 mt-0.5" />
+                    <AlertTriangle className="size-4 text-primary shrink-0 mt-0.5" />
                     <div>
                       <h4 className="text-xs font-bold text-foreground">
                         Regenerate Invitation Link?
                       </h4>
-                      <p className="text-[11.5px] text-foreground-secondary leading-relaxed mt-0.5">
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
                         The current link and any previously printed or shared QR codes will stop working immediately.
                       </p>
                     </div>
@@ -263,18 +265,18 @@ export function GroupInviteModal({
                     </Button>
                     <Button
                       type="button"
-                      variant="primary"
+                      variant="default"
                       size="sm"
                       onClick={handleExecuteRegenerate}
                       isLoading={isRegenerating}
                     >
-                      Confirm & Regenerate
+                      Confirm &amp; Regenerate
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
-                  <div className="text-[11px] text-foreground-dim">
+                  <div className="text-xs text-muted-foreground">
                     <span>Need to revoke old links?</span>
                   </div>
                   <Button
@@ -282,7 +284,8 @@ export function GroupInviteModal({
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsConfirmingRegenerate(true)}
-                    leftIcon={<RefreshCw className="size-3 text-foreground-dim" />}
+                    leftIcon={<RefreshCw className="size-3 text-muted-foreground" />}
+                    className="text-xs"
                   >
                     Regenerate Code
                   </Button>
@@ -292,7 +295,7 @@ export function GroupInviteModal({
           )}
 
           {regenerateError && (
-            <div className="rounded-xl border border-border bg-surface-elevated p-2.5 text-xs text-foreground">
+            <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-xs text-foreground">
               {regenerateError}
             </div>
           )}

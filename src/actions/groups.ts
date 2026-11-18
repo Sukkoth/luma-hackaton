@@ -345,6 +345,12 @@ export async function getGroupDetailsAction({
       };
     }
 
+    const isGroupAdmin =
+      membership?.role === "admin" ||
+      membership?.role === "owner" ||
+      groupRecord.ownerId === session.user.id;
+    const canInvite = !groupRecord.isPrivate || isGroupAdmin;
+
     return {
       success: true,
       group: {
@@ -352,7 +358,7 @@ export async function getGroupDetailsAction({
         name: groupRecord.name,
         description: groupRecord.description,
         avatarUrl: groupRecord.avatarUrl,
-        inviteCode: groupRecord.inviteCode,
+        inviteCode: canInvite ? groupRecord.inviteCode : "",
         ownerId: groupRecord.ownerId,
         isPrivate: groupRecord.isPrivate,
         requiresApproval: groupRecord.requiresApproval,
@@ -640,26 +646,32 @@ export async function searchPublicGroupsAction({
       with: {
         members: true,
       },
-      limit,
       orderBy: [desc(groups.createdAt)],
     });
 
-    const result = publicGroups.map((g) => {
-      const activeMembers = g.members.filter((m) => m.status === "active");
-      const isEnrolled = g.members.some(
-        (m) => m.userId === session.user.id && m.status === "active"
-      );
-
-      return {
-        id: g.id,
-        name: g.name,
-        description: g.description,
-        avatarUrl: g.avatarUrl,
-        memberCount: activeMembers.length,
-        requiresApproval: g.requiresApproval,
-        isEnrolled,
-      };
-    });
+    const result = publicGroups
+      .filter((g) => {
+        // Exclude groups where caller is already an active or pending member
+        const isMember = g.members.some(
+          (m) =>
+            m.userId === session.user.id &&
+            (m.status === "active" || m.status === "pending_approval")
+        );
+        return !isMember;
+      })
+      .slice(0, limit)
+      .map((g) => {
+        const activeMembers = g.members.filter((m) => m.status === "active");
+        return {
+          id: g.id,
+          name: g.name,
+          description: g.description,
+          avatarUrl: g.avatarUrl,
+          memberCount: activeMembers.length,
+          requiresApproval: g.requiresApproval,
+          isEnrolled: false,
+        };
+      });
 
     return { success: true, groups: result };
   } catch (err) {
@@ -1610,6 +1622,9 @@ export async function getGroupLeaderboardAction({
     const hideProgressMap = new Map<string, boolean>();
     members.forEach((m) => hideProgressMap.set(m.userId, m.hideProgress));
 
+    const callerMembership = members.find((m) => m.userId === session.user.id);
+    const isCallerMember = callerMembership && callerMembership.status === "active";
+
     const currentUserHideProgress =
       hideProgressMap.get(session.user.id) ?? false;
 
@@ -1618,9 +1633,10 @@ export async function getGroupLeaderboardAction({
     const entries: LeaderboardEntry[] = enrollments.map((e) => {
       const isCurrentUser = e.userId === session.user.id;
       const isHidden = hideProgressMap.get(e.userId) ?? false;
-      // If a user hides their own visibility, they cannot see others' names (reciprocal anonymity)
+      // Non-members cannot see names of cohort members.
+      // If a member hides their own visibility, reciprocal anonymity applies.
       const shouldAnonymize =
-        !isCurrentUser && (isHidden || currentUserHideProgress);
+        !isCallerMember || (!isCurrentUser && (isHidden || currentUserHideProgress));
 
       const userReadings = readingsByInstance.get(e.planInstanceId) || [];
       const totalChapters = e.totalChapters || 1;
@@ -1637,8 +1653,12 @@ export async function getGroupLeaderboardAction({
       });
 
       return {
-        userId: e.userId,
-        name: shouldAnonymize ? "Anonymous Reader" : e.name || "Reader",
+        userId: shouldAnonymize ? `anon-${e.userId.slice(0, 8)}` : e.userId,
+        name: shouldAnonymize
+          ? !isCallerMember
+            ? "Fellowship Member"
+            : "Anonymous Reader"
+          : e.name || "Reader",
         avatarUrl: shouldAnonymize ? null : e.image || null,
         isCurrentUser,
         isAnonymous: shouldAnonymize,

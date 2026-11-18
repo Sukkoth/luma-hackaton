@@ -45,7 +45,7 @@ function renderContentWithLinks({ content }: { content: string }) {
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors break-all"
+          className="font-medium text-primary underline underline-offset-4 decoration-primary/40 hover:decoration-primary transition-colors break-all"
         >
           {part}
         </a>
@@ -74,17 +74,17 @@ export function GroupPinnedBulletin({
     if (!isAdmin) return null;
 
     return (
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-dashed border-border/80 bg-surface/40 p-4 transition-colors hover:border-border">
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-dashed border-border/80 bg-muted/20 p-4 transition-colors hover:border-border">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-surface-elevated text-foreground-dim border border-border">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-muted-foreground border border-border">
             <Pin className="size-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-foreground">
+            <p className="text-xs font-semibold text-foreground">
               No active bulletin announcement
             </p>
-            <p className="text-[11px] text-foreground-dim truncate">
-              Pin a timed notice for upcoming meetings, prayer points, or reading goals.
+            <p className="text-xs text-muted-foreground truncate">
+              Pin a timed notice for upcoming cohort meetings, prayer points, or reading goals.
             </p>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function GroupPinnedBulletin({
           variant="outline"
           size="sm"
           onClick={onOpenNoticeModal}
-          leftIcon={<Pin className="size-3" />}
+          leftIcon={<Pin className="size-3.5" />}
           className="shrink-0 text-xs"
         >
           Pin Announcement
@@ -104,17 +104,17 @@ export function GroupPinnedBulletin({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-surface-elevated/70 to-surface p-4 sm:p-5 shadow-xs transition-all">
+    <div className="ui-card relative overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-4 sm:p-5 shadow-xs transition-all">
       {/* Top Header: Badge, Expiration countdown, and Admin Edit button */}
       <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-3">
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
-            <Pin className="size-3 rotate-45" />
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/15 border border-primary/25 px-2.5 py-1 text-xs font-semibold text-primary">
+            <Pin className="size-3.5 rotate-45" />
             <span>Pinned Bulletin</span>
           </span>
 
           {remainingLabel && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-foreground-dim border border-border">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border">
               <Clock className="size-3" />
               <span>{remainingLabel}</span>
             </span>
@@ -127,8 +127,8 @@ export function GroupPinnedBulletin({
             variant="ghost"
             size="sm"
             onClick={onOpenNoticeModal}
-            leftIcon={<Edit3 className="size-3.5 text-foreground-dim" />}
-            className="text-xs text-foreground-secondary hover:text-foreground shrink-0"
+            leftIcon={<Edit3 className="size-3.5 text-muted-foreground" />}
+            className="text-xs text-muted-foreground hover:text-foreground shrink-0 h-8 px-2.5"
           >
             Edit
           </Button>
@@ -143,20 +143,20 @@ export function GroupPinnedBulletin({
           </h3>
         )}
 
-        <div className="text-xs sm:text-sm text-foreground-secondary leading-relaxed whitespace-pre-line">
+        <div className="text-xs sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
           {renderContentWithLinks({ content: notice.content })}
         </div>
       </div>
 
       {/* Footer Meta */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-foreground-dim border-t border-border/40 pt-2.5">
+      <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground border-t border-border/50 pt-2.5">
         <span className="flex items-center gap-1">
           <User className="size-3" />
-          <span>{notice.authorName ? `Posted by ${notice.authorName}` : "Posted by Admin"}</span>
+          <span>{notice.authorName ? `Posted by ${notice.authorName}` : "Posted by Leader"}</span>
         </span>
-        <span className="text-foreground-dim/40">•</span>
+        <span>•</span>
         <span className="flex items-center gap-1">
-          <Sparkles className="size-3" />
+          <Sparkles className="size-3 text-primary" />
           <span>Scripture Fellowship Announcement</span>
         </span>
       </div>

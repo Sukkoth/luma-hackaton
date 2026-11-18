@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -87,14 +88,16 @@ export default async function GroupPage({ params }: PageProps) {
     >
       <div className="w-full px-4 sm:px-8 py-4 sm:py-6">
         <main className="mt-1 w-full">
-          <GroupWorkspaceView
-            group={group}
-            members={members}
-            pendingMembers={pendingMembers}
-            leaderboardsByPlanId={leaderboardsByPlanId}
-            trackers={trackersData.trackers}
-            activeTrackerId={trackersData.activeTracker?.id}
-          />
+          <Suspense fallback={null}>
+            <GroupWorkspaceView
+              group={group}
+              members={members}
+              pendingMembers={pendingMembers}
+              leaderboardsByPlanId={leaderboardsByPlanId}
+              trackers={trackersData.trackers}
+              activeTrackerId={trackersData.activeTracker?.id}
+            />
+          </Suspense>
         </main>
       </div>
     </AppShell>

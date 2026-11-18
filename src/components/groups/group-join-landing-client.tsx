@@ -73,16 +73,16 @@ export function GroupJoinLandingClient({
         {/* Back navigation */}
         <Link
           href="/groups"
-          className="inline-flex items-center gap-1.5 text-xs text-foreground-dim hover:text-foreground transition-colors mb-6"
+          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6 font-medium"
         >
           <ArrowLeft className="size-3.5" />
           <span>Back to Fellowships</span>
         </Link>
 
         {/* Invite Card */}
-        <div className="rounded-[28px] border border-border bg-surface p-7 shadow-xl space-y-6 text-center">
+        <div className="rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-xl space-y-6 text-center">
           {/* Avatar */}
-          <div className="mx-auto flex size-20 items-center justify-center rounded-[24px] bg-surface-elevated border border-border text-2xl font-bold text-foreground overflow-hidden shadow-inner">
+          <div className="mx-auto flex size-20 items-center justify-center rounded-2xl bg-muted border border-border text-2xl font-bold text-foreground overflow-hidden shadow-xs">
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
@@ -99,21 +99,21 @@ export function GroupJoinLandingClient({
           {/* Group Details */}
           <div>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-surface-elevated px-2.5 py-1 text-[11px] font-medium text-foreground-dim border border-border">
+              <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground border border-border">
                 {isPrivate ? (
                   <>
-                    <Lock className="size-3" />
-                    Private Group
+                    <Lock className="size-3 text-muted-foreground" />
+                    Private Fellowship
                   </>
                 ) : (
                   <>
-                    <Globe className="size-3" />
-                    Public Group
+                    <Globe className="size-3 text-primary" />
+                    Open Access
                   </>
                 )}
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-surface-elevated px-2.5 py-1 text-[11px] font-medium text-foreground-dim border border-border">
-                <Users className="size-3" />
+              <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground border border-border">
+                <Users className="size-3 text-primary" />
                 {memberCount} {memberCount === 1 ? "member" : "members"}
               </span>
             </div>
@@ -121,16 +121,16 @@ export function GroupJoinLandingClient({
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               {name}
             </h1>
-            <p className="mt-2 text-xs text-foreground-dim leading-relaxed">
-              {description || "You have been invited to join this community reading fellowship on Luma."}
+            <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+              {description || "You have been invited to join this Scripture reading fellowship on Luma."}
             </p>
           </div>
 
           {/* Approval Notice */}
           {requiresApproval && (
-            <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning/10 p-3 text-left">
-              <ShieldAlert className="size-4 text-warning shrink-0 mt-0.5" />
-              <p className="text-[11px] text-foreground-secondary leading-snug">
+            <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-left">
+              <ShieldAlert className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-800 dark:text-amber-300 leading-snug">
                 This fellowship requires admin approval. Once requested, the owner or an admin will review your membership before granting access.
               </p>
             </div>
@@ -138,30 +138,30 @@ export function GroupJoinLandingClient({
 
           {/* Error Message */}
           {error && (
-            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive text-left">
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive text-left font-medium">
               {error}
             </div>
           )}
 
           {/* Success State */}
           {isJoined && (
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-foreground animate-in fade-in">
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-primary animate-in fade-in">
               <CheckCircle2 className="size-4" />
               <span>Joined! Redirecting to fellowship...</span>
             </div>
           )}
 
           {isPending && (
-            <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4 text-center space-y-2">
-              <p className="text-xs font-semibold text-warning">
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-center space-y-2">
+              <p className="text-xs font-bold text-amber-700 dark:text-amber-400">
                 Request Submitted
               </p>
-              <p className="text-[11px] text-foreground-secondary">
-                Your request is pending review by the group admins. You will see this fellowship on your dashboard once approved.
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Your request is pending review by the fellowship admins. You will see this fellowship on your dashboard once approved.
               </p>
               <Link
                 href="/groups"
-                className="inline-block mt-2 text-xs font-medium text-primary hover:underline"
+                className="inline-block mt-2 text-xs font-semibold text-primary hover:underline"
               >
                 Return to Fellowships
               </Link>
@@ -172,9 +172,9 @@ export function GroupJoinLandingClient({
           {!isJoined && !isPending && (
             <Button
               type="button"
-              variant="primary"
+              variant="default"
               size="lg"
-              className="w-full"
+              className="w-full font-semibold"
               isLoading={isSubmitting}
               onClick={handleJoin}
             >

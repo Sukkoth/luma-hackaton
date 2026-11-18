@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryState, parseAsStringLiteral } from "nuqs";
 import {
   Users,
   Calendar,
@@ -18,6 +19,8 @@ import {
   Share2,
   LogOut,
   Pin,
+  UserPlus,
+  Clock,
 } from "lucide-react";
 import type {
   GroupDetails,
@@ -35,7 +38,9 @@ import { GroupSchedulePlanModal } from "@/components/groups/group-schedule-plan-
 import { GroupInviteModal } from "@/components/groups/group-invite-modal";
 import { GroupPinnedBulletin } from "@/components/groups/group-pinned-bulletin";
 import { GroupPinnedNoticeModal } from "@/components/groups/group-pinned-notice-modal";
+import { GroupJoinConfirmModal } from "@/components/groups/group-join-confirm-modal";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export type GroupWorkspaceViewProps = {
   group: GroupDetails;
@@ -46,6 +51,9 @@ export type GroupWorkspaceViewProps = {
   activeTrackerId?: string;
 };
 
+const WORKSPACE_TABS = ["plans", "leaderboard", "members", "admin"] as const;
+type WorkspaceTab = (typeof WORKSPACE_TABS)[number];
+
 export function GroupWorkspaceView({
   group,
   members,
@@ -55,9 +63,11 @@ export function GroupWorkspaceView({
   activeTrackerId,
 }: GroupWorkspaceViewProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<
-    "plans" | "leaderboard" | "members" | "admin"
-  >("plans");
+  const [activeTab, setActiveTab] = useQueryState<WorkspaceTab>(
+    "tab",
+    parseAsStringLiteral(WORKSPACE_TABS).withDefault("plans")
+  );
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
@@ -68,6 +78,10 @@ export function GroupWorkspaceView({
 
   const isOwner = group.currentUserRole === "owner";
   const isAdmin = isOwner || group.currentUserRole === "admin";
+  const isMember = Boolean(group.currentUserRole);
+  const isPending = group.currentUserMembershipStatus === "pending_approval";
+  const isNotJoined = !isMember && !isPending;
+  const canInvite = !group.isPrivate || isAdmin;
 
   async function handleConfirmLeaveGroup() {
     setIsLeavingGroup(true);
@@ -93,141 +107,205 @@ export function GroupWorkspaceView({
     .toUpperCase();
 
   return (
-    <div className="w-full max-w-full space-y-8 animate-in fade-in duration-150 overflow-x-hidden">
-      {/* ── Top Bar: Back Link & Context ── */}
-      <div className="flex items-center justify-between border-b border-border/60 pb-4">
+    <div className="w-full max-w-full space-y-6 animate-in fade-in duration-200 overflow-x-hidden">
+      {/* ── Top Bar: Back Link & Context Badges ── */}
+      <div className="flex items-center justify-between gap-4 pb-1">
         <Link
           href="/groups"
-          className="inline-flex items-center gap-2 text-xs font-medium text-foreground-dim hover:text-foreground transition-colors group"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors group"
         >
           <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
           <span>All Fellowships</span>
         </Link>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground border border-border shadow-2xs">
             {group.isPrivate ? (
               <>
-                <Lock className="size-3 text-foreground-dim" />
-                <span>Private</span>
+                <Lock className="size-3 text-muted-foreground" />
+                <span>Private Fellowship</span>
               </>
             ) : (
               <>
-                <Globe className="size-3 text-foreground-dim" />
-                <span>Open</span>
+                <Globe className="size-3 text-primary" />
+                <span>Open Access</span>
               </>
             )}
           </span>
 
           {isOwner ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground border border-border">
-              <Shield className="size-3 text-foreground-dim" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-xs font-semibold text-primary">
+              <Shield className="size-3" />
               <span>Owner</span>
             </span>
           ) : isAdmin ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
-              <ShieldCheck className="size-3 text-foreground-dim" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-xs font-semibold text-primary">
+              <ShieldCheck className="size-3" />
               <span>Admin</span>
             </span>
-          ) : null}
+          ) : isMember ? (
+            <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-foreground">
+              Member
+            </span>
+          ) : isPending ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+              <Clock className="size-3" />
+              <span>Pending</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-muted/60 px-2.5 py-1 text-xs font-medium text-muted-foreground border border-border/50">
+              Guest View
+            </span>
+          )}
         </div>
       </div>
 
-      {/* ── Group Header (Clean, Editorial, Full-Width) ── */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4 sm:gap-5 min-w-0">
-          {/* Group Avatar */}
-          <div className="relative flex size-14 sm:size-16 shrink-0 items-center justify-center rounded-2xl bg-surface-elevated border border-border text-base sm:text-lg font-semibold text-foreground overflow-hidden shadow-2xs">
-            {group.avatarUrl ? (
-              <Image
-                src={group.avatarUrl}
-                alt={group.name}
-                width={64}
-                height={64}
-                className="size-full object-cover"
-              />
-            ) : (
-              <span className="tracking-wide">{initials}</span>
-            )}
-          </div>
-
-          <div className="min-w-0 space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              {group.name}
-            </h1>
-
-            {group.description && (
-              <p className="text-sm text-foreground-secondary max-w-2xl leading-relaxed">
-                {group.description}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-1 text-xs text-foreground-dim">
-              <span>{group.memberCount} {group.memberCount === 1 ? "member" : "members"}</span>
-              <span className="text-foreground-dim/40">•</span>
-              <span>{group.activePlans.length} active {group.activePlans.length === 1 ? "plan" : "plans"}</span>
-              {group.scheduledPlans.length > 0 && (
-                <>
-                  <span className="text-foreground-dim/40">•</span>
-                  <span>{group.scheduledPlans.length} scheduled</span>
-                </>
+      {/* ── Fellowship Masthead (Warm Sanctuary Hero) ── */}
+      <section className="relative rounded-2xl border border-border bg-card p-6 sm:p-7 shadow-xs overflow-hidden">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4 sm:gap-5 min-w-0">
+            {/* Group Avatar */}
+            <div className="relative flex size-14 sm:size-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-base sm:text-lg font-bold text-primary overflow-hidden shadow-2xs">
+              {group.avatarUrl ? (
+                <Image
+                  src={group.avatarUrl}
+                  alt={group.name}
+                  width={64}
+                  height={64}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <span className="tracking-wide font-bold">{initials}</span>
               )}
             </div>
+
+            <div className="min-w-0 space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                {group.name}
+              </h1>
+
+              {group.description && (
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                  {group.description}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Users className="size-3.5 text-primary" />
+                  <span>{group.memberCount} {group.memberCount === 1 ? "member" : "members"}</span>
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1.5 font-medium">
+                  <BookOpen className="size-3.5 text-primary" />
+                  <span>{group.activePlans.length} active {group.activePlans.length === 1 ? "plan" : "plans"}</span>
+                </span>
+                {group.scheduledPlans.length > 0 && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="size-3.5" />
+                      <span>{group.scheduledPlans.length} scheduled</span>
+                    </span>
+                  </>
+                )}
+                <span>•</span>
+                <span className="font-medium text-foreground/80">Synchronized Pace</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Header Action Buttons - Single clear action focal point */}
+          <div className="shrink-0 self-start lg:self-center">
+            {isNotJoined ? (
+              <div className="flex flex-col items-start lg:items-end gap-1.5">
+                <Button
+                  type="button"
+                  variant="default"
+                  size="default"
+                  onClick={() => setIsJoinModalOpen(true)}
+                  leftIcon={<UserPlus className="size-4" />}
+                  className="h-10 px-5 font-semibold shadow-xs rounded-xl"
+                >
+                  Join this Group
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Free to join • Read in lockstep
+                </span>
+              </div>
+            ) : isPending ? (
+              <div className="flex flex-col items-start lg:items-end gap-1.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="default"
+                  disabled
+                  leftIcon={<Clock className="size-3.5" />}
+                  className="h-10 px-4 rounded-xl"
+                >
+                  Pending Approval
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Request sent to leaders
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                {canInvite && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsInviteModalOpen(true)}
+                    leftIcon={<Share2 className="size-3.5" />}
+                    className="rounded-xl h-9"
+                  >
+                    Invite
+                  </Button>
+                )}
+
+                {!isOwner && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsLeaveGroupModalOpen(true)}
+                    leftIcon={<LogOut className="size-3.5 text-muted-foreground" />}
+                    className="rounded-xl h-9 text-muted-foreground hover:text-destructive"
+                  >
+                    Leave
+                  </Button>
+                )}
+
+                {isAdmin && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsNoticeModalOpen(true)}
+                      leftIcon={<Pin className="size-3.5 text-muted-foreground" />}
+                      className="rounded-xl h-9"
+                    >
+                      {group.pinnedNotice ? "Edit Bulletin" : "Pin Bulletin"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      onClick={() => setIsScheduleModalOpen(true)}
+                      leftIcon={<Calendar className="size-3.5" />}
+                      className="rounded-xl h-9 font-semibold shadow-xs"
+                    >
+                      Schedule Plan
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Header Actions */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0 self-start lg:self-center">
-          <Button
-            type="button"
-            variant="outline"
-            size="md"
-            onClick={() => setIsInviteModalOpen(true)}
-            leftIcon={<Share2 className="size-4" />}
-            className="w-full sm:w-auto justify-center"
-          >
-            Invite
-          </Button>
-
-          {!isOwner && group.currentUserRole && (
-            <Button
-              type="button"
-              variant="outline"
-              size="md"
-              onClick={() => setIsLeaveGroupModalOpen(true)}
-              leftIcon={<LogOut className="size-4 text-foreground-dim" />}
-              className="w-full sm:w-auto justify-center"
-            >
-              Leave
-            </Button>
-          )}
-
-          {isAdmin && (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={() => setIsNoticeModalOpen(true)}
-                leftIcon={<Pin className="size-4 text-foreground-dim" />}
-                className="w-full sm:w-auto justify-center"
-              >
-                {group.pinnedNotice ? "Edit Bulletin" : "Pin Bulletin"}
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                onClick={() => setIsScheduleModalOpen(true)}
-                leftIcon={<Calendar className="size-4" />}
-                className="col-span-2 sm:col-span-1 w-full sm:w-auto justify-center font-semibold"
-              >
-                Schedule Plan
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+      </section>
 
       {/* ── Pinned Fellowship Bulletin (Timed Notice) ── */}
       <GroupPinnedBulletin
@@ -237,33 +315,35 @@ export function GroupWorkspaceView({
         onOpenNoticeModal={() => setIsNoticeModalOpen(true)}
       />
 
-      {/* ── Standalone Tabs (Single Responsibility Architecture) ── */}
-      <div className="flex items-center gap-4 sm:gap-6 border-b border-border overflow-x-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+      {/* ── Standalone Tabs (Segmented Control matching PlanCatalog style) ── */}
+      <div className="flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none w-fit max-w-full">
         {/* Tab 1: Plans */}
         <button
           type="button"
           onClick={() => setActiveTab("plans")}
-          className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-all cursor-pointer shrink-0 ${
+          className={cn(
+            "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
             activeTab === "plans"
-              ? "border-foreground text-foreground font-semibold"
-              : "border-transparent text-foreground-dim hover:text-foreground"
-          }`}
+              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+              : "bg-transparent text-muted-foreground hover:text-foreground"
+          )}
         >
-          <BookOpen className="size-4" />
-          <span>Plans</span>
+          <BookOpen className="size-3.5" />
+          <span>Plans ({group.activePlans.length})</span>
         </button>
 
-        {/* Tab 2: Leaderboard (Dedicated Accountability & Circle Tab) */}
+        {/* Tab 2: Leaderboard */}
         <button
           type="button"
           onClick={() => setActiveTab("leaderboard")}
-          className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-all cursor-pointer shrink-0 ${
+          className={cn(
+            "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
             activeTab === "leaderboard"
-              ? "border-foreground text-foreground font-semibold"
-              : "border-transparent text-foreground-dim hover:text-foreground"
-          }`}
+              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+              : "bg-transparent text-muted-foreground hover:text-foreground"
+          )}
         >
-          <Trophy className="size-4" />
+          <Trophy className="size-3.5" />
           <span>Leaderboard</span>
         </button>
 
@@ -271,14 +351,15 @@ export function GroupWorkspaceView({
         <button
           type="button"
           onClick={() => setActiveTab("members")}
-          className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-all cursor-pointer shrink-0 ${
+          className={cn(
+            "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
             activeTab === "members"
-              ? "border-foreground text-foreground font-semibold"
-              : "border-transparent text-foreground-dim hover:text-foreground"
-          }`}
+              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+              : "bg-transparent text-muted-foreground hover:text-foreground"
+          )}
         >
-          <Users className="size-4" />
-          <span>Members</span>
+          <Users className="size-3.5" />
+          <span>Members ({group.memberCount})</span>
         </button>
 
         {/* Tab 4: Administration / Settings (Admins Only) */}
@@ -286,20 +367,21 @@ export function GroupWorkspaceView({
           <button
             type="button"
             onClick={() => setActiveTab("admin")}
-            className={`flex items-center gap-2 pb-3 text-sm font-medium border-b-2 transition-all cursor-pointer shrink-0 ${
+            className={cn(
+              "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
               activeTab === "admin"
-                ? "border-foreground text-foreground font-semibold"
-                : "border-transparent text-foreground-dim hover:text-foreground"
-            }`}
+                ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                : "bg-transparent text-muted-foreground hover:text-foreground"
+            )}
           >
-            <Settings className="size-4" />
+            <Settings className="size-3.5" />
             <span>Settings</span>
           </button>
         )}
       </div>
 
       {/* ── Active Tab Display ── */}
-      <div>
+      <section className="w-full space-y-6 pt-1">
         {/* Tab 1: Plans */}
         {activeTab === "plans" && (
           <GroupPlansTab
@@ -310,9 +392,11 @@ export function GroupWorkspaceView({
             trackers={trackers}
             activeTrackerId={activeTrackerId}
             isAdmin={isAdmin}
+            isMember={isMember}
             onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
             selectedPlanForEnroll={selectedPlanForEnroll}
             onSelectPlanForEnroll={setSelectedPlanForEnroll}
+            onJoinGroupClick={() => setIsJoinModalOpen(true)}
           />
         )}
 
@@ -324,8 +408,9 @@ export function GroupWorkspaceView({
             leaderboardsByPlanId={leaderboardsByPlanId}
             currentUserHideProgress={group.currentUserHideProgress}
             currentUserPrivacyUpdatedAt={group.currentUserPrivacyUpdatedAt}
+            isMember={isMember}
             onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
-            onCopyInvite={() => setIsInviteModalOpen(true)}
+            onCopyInvite={canInvite ? () => setIsInviteModalOpen(true) : undefined}
             onSelectPlanForEnroll={(plan) => {
               setSelectedPlanForEnroll(plan);
               setActiveTab("plans");
@@ -340,6 +425,8 @@ export function GroupWorkspaceView({
             members={members}
             pendingMembers={pendingMembers}
             isAdmin={isAdmin}
+            isMember={isMember}
+            onJoinClick={() => setIsJoinModalOpen(true)}
           />
         )}
 
@@ -357,26 +444,26 @@ export function GroupWorkspaceView({
             members={members}
           />
         )}
-      </div>
+      </section>
 
-      {/* Schedule Plan Modal */}
+      {/* ── Modals ── */}
       <GroupSchedulePlanModal
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
         groupId={group.id}
       />
 
-      {/* Fellowship Invitation & QR Code Modal */}
-      <GroupInviteModal
-        isOpen={isInviteModalOpen}
-        onClose={() => setIsInviteModalOpen(false)}
-        groupId={group.id}
-        groupName={group.name}
-        initialInviteCode={group.inviteCode}
-        isAdmin={isAdmin}
-      />
+      {canInvite && (
+        <GroupInviteModal
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          groupId={group.id}
+          groupName={group.name}
+          initialInviteCode={group.inviteCode}
+          isAdmin={isAdmin}
+        />
+      )}
 
-      {/* Pinned Bulletin Notice Modal */}
       <GroupPinnedNoticeModal
         isOpen={isNoticeModalOpen}
         onClose={() => setIsNoticeModalOpen(false)}
@@ -386,22 +473,22 @@ export function GroupWorkspaceView({
 
       {/* Leave Fellowship Confirmation Modal */}
       {isLeaveGroupModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="rounded-2xl border border-border bg-surface max-w-sm w-full p-5 sm:p-6 space-y-4 text-center shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="rounded-2xl border border-border bg-card max-w-sm w-full p-5 sm:p-6 space-y-4 text-center shadow-lg">
             <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive mx-auto border border-destructive/20">
               <LogOut className="size-6" />
             </div>
             <h4 className="text-base font-bold text-foreground">
               Leave Fellowship?
             </h4>
-            <p className="text-xs text-foreground-secondary leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to leave &ldquo;{group.name}&rdquo;? You will be unenrolled from all cohort reading plans and will need an invite code to rejoin.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={() => setIsLeaveGroupModalOpen(false)}
                 disabled={isLeavingGroup}
                 className="flex-1"
@@ -411,7 +498,7 @@ export function GroupWorkspaceView({
               <Button
                 type="button"
                 variant="destructive"
-                size="md"
+                size="sm"
                 isLoading={isLeavingGroup}
                 onClick={handleConfirmLeaveGroup}
                 className="flex-1"
@@ -422,6 +509,27 @@ export function GroupWorkspaceView({
           </div>
         </div>
       )}
+      {/* Join Fellowship Multi-Step Onboarding Modal */}
+      <GroupJoinConfirmModal
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+        group={{
+          id: group.id,
+          name: group.name,
+          description: group.description,
+          avatarUrl: group.avatarUrl,
+          memberCount: group.memberCount,
+          requiresApproval: group.requiresApproval,
+          inviteCode: group.inviteCode,
+          activePlans: group.activePlans,
+          scheduledPlans: group.scheduledPlans,
+        }}
+        trackers={trackers}
+        activeTrackerId={activeTrackerId}
+        onCompleted={() => {
+          router.refresh();
+        }}
+      />
     </div>
   );
 }

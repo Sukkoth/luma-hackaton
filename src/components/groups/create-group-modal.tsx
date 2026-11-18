@@ -72,25 +72,25 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-lg rounded-[24px] border border-border bg-surface p-6 shadow-2xl transition-all"
+        className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl transition-all"
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-group-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-border">
+        <div className="flex items-center justify-between pb-4 border-b border-border/60">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-surface-elevated text-foreground border border-border">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Users className="size-5" />
             </div>
             <div>
               <h2
                 id="create-group-title"
-                className="text-lg font-semibold tracking-tight text-foreground"
+                className="text-base sm:text-lg font-bold tracking-tight text-foreground"
               >
                 Create Fellowship
               </h2>
-              <p className="text-xs text-foreground-dim">
+              <p className="text-xs text-muted-foreground">
                 Start a reading circle for your church, family, or friends.
               </p>
             </div>
@@ -98,7 +98,7 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-xl text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
+            className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <X className="size-4" />
           </button>
@@ -106,17 +106,17 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
 
         {/* Error Alert */}
         {error && (
-          <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
+          <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive font-medium">
             {error}
           </div>
         )}
 
         {/* Uncontrolled Form */}
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4.5">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
             <label
               htmlFor="group-name"
-              className="block text-[13px] font-semibold text-foreground mb-1.5"
+              className="block text-xs font-semibold text-foreground mb-1.5"
             >
               Group Name <span className="text-destructive">*</span>
             </label>
@@ -125,15 +125,15 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
               name="name"
               type="text"
               required
-              placeholder="e.g. Grace Fellowship Men's Study"
-              className="w-full h-11 rounded-xl border border-border bg-surface-elevated px-4 text-sm font-medium text-foreground placeholder:text-foreground-dim focus:outline-hidden focus:ring-1 focus:ring-primary transition-all"
+              placeholder="e.g. Grace Fellowship Small Group"
+              className="w-full h-10 rounded-xl border border-border bg-background px-3.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary transition-all"
             />
           </div>
 
           <div>
             <label
               htmlFor="group-desc"
-              className="block text-[13px] font-semibold text-foreground mb-1.5"
+              className="block text-xs font-semibold text-foreground mb-1.5"
             >
               Description (Optional)
             </label>
@@ -142,14 +142,14 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
               name="description"
               rows={3}
               placeholder="What is the focus or rhythm of this group?"
-              className="w-full rounded-xl border border-border bg-surface-elevated p-3.5 text-sm font-medium text-foreground placeholder:text-foreground-dim focus:outline-hidden focus:ring-1 focus:ring-primary transition-all resize-none"
+              className="w-full rounded-xl border border-border bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary transition-all resize-none"
             />
           </div>
 
           <div>
             <label
               htmlFor="group-avatar"
-              className="block text-[13px] font-semibold text-foreground mb-1.5"
+              className="block text-xs font-semibold text-foreground mb-1.5"
             >
               Avatar Image URL (Optional)
             </label>
@@ -158,85 +158,81 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
               name="avatarUrl"
               type="url"
               placeholder="https://..."
-              className="w-full h-11 rounded-xl border border-border bg-surface-elevated px-4 text-sm font-medium text-foreground placeholder:text-foreground-dim focus:outline-hidden focus:ring-1 focus:ring-primary transition-all"
+              className="w-full h-10 rounded-xl border border-border bg-background px-3.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary transition-all"
             />
           </div>
 
           {/* Privacy Selector */}
           <div>
-            <span className="block text-[13px] font-semibold text-foreground mb-2">
+            <span className="block text-xs font-semibold text-foreground mb-1.5">
               Privacy Setting
             </span>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setIsPrivate(true)}
-                className={`flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   isPrivate
-                    ? "border-primary bg-primary/5 text-foreground ring-1 ring-primary"
-                    : "border-border bg-surface-elevated/50 text-foreground-dim hover:text-foreground"
+                    ? "border-primary bg-primary/5 text-foreground ring-1 ring-primary/40 shadow-xs"
+                    : "border-border bg-background text-muted-foreground hover:border-border-strong"
                 }`}
               >
-                <Lock className="size-4.5 mt-0.5 shrink-0 text-foreground" />
-                <div>
-                  <span className="text-[13px] font-semibold text-foreground block">
-                    Private
-                  </span>
-                  <span className="text-[11.5px] text-foreground-dim leading-snug block mt-0.5">
-                    Accessible strictly via invite link or code.
-                  </span>
+                <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs text-foreground">
+                  <Lock className="size-3.5 text-primary" />
+                  <span>Private</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  Requires direct link or invite code to view &amp; join.
+                </p>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsPrivate(false)}
-                className={`flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   !isPrivate
-                    ? "border-primary bg-primary/5 text-foreground ring-1 ring-primary"
-                    : "border-border bg-surface-elevated/50 text-foreground-dim hover:text-foreground"
+                    ? "border-primary bg-primary/5 text-foreground ring-1 ring-primary/40 shadow-xs"
+                    : "border-border bg-background text-muted-foreground hover:border-border-strong"
                 }`}
               >
-                <Globe className="size-4.5 mt-0.5 shrink-0 text-foreground" />
-                <div>
-                  <span className="text-[13px] font-semibold text-foreground block">
-                    Public
-                  </span>
-                  <span className="text-[11.5px] text-foreground-dim leading-snug block mt-0.5">
-                    Visible in the community directory for anyone.
-                  </span>
+                <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs text-foreground">
+                  <Globe className="size-3.5 text-primary" />
+                  <span>Open Public</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  Discoverable on public fellowships directory.
+                </p>
               </button>
             </div>
           </div>
 
-          {/* Approval Gate Option */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border bg-surface-elevated/40">
-            <div className="flex items-center gap-2.5">
-              <ShieldCheck className="size-4.5 text-foreground-dim shrink-0" />
+          {/* Admin Approval Toggle */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/20">
+            <div className="flex items-start gap-2.5">
+              <ShieldCheck className="size-4 text-primary shrink-0 mt-0.5" />
               <div>
                 <span className="text-xs font-semibold text-foreground block">
-                  Require Admin Approval
+                  Require Leader Approval
                 </span>
-                <span className="text-[11.5px] text-foreground-dim block">
-                  Review new member requests before granting access.
+                <span className="text-[11px] text-muted-foreground block">
+                  New members must be approved before viewing cohort progress.
                 </span>
               </div>
             </div>
             <input
               type="checkbox"
-              id="requires-approval"
               name="requiresApproval"
-              className="size-5 rounded-lg border-border text-primary focus:ring-primary cursor-pointer accent-primary"
+              id="requiresApproval"
+              className="size-4.5 rounded border-border text-primary focus:ring-primary cursor-pointer accent-primary"
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/60">
             <Button
               type="button"
               variant="outline"
-              size="md"
+              size="sm"
               onClick={onClose}
               disabled={isSubmitting}
             >
@@ -244,8 +240,8 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
             </Button>
             <Button
               type="submit"
-              variant="primary"
-              size="md"
+              variant="default"
+              size="sm"
               isLoading={isSubmitting}
             >
               Create Fellowship
