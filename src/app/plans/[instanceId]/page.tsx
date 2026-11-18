@@ -59,7 +59,7 @@ export default async function PlanInstancePage(props: PlanInstancePageProps) {
     <Suspense
       fallback={
         <div className="flex min-h-screen w-full items-center justify-center p-8">
-          <div className="size-8 animate-spin rounded-full border-2 border-black/10 border-t-black dark:border-white/10 dark:border-t-white" />
+          <div className="size-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
         </div>
       }
     >

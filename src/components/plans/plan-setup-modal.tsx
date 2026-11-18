@@ -541,91 +541,90 @@ export function PlanSetupModal({
             <div className="space-y-5">
               <div className="ui-card-elevated p-5">
                 <div className="flex items-center gap-2">
-                  <span className="ui-pill text-[11px] font-medium">
-                    {plan.category}
+                  <span className="text-xs font-semibold text-primary">
+                    {plan.category} Blueprint
                   </span>
-                  <span className="ui-pill-primary text-[10px]">Blueprint</span>
                 </div>
-                <h3 className="mt-2.5 text-[21px] font-medium tracking-tight text-black dark:text-white">
+                <h3 className="mt-2.5 text-[21px] font-semibold tracking-tight text-foreground">
                   {plan.title}
                 </h3>
                 {plan.subtitle && (
-                  <p className="mt-0.5 text-[13.5px] font-normal text-[#666666] dark:text-[#9CA3AF]">
+                  <p className="mt-0.5 text-[13.5px] font-normal text-foreground-secondary">
                     {plan.subtitle}
                   </p>
                 )}
-                <p className="mt-2.5 text-[13px] leading-relaxed text-[#777777] dark:text-[#A1A1AA]">
+                <p className="mt-2.5 text-[13px] leading-relaxed text-foreground-dim">
                   {plan.description}
                 </p>
               </div>
 
               {/* Specs Grid */}
               <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
-                <div className="rounded-xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/4">
-                  <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <BookOpen className="size-3.5 text-zinc-900 dark:text-white" />
+                <div className="rounded-xl border border-border bg-surface-elevated/70 p-3.5">
+                  <span className="flex items-center gap-1.5 text-xs text-foreground-secondary">
+                    <BookOpen className="size-3.5 text-primary" />
                     <span>Chapters</span>
                   </span>
-                  <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
+                  <p className="mt-1 text-[20px] font-semibold text-foreground">
                     {plan.totalChapters}
                   </p>
                 </div>
-                <div className="rounded-xl border border-black/6 bg-white/70 p-3.5 dark:border-white/8 dark:bg-white/4">
-                  <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <Clock className="size-3.5 text-zinc-900 dark:text-white" />
+                <div className="rounded-xl border border-border bg-surface-elevated/70 p-3.5">
+                  <span className="flex items-center gap-1.5 text-xs text-foreground-secondary">
+                    <Clock className="size-3.5 text-primary" />
                     <span>Target Length</span>
                   </span>
-                  <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
+                  <p className="mt-1 text-[20px] font-semibold text-foreground">
                     {plan.recommendedDays} days
                   </p>
                 </div>
-                <div className="col-span-2 rounded-xl border border-black/6 bg-white/70 p-3.5 sm:col-span-1 dark:border-white/8 dark:bg-white/4">
-                  <span className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#A1A1AA]">
-                    <Sparkles className="size-3.5 text-zinc-900 dark:text-white" />
+                <div className="col-span-2 rounded-xl border border-border bg-surface-elevated/70 p-3.5 sm:col-span-1">
+                  <span className="flex items-center gap-1.5 text-xs text-foreground-secondary">
+                    <Sparkles className="size-3.5 text-primary" />
                     <span>Default Pace</span>
                   </span>
-                  <p className="mt-1 text-[20px] font-semibold text-black dark:text-white">
+                  <p className="mt-1 text-[20px] font-semibold text-foreground">
                     ~{plan.defaultDailyTarget} / day
                   </p>
                 </div>
               </div>
 
               {/* Curriculum Accordion */}
-              <div className="rounded-2xl border border-black/6 bg-white/50 p-4.5 dark:border-white/8 dark:bg-white/3">
+              <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                 <button
                   type="button"
                   onClick={() => setIsCurriculumExpanded(!isCurriculumExpanded)}
-                  className="flex w-full items-center justify-between text-left"
+                  className="flex w-full items-center justify-between text-left cursor-pointer"
                 >
                   <div>
-                    <h4 className="text-[14px] font-medium text-black dark:text-white">
+                    <h4 className="text-[14px] font-semibold text-foreground">
                       Curriculum Breakdown
                     </h4>
-                    <p className="text-[12px] text-[#777777] dark:text-[#9CA3AF]">
+                    <p className="text-[12px] text-foreground-secondary">
                       {plan.sections.length > 0
                         ? `${plan.sections.length} thematic sections`
                         : "Sequential scripture readings"}
                     </p>
                   </div>
                   {isCurriculumExpanded ? (
-                    <ChevronUp className="size-4.5 text-[#888888]" />
+                    <ChevronUp className="size-4.5 text-foreground-dim" />
                   ) : (
-                    <ChevronDown className="size-4.5 text-[#888888]" />
+                    <ChevronDown className="size-4.5 text-foreground-dim" />
                   )}
                 </button>
 
                 {isCurriculumExpanded && (
-                  <div className="mt-3.5 max-h-52 space-y-2 overflow-y-auto border-t border-black/6 pt-3 text-[12.5px] dark:border-white/6">
+                  <div className="mt-3.5 max-h-52 space-y-2 overflow-y-auto border-t border-border pt-3 text-[12.5px]">
                     {plan.sections.length > 0
                       ? plan.sections.map((sec, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center justify-between rounded-lg bg-black/3 px-3 py-2 dark:bg-white/4"
+                            className="flex items-center justify-between rounded-lg bg-surface px-3 py-2 border border-border/50"
                           >
-                            <span className="font-medium text-black dark:text-white">
+                            <span className="font-medium text-foreground">
                               {sec.title}
                             </span>
-                            <span className="text-[#888888] dark:text-[#9CA3AF]">
+                            <span className="text-foreground-dim">
                               {sec.chaptersCount} ch
                             </span>
                           </div>
@@ -633,18 +632,18 @@ export function PlanSetupModal({
                       : plan.readings.slice(0, 8).map((r, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center justify-between rounded-lg bg-black/3 px-3 py-2 dark:bg-white/4"
+                            className="flex items-center justify-between rounded-lg bg-surface px-3 py-2 border border-border/50"
                           >
-                            <span className="font-medium text-black dark:text-white">
+                            <span className="font-medium text-foreground">
                               {r.displayText || `${r.bookName} ${r.chapter}`}
                             </span>
-                            <span className="text-[#888888] dark:text-[#9CA3AF]">
+                            <span className="text-foreground-dim">
                               #{idx + 1}
                             </span>
                           </div>
                         ))}
                     {plan.readings.length > 8 && plan.sections.length === 0 && (
-                      <p className="pt-1.5 text-center text-[11.5px] text-[#888888]">
+                      <p className="pt-1.5 text-center text-[11.5px] text-foreground-dim">
                         + {plan.readings.length - 8} additional readings
                       </p>
                     )}
@@ -658,10 +657,10 @@ export function PlanSetupModal({
           {step === "pacing" && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-[16px] font-medium text-black dark:text-white">
+                <h3 className="text-[16px] font-semibold text-foreground">
                   Choose your pacing style
                 </h3>
-                <p className="mt-0.5 text-[13px] text-[#777777] dark:text-[#9CA3AF]">
+                <p className="mt-0.5 text-[13px] text-foreground-secondary">
                   Select the structure that best fits your daily rhythm.
                 </p>
               </div>
@@ -739,7 +738,7 @@ export function PlanSetupModal({
                         Self-Paced (Flexible)
                       </span>
                       {plan.allowSelfPaced === false && (
-                        <span className="ui-pill text-[10.5px]">
+                        <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[10.5px] font-medium text-foreground-secondary">
                           Fixed Itinerary
                         </span>
                       )}
@@ -756,7 +755,7 @@ export function PlanSetupModal({
                       )}
                     </div>
                   </div>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-[#666666] dark:text-[#A1A1AA]">
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-foreground-secondary">
                     Read freely without calendar deadlines or overdue notices.
                     Check off chapters as you complete them.
                   </p>
@@ -772,12 +771,12 @@ export function PlanSetupModal({
                 /* SELF-PACED SCHEDULE CONFIGURATION */
                 <div className="space-y-4">
                   {/* Start Date */}
-                  <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
+                  <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[13.5px] font-medium text-black dark:text-white">
+                      <label className="text-[13.5px] font-semibold text-foreground">
                         Plan Start Date
                       </label>
-                      <span className="rounded-md bg-black/5 px-2.5 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/8 dark:text-[#9CA3AF]">
+                      <span className="rounded-md bg-surface border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary">
                         {isStartDateToday
                           ? "Starts Today"
                           : diffDaysFromToday < 0
@@ -794,23 +793,23 @@ export function PlanSetupModal({
                         onKeyDown={(e) => {
                           if (e.key === "Enter") e.preventDefault();
                         }}
-                        className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2 text-[13px] text-black shadow-2xs focus:border-black focus:outline-none dark:border-white/15 dark:bg-white/5 dark:text-white"
+                        className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-[13px] text-foreground shadow-2xs focus:border-primary focus:outline-none"
                       />
                     </div>
                   </div>
 
                   {/* Daily Reading Reminder */}
-                  <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
+                  <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-9 items-center justify-center rounded-xl bg-black/5 text-[#555555] dark:bg-white/8 dark:text-[#9CA3AF]">
-                          <Bell className="size-4.5" />
+                        <div className="flex size-9 items-center justify-center rounded-xl bg-surface border border-border text-foreground">
+                          <Bell className="size-4.5 text-primary" />
                         </div>
                         <div>
-                          <span className="text-[13.5px] font-medium text-black dark:text-white">
+                          <span className="text-[13.5px] font-semibold text-foreground">
                             Daily Reading Reminder
                           </span>
-                          <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                          <p className="text-[11.5px] text-foreground-secondary">
                             Receive a daily notification in your browser
                           </p>
                         </div>
@@ -819,13 +818,13 @@ export function PlanSetupModal({
                         type="checkbox"
                         checked={reminderEnabled}
                         onChange={handleToggleReminder}
-                        className="size-4.5 rounded accent-black dark:accent-white"
+                        className="size-4.5 rounded accent-primary"
                       />
                     </label>
 
                     {reminderEnabled && (
-                      <div className="mt-3 flex items-center justify-between rounded-xl bg-black/4 p-2.5 pl-3.5 dark:bg-white/4">
-                        <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+                      <div className="mt-3 flex items-center justify-between rounded-xl bg-surface p-2.5 pl-3.5 border border-border">
+                        <span className="text-[12px] text-foreground-secondary">
                           Reminder Time
                         </span>
                         <input
@@ -835,24 +834,24 @@ export function PlanSetupModal({
                           onKeyDown={(e) => {
                             if (e.key === "Enter") e.preventDefault();
                           }}
-                          className="rounded-lg border border-black/10 bg-white px-2.5 py-1 text-[12px] font-medium text-black dark:border-white/10 dark:bg-white/10 dark:text-white"
+                          className="rounded-lg border border-border bg-surface px-2.5 py-1 text-[12px] font-medium text-foreground"
                         />
                       </div>
                     )}
                   </div>
 
                   {/* Dedicated Study Journal Folder */}
-                  <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
+                  <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
-                          <FolderPlus className="size-4.5" />
+                        <div className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground">
+                          <FolderPlus className="size-4.5 text-primary" />
                         </div>
                         <div>
-                          <span className="text-[13.5px] font-medium text-black dark:text-white">
+                          <span className="text-[13.5px] font-semibold text-foreground">
                             Create Study Journal Folder
                           </span>
-                          <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                          <p className="text-[11.5px] text-foreground-secondary">
                             Group all notes taken during this plan in &ldquo;
                             {plan.title}&rdquo;
                           </p>
@@ -862,7 +861,7 @@ export function PlanSetupModal({
                         type="checkbox"
                         checked={createNoteFolder}
                         onChange={(e) => setCreateNoteFolder(e.target.checked)}
-                        className="size-4.5 rounded accent-black dark:accent-white"
+                        className="size-4.5 rounded accent-primary"
                       />
                     </label>
                   </div>
@@ -872,20 +871,20 @@ export function PlanSetupModal({
                 <>
                   {/* Daily Target / End Date Steppers */}
                   {plan.allowCustomPace !== false ? (
-                    <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
+                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                       {/* Sub-mode switcher */}
-                      <div className="flex items-center justify-between border-b border-black/6 pb-3 dark:border-white/6">
-                        <label className="text-[13px] font-medium text-black dark:text-white">
+                      <div className="flex items-center justify-between border-b border-border pb-3">
+                        <label className="text-[13px] font-semibold text-foreground">
                           Pacing Calculation
                         </label>
-                        <div className="flex items-center gap-1 rounded-xl bg-black/5 p-1 dark:bg-white/6">
+                        <div className="flex items-center gap-1 rounded-xl bg-surface p-1 border border-border">
                           <button
                             type="button"
                             onClick={() => setPaceType("by_daily_target")}
                             className={`rounded-lg px-3 py-1 text-[11.5px] font-medium transition-all ${
                               paceType === "by_daily_target"
-                                ? "bg-white font-semibold text-black shadow-2xs dark:bg-white/15 dark:text-white"
-                                : "text-[#777777] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                                ? "bg-primary font-semibold text-primary-foreground shadow-2xs"
+                                : "text-foreground-secondary hover:text-foreground"
                             }`}
                           >
                             Chapters / Day
@@ -895,8 +894,8 @@ export function PlanSetupModal({
                             onClick={() => setPaceType("by_end_date")}
                             className={`rounded-lg px-3 py-1 text-[11.5px] font-medium transition-all ${
                               paceType === "by_end_date"
-                                ? "bg-white font-semibold text-black shadow-2xs dark:bg-white/15 dark:text-white"
-                                : "text-[#777777] hover:text-black dark:text-[#9CA3AF] dark:hover:text-white"
+                                ? "bg-primary font-semibold text-primary-foreground shadow-2xs"
+                                : "text-foreground-secondary hover:text-foreground"
                             }`}
                           >
                             Target Duration
@@ -907,10 +906,10 @@ export function PlanSetupModal({
                       {paceType === "by_daily_target" ? (
                         <div className="mt-3.5 flex items-center justify-between">
                           <div>
-                            <span className="text-[13px] font-medium text-black dark:text-white">
+                            <span className="text-[13px] font-semibold text-foreground">
                               Daily Chapters Target
                             </span>
-                            <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                            <p className="text-[11.5px] text-foreground-secondary">
                               Spans ~
                               {Math.ceil(plan.totalChapters / dailyChapters)}{" "}
                               reading days
@@ -922,11 +921,11 @@ export function PlanSetupModal({
                               onClick={() =>
                                 setDailyChapters(Math.max(1, dailyChapters - 1))
                               }
-                              className="flex size-9 items-center justify-center rounded-xl border border-black/10 bg-white text-black shadow-2xs hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:text-white"
+                              className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
                             >
                               -
                             </button>
-                            <span className="w-10 text-center text-[17px] font-semibold text-black dark:text-white">
+                            <span className="w-10 text-center text-[17px] font-semibold text-foreground">
                               {dailyChapters}
                             </span>
                             <button
@@ -936,7 +935,7 @@ export function PlanSetupModal({
                                   Math.min(50, dailyChapters + 1)
                                 )
                               }
-                              className="flex size-9 items-center justify-center rounded-xl border border-black/10 bg-white text-black shadow-2xs hover:bg-black/5 dark:border-white/15 dark:bg-white/10 dark:text-white"
+                              className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
                             >
                               +
                             </button>
@@ -946,14 +945,14 @@ export function PlanSetupModal({
                         <div className="mt-3.5 space-y-3">
                           <div className="flex items-center justify-between">
                             <div>
-                              <span className="text-[13px] font-medium text-black dark:text-white">
+                              <span className="text-[13px] font-semibold text-foreground">
                                 Target Total Duration
                               </span>
-                              <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                              <p className="text-[11.5px] text-foreground-secondary">
                                 Requires ~{effectiveDailyPace} ch / reading day
                               </p>
                             </div>
-                            <span className="text-[17px] font-semibold text-black dark:text-white">
+                            <span className="text-[17px] font-semibold text-foreground">
                               {targetDays} days
                             </span>
                           </div>
@@ -977,11 +976,11 @@ export function PlanSetupModal({
                       )}
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-black/6 bg-white/60 p-4 dark:border-white/8 dark:bg-white/3">
-                      <span className="text-[12px] font-medium text-[#777777] dark:text-[#A1A1AA]">
+                    <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4">
+                      <span className="text-[12px] font-medium text-foreground-dim">
                         Fixed Plan Schedule
                       </span>
-                      <p className="text-[14.5px] font-medium text-black dark:text-white">
+                      <p className="text-[14.5px] font-medium text-foreground">
                         {plan.defaultDailyTarget} Chapters / Day (Fixed
                         Itinerary)
                       </p>
@@ -989,17 +988,17 @@ export function PlanSetupModal({
                   )}
 
                   {/* Compact Weekly Rest Days Selector */}
-                  <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
+                  <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[13.5px] font-medium text-black dark:text-white">
+                      <label className="text-[13.5px] font-semibold text-foreground">
                         Weekly Reading Days
                       </label>
-                      <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                      <span className="text-[11px] font-medium text-foreground-dim">
                         {safeActiveDays.length} active /{" "}
                         {7 - safeActiveDays.length} rest
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                    <p className="mt-0.5 text-[11.5px] text-foreground-secondary">
                       Tap days to toggle reading on or off (rest days).
                     </p>
 
@@ -1025,8 +1024,8 @@ export function PlanSetupModal({
                     </div>
 
                     {safeActiveDays.length < 7 && (
-                      <div className="mt-3 flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-[11.5px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-                        <Coffee className="size-3.5 shrink-0" />
+                      <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-surface p-2.5 text-[11.5px] text-foreground-secondary">
+                        <Coffee className="size-3.5 shrink-0 text-primary" />
                         <span>
                           Rest days pause new readings without streak penalties.
                         </span>
@@ -1035,12 +1034,12 @@ export function PlanSetupModal({
                   </div>
 
                   {/* Start Date & Migration Options */}
-                  <div className="rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
+                  <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[13.5px] font-medium text-black dark:text-white">
+                      <label className="text-[13.5px] font-semibold text-foreground">
                         Plan Start Date
                       </label>
-                      <span className="rounded-md bg-black/5 px-2.5 py-0.5 text-[11px] font-medium text-[#555555] dark:bg-white/8 dark:text-[#9CA3AF]">
+                      <span className="rounded-md bg-surface border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary">
                         {isStartDateToday
                           ? "Starts Today"
                           : diffDaysFromToday < 0
@@ -1057,13 +1056,13 @@ export function PlanSetupModal({
                         onKeyDown={(e) => {
                           if (e.key === "Enter") e.preventDefault();
                         }}
-                        className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2 text-[13px] text-black shadow-2xs focus:border-black focus:outline-none dark:border-white/15 dark:bg-white/5 dark:text-white"
+                        className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-[13px] text-foreground shadow-2xs focus:border-primary focus:outline-none"
                       />
                     </div>
 
                     {/* Rest Day Alert */}
                     {isStartOnRestDay && (
-                      <div className="mt-3 flex items-start gap-2 rounded-xl bg-amber-500/10 p-2.5 text-[11.5px] text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                      <div className="mt-3 flex items-start gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 p-2.5 text-[11.5px] text-amber-700 dark:text-amber-400">
                         <Coffee className="size-4 shrink-0 mt-0.5" />
                         <span>
                           Selected start date falls on a rest day. Day 1
@@ -1078,7 +1077,7 @@ export function PlanSetupModal({
 
                     {/* Past Date Migration Checkbox */}
                     {isStartDateInPast && pastReadingsCount > 0 && (
-                      <div className="mt-3 rounded-xl border border-black/8 bg-white/80 p-3.5 dark:border-white/10 dark:bg-white/5">
+                      <div className="mt-3 rounded-xl border border-border bg-surface p-3.5">
                         <label className="flex items-start gap-2.5 cursor-pointer">
                           <input
                             type="checkbox"
@@ -1086,13 +1085,13 @@ export function PlanSetupModal({
                             onChange={(e) =>
                               setAutoCompletePastDays(e.target.checked)
                             }
-                            className="mt-0.5 size-4 rounded accent-black dark:accent-white"
+                            className="mt-0.5 size-4 rounded accent-primary"
                           />
                           <div>
-                            <span className="text-[12.5px] font-medium text-black dark:text-white">
+                            <span className="text-[12.5px] font-semibold text-foreground">
                               Mark Previous Sessions as Read
                             </span>
-                            <p className="mt-0.5 text-[11px] text-[#666666] dark:text-[#9CA3AF]">
+                            <p className="mt-0.5 text-[11px] text-foreground-secondary">
                               Auto-complete {pastReadingsCount} reading items up
                               to today. Perfect for migrating your progress from
                               another Bible app.
@@ -1104,18 +1103,18 @@ export function PlanSetupModal({
                   </div>
 
                   {/* Preferences: Reminder & Note Folder */}
-                  <div className="space-y-3 rounded-2xl border border-black/6 bg-white/60 p-4.5 dark:border-white/8 dark:bg-white/3">
+                  <div className="space-y-3 rounded-2xl border border-border bg-surface-elevated/40 p-4.5">
                     {/* Note Folder Option */}
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-8.5 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-800 dark:text-white">
-                          <FolderPlus className="size-4" />
+                        <div className="flex size-8.5 items-center justify-center rounded-xl border border-border bg-surface text-foreground">
+                          <FolderPlus className="size-4 text-primary" />
                         </div>
                         <div>
-                          <span className="text-[13px] font-medium text-black dark:text-white">
+                          <span className="text-[13px] font-semibold text-foreground">
                             Study Journal Note Folder
                           </span>
-                          <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+                          <p className="text-[11px] text-foreground-secondary">
                             Group all notes under &ldquo;{plan.title}&rdquo;
                           </p>
                         </div>
@@ -1124,22 +1123,22 @@ export function PlanSetupModal({
                         type="checkbox"
                         checked={createNoteFolder}
                         onChange={(e) => setCreateNoteFolder(e.target.checked)}
-                        className="size-4 rounded accent-black dark:accent-white"
+                        className="size-4 rounded accent-primary"
                       />
                     </label>
 
                     {/* Reminder Option */}
-                    <div className="border-t border-black/6 pt-3 dark:border-white/6">
+                    <div className="border-t border-border pt-3">
                       <label className="flex items-center justify-between cursor-pointer">
                         <div className="flex items-center gap-3">
-                          <div className="flex size-8.5 items-center justify-center rounded-xl bg-black/5 text-[#555555] dark:bg-white/8 dark:text-[#9CA3AF]">
-                            <Bell className="size-4" />
+                          <div className="flex size-8.5 items-center justify-center rounded-xl bg-surface border border-border text-foreground">
+                            <Bell className="size-4 text-primary" />
                           </div>
                           <div>
-                            <span className="text-[13px] font-medium text-black dark:text-white">
+                            <span className="text-[13px] font-semibold text-foreground">
                               Daily Reading Reminder
                             </span>
-                            <p className="text-[11px] text-[#777777] dark:text-[#9CA3AF]">
+                            <p className="text-[11px] text-foreground-secondary">
                               Browser reading prompt
                             </p>
                           </div>
@@ -1148,13 +1147,13 @@ export function PlanSetupModal({
                           type="checkbox"
                           checked={reminderEnabled}
                           onChange={handleToggleReminder}
-                          className="size-4 rounded accent-black dark:accent-white"
+                          className="size-4 rounded accent-primary"
                         />
                       </label>
 
                       {reminderEnabled && (
-                        <div className="mt-2.5 flex items-center justify-between rounded-xl bg-black/4 p-2.5 pl-3.5 dark:bg-white/4">
-                          <span className="text-[12px] text-[#777777] dark:text-[#A1A1AA]">
+                        <div className="mt-2.5 flex items-center justify-between rounded-xl bg-surface p-2.5 pl-3.5 border border-border">
+                          <span className="text-[12px] text-foreground-secondary">
                             Reminder Time
                           </span>
                           <input
@@ -1164,7 +1163,7 @@ export function PlanSetupModal({
                             onKeyDown={(e) => {
                               if (e.key === "Enter") e.preventDefault();
                             }}
-                            className="rounded-lg border border-black/10 bg-white px-2.5 py-1 text-[12px] font-medium text-black dark:border-white/10 dark:bg-white/10 dark:text-white"
+                            className="rounded-lg border border-border bg-surface px-2.5 py-1 text-[12px] font-medium text-foreground"
                           />
                         </div>
                       )}
@@ -1179,30 +1178,30 @@ export function PlanSetupModal({
           {step === "review" && (
             <div className="space-y-4">
               {/* Summary Card */}
-              <div className="rounded-2xl border border-black/8 bg-white/80 p-5 dark:border-white/10 dark:bg-white/4">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+              <div className="rounded-2xl border border-border bg-surface-elevated/70 p-5">
+                <span className="text-xs font-semibold text-primary">
                   ENROLLMENT SUMMARY
                 </span>
-                <h3 className="mt-1 text-[19px] font-medium text-black dark:text-white">
+                <h3 className="mt-1 text-[19px] font-semibold text-foreground">
                   {plan.title}
                 </h3>
 
-                <div className="mt-4 space-y-2.5 border-t border-black/6 pt-3.5 text-[13px] dark:border-white/6">
+                <div className="mt-4 space-y-2.5 border-t border-border pt-3.5 text-[13px]">
                   <div className="flex justify-between">
-                    <span className="text-[#777777] dark:text-[#A1A1AA]">
+                    <span className="text-foreground-secondary">
                       Pacing Mode
                     </span>
-                    <span className="font-medium text-black dark:text-white capitalize">
+                    <span className="font-semibold text-foreground capitalize">
                       {pacingMode === "scheduled"
                         ? "Scheduled Calendar"
                         : "Self-Paced (Flexible)"}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#777777] dark:text-[#A1A1AA]">
+                    <span className="text-foreground-secondary">
                       Start Date
                     </span>
-                    <span className="font-medium text-black dark:text-white">
+                    <span className="font-semibold text-foreground">
                       {formatDateDisplay(selectedStartMidnight)}
                     </span>
                   </div>
@@ -1210,55 +1209,55 @@ export function PlanSetupModal({
                   {pacingMode === "scheduled" ? (
                     <>
                       <div className="flex justify-between">
-                        <span className="text-[#777777] dark:text-[#A1A1AA]">
+                        <span className="text-foreground-secondary">
                           Daily Target
                         </span>
-                        <span className="font-medium text-black dark:text-white">
+                        <span className="font-semibold text-foreground">
                           {effectiveDailyPace} chapters / reading day
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#777777] dark:text-[#A1A1AA]">
+                        <span className="text-foreground-secondary">
                           Active Days
                         </span>
-                        <span className="font-medium text-black dark:text-white">
+                        <span className="font-semibold text-foreground">
                           {safeActiveDays.length} reading days / week
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#777777] dark:text-[#A1A1AA]">
+                        <span className="text-foreground-secondary">
                           Projected Completion
                         </span>
-                        <span className="font-medium text-black dark:text-white">
+                        <span className="font-semibold text-foreground">
                           {formatDateDisplay(projectedEndDate)}
                         </span>
                       </div>
                     </>
                   ) : (
                     <div className="flex justify-between">
-                      <span className="text-[#777777] dark:text-[#A1A1AA]">
+                      <span className="text-foreground-secondary">
                         Total Chapters
                       </span>
-                      <span className="font-medium text-black dark:text-white">
+                      <span className="font-semibold text-foreground">
                         {plan.totalChapters} chapters (Open-ended)
                       </span>
                     </div>
                   )}
 
                   <div className="flex justify-between">
-                    <span className="text-[#777777] dark:text-[#A1A1AA]">
+                    <span className="text-foreground-secondary">
                       Daily Reminder
                     </span>
-                    <span className="font-medium text-black dark:text-white">
+                    <span className="font-semibold text-foreground">
                       {reminderEnabled ? `At ${reminderTime}` : "Disabled"}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-[#777777] dark:text-[#A1A1AA]">
+                    <span className="text-foreground-secondary">
                       Study Journal Folder
                     </span>
-                    <span className="font-medium text-black dark:text-white">
+                    <span className="font-semibold text-foreground">
                       {createNoteFolder ? `"${plan.title}"` : "Default"}
                     </span>
                   </div>

@@ -33,11 +33,11 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
         <div className="ui-card flex flex-col justify-between p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-bold text-foreground-secondary">
+              <span className="flex items-center gap-2 text-[12px] font-medium text-foreground-secondary">
                 <Bookmark className="size-3.5 text-primary" />
                 <span>Bible Plans Catalog • Curated Journeys</span>
               </span>
-              <span className="ui-pill text-[11px] font-bold">
+              <span className="rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
                 {READING_PLANS.length} Curated Plans
               </span>
             </div>
@@ -72,11 +72,11 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
         <div className="ui-card flex flex-col justify-between p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-bold text-foreground-secondary">
+              <span className="flex items-center gap-2 text-[12px] font-medium text-foreground-secondary">
                 <Bookmark className="size-3.5 text-primary" />
                 <span>Bible Plans • Active Reading</span>
               </span>
-              <span className="ui-pill-primary text-[11px] font-bold">
+              <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
                 {activePlanInstances[0]?.progressPercent}% Complete
               </span>
             </div>
@@ -128,11 +128,11 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
         <div className="ui-card flex flex-col justify-between p-6 sm:col-span-2">
           <div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12px] font-bold text-foreground-secondary">
+              <span className="flex items-center gap-2 text-[12px] font-medium text-foreground-secondary">
                 <Bookmark className="size-3.5 text-primary" />
                 <span>Bible Plans • Personal Reading</span>
               </span>
-              <span className="ui-pill text-[11px] font-bold">
+              <span className="rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
                 Ready to Start
               </span>
             </div>
@@ -153,7 +153,7 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
             <span className="text-foreground-dim">
               {READING_PLANS.length} curated blueprints available below
             </span>
-            <span className="text-[12px] font-bold text-foreground">
+            <span className="text-[12px] font-medium text-primary">
               Select a plan below to start
             </span>
           </div>
@@ -164,10 +164,10 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
       <div className="ui-card flex flex-col justify-between p-6">
         <div>
           <div className="flex items-center justify-between">
-            <span className="text-[12px] font-bold text-foreground-secondary">
+            <span className="text-[12px] font-medium text-foreground-secondary">
               Plans Overview
             </span>
-            <span className="ui-pill text-[11px] font-bold">
+            <span className="rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
               {activePlanInstances.length} Active
             </span>
           </div>
@@ -193,7 +193,7 @@ export function PlanActiveBanner({ session, activePlanInstances }: Props) {
               <span className="text-foreground-secondary">
                 Pacing Flexibility
               </span>
-              <span className="ui-pill text-[11px] font-medium">
+              <span className="rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border">
                 Fixed & Self-Paced
               </span>
             </div>

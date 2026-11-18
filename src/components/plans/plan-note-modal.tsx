@@ -194,11 +194,10 @@ export function PlanNoteModal({
               <FileText className="size-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground-dim">
-                  {planTitle}
-                </span>
-                <span className="ui-pill text-[10.5px]">{sessionTitle}</span>
+              <div className="flex items-center gap-2 text-xs text-foreground-dim">
+                <span className="font-medium text-foreground-secondary">{planTitle}</span>
+                <span>•</span>
+                <span>{sessionTitle}</span>
               </div>
               <h3
                 id="plan-note-modal-title"

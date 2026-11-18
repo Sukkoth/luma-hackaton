@@ -106,8 +106,8 @@ export function PlanCatchUpModal({
                   <h3 className="text-[14.5px] font-bold text-foreground">
                     Shift Days to Today
                   </h3>
-                  <span className="ui-pill text-[9px] uppercase tracking-wider">
-                    RECOMMENDED
+                  <span className="rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    Recommended
                   </span>
                 </div>
                 <p className="mt-1 text-[12px] leading-relaxed text-foreground-secondary">
@@ -117,15 +117,15 @@ export function PlanCatchUpModal({
                   {overdueInfo.projectedEndDateLabel || "the future"}.
                 </p>
 
-                {/* Info Pills */}
+                {/* Info Badges */}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <div className="ui-pill">
-                    <BookOpen className="size-3 text-foreground" />
+                  <div className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground-secondary">
+                    <BookOpen className="size-3 text-primary" />
                     <span>{currentPace} chap/day</span>
                   </div>
                   {overdueInfo.projectedEndDateLabel && (
-                    <div className="ui-pill">
-                      <Clock className="size-3 text-foreground" />
+                    <div className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground-secondary">
+                      <Clock className="size-3 text-primary" />
                       <span>Finishes {overdueInfo.projectedEndDateLabel}</span>
                     </div>
                   )}
@@ -162,16 +162,16 @@ export function PlanCatchUpModal({
                     : `Increase pace from ${currentPace} to ${requiredPace} chapters/day to catch up faster.`}
                 </p>
 
-                {/* Info Pills */}
+                {/* Info Badges */}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <div className="ui-pill">
-                    <TrendingUp className="size-3 text-foreground" />
+                  <div className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground-secondary">
+                    <TrendingUp className="size-3 text-primary" />
                     <span>New Target: {requiredPace} chap/day</span>
                   </div>
                   {overdueInfo.hasTargetEndDate &&
                     overdueInfo.targetEndDateLabel && (
-                      <div className="ui-pill">
-                        <Flag className="size-3 text-foreground" />
+                      <div className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground-secondary">
+                        <Flag className="size-3 text-primary" />
                         <span>
                           Keep Deadline ({overdueInfo.targetEndDateLabel})
                         </span>

@@ -173,21 +173,21 @@ export function PlanCatalog({
       />
 
       {/* Main Catalog & My Plans Section */}
-      <section className="ui-card rounded-[22px] p-5 sm:p-6">
+      <section className="ui-card p-5 sm:p-6">
         {/* Navigation Tabs and Search Bar */}
         <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
           {/* Tab Switcher - Segmented control */}
           <div
             data-testid="plan-catalog-tabs"
-            className="flex items-center gap-1 rounded-[16px] border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none"
+            className="flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none"
           >
             <button
               type="button"
               disabled={!mounted}
               onClick={() => setActiveTab("catalog")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "catalog"
-                  ? "bg-primary text-primary-foreground shadow-xs"
+                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
@@ -198,9 +198,9 @@ export function PlanCatalog({
               type="button"
               disabled={!mounted}
               onClick={() => setActiveTab("active")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "active"
-                  ? "bg-primary text-primary-foreground shadow-xs"
+                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
@@ -213,9 +213,9 @@ export function PlanCatalog({
               type="button"
               disabled={!mounted}
               onClick={() => setActiveTab("paused")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "paused"
-                  ? "bg-primary text-primary-foreground shadow-xs"
+                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
@@ -228,9 +228,9 @@ export function PlanCatalog({
               type="button"
               disabled={!mounted}
               onClick={() => setActiveTab("finished")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
+              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "finished"
-                  ? "bg-primary text-primary-foreground shadow-xs"
+                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
                   : "bg-transparent text-foreground-secondary hover:text-foreground"
               }`}
             >
@@ -250,7 +250,7 @@ export function PlanCatalog({
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full rounded-[12px] border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
+                className="h-9 w-full rounded-xl border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
               />
               {searchQuery && (
                 <button
@@ -591,7 +591,7 @@ export function PlanCatalog({
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="ui-pill text-[11px] gap-1">
+                      <span className="rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border inline-flex items-center gap-1">
                         <Trophy className="size-3" />
                         <span>Finished</span>
                       </span>

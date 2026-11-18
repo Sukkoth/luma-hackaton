@@ -325,8 +325,8 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                 <span className="text-xs sm:text-sm font-bold">
                   Cohort Plan Starts {formattedPlanStartDate}
                 </span>
-                <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] font-semibold text-foreground-secondary uppercase tracking-wider">
-                  {daysUntilStart === 1 ? "Starts Tomorrow" : `Starts in ${daysUntilStart} Days`}
+                <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] font-medium text-foreground-secondary">
+                  {daysUntilStart === 1 ? "Starts tomorrow" : `Starts in ${daysUntilStart} days`}
                 </span>
               </div>
               <p className="text-[11.5px] text-foreground-dim mt-0.5">
@@ -368,9 +368,9 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
           <button
             type="button"
             onClick={() => setIsCatchUpModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-1.5 text-xs font-semibold text-black transition-all hover:bg-amber-400 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-95 cursor-pointer shadow-xs"
           >
-            <Zap className="size-3.5 fill-black" />
+            <Zap className="size-3.5 fill-current" />
             <span>Catch Up Plan</span>
           </button>
         </div>
@@ -380,13 +380,13 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
           2. SEGMENTED TAB SWITCHER: [Plan Chapters] | [Pacing & Settings]
           ========================================================================= */}
       <div className="flex justify-center">
-        <div className="inline-flex rounded-xl bg-surface-elevated/80 p-1 border border-border/60 shadow-2xs">
+        <div className="inline-flex rounded-xl bg-surface-elevated p-1 border border-border shadow-xs">
           <button
             type="button"
             onClick={() => setActiveTab("chapters")}
             className={`flex items-center gap-2 rounded-lg px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
               activeTab === "chapters"
-                ? "bg-foreground text-background shadow-xs"
+                ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-foreground-secondary hover:text-foreground"
             }`}
           >
@@ -398,7 +398,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
             onClick={() => setActiveTab("settings")}
             className={`flex items-center gap-2 rounded-lg px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
               activeTab === "settings"
-                ? "bg-foreground text-background shadow-xs"
+                ? "bg-primary text-primary-foreground shadow-xs"
                 : "text-foreground-secondary hover:text-foreground"
             }`}
           >
@@ -505,7 +505,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                     Part {activePartIndex}
                   </span>
                   {currentPart && (
-                    <span className="inline-flex items-center rounded-md bg-surface-elevated px-2 py-0.5 text-[11px] font-semibold text-foreground-secondary border border-border/40">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary border border-primary/20">
                       {currentPart.completedSessions} /{" "}
                       {currentPart.totalSessions} Done
                     </span>
@@ -544,7 +544,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                       onClick={() => setActiveSessionIndex(session.sessionIndex)}
                       className={`w-[210px] sm:w-[230px] shrink-0 cursor-pointer snap-start rounded-2xl border p-3.5 sm:p-4 transition-all duration-200 select-none ${
                         isSelected
-                          ? "border-foreground bg-surface shadow-sm ring-1 ring-foreground"
+                          ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/40"
                           : "border-border/80 bg-surface hover:border-border-strong"
                       }`}
                     >
@@ -603,8 +603,8 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                     isScheduledFuture
                                       ? "border border-border/40 opacity-40 cursor-not-allowed text-foreground-dim"
                                       : reading.isCompleted
-                                        ? "bg-foreground text-background cursor-pointer"
-                                        : "border border-border/80 hover:border-foreground cursor-pointer"
+                                        ? "bg-primary text-primary-foreground border border-primary cursor-pointer shadow-2xs"
+                                        : "border border-border/80 hover:border-primary cursor-pointer"
                                   }`}
                                   title={
                                     isScheduledFuture
@@ -621,7 +621,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                     <Lock className="size-2.5 text-foreground-dim" />
                                   ) : (
                                     reading.isCompleted && (
-                                      <Check className="size-3 stroke-[3]" />
+                                      <Check className="size-3 stroke-[2.5]" />
                                     )
                                   )}
                                 </button>
@@ -637,7 +637,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                   <Link
                                     href={readerUrl}
                                     onClick={(e) => e.stopPropagation()}
-                                    className={`truncate hover:underline cursor-pointer ${
+                                    className={`truncate hover:text-primary transition-colors cursor-pointer ${
                                       reading.isCompleted
                                         ? "text-foreground-muted line-through"
                                         : "text-foreground font-medium"

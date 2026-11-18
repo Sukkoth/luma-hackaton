@@ -31,7 +31,7 @@ export function PlanSpeedometerGauge({
           {title}
         </h3>
         <span
-          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider ${
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
             isCompleted
               ? "bg-primary text-primary-foreground shadow-2xs"
               : "bg-surface-elevated text-foreground-secondary border border-border"

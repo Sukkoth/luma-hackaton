@@ -28,7 +28,7 @@ export function RechartsPlanGauge({
       {
         name: "Journey",
         value: clampedPercent,
-        fill: "var(--foreground, #ffffff)",
+        fill: "var(--primary)",
       },
     ];
   }, [clampedPercent]);
@@ -61,7 +61,7 @@ export function RechartsPlanGauge({
               tick={false}
             />
             <RadialBar
-              background={{ fill: "var(--border, rgba(255,255,255,0.12))" }}
+              background={{ fill: "color-mix(in srgb, var(--border) 70%, transparent)" }}
               dataKey="value"
               cornerRadius={9}
               animationDuration={800}
@@ -81,7 +81,7 @@ export function RechartsPlanGauge({
           <span className="text-xs font-medium text-foreground-muted mt-1.5">
             {completedChapters} of {totalChapters} chapters
           </span>
-          <span className="mt-2.5 inline-flex items-center rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-dim border border-border/50">
+          <span className="mt-2.5 inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary border border-primary/20">
             {badgeText}
           </span>
         </div>

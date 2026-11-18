@@ -182,10 +182,10 @@ export function PlanReadingFlow({
 
           <div className="text-center">
             <div className="inline-flex items-center gap-2">
-              <span className="text-[13.5px] font-bold text-foreground">
+              <span className="text-[13.5px] font-semibold text-foreground">
                 {currentPart.title}
               </span>
-              <span className="ui-pill text-[10px]">
+              <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[11px] font-medium text-foreground-secondary">
                 {currentPart.completedSessions}/{currentPart.totalSessions} Done
               </span>
             </div>
@@ -223,9 +223,9 @@ export function PlanReadingFlow({
             <div
               key={session.sessionIndex}
               onClick={() => onSelectSessionAction(session.sessionIndex)}
-              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-[16px] border bg-surface p-3 sm:p-3.5 transition-all ${
+              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-xl border bg-surface p-3 sm:p-3.5 transition-all ${
                 isSelected
-                  ? "border-primary shadow-xs"
+                  ? "border-primary shadow-xs ring-1 ring-primary/40"
                   : "border-border hover:border-border-strong"
               }`}
             >
@@ -249,12 +249,12 @@ export function PlanReadingFlow({
                         {session.dateLabel}
                       </span>
                       {session.isPastDue && (
-                        <span className="rounded bg-destructive/15 px-1 py-0.2 text-[9px] font-bold uppercase tracking-wider text-destructive">
+                        <span className="rounded-md bg-destructive/15 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
                           Overdue
                         </span>
                       )}
                       {session.isToday && (
-                        <span className="ui-pill text-[9px] uppercase tracking-wider">
+                        <span className="rounded-md bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                           Today
                         </span>
                       )}

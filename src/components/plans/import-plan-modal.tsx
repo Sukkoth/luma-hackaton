@@ -223,12 +223,9 @@ export function ImportPlanModal({
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between border-b border-border px-6 py-4.5">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
-                Reading Plan Import
-              </span>
-              <span className="ui-pill text-[10px]">File / CSV / JSON</span>
-            </div>
+            <span className="text-xs font-semibold text-primary">
+              Reading Plan Import
+            </span>
             <h2
               id="import-plan-title"
               className="mt-1 text-[18px] font-bold tracking-tight text-foreground"
@@ -248,15 +245,15 @@ export function ImportPlanModal({
         </div>
 
         {/* Source Tabs & Sample Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/6 bg-neutral-50/50 px-6 py-2.5 dark:border-white/6 dark:bg-white/[0.02] shrink-0">
-          <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-elevated/40 px-6 py-2.5 shrink-0">
+          <div className="flex items-center gap-1 rounded-xl border border-border bg-surface p-1">
             <button
               type="button"
               onClick={() => setActiveTab("paste")}
-              className={`rounded-xl px-3 py-1 text-[12px] font-medium transition-all cursor-pointer ${
+              className={`rounded-lg px-3 py-1 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "paste"
-                  ? "bg-white text-black shadow-2xs dark:bg-white/15 dark:text-white"
-                  : "text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                  : "text-foreground-secondary hover:text-foreground"
               }`}
             >
               Paste Text
@@ -264,10 +261,10 @@ export function ImportPlanModal({
             <button
               type="button"
               onClick={() => setActiveTab("upload")}
-              className={`rounded-xl px-3 py-1 text-[12px] font-medium transition-all cursor-pointer ${
+              className={`rounded-lg px-3 py-1 text-[12px] font-medium transition-all cursor-pointer ${
                 activeTab === "upload"
-                  ? "bg-white text-black shadow-2xs dark:bg-white/15 dark:text-white"
-                  : "text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                  : "text-foreground-secondary hover:text-foreground"
               }`}
             >
               Upload File
@@ -279,7 +276,7 @@ export function ImportPlanModal({
               type="button"
               data-testid="import-load-sample-csv-btn"
               onClick={handleLoadSampleCsv}
-              className="rounded-xl border border-black/8 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700 hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 cursor-pointer"
+              className="rounded-xl border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground transition-colors cursor-pointer"
             >
               Load Sample CSV
             </button>
@@ -287,7 +284,7 @@ export function ImportPlanModal({
               type="button"
               data-testid="import-load-sample-json-btn"
               onClick={handleLoadSampleJson}
-              className="rounded-xl border border-black/8 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700 hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10 cursor-pointer"
+              className="rounded-xl border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground transition-colors cursor-pointer"
             >
               Load Sample JSON
             </button>
@@ -295,7 +292,7 @@ export function ImportPlanModal({
               <button
                 type="button"
                 onClick={handleClear}
-                className="rounded-xl p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer"
+                className="rounded-xl p-1 text-foreground-dim hover:text-foreground cursor-pointer"
                 title="Clear input"
               >
                 <RotateCcw className="size-3.5" />
@@ -307,14 +304,14 @@ export function ImportPlanModal({
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 min-h-0 space-y-4">
           {actionError && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-[12.5px] text-red-600 dark:text-red-400">
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-[12.5px] text-destructive">
               {actionError}
             </div>
           )}
 
           {/* Tab 1: Upload File */}
           {activeTab === "upload" && (
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-black/10 p-6 text-center dark:border-white/10">
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border p-6 text-center bg-surface-elevated/20">
               <input
                 type="file"
                 accept=".csv,.tsv,.json,.txt"
@@ -326,13 +323,13 @@ export function ImportPlanModal({
                 htmlFor="plan-file-input"
                 className="flex flex-col items-center gap-2 cursor-pointer"
               >
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-black/5 dark:bg-white/5 text-neutral-600 dark:text-neutral-300">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-surface border border-border text-primary">
                   <Upload className="size-6" />
                 </div>
-                <span className="text-[13.5px] font-medium text-black dark:text-white">
+                <span className="text-[13.5px] font-semibold text-foreground">
                   {fileName ? fileName : "Click to select CSV or JSON file"}
                 </span>
-                <span className="text-[11.5px] text-neutral-400">
+                <span className="text-[11.5px] text-foreground-dim">
                   Supports comma/tab/semicolon delimited CSV, or structured JSON
                 </span>
               </label>
@@ -342,7 +339,7 @@ export function ImportPlanModal({
           {/* Tab 2: Paste Raw Text */}
           {activeTab === "paste" && (
             <div>
-              <label className="block text-[12.5px] font-medium text-black dark:text-white mb-1">
+              <label className="block text-[12.5px] font-semibold text-foreground mb-1">
                 CSV or JSON Content
               </label>
               <textarea
@@ -351,7 +348,7 @@ export function ImportPlanModal({
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 placeholder="Day,Book,Chapter,Verses,Track&#10;1,Genesis,1,,Law&#10;1,Matthew,1,,Gospels&#10;2,Genesis,2,,Law"
-                className="w-full rounded-xl border border-black/10 bg-white p-3 text-[12px] text-black focus:outline-hidden dark:border-white/12 dark:bg-white/5 dark:text-white"
+                className="w-full rounded-xl border border-border bg-surface p-3 text-[12px] text-foreground focus:border-primary focus:outline-hidden"
               />
             </div>
           )}
@@ -372,46 +369,46 @@ export function ImportPlanModal({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-center">
-                    <div className="rounded-xl bg-white/70 p-2 dark:bg-black/20">
-                      <span className="block text-[10.5px] text-neutral-500 dark:text-neutral-400">
+                    <div className="rounded-xl bg-surface border border-border/50 p-2">
+                      <span className="block text-[10.5px] text-foreground-dim">
                         Total Days
                       </span>
                       <span
                         data-testid="import-summary-total-days"
-                        className="text-[14px] font-bold text-black dark:text-white"
+                        className="text-[14px] font-bold text-foreground"
                       >
                         {validationResult.summary.totalDays}
                       </span>
                     </div>
-                    <div className="rounded-xl bg-white/70 p-2 dark:bg-black/20">
-                      <span className="block text-[10.5px] text-neutral-500 dark:text-neutral-400">
+                    <div className="rounded-xl bg-surface border border-border/50 p-2">
+                      <span className="block text-[10.5px] text-foreground-dim">
                         Total Readings
                       </span>
                       <span
                         data-testid="import-summary-total-readings"
-                        className="text-[14px] font-bold text-black dark:text-white"
+                        className="text-[14px] font-bold text-foreground"
                       >
                         {validationResult.summary.totalReadings}
                       </span>
                     </div>
-                    <div className="rounded-xl bg-white/70 p-2 dark:bg-black/20">
-                      <span className="block text-[10.5px] text-neutral-500 dark:text-neutral-400">
+                    <div className="rounded-xl bg-surface border border-border/50 p-2">
+                      <span className="block text-[10.5px] text-foreground-dim">
                         Unique Books
                       </span>
                       <span
                         data-testid="import-summary-unique-books"
-                        className="text-[14px] font-bold text-black dark:text-white"
+                        className="text-[14px] font-bold text-foreground"
                       >
                         {validationResult.summary.uniqueBooks}
                       </span>
                     </div>
-                    <div className="rounded-xl bg-white/70 p-2 dark:bg-black/20">
-                      <span className="block text-[10.5px] text-neutral-500 dark:text-neutral-400">
+                    <div className="rounded-xl bg-surface border border-border/50 p-2">
+                      <span className="block text-[10.5px] text-foreground-dim">
                         Tracks
                       </span>
                       <span
                         data-testid="import-summary-tracks"
-                        className="text-[14px] font-bold text-black dark:text-white"
+                        className="text-[14px] font-bold text-foreground"
                       >
                         {validationResult.summary.tracks.length}
                       </span>
@@ -421,15 +418,15 @@ export function ImportPlanModal({
               ) : (
                 <div
                   data-testid="import-validation-status-invalid"
-                  className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 dark:border-red-500/25 dark:bg-red-500/15"
+                  className="rounded-2xl border border-destructive/20 bg-destructive/10 p-4"
                 >
-                  <div className="flex items-center gap-2 text-red-700 dark:text-red-300 mb-2">
+                  <div className="flex items-center gap-2 text-destructive mb-2">
                     <AlertCircle className="size-4.5" />
                     <span className="text-[13.5px] font-semibold">
                       Validation Errors Found ({validationResult.errors.length})
                     </span>
                   </div>
-                  <ul className="max-h-32 overflow-y-auto space-y-1 text-[11.5px] text-red-600 dark:text-red-400 pr-1">
+                  <ul className="max-h-32 overflow-y-auto space-y-1 text-[11.5px] text-destructive pr-1">
                     {validationResult.errors.map((err, idx) => (
                       <li key={idx} className="flex items-start gap-1.5">
                         <span className="font-bold">•</span>
@@ -442,9 +439,9 @@ export function ImportPlanModal({
 
               {/* Title & Description Override Form */}
               {validationResult.isValid && (
-                <div className="rounded-2xl border border-black/8 bg-neutral-50/60 p-4 dark:border-white/8 dark:bg-white/[0.02] space-y-3">
+                <div className="rounded-2xl border border-border bg-surface-elevated/40 p-4 space-y-3">
                   <div>
-                    <label className="block text-[12px] font-medium text-black dark:text-white mb-1">
+                    <label className="block text-[12px] font-medium text-foreground mb-1">
                       Plan Title
                     </label>
                     <input
@@ -454,12 +451,12 @@ export function ImportPlanModal({
                       placeholder={
                         validationResult.template?.title || "Imported Plan"
                       }
-                      className="w-full rounded-xl border border-black/10 bg-white px-3 py-1.5 text-[12.5px] text-black focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white"
+                      className="w-full rounded-xl border border-border bg-surface px-3 py-1.5 text-[12.5px] text-foreground focus:border-primary focus:outline-hidden"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[12px] font-medium text-black dark:text-white mb-1">
+                    <label className="block text-[12px] font-medium text-foreground mb-1">
                       Description
                     </label>
                     <input
@@ -469,7 +466,7 @@ export function ImportPlanModal({
                       placeholder={
                         validationResult.template?.description || "Description"
                       }
-                      className="w-full rounded-xl border border-black/10 bg-white px-3 py-1.5 text-[12.5px] text-black focus:outline-hidden dark:border-white/10 dark:bg-white/5 dark:text-white"
+                      className="w-full rounded-xl border border-border bg-surface px-3 py-1.5 text-[12.5px] text-foreground focus:border-primary focus:outline-hidden"
                     />
                   </div>
                 </div>
