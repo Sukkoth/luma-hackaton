@@ -23,6 +23,7 @@
     "@tiptap/react": "^3.32.2",
     "@tiptap/starter-kit": "^3.32.2",
     "better-auth": "^1.7.14",
+    "clsx": "^2.1.1",
     "dotenv": "^18.0.9",
     "drizzle-orm": "^0.45.4",
     "geist": "^1.9.2",
@@ -35,6 +36,7 @@
     "react-dom": "19.3.0",
     "recharts": "^3.10.1",
     "sanitize-html": "^2.18.2",
+    "tailwind-merge": "^3.7.0",
     "valibot": "^1.5.0"
   },
   "devDependencies": {

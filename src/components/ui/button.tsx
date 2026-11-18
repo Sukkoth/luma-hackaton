@@ -2,16 +2,19 @@
 
 import * as React from "react";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type ButtonVariant =
+  | "default"
   | "primary"
   | "secondary"
   | "outline"
   | "ghost"
   | "subtle"
-  | "destructive";
+  | "destructive"
+  | "link";
 
-export type ButtonSize = "sm" | "md" | "lg" | "icon";
+export type ButtonSize = "sm" | "default" | "md" | "lg" | "icon";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -22,36 +25,40 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
+  default:
+    "bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98] shadow-xs font-medium border border-transparent",
   primary:
     "bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98] shadow-xs font-medium border border-transparent",
   secondary:
-    "bg-surface-elevated text-foreground hover:bg-surface-subtle active:scale-[0.98] font-medium border border-border/60",
+    "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98] font-medium border border-border/40",
   outline:
-    "bg-surface text-foreground hover:bg-surface-elevated active:scale-[0.98] font-medium border border-border",
+    "bg-card text-foreground hover:bg-muted active:scale-[0.98] font-medium border border-border",
   subtle:
-    "bg-surface-subtle/70 text-foreground hover:bg-surface-subtle active:scale-[0.98] font-medium border border-transparent",
+    "bg-muted/70 text-foreground hover:bg-muted active:scale-[0.98] font-medium border border-transparent",
   ghost:
-    "text-foreground-secondary hover:text-foreground hover:bg-surface-elevated active:scale-[0.98] font-medium border border-transparent",
+    "text-muted-foreground hover:text-foreground hover:bg-muted active:scale-[0.98] font-medium border border-transparent",
   destructive:
     "bg-destructive text-destructive-foreground hover:opacity-90 active:scale-[0.98] font-medium shadow-xs border border-transparent",
+  link: "text-primary underline-offset-4 hover:underline p-0 h-auto font-medium",
 };
 
 const SIZE_STYLES: Record<ButtonSize, string> = {
-  sm: "h-9 px-3.5 text-xs rounded-xl gap-1.5",
-  md: "h-10.5 px-4.5 text-xs sm:text-sm rounded-xl gap-2",
-  lg: "h-12 px-5.5 text-sm rounded-2xl gap-2.5 font-semibold",
+  sm: "h-8.5 px-3 text-xs rounded-xl gap-1.5",
+  default: "h-10 px-4 text-xs sm:text-sm rounded-xl gap-2",
+  md: "h-10 px-4 text-xs sm:text-sm rounded-xl gap-2",
+  lg: "h-11 px-5 text-sm rounded-xl gap-2.5 font-semibold",
   icon: "size-10 p-0 rounded-xl flex items-center justify-center shrink-0",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
-      variant = "primary",
-      size = "md",
+      variant = "default",
+      size = "default",
       isLoading = false,
       leftIcon,
       rightIcon,
-      className = "",
+      className,
       disabled,
       children,
       ...props
@@ -64,7 +71,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={isDisabled}
-        className={`inline-flex items-center justify-center transition-all cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${VARIANT_STYLES[variant]} ${SIZE_STYLES[size]} ${className}`}
+        className={cn(
+          "inline-flex items-center justify-center transition-all cursor-pointer select-none disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          VARIANT_STYLES[variant],
+          SIZE_STYLES[size],
+          className
+        )}
         {...props}
       >
         {isLoading ? (
