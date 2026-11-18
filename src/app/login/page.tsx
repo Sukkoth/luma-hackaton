@@ -153,9 +153,8 @@ function LoginContent() {
           <div className="text-left">
             <div className="inline-flex items-center gap-2">
               <span className="text-[20px] font-bold tracking-tight text-foreground">
-                Luma<span className="text-foreground-dim">.</span>
+                Luma<span className="text-primary">.</span>
               </span>
-              <span className="ui-pill-primary text-[10px]">Sign In</span>
             </div>
             <h1 className="mt-4 text-[26px] font-bold tracking-tight text-foreground sm:text-[28px]">
               Welcome back

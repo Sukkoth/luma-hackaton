@@ -71,9 +71,8 @@ export function OnboardingView({ userName = "Reader" }: Props) {
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-2">
             <span className="text-[20px] font-bold tracking-tight text-foreground">
-              Luma<span className="text-foreground-dim">.</span>
+              Luma<span className="text-primary">.</span>
             </span>
-            <span className="ui-pill-primary text-[10px]">Onboarding</span>
           </div>
 
           {phase === "showcase" ? (

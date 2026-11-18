@@ -64,11 +64,11 @@ export function OnboardingShowcase({
 
       {/* Slide Content */}
       <div className="mt-4 text-center sm:mt-6">
-        <span className="ui-pill text-[10px] font-medium tracking-wider uppercase">
+        <span className="text-xs font-semibold text-primary">
           {activeSlide.badge}
         </span>
 
-        <h2 className="mt-4 text-[26px] font-normal tracking-tight text-foreground sm:text-[30px]">
+        <h2 className="mt-3 text-[26px] font-semibold tracking-tight text-foreground sm:text-[30px]">
           {activeSlide.title}
         </h2>
 

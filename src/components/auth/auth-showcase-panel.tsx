@@ -284,7 +284,7 @@ export function AuthShowcasePanel({
       {/* Center Typography */}
       <div className="relative z-10 my-auto max-w-lg pt-12">
         {badge && (
-          <span className="ui-pill text-[10.5px] font-bold tracking-[0.2em] uppercase">
+          <span className="text-xs font-semibold text-primary">
             {badge}
           </span>
         )}
