@@ -374,9 +374,10 @@ export function AppShell({
               type="button"
               onClick={() => setIsStreakOpen(true)}
               aria-label={`Current streak: ${streak.currentStreak} days`}
-              className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 transition-all cursor-pointer"
+              data-testid="mobile-streak-button"
+              className="flex h-8 items-center gap-1.5 rounded-full bg-primary px-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-transform duration-200 active:scale-95 cursor-pointer hover:opacity-90"
             >
-              <Flame className="size-3.5 fill-amber-500 text-amber-500" />
+              <Flame className="size-3.5 fill-current" />
               <span className="tabular-nums">{streak.currentStreak}</span>
             </button>
           )}
@@ -411,11 +412,11 @@ export function AppShell({
                 onClick={() => setIsStreakOpen(true)}
                 aria-label={`Current streak: ${streak.currentStreak} days`}
                 data-testid="topbar-streak-button"
-                className="flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 transition-all cursor-pointer shadow-2xs"
+                className="flex h-9.5 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground shadow-xs transition-transform duration-200 active:scale-95 cursor-pointer hover:opacity-90"
               >
-                <Flame className="size-3.5 fill-amber-500 text-amber-500" />
+                <Flame className="size-4 fill-current" />
                 <span className="tabular-nums font-bold">
-                  {streak.currentStreak} day streak
+                  {streak.currentStreak}
                 </span>
               </button>
             )}
