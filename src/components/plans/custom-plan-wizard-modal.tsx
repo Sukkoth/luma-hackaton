@@ -36,6 +36,13 @@ import {
 } from "@/data/readingPlans";
 import { createCustomPlanTemplateAction } from "@/actions/plans";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   buildPlanSessions,
   exportPlanToPdf,
 } from "@/lib/plans/export-plan-pdf";
@@ -912,25 +919,25 @@ export function CustomPlanWizardModal({
                   <span className="text-[12.5px] font-medium text-foreground">
                     Canon:
                   </span>
-                  <select
+                  <Select
                     value={selectedCanon}
-                    onChange={(e) =>
-                      handleSelectCanonChange(e.target.value as BibleCanon)
+                    onValueChange={(val) =>
+                      handleSelectCanonChange(val as BibleCanon)
                     }
-                    className="ui-input py-1.5 text-[12.5px]"
                   >
-                    {Object.entries(BIBLE_CANONS_CONFIG).map(
-                      ([key, config]) => (
-                        <option
-                          key={key}
-                          value={key}
-                          className="bg-surface text-foreground"
-                        >
-                          {config.name} ({config.totalBooks} books)
-                        </option>
-                      )
-                    )}
-                  </select>
+                    <SelectTrigger className="h-9 w-[220px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(BIBLE_CANONS_CONFIG).map(
+                        ([key, config]) => (
+                          <SelectItem key={key} value={key}>
+                            {config.name} ({config.totalBooks} books)
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="relative flex-1 sm:max-w-xs">

@@ -19,6 +19,13 @@ import {
   deleteGroupAction,
 } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { GroupInviteModal } from "@/components/groups/group-invite-modal";
 import { GroupTransferOwnershipModal } from "@/components/groups/group-transfer-ownership-modal";
 
@@ -366,20 +373,24 @@ export function GroupAdminTab({
                     ) : (
                       <>
                         {isOwner && (
-                          <select
+                          <Select
                             value={member.role}
                             disabled={loadingUserId === member.userId}
-                            onChange={(e) =>
+                            onValueChange={(val) =>
                               handleRoleChange(
                                 member.userId,
-                                e.target.value as "admin" | "member"
+                                val as "admin" | "member"
                               )
                             }
-                            className="h-8 rounded-lg border border-border bg-background px-2 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
                           >
-                            <option value="member">Member</option>
-                            <option value="admin">Admin</option>
-                          </select>
+                            <SelectTrigger className="h-8 w-[95px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent align="end">
+                              <SelectItem value="member">Member</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
                         )}
 
                         {!isOwner && (

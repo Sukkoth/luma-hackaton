@@ -4,6 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldAlert, ArrowRightLeft, Check, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { GroupMemberSummary } from "@/actions/groups";
 import { transferGroupOwnershipAction } from "@/actions/groups";
 
@@ -121,22 +128,24 @@ export function GroupTransferOwnershipModal({
               No other active members available to transfer ownership to.
             </p>
           ) : (
-            <select
-              id="new-owner-select"
+            <Select
               value={selectedUserId}
-              onChange={(e) => {
-                setSelectedUserId(e.target.value);
+              onValueChange={(val) => {
+                setSelectedUserId(val);
                 setErrorMessage(null);
               }}
-              className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
             >
-              <option value="">-- Choose an active member --</option>
-              {eligibleMembers.map((m) => (
-                <option key={m.userId} value={m.userId}>
-                  {m.name} ({m.email}) • Currently {m.role}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id="new-owner-select" className="w-full h-10 text-xs sm:text-sm">
+                <SelectValue placeholder="-- Choose an active member --" />
+              </SelectTrigger>
+              <SelectContent>
+                {eligibleMembers.map((m) => (
+                  <SelectItem key={m.userId} value={m.userId}>
+                    {m.name} ({m.email}) • Currently {m.role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         </div>
 

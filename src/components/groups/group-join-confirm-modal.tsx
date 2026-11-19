@@ -17,6 +17,13 @@ import type { GroupPlanSummary } from "@/actions/groups";
 import { joinGroupAction, enrollInGroupPlanAction } from "@/actions/groups";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export type GroupJoinConfirmModalProps = {
@@ -361,17 +368,21 @@ export function GroupJoinConfirmModal({
                 <label className="text-xs font-semibold text-foreground block">
                   Log progress under tracker:
                 </label>
-                <select
+                <Select
                   value={selectedTrackerId}
-                  onChange={(e) => setSelectedTrackerId(e.target.value)}
-                  className="w-full h-9 rounded-xl border border-border bg-background px-3 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  onValueChange={setSelectedTrackerId}
                 >
-                  {trackers.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name} ({t.canon})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full h-9 text-xs">
+                    <SelectValue placeholder="Select tracker" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {trackers.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name} ({t.canon})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 

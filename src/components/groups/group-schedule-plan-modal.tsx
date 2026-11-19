@@ -25,6 +25,13 @@ import type { BibleCanon } from "@/data/bibleData";
 import { ScheduleGroupPlanSchema } from "@/lib/schemas/groups";
 import { scheduleGroupPlanAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type GroupSchedulePlanModalProps = {
   isOpen: boolean;
@@ -314,38 +321,50 @@ export function GroupSchedulePlanModal({
 
                 {/* Canon Filter */}
                 <div className="relative shrink-0">
-                  <select
+                  <Select
                     value={selectedCanon}
-                    onChange={(e) => setSelectedCanon(e.target.value)}
-                    aria-label="Filter by Bible Canon"
-                    className="h-9 px-3 text-xs rounded-xl border border-border bg-surface-elevated text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground cursor-pointer"
+                    onValueChange={setSelectedCanon}
                   >
-                    <option value="all">All Canons</option>
-                    <option value="protestant">Protestant (66)</option>
-                    <option value="catholic">Catholic (73)</option>
-                    <option value="eastern_orthodox">Eastern Orthodox</option>
-                    <option value="ethiopian_orthodox">Ethiopian Orthodox</option>
-                  </select>
+                    <SelectTrigger
+                      aria-label="Filter by Bible Canon"
+                      className="h-9 w-[150px] text-xs"
+                    >
+                      <SelectValue placeholder="All Canons" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Canons</SelectItem>
+                      <SelectItem value="protestant">Protestant (66)</SelectItem>
+                      <SelectItem value="catholic">Catholic (73)</SelectItem>
+                      <SelectItem value="eastern_orthodox">Eastern Orthodox</SelectItem>
+                      <SelectItem value="ethiopian_orthodox">Ethiopian Orthodox</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Bible Section Filter */}
                 <div className="relative shrink-0">
-                  <select
+                  <Select
                     value={selectedSection}
-                    onChange={(e) => setSelectedSection(e.target.value)}
-                    aria-label="Filter by Bible Section"
-                    className="h-9 px-3 text-xs rounded-xl border border-border bg-surface-elevated text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground cursor-pointer"
+                    onValueChange={setSelectedSection}
                   >
-                    <option value="all">All Sections</option>
-                    <option value="Gospels">Gospels</option>
-                    <option value="Epistles">Epistles</option>
-                    <option value="Wisdom & Poetry">Wisdom &amp; Poetry</option>
-                    <option value="Old Testament">Old Testament</option>
-                    <option value="New Testament">New Testament</option>
-                    <option value="Whole Bible">Whole Bible</option>
-                    <option value="Chronological">Chronological</option>
-                    <option value="Multi-Track">Multi-Track</option>
-                  </select>
+                    <SelectTrigger
+                      aria-label="Filter by Bible Section"
+                      className="h-9 w-[150px] text-xs"
+                    >
+                      <SelectValue placeholder="All Sections" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sections</SelectItem>
+                      <SelectItem value="Gospels">Gospels</SelectItem>
+                      <SelectItem value="Epistles">Epistles</SelectItem>
+                      <SelectItem value="Wisdom & Poetry">Wisdom &amp; Poetry</SelectItem>
+                      <SelectItem value="Old Testament">Old Testament</SelectItem>
+                      <SelectItem value="New Testament">New Testament</SelectItem>
+                      <SelectItem value="Whole Bible">Whole Bible</SelectItem>
+                      <SelectItem value="Chronological">Chronological</SelectItem>
+                      <SelectItem value="Multi-Track">Multi-Track</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

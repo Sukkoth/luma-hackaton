@@ -14,6 +14,13 @@ import {
 } from "lucide-react";
 import type { GroupPlanSummary, LeaderboardEntry } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { GroupVisibilityModal } from "@/components/groups/group-visibility-modal";
 import { cn } from "@/lib/utils";
 
@@ -121,18 +128,22 @@ export function GroupLeaderboardTab({
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {/* Plan Selector if multiple plans exist */}
-          {activePlans.length > 1 && (
-            <select
-              value={currentPlan?.id}
-              onChange={(e) => setSelectedPlanId(e.target.value)}
-              className="h-9 rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
+          {activePlans.length > 1 && currentPlan && (
+            <Select
+              value={currentPlan.id}
+              onValueChange={setSelectedPlanId}
             >
-              {activePlans.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.templateTitle}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-9 w-[180px] text-xs">
+                <SelectValue placeholder="Select plan" />
+              </SelectTrigger>
+              <SelectContent>
+                {activePlans.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.templateTitle}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
 
           {/* Privacy Toggle (Only shown to enrolled cohort members) */}
