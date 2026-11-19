@@ -537,6 +537,11 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                 {partSessions.map((session) => {
                   const isSelected =
                     session.sessionIndex === activeSession.sessionIndex;
+                  const isPreviousIncomplete =
+                    currentPlan.mode === "scheduled" &&
+                    session.sessionIndex > 1 &&
+                    sessions.slice(0, session.sessionIndex - 1).some((s) => !s.isCompleted);
+                  const isLocked = isScheduledFuture || isPreviousIncomplete;
 
                   return (
                     <div
@@ -561,16 +566,20 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          {isScheduledFuture && (
+                          {isLocked && (
                             <span
                               className="inline-flex items-center gap-1 rounded bg-surface-elevated px-1.5 py-0.5 text-[9.5px] font-semibold text-foreground-dim border border-border"
-                              title={`Readings unlock on ${formattedPlanStartDate}`}
+                              title={
+                                isScheduledFuture
+                                  ? `Readings unlock on ${formattedPlanStartDate}`
+                                  : "Complete previous sessions to unlock"
+                              }
                             >
                               <Lock className="size-2.5" />
                               <span>Locked</span>
                             </span>
                           )}
-                          {isSelected && !isScheduledFuture && (
+                          {isSelected && !isLocked && (
                             <MapPin className="size-3 text-foreground-dim" />
                           )}
                           {session.isCompleted && (
@@ -592,15 +601,15 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                               <div className="flex items-center gap-2 min-w-0 flex-1">
                                 <button
                                   type="button"
-                                  disabled={isScheduledFuture}
+                                  disabled={isLocked}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (!isScheduledFuture) {
+                                    if (!isLocked) {
                                       handleToggleReading(reading.id);
                                     }
                                   }}
                                   className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-colors ${
-                                    isScheduledFuture
+                                    isLocked
                                       ? "border border-border/40 opacity-40 cursor-not-allowed text-foreground-dim"
                                       : reading.isCompleted
                                         ? "bg-primary text-primary-foreground border border-primary cursor-pointer shadow-2xs"
@@ -609,12 +618,16 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                   title={
                                     isScheduledFuture
                                       ? `Readings are locked until cohort start date (${formattedPlanStartDate})`
-                                      : undefined
+                                      : isPreviousIncomplete
+                                        ? "Complete previous sessions to unlock"
+                                        : undefined
                                   }
                                   aria-label={
                                     isScheduledFuture
                                       ? `Locked until ${formattedPlanStartDate}`
-                                      : `Mark ${reading.displayText || reading.bookName} as ${reading.isCompleted ? "unread" : "read"}`
+                                      : isPreviousIncomplete
+                                        ? "Locked: complete previous sessions first"
+                                        : `Toggle reading ${reading.displayText || reading.bookName}`
                                   }
                                 >
                                   {isScheduledFuture ? (

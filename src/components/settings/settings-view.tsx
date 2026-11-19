@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -11,6 +12,7 @@ import {
   Bell,
   User,
   Shield,
+  ShieldCheck,
   BookMarked,
   LogOut,
 } from "lucide-react";
@@ -79,20 +81,142 @@ export function SettingsView({
       trackers={trackers}
       activeTrackerId={activeTrackerId}
     >
-      <div className="w-full max-w-5xl mx-auto space-y-6">
-        {/* Settings Header */}
-        <section className="ui-card p-6 sm:p-7">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Account & Settings
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Manage your reading trackers, canonical editions, daily reminders,
-            and profile preferences.
-          </p>
+      <div className="w-full max-w-[1440px] mx-auto space-y-6">
+        {/* ── Unboxed Editorial Masthead ── */}
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1">
+          <div className="space-y-1.5 max-w-xl">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+              <span className="size-1.5 rounded-full bg-primary" />
+              <span>Account Preferences & Workspace Controls</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+              Account & Settings
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Manage canonical editions, multi-tenant study trackers, daily reminders, and security safeguards.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              leftIcon={<LogOut className="size-4" />}
+              className="rounded-xl font-medium"
+            >
+              {isSigningOut ? "Signing out..." : "Sign Out"}
+            </Button>
+            <Link href="/onboarding">
+              <Button
+                type="button"
+                variant="default"
+                size="default"
+                leftIcon={<Plus className="size-4" />}
+                className="rounded-xl font-semibold shadow-xs"
+              >
+                Create Tracker
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        {/* ── Signature Horizon Ribbon ── */}
+        <section className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
+            {/* Column 1: Active Tracker & Workspace */}
+            <div className="pr-0 md:pr-8 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                  </span>
+                  <span className="text-xs font-semibold text-foreground">
+                    Active Canon Tracker
+                  </span>
+                </div>
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  Workspace
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums line-clamp-1">
+                    {trackers?.find((t) => t.id === activeTrackerId)?.name ?? "Primary Devotional Tracker"}
+                  </span>
+                  <span className="text-xs font-semibold text-primary shrink-0">
+                    Active
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Protestant Canon • 66 Books • Multi-tenant reading isolation active.
+                </p>
+              </div>
+
+              <div className="space-y-1 pt-0.5">
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Isolation status</span>
+                  <span className="text-primary font-medium">Active & Protected</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-500"
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Column 2: Account & Security Profile */}
+            <div className="pl-0 md:pl-8 pt-5 md:pt-0 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-3.5 text-primary" />
+                  <span className="text-xs font-semibold text-foreground">
+                    Authentication & Profile
+                  </span>
+                </div>
+                <span className="text-[11px] font-medium text-primary">
+                  Member ID: {user.id ? `${user.id.slice(0, 8)}...` : "Active"}
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                    {user.name || "Reader"}
+                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    Verified
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {user.email} • Session active with secure credentials.
+                </p>
+              </div>
+
+              {/* Security Tags */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  Session Verified
+                </span>
+                <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  Daily Reminders Configured
+                </span>
+                <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                  Active Member
+                </span>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Section 1: Reading Trackers Manager */}
-        <section className="ui-card p-6 sm:p-7">
+        <section className="ui-card p-4 sm:p-6 lg:p-7">
           <div className="flex flex-col gap-2 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -172,7 +296,7 @@ export function SettingsView({
         {/* Section 2: Pacing & Buffer Days and Reminders */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Pacing Safeguards */}
-          <section className="ui-card p-6">
+          <section className="ui-card p-4 sm:p-6">
             <div className="flex items-center gap-2 border-b border-border/60 pb-4">
               <Sliders className="size-4 text-primary" />
               <h2 className="text-base font-semibold tracking-tight text-foreground">
@@ -212,7 +336,7 @@ export function SettingsView({
           </section>
 
           {/* Daily Reminders */}
-          <section className="ui-card p-6">
+          <section className="ui-card p-4 sm:p-6">
             <div className="flex items-center gap-2 border-b border-border/60 pb-4">
               <Bell className="size-4 text-primary" />
               <h2 className="text-base font-semibold tracking-tight text-foreground">
@@ -258,7 +382,7 @@ export function SettingsView({
         </div>
 
         {/* Section 3: Profile & Account */}
-        <section className="ui-card p-6 sm:p-7">
+        <section className="ui-card p-4 sm:p-6 lg:p-7">
           <div className="flex items-center justify-between border-b border-border/60 pb-4">
             <div className="flex items-center gap-2">
               <User className="size-4 text-primary" />

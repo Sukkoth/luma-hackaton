@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BookOpen, Calendar, Bookmark, X } from "lucide-react";
+import { BookOpen, Sparkles, X, ArrowRight, Bookmark } from "lucide-react";
 import type { VerseOfTheDayData } from "@/lib/youversion";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   totalReadChapters: number;
@@ -26,94 +27,160 @@ export function VerseOfTheDayBanner({
     verse?.text || "Your word is a lamp to my feet and a light to my path.";
   const version = verse?.version || "English Standard Version";
 
+  const remainingChapters = Math.max(
+    0,
+    totalChaptersAcrossCanon - totalReadChapters
+  );
+
   return (
-    <>
-      <section className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Verse of the Day */}
-        <div className="ui-card relative flex flex-col justify-between overflow-hidden p-5 sm:p-6 sm:col-span-2">
-          <div>
+    <div className="w-full space-y-6">
+      {/* ── Unboxed Editorial Masthead ── */}
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+            <span className="size-1.5 rounded-full bg-primary" />
+            <span>Scripture Canon & Library</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+            Immerse in the Word, chapter by chapter.
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            Track canonical progress, check off read chapters, and dive into
+            original testament texts with daily verse reflections.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+          <Link href="/plans">
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              leftIcon={<Bookmark className="size-4" />}
+              className="rounded-xl font-medium"
+            >
+              Explore Plans
+            </Button>
+          </Link>
+          <Link href="/bible/GEN/1">
+            <Button
+              type="button"
+              variant="default"
+              size="default"
+              leftIcon={<BookOpen className="size-4" />}
+              className="rounded-xl font-semibold shadow-xs"
+            >
+              Open Scripture Reader
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Signature Horizon Ribbon ── */}
+      <section className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
+          {/* Column 1: Canonical Progress */}
+          <div className="pr-0 md:pr-8 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="flex size-7 items-center justify-center rounded-lg border border-primary/25 bg-primary/10 text-primary">
-                  <BookOpen className="size-3.5" />
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
                 </span>
                 <span className="text-xs font-semibold text-foreground">
-                  Daily Scripture
+                  Canonical Progress
                 </span>
               </div>
-              <span className="text-xs text-muted-foreground font-medium">
+              <span className="text-[11px] font-medium text-muted-foreground">
+                Current Tracker
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-baseline gap-2.5">
+                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                  {totalReadChapters}
+                </span>
+                <span className="text-xs font-semibold text-primary">
+                  of {totalChaptersAcrossCanon} chapters read ({canonPercentage}%)
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {remainingChapters > 0
+                  ? `${remainingChapters} chapters remaining to complete your current canonical pass.`
+                  : "All chapters across this canon completed! Outstanding faithfulness."}
+              </p>
+            </div>
+
+            {/* Canon Progress Gauge */}
+            <div className="space-y-1 pt-0.5">
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>Canon completion</span>
+                <span className="text-primary font-medium">
+                  {canonPercentage}% finished
+                </span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(2, canonPercentage))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Verse of the Day */}
+          <div className="pl-0 md:pl-8 pt-5 md:pt-0 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-3.5 text-primary" />
+                <span className="text-xs font-semibold text-foreground">
+                  Verse of the Day
+                </span>
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground">
                 YouVersion
               </span>
             </div>
 
-            {verse?.imageUrl ? (
-              <button
-                type="button"
-                onClick={() => setShowArtworkModal(true)}
-                className="group mt-3.5 block w-full cursor-pointer text-left transition-opacity hover:opacity-90 focus:outline-none"
-                aria-label="View verse artwork"
-                title="Click to view artwork"
-              >
-                <blockquote className="text-lg sm:text-xl font-normal leading-relaxed text-foreground tracking-tight transition-colors group-hover:text-foreground/80">
+            <div className="space-y-1.5">
+              {verse?.imageUrl ? (
+                <button
+                  type="button"
+                  onClick={() => setShowArtworkModal(true)}
+                  className="group block w-full cursor-pointer text-left transition-opacity hover:opacity-90 focus:outline-none"
+                  aria-label="View verse artwork"
+                  title="Click to view artwork"
+                >
+                  <blockquote className="text-xs sm:text-sm font-medium leading-relaxed text-foreground tracking-tight transition-colors group-hover:text-foreground/80 line-clamp-2">
+                    &ldquo;{text}&rdquo;
+                  </blockquote>
+                </button>
+              ) : (
+                <blockquote className="text-xs sm:text-sm font-medium leading-relaxed text-foreground tracking-tight line-clamp-2">
                   &ldquo;{text}&rdquo;
                 </blockquote>
-              </button>
-            ) : (
-              <blockquote className="mt-3.5 text-lg sm:text-xl font-normal leading-relaxed text-foreground tracking-tight">
-                &ldquo;{text}&rdquo;
-              </blockquote>
-            )}
-          </div>
+              )}
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs">
-            <span className="font-semibold text-primary">{reference}</span>
-            <span className="text-muted-foreground">{version}</span>
-          </div>
-        </div>
-
-        {/* Today's Active Plan Reading */}
-        <div className="ui-card flex flex-col justify-between p-5 sm:p-6">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                <Calendar className="size-3.5 text-primary" />
-                <span>Today&apos;s Reading</span>
-              </span>
-              <Link
-                href="/plans"
-                className="text-xs font-semibold text-primary hover:underline"
-              >
-                View Plans
-              </Link>
-            </div>
-
-            <div className="mt-3.5 rounded-xl border border-border/60 bg-muted/50 p-3.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary">
-                    <Bookmark className="size-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-foreground">
-                      Romans 8
-                    </h4>
-                    <p className="text-[11px] text-muted-foreground">
-                      Assigned Reading
-                    </p>
-                  </div>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-primary">{reference}</span>
+                  <span className="text-muted-foreground text-[11px]">
+                    {version}
+                  </span>
                 </div>
-                <span className="text-xs font-bold text-primary tabular-nums">
-                  Day 1
-                </span>
+                {verse?.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setShowArtworkModal(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline cursor-pointer"
+                  >
+                    <span>View artwork</span>
+                    <ArrowRight className="size-3" />
+                  </button>
+                )}
               </div>
             </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs">
-            <span className="text-muted-foreground">Canon Progress</span>
-            <span className="font-semibold text-foreground tabular-nums">
-              {totalReadChapters} / {totalChaptersAcrossCanon} ({canonPercentage}%)
-            </span>
           </div>
         </div>
       </section>
@@ -166,6 +233,6 @@ export function VerseOfTheDayBanner({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

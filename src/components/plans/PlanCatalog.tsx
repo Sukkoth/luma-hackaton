@@ -170,6 +170,8 @@ export function PlanCatalog({
       <PlanActiveBanner
         session={session}
         activePlanInstances={activePlanInstances}
+        onCreateCustom={() => setIsCustomWizardOpen(true)}
+        onImportPlan={() => setIsImportModalOpen(true)}
       />
 
       {/* Main Catalog & My Plans Section */}
@@ -278,7 +280,6 @@ export function PlanCatalog({
                   type="button"
                   disabled={!mounted}
                   onClick={() => setIsCustomWizardOpen(true)}
-                  data-testid="open-custom-plan-wizard-btn"
                   className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
                 >
                   <Plus className="size-3.5" />
@@ -288,7 +289,6 @@ export function PlanCatalog({
                   type="button"
                   disabled={!mounted}
                   onClick={() => setIsImportModalOpen(true)}
-                  data-testid="open-import-plan-modal-btn"
                   className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
                 >
                   <Upload className="size-3.5" />

@@ -8,9 +8,11 @@ import {
   Clock,
   Zap,
   Settings,
-  ArrowRight,
+  Compass,
+  Play,
 } from "lucide-react";
-import { BIBLE_VERSIONS, detectDefaultVersion } from "@/lib/bible-versions";
+import { detectDefaultVersion } from "@/lib/bible-versions";
+import { Button } from "@/components/ui/button";
 
 const OLD_TESTAMENT_BOOKS = [
   { id: "gen", name: "Genesis", chapters: 50 },
@@ -134,54 +136,147 @@ export function BibleLandingPage() {
 
   const booksForTab = activeTab === "ot" ? OLD_TESTAMENT_BOOKS : NEW_TESTAMENT_BOOKS;
 
-  const continueReading = lastRead ? (
-    <Link
-      href={`/bible/${lastRead.bookId}/${lastRead.chapter}?v=${lastRead.versionId}`}
-      className="ui-card flex items-center gap-4 p-4 shadow-xs border-primary/20 bg-primary/5"
-    >
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-        <BookOpen className="size-6" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-primary">
-            Continue Reading
-          </span>
-        </div>
-        <h3 className="mt-1 text-[16px] font-bold tracking-tight text-foreground">
-          {ALL_BOOKS.find((b) => b.id === lastRead.bookId)?.name || lastRead.bookId}{" "}
-          {lastRead.chapter}
-        </h3>
-        <p className="mt-0.5 text-[12px] text-foreground-dim">
-          {BIBLE_VERSIONS.find((v) => v.id === lastRead.versionId)?.abbreviation ||
-            `Version ${lastRead.versionId}`}
-        </p>
-      </div>
-      <ArrowRight className="size-5 text-foreground-dim shrink-0" />
-    </Link>
-  ) : null;
+  const lastReadBookName =
+    ALL_BOOKS.find((b) => b.id === lastRead?.bookId)?.name || lastRead?.bookId;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-foreground">
-            Bible
+      {/* ── Unboxed Editorial Masthead ── */}
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+            <span className="size-1.5 rounded-full bg-primary" />
+            <span>Scripture Reader & Living Text</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+            The Holy Scriptures, chapter by chapter.
           </h1>
-          <p className="mt-1 text-[14px] text-foreground-dim">
-            Read, study, and meditate on God&apos;s Word
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            Read, study, and meditate on God&apos;s Word across canonical testaments, parallel translations, and original verses.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="ui-btn-secondary ui-btn-icon size-10 rounded-[12px] cursor-pointer">
-            <Settings className="size-4.5" />
-          </button>
-        </div>
-      </div>
 
-      {/* Continue Reading Card */}
-      {continueReading}
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+          <Link href="/books">
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              leftIcon={<Compass className="size-4" />}
+              className="rounded-xl font-medium"
+            >
+              Canon Books
+            </Button>
+          </Link>
+          <Link href="/bible/GEN/1">
+            <Button
+              type="button"
+              variant="default"
+              size="default"
+              leftIcon={<BookOpen className="size-4" />}
+              className="rounded-xl font-semibold shadow-xs"
+            >
+              Genesis 1
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Signature Horizon Ribbon ── */}
+      <section className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
+          {/* Column 1: Continue Reading Session */}
+          <div className="pr-0 md:pr-8 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                </span>
+                <span className="text-xs font-semibold text-foreground">
+                  {lastRead ? "Recent Reading Session" : "Scripture Reader"}
+                </span>
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground">
+                {selectedVersion.abbreviation}
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                  {lastRead ? `${lastReadBookName} ${lastRead.chapter}` : "Genesis 1"}
+                </span>
+                <span className="text-xs font-semibold text-primary">
+                  {lastRead ? "Resume Chapter" : "Creation"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {lastRead
+                  ? `Pick up where you left off in ${selectedVersion.name}.`
+                  : "In the beginning, God created the heavens and the earth."}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
+              <span>{lastRead ? `Version: ${selectedVersion.abbreviation}` : "66 books ready to explore"}</span>
+              <Link
+                href={
+                  lastRead
+                    ? `/bible/${lastRead.bookId}/${lastRead.chapter}?v=${lastRead.versionId}`
+                    : "/bible/GEN/1"
+                }
+                className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline"
+              >
+                <Play className="size-3 fill-current" />
+                <span>{lastRead ? "Resume Reading" : "Start Genesis 1"} →</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Column 2: Scripture Library Architecture */}
+          <div className="pl-0 md:pl-8 pt-5 md:pt-0 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="size-3.5 text-primary" />
+                <span className="text-xs font-semibold text-foreground">
+                  Scripture Library Structure
+                </span>
+              </div>
+              <span className="text-[11px] font-medium text-primary">
+                {selectedVersion.abbreviation} Active
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                  66
+                </span>
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Canonical Books • 1,189 Chapters
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                39 Old Testament books and 27 New Testament books with full verse coverage.
+              </p>
+            </div>
+
+            {/* Canon Chips */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                39 Old Testament
+              </span>
+              <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                27 New Testament
+              </span>
+              <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                {selectedVersion.abbreviation}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Version Selector */}
       <div className="ui-card p-4 shadow-xs">

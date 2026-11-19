@@ -221,7 +221,7 @@ export function BooksView({
       trackers={trackers}
       activeTrackerId={activeTrackerId}
     >
-      <div className="w-full max-w-7xl mx-auto space-y-6">
+      <div className="w-full max-w-[1440px] mx-auto space-y-6">
         {/* Top Highlight Cards */}
         <VerseOfTheDayBanner
           totalReadChapters={totalReadChapters}
@@ -231,7 +231,7 @@ export function BooksView({
         />
 
         {/* Books Section */}
-        <section className="ui-card p-5 sm:p-6">
+        <section className="ui-card p-3.5 sm:p-6">
           {/* Header & Controls Toolbar */}
           <div className="flex flex-col gap-4 border-b border-border/60 pb-5 md:flex-row md:items-center md:justify-between">
             <div>
@@ -240,7 +240,7 @@ export function BooksView({
                   Scripture Books
                 </h2>
                 <span className="text-xs text-muted-foreground font-semibold">
-                  {filteredBooks.length} of {canonBooks.length} Books
+                  All Books ({filteredBooks.length} of {canonBooks.length})
                 </span>
                 {trackerName && (
                   <span className="hidden sm:inline-block rounded-lg bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">
