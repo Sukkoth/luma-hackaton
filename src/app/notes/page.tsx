@@ -70,9 +70,8 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
       streak={streak}
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
-      className="flex flex-col min-h-0"
     >
-      <div className="w-full max-w-[1440px] mx-auto flex-1 min-h-[600px] h-[calc(100dvh-124px)] lg:h-[calc(100dvh-112px)] flex flex-col">
+      <div className="w-full max-w-[1440px] mx-auto space-y-6 pb-12">
         <NotesManager
           initialNotes={initialNotes}
           initialFolders={initialFolders}
