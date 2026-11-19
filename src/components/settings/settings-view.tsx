@@ -96,31 +96,6 @@ export function SettingsView({
               Manage canonical editions, multi-tenant study trackers, daily reminders, and security safeguards.
             </p>
           </div>
-
-          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              leftIcon={<LogOut className="size-4" />}
-              className="rounded-xl font-medium"
-            >
-              {isSigningOut ? "Signing out..." : "Sign Out"}
-            </Button>
-            <Link href="/onboarding">
-              <Button
-                type="button"
-                variant="default"
-                size="default"
-                leftIcon={<Plus className="size-4" />}
-                className="rounded-xl font-semibold shadow-xs"
-              >
-                Create Tracker
-              </Button>
-            </Link>
-          </div>
         </section>
 
         {/* ── Signature Horizon Ribbon ── */}
@@ -230,14 +205,16 @@ export function SettingsView({
               </p>
             </div>
 
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              leftIcon={<Plus className="size-3.5" />}
-            >
-              Create Tracker
-            </Button>
+            <Link href="/onboarding">
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                leftIcon={<Plus className="size-3.5" />}
+              >
+                Create Tracker
+              </Button>
+            </Link>
           </div>
 
           <div className="mt-5 space-y-3">
