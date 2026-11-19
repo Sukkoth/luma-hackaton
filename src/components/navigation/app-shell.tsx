@@ -393,7 +393,7 @@ export function AppShell({
                 type="button"
                 onClick={() => setIsStreakOpen(true)}
                 aria-label={`Current streak: ${streak.currentStreak} days`}
-                data-testid="topbar-streak-button"
+                data-testid="streak-navbar-button"
                 className="flex h-9.5 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground shadow-xs transition-transform duration-200 active:scale-95 cursor-pointer hover:opacity-90"
               >
                 <Flame className="size-4 fill-current" />
