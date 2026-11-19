@@ -82,7 +82,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
             className="ui-btn-primary ui-btn-sm self-start sm:self-auto gap-1.5"
           >
             <Sparkles className="size-3.5" />
-            <span>Celebrate 🎉</span>
+            <span>Celebrate</span>
           </button>
         </div>
 

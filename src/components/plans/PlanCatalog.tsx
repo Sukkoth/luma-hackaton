@@ -36,6 +36,7 @@ import {
 import { PlanSetupModal } from "./plan-setup-modal";
 import { CustomPlanWizardModal } from "./custom-plan-wizard-modal";
 import { ImportPlanModal } from "./import-plan-modal";
+import { Button } from "@/components/ui/button";
 import type { ReadingPlanTemplate } from "@/data/readingPlans";
 import { celebratePlanCompletion } from "@/lib/confetti";
 import { updatePlanSettingsAction } from "@/actions/plans";
@@ -398,17 +399,21 @@ export function PlanCatalog({
                       </div>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
-                      <span className="flex items-center gap-1 text-[12px] text-foreground-secondary">
-                        <CheckCircle2 className="size-3.5 text-foreground-dim" />
+                    <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+                      <span className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                        <CheckCircle2 className="size-3.5 text-primary" />
                         <span>Active Tracker</span>
                       </span>
-                      <Link
-                        href={`/plans/${instance.id}`}
-                        className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5"
-                      >
-                        <span>View Plan</span>
-                        <ArrowRight className="size-3.5" />
+                      <Link href={`/plans/${instance.id}`}>
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          rightIcon={<ArrowRight className="size-3.5" />}
+                          className="font-semibold shadow-xs"
+                        >
+                          View Plan
+                        </Button>
                       </Link>
                     </div>
                   </div>
@@ -502,22 +507,28 @@ export function PlanCatalog({
                       </div>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
-                      <button
+                    <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+                      <Button
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         disabled={isPending}
                         onClick={() => handleResumePlan(instance.id)}
-                        className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:opacity-50"
+                        leftIcon={<Play className="size-3 fill-current" />}
+                        className="cursor-pointer font-medium"
                       >
-                        <Play className="size-3 fill-current" />
-                        <span>Resume Plan</span>
-                      </button>
-                      <Link
-                        href={`/plans/${instance.id}`}
-                        className="ui-btn-secondary ui-btn-sm gap-1.5"
-                      >
-                        <span>View Plan</span>
-                        <ArrowRight className="size-3.5" />
+                        Resume Plan
+                      </Button>
+                      <Link href={`/plans/${instance.id}`}>
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          rightIcon={<ArrowRight className="size-3.5" />}
+                          className="font-semibold shadow-xs"
+                        >
+                          View Plan
+                        </Button>
                       </Link>
                     </div>
                   </div>
@@ -605,21 +616,27 @@ export function PlanCatalog({
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
-                    <button
+                  <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="sm"
                       onClick={() => celebratePlanCompletion()}
-                      className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
+                      leftIcon={<Sparkles className="size-3.5" />}
+                      className="cursor-pointer font-medium"
                     >
-                      <Sparkles className="size-3.5" />
-                      <span>Celebrate 🎉</span>
-                    </button>
-                    <Link
-                      href={`/plans/${instance.id}`}
-                      className="ui-btn-secondary ui-btn-sm gap-1.5"
-                    >
-                      <span>Review Plan</span>
-                      <ArrowRight className="size-3.5" />
+                      Celebrate
+                    </Button>
+                    <Link href={`/plans/${instance.id}`}>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        rightIcon={<ArrowRight className="size-3.5" />}
+                        className="font-medium"
+                      >
+                        Review Plan
+                      </Button>
                     </Link>
                   </div>
                 </div>
