@@ -8,8 +8,8 @@ import {
   Check,
   Bell,
   ShieldCheck,
-  LogOut,
   Calendar,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { AppShell } from "@/components/navigation/app-shell";
@@ -19,10 +19,15 @@ import { switchTrackerAction } from "@/actions/trackers";
 import { updateUserSettingsAction } from "@/actions/settings";
 import { TrackerCreationModal } from "@/components/trackers/tracker-creation-modal";
 import { TrackerIcon } from "@/components/trackers/tracker-icons";
+import { LogoutConfirmModal } from "@/components/auth/logout-confirm-modal";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { ProfileSettingsSection } from "./profile-settings-section";
 import type { BibleCanon } from "@/data/bibleData";
 import { cn } from "@/lib/utils";
@@ -68,6 +73,92 @@ export type SettingsViewProps = {
   settings: UserSettingsState;
 };
 
+type TrackerCardProps = {
+  tracker: EnrichedTrackerSummary;
+  isActive: boolean;
+  isSwitching: boolean;
+  onSwitch: ({ trackerId }: { trackerId: string }) => void;
+};
+
+function TrackerCard({
+  tracker,
+  isActive,
+  isSwitching,
+  onSwitch,
+}: TrackerCardProps) {
+  const canonTitle = formatCanonTitle({ canon: tracker.canon as BibleCanon });
+  const progressPct =
+    tracker.totalChaptersCount > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (tracker.readChaptersCount / tracker.totalChaptersCount) * 100
+          )
+        )
+      : 0;
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border p-4 sm:p-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center transition-all",
+        isActive
+          ? "border-primary/40 bg-primary/5 shadow-xs"
+          : "border-border bg-card hover:border-border-strong"
+      )}
+    >
+      <div className="flex items-center gap-3.5">
+        <div
+          className={cn(
+            "flex size-11 items-center justify-center rounded-xl border shrink-0",
+            isActive
+              ? "bg-primary/10 border-primary/20 text-primary"
+              : "bg-muted border-border text-muted-foreground"
+          )}
+        >
+          <TrackerIcon icon={tracker.icon} className="size-5" />
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground">
+              {tracker.name}
+            </h3>
+            {isActive && (
+              <span className="rounded-md bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                Active Default
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {canonTitle} • {tracker.readChaptersCount} / {tracker.totalChaptersCount} chapters read ({progressPct}%)
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2.5 self-end sm:self-center">
+        {isActive ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+            <Check className="size-4" />
+            <span>Current Default</span>
+          </span>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isSwitching}
+            isLoading={isSwitching}
+            onClick={() => onSwitch({ trackerId: tracker.id })}
+            className="font-medium"
+          >
+            Switch to this
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function SettingsView({
   user,
   trackers = [],
@@ -79,6 +170,8 @@ export function SettingsView({
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [switchingTrackerId, setSwitchingTrackerId] = useState<string | null>(null);
   const [isCreateTrackerOpen, setIsCreateTrackerOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isTrackerListExpanded, setIsTrackerListExpanded] = useState(false);
 
   // Settings local state
   const [settings, setSettings] = useState<UserSettingsState>(initialSettings);
@@ -180,6 +273,21 @@ export function SettingsView({
   const displayName = user.name.split(" ")[0] || user.name || "Reader";
   const activeTracker = trackers.find((t) => t.id === activeTrackerId) ?? trackers[0];
 
+  const sortedTrackers = [...trackers].sort((a, b) => {
+    if (a.id === activeTrackerId) return -1;
+    if (b.id === activeTrackerId) return 1;
+    return 0;
+  });
+
+  const INITIAL_VISIBLE_TRACKERS = 3;
+  const hasMoreTrackers = sortedTrackers.length > INITIAL_VISIBLE_TRACKERS;
+  const initialTrackers = hasMoreTrackers
+    ? sortedTrackers.slice(0, INITIAL_VISIBLE_TRACKERS)
+    : sortedTrackers;
+  const extraTrackers = hasMoreTrackers
+    ? sortedTrackers.slice(INITIAL_VISIBLE_TRACKERS)
+    : [];
+
   return (
     <AppShell
       userName={displayName}
@@ -191,36 +299,17 @@ export function SettingsView({
     >
       <div className="w-full max-w-[1440px] mx-auto space-y-6">
         {/* ── Unboxed Editorial Masthead ── */}
-        <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1">
-          <div className="space-y-1.5 max-w-xl">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
-              <span className="size-1.5 rounded-full bg-primary" />
-              <span>Account Preferences & Workspace Controls</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
-              Account & Settings
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Manage study trackers, daily chapter reminders, and credentials.
-            </p>
+        <section className="space-y-1.5 max-w-xl pt-1">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+            <span className="size-1.5 rounded-full bg-primary" />
+            <span>Account Preferences & Workspace Controls</span>
           </div>
-
-          <HeaderActions>
-            <HeaderActionButton
-              type="secondary"
-              onClick={() => setIsCreateTrackerOpen(true)}
-              icon={<Plus className="size-4" />}
-              label="New Tracker"
-            />
-            <HeaderActionButton
-              type="primary"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              isLoading={isSigningOut}
-              icon={<LogOut className="size-4" />}
-              label="Sign Out"
-            />
-          </HeaderActions>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+            Account & Settings
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            Manage study trackers, daily chapter reminders, and credentials.
+          </p>
         </section>
 
         {/* ── Signature Horizon Ribbon ── */}
@@ -332,6 +421,11 @@ export function SettingsView({
                 <h2 className="text-base font-semibold tracking-tight text-foreground">
                   Reading Trackers
                 </h2>
+                {trackers.length > 0 && (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                    {trackers.length}
+                  </span>
+                )}
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Switch your active devotional tracker or create a new workspace for another canonical tradition.
@@ -349,79 +443,62 @@ export function SettingsView({
             </Button>
           </div>
 
-          <div className="space-y-3 pt-1">
-            {trackers.map((tracker) => {
-              const isActive = tracker.id === activeTrackerId;
-              const isSwitching = switchingTrackerId === tracker.id;
-              const canonTitle = formatCanonTitle({ canon: tracker.canon as BibleCanon });
-              const progressPct =
-                tracker.totalChaptersCount > 0
-                  ? Math.min(100, Math.round((tracker.readChaptersCount / tracker.totalChaptersCount) * 100))
-                  : 0;
-
-              return (
-                <div
+          <Collapsible
+            open={isTrackerListExpanded}
+            onOpenChange={setIsTrackerListExpanded}
+            className="space-y-3 pt-1"
+          >
+            <div className="space-y-3">
+              {initialTrackers.map((tracker) => (
+                <TrackerCard
                   key={tracker.id}
-                  className={cn(
-                    "rounded-xl border p-4 sm:p-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center transition-all",
-                    isActive
-                      ? "border-primary/40 bg-primary/5 shadow-xs"
-                      : "border-border bg-card hover:border-border-strong"
-                  )}
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div
-                      className={cn(
-                        "flex size-11 items-center justify-center rounded-xl border shrink-0",
-                        isActive
-                          ? "bg-primary/10 border-primary/20 text-primary"
-                          : "bg-muted border-border text-muted-foreground"
-                      )}
+                  tracker={tracker}
+                  isActive={tracker.id === activeTrackerId}
+                  isSwitching={switchingTrackerId === tracker.id}
+                  onSwitch={handleSwitchTracker}
+                />
+              ))}
+            </div>
+
+            {hasMoreTrackers && (
+              <>
+                <CollapsibleContent className="space-y-3 pt-0">
+                  {extraTrackers.map((tracker) => (
+                    <TrackerCard
+                      key={tracker.id}
+                      tracker={tracker}
+                      isActive={tracker.id === activeTrackerId}
+                      isSwitching={switchingTrackerId === tracker.id}
+                      onSwitch={handleSwitchTracker}
+                    />
+                  ))}
+                </CollapsibleContent>
+
+                <div className="pt-1 flex justify-center">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs font-semibold text-muted-foreground hover:text-foreground gap-1.5 h-8 rounded-lg border-border/80"
                     >
-                      <TrackerIcon icon={tracker.icon} className="size-5" />
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-semibold text-foreground">
-                          {tracker.name}
-                        </h3>
-                        {isActive && (
-                          <span className="rounded-md bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                            Active Default
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {canonTitle} • {tracker.readChaptersCount} / {tracker.totalChaptersCount} chapters read ({progressPct}%)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 self-end sm:self-center">
-                    {isActive ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
-                        <Check className="size-4" />
-                        <span>Current Default</span>
+                      <span>
+                        {isTrackerListExpanded
+                          ? "Show fewer trackers"
+                          : `View all ${trackers.length} trackers (${extraTrackers.length} more)`}
                       </span>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={isSwitching}
-                        isLoading={isSwitching}
-                        onClick={() => handleSwitchTracker({ trackerId: tracker.id })}
-                        className="font-medium"
-                      >
-                        Switch to this
-                      </Button>
-                    )}
-                  </div>
+                      <ChevronDown
+                        className={cn(
+                          "size-3.5 transition-transform duration-200",
+                          isTrackerListExpanded && "rotate-180"
+                        )}
+                      />
+                    </Button>
+                  </CollapsibleTrigger>
                 </div>
-              );
-            })}
-          </div>
+              </>
+            )}
+          </Collapsible>
         </section>
 
         {/* Section 2: General Notifications & Reading Reminders */}
@@ -505,7 +582,7 @@ export function SettingsView({
         {/* Section 4: Profile & Password Security Management */}
         <ProfileSettingsSection
           user={user}
-          onSignOut={handleSignOut}
+          onSignOut={() => setIsLogoutModalOpen(true)}
           isSigningOut={isSigningOut}
         />
 
@@ -519,6 +596,14 @@ export function SettingsView({
               router.refresh();
             }
           }}
+        />
+
+        {/* Logout Confirmation Modal */}
+        <LogoutConfirmModal
+          isOpen={isLogoutModalOpen}
+          onClose={() => setIsLogoutModalOpen(false)}
+          onConfirm={handleSignOut}
+          isPending={isSigningOut}
         />
       </div>
     </AppShell>
