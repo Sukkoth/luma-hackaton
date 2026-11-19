@@ -298,9 +298,6 @@ export function PlanActiveBanner({
               <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                 Ethiopian (81)
               </span>
-              <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                Multi-Track
-              </span>
             </div>
           </div>
         </div>

@@ -18,8 +18,6 @@ import {
   Trophy,
   Sparkles,
   Coffee,
-  Plus,
-  Upload,
 } from "lucide-react";
 import {
   READING_PLANS,
@@ -270,31 +268,11 @@ export function PlanCatalog({
         {/* Tab Content */}
         {activeTab === "catalog" ? (
           <div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
               <PlanFilterPills
                 selectedFilter={selectedFilter}
                 onSelectFilter={({ filter }) => setSelectedFilter(filter)}
               />
-              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                <button
-                  type="button"
-                  disabled={!mounted}
-                  onClick={() => setIsCustomWizardOpen(true)}
-                  className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
-                >
-                  <Plus className="size-3.5" />
-                  <span>Create Custom</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={!mounted}
-                  onClick={() => setIsImportModalOpen(true)}
-                  className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
-                >
-                  <Upload className="size-3.5" />
-                  <span>Import</span>
-                </button>
-              </div>
             </div>
 
             {/* Catalog Grid */}
