@@ -2,22 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  X,
-  BookOpen,
-  Bookmark,
-  Sparkles,
-  Flame,
-  Award,
-  Layers,
-  Lock,
-  Loader2,
-} from "lucide-react";
+import { X, Lock, Loader2 } from "lucide-react";
 import {
   updateTrackerAction,
   type UserTrackerSummary,
 } from "@/actions/trackers";
 import type { BibleCanon } from "@/data/bibleData";
+import { TRACKER_ICONS } from "./tracker-icons";
 
 type TrackerEditModalProps = {
   isOpen: boolean;
@@ -32,15 +23,6 @@ const CANON_NAMES: Record<BibleCanon, { name: string; totalBooks: number }> = {
   eastern_orthodox: { name: "Eastern Orthodox (78 Books)", totalBooks: 78 },
   ethiopian_orthodox: { name: "Ethiopian Orthodox (81 Books)", totalBooks: 81 },
 };
-
-const TRACKER_ICONS = [
-  { id: "book-open", label: "Open Book", icon: BookOpen },
-  { id: "bookmark", label: "Bookmark", icon: Bookmark },
-  { id: "sparkles", label: "Sparkles", icon: Sparkles },
-  { id: "flame", label: "Flame", icon: Flame },
-  { id: "award", label: "Award", icon: Award },
-  { id: "layers", label: "Layers", icon: Layers },
-] as const;
 
 export function TrackerEditModal({
   isOpen,

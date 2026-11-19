@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AchievementCelebrationListener } from "@/components/achievements/achievement-celebration-listener";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -57,6 +58,7 @@ export default function RootLayout({
             <Suspense fallback={null}>
               <AchievementCelebrationListener />
             </Suspense>
+            <Toaster position="top-right" richColors />
             <main className="flex-1 pb-20 lg:pb-0">{children}</main>
           </ThemeProvider>
         </NuqsAdapter>

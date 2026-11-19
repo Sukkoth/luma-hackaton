@@ -9,12 +9,6 @@ import {
   Plus,
   Pencil,
   Loader2,
-  BookOpen,
-  Bookmark,
-  Compass,
-  Heart,
-  Flame,
-  Sun,
 } from "lucide-react";
 import {
   switchTrackerAction,
@@ -22,6 +16,7 @@ import {
 } from "@/actions/trackers";
 import { TrackerCreationModal } from "./tracker-creation-modal";
 import { TrackerEditModal } from "./tracker-edit-modal";
+import { TrackerIcon } from "./tracker-icons";
 import { CANON_OPTIONS } from "@/lib/schemas/onboarding";
 import { cn } from "@/lib/utils";
 
@@ -30,15 +25,6 @@ type Props = {
   activeTrackerId?: string | null;
   variant?: "default" | "sidebar" | "tenant";
 };
-
-const ICON_MAP = {
-  "book-open": BookOpen,
-  bookmark: Bookmark,
-  compass: Compass,
-  heart: Heart,
-  flame: Flame,
-  sun: Sun,
-} as const;
 
 export function TrackerSwitcher({
   trackers = [],
@@ -78,9 +64,6 @@ export function TrackerSwitcher({
   const activeTracker =
     trackers.find((t) => t.id === activeTrackerId) ?? trackers[0]!;
 
-  const ActiveIconComp =
-    ICON_MAP[activeTracker.icon as keyof typeof ICON_MAP] ?? BookOpen;
-
   const handleSwitch = (trackerId: string) => {
     if (trackerId === activeTracker.id || isPending) {
       setIsOpen(false);
@@ -115,7 +98,7 @@ export function TrackerSwitcher({
                 {isPending ? (
                   <Loader2 className="size-4 animate-spin text-primary" />
                 ) : (
-                  <ActiveIconComp className="size-4" />
+                  <TrackerIcon icon={activeTracker.icon} className="size-4" />
                 )}
               </div>
               <div className="flex flex-col min-w-0">
@@ -152,7 +135,7 @@ export function TrackerSwitcher({
                 {isPending ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
-                  <ActiveIconComp className="size-3.5" />
+                  <TrackerIcon icon={activeTracker.icon} className="size-3.5" />
                 )}
               </div>
               <div className="flex flex-col min-w-0">
@@ -183,7 +166,7 @@ export function TrackerSwitcher({
                 {isPending ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
-                  <ActiveIconComp className="size-3.5" />
+                  <TrackerIcon icon={activeTracker.icon} className="size-3.5" />
                 )}
               </div>
               <div className="flex flex-col min-w-0">
@@ -231,8 +214,6 @@ export function TrackerSwitcher({
             <div className="space-y-1 max-h-64 overflow-y-auto overflow-x-hidden">
               {trackers.map((tracker) => {
                 const isActive = tracker.id === activeTracker.id;
-                const IconComp =
-                  ICON_MAP[tracker.icon as keyof typeof ICON_MAP] ?? BookOpen;
                 const canonInfo =
                   CANON_OPTIONS.find((c) => c.id === tracker.canon) ??
                   CANON_OPTIONS[0]!;
@@ -260,7 +241,7 @@ export function TrackerSwitcher({
                             : "bg-muted border-border text-muted-foreground"
                         )}
                       >
-                        <IconComp className="size-3.5" />
+                        <TrackerIcon icon={tracker.icon} className="size-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">

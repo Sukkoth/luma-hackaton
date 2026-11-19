@@ -570,6 +570,12 @@ export const userSettings = pgTable(
     streakFreezesAvailable: integer("streak_freezes_available")
       .default(0)
       .notNull(),
+    dailyReminderEnabled: boolean("daily_reminder_enabled")
+      .default(false)
+      .notNull(),
+    dailyReminderTime: varchar("daily_reminder_time", { length: 10 })
+      .default("20:00")
+      .notNull(),
     frozenDatesJson: text("frozen_dates_json"),
     freezeRestorationDaysCount: integer("freeze_restoration_days_count")
       .default(0)

@@ -2,22 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  X,
-  BookOpen,
-  Bookmark,
-  Sparkles,
-  Flame,
-  Award,
-  Layers,
-  Check,
-  Loader2,
-} from "lucide-react";
+import { X, Check, Loader2 } from "lucide-react";
 import {
   createTrackerAction,
   type CreateTrackerActionResult,
 } from "@/actions/trackers";
 import type { BibleCanon } from "@/data/bibleData";
+import { TRACKER_ICONS } from "./tracker-icons";
 
 type TrackerCreationModalProps = {
   isOpen: boolean;
@@ -56,15 +47,6 @@ const CANON_OPTIONS: ReadonlyArray<{
     subtitle: "Includes Jubilees, 1 Enoch, and 1-3 Meqabyan",
   },
 ];
-
-const TRACKER_ICONS = [
-  { id: "book-open", label: "Open Book", icon: BookOpen },
-  { id: "bookmark", label: "Bookmark", icon: Bookmark },
-  { id: "sparkles", label: "Sparkles", icon: Sparkles },
-  { id: "flame", label: "Flame", icon: Flame },
-  { id: "award", label: "Award", icon: Award },
-  { id: "layers", label: "Layers", icon: Layers },
-] as const;
 
 export function TrackerCreationModal({
   isOpen,

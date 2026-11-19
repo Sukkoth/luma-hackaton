@@ -1,24 +1,7 @@
 import type React from "react";
-import {
-  BookOpen,
-  Bookmark,
-  Compass,
-  Heart,
-  Flame,
-  Sun,
-  ArrowRight,
-  Loader2,
-} from "lucide-react";
+import { BookOpen, ArrowRight, Loader2 } from "lucide-react";
 import { CanonSelector } from "./canon-selector";
-
-const TRACKER_ICONS = [
-  { id: "book-open", label: "Open Book", icon: BookOpen },
-  { id: "bookmark", label: "Bookmark", icon: Bookmark },
-  { id: "compass", label: "Compass", icon: Compass },
-  { id: "heart", label: "Heart", icon: Heart },
-  { id: "flame", label: "Flame", icon: Flame },
-  { id: "sun", label: "Sun", icon: Sun },
-];
+import { TRACKER_ICONS } from "@/components/trackers/tracker-icons";
 
 type Props = {
   selectedCanonId: string;
@@ -74,7 +57,7 @@ export function TrackerSetupForm({
           <label className="block text-[12px] font-bold text-foreground">
             Icon Badge
           </label>
-          <div className="mt-2 grid grid-cols-6 gap-2">
+          <div className="mt-2 grid grid-cols-7 gap-2">
             {TRACKER_ICONS.map((item, idx) => {
               const IconComp = item.icon;
               return (
