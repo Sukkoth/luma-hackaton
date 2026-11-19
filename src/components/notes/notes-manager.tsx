@@ -759,9 +759,14 @@ export function NotesManager({
   });
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-4 sm:space-y-6">
       {/* ── 1. Unboxed Editorial Masthead ── */}
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1">
+      <section
+        className={cn(
+          "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1",
+          mobileView === "editor" ? "hidden lg:flex" : "flex"
+        )}
+      >
         <div className="space-y-1.5 max-w-xl">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
             <span className="size-1.5 rounded-full bg-primary" />
@@ -775,7 +780,7 @@ export function NotesManager({
           </p>
         </div>
 
-        <HeaderActions>
+        <HeaderActions className="w-full sm:w-auto flex-wrap sm:flex-nowrap gap-2 sm:gap-2.5">
           <HeaderActionButton
             type="secondary"
             onClick={() => setShowFolderModal(true)}
@@ -783,6 +788,7 @@ export function NotesManager({
             testId="create-new-folder-button"
             icon={<FolderPlus className="size-4" />}
             label="New Collection"
+            className="flex-1 sm:flex-initial justify-center"
           />
           <HeaderActionButton
             type="primary"
@@ -791,12 +797,13 @@ export function NotesManager({
             testId="create-new-note-button"
             icon={<Plus className="size-4" />}
             label="Create Note"
+            className="flex-1 sm:flex-initial justify-center"
           />
         </HeaderActions>
       </section>
 
-      {/* ── 2. Signature Horizon Ribbon ── */}
-      <section className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+      {/* ── 2. Signature Horizon Ribbon (Hidden on mobile <768px to preserve note space) ── */}
+      <section className="hidden md:block rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
           {/* Column 1: Active Reflections */}
           <div className="pr-0 md:pr-8 space-y-1.5">
@@ -867,7 +874,12 @@ export function NotesManager({
       </section>
 
       {/* ── 3. Unified Filter & Search Bar with shadcn Select ── */}
-      <section className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+      <section
+        className={cn(
+          "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1",
+          mobileView === "editor" ? "hidden lg:flex" : "flex"
+        )}
+      >
         {/* Left: View Tabs */}
         <TabsBar
           tabs={[
@@ -917,9 +929,9 @@ export function NotesManager({
         />
 
         {/* Right: Search & shadcn Sort Dropdown */}
-        <div className="flex items-center gap-2.5 flex-1 max-w-md justify-end">
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto sm:max-w-md justify-end">
           {/* Search Box */}
-          <div className="relative w-full max-w-xs">
+          <div className="relative flex-1 min-w-0 sm:max-w-xs">
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
             <input
               type="text"
@@ -927,7 +939,7 @@ export function NotesManager({
                 activeTab === "folders"
                   ? "Search collections..."
                   : activeTab === "archived"
-                  ? "Search archived notes..."
+                  ? "Search archived..."
                   : "Search study notes..."
               }
               value={searchQuery}
@@ -954,11 +966,11 @@ export function NotesManager({
             >
               <SelectTrigger
                 data-testid="notes-sort-select"
-                className="h-9.5 w-[165px] sm:w-[175px]"
+                className="h-9.5 w-[130px] sm:w-[175px]"
               >
                 <div className="flex items-center gap-1.5 truncate">
                   <ArrowUpDown className="size-3.5 text-primary shrink-0" />
-                  <SelectValue placeholder="Sort notes" />
+                  <SelectValue placeholder="Sort" />
                 </div>
               </SelectTrigger>
               <SelectContent align="end">
@@ -974,33 +986,35 @@ export function NotesManager({
 
       {/* ── 4. Quick Collection Filter Pills (when in active tab) ── */}
       {activeTab === "active" && (
-        <FilterPills
-          containerTestId="notes-folders-filter"
-          className="py-1"
-          items={[
-            { id: "all", label: "All Collections" },
-            ...folders.map((folder) => ({
-              id: folder.id,
-              label: (
-                <span className="inline-flex items-center gap-1.5">
-                  <FolderIcon className="size-3 shrink-0" />
-                  <span>{folder.name}</span>
-                  <span className="opacity-75 text-[10px]">({folder.notesCount})</span>
-                </span>
-              ),
-            })),
-            ...(uncategorizedNotesCount > 0
-              ? [
-                  {
-                    id: "uncategorized",
-                    label: `Uncategorized (${uncategorizedNotesCount})`,
-                  },
-                ]
-              : []),
-          ]}
-          activeFilter={activeFolderId}
-          onFilterChange={({ filter }) => handleSwitchFolder({ folderId: filter })}
-        />
+        <div className={cn(mobileView === "editor" ? "hidden lg:block" : "block")}>
+          <FilterPills
+            containerTestId="notes-folders-filter"
+            className="py-1"
+            items={[
+              { id: "all", label: "All Collections" },
+              ...folders.map((folder) => ({
+                id: folder.id,
+                label: (
+                  <span className="inline-flex items-center gap-1.5">
+                    <FolderIcon className="size-3 shrink-0" />
+                    <span>{folder.name}</span>
+                    <span className="opacity-75 text-[10px]">({folder.notesCount})</span>
+                  </span>
+                ),
+              })),
+              ...(uncategorizedNotesCount > 0
+                ? [
+                    {
+                      id: "uncategorized",
+                      label: `Uncategorized (${uncategorizedNotesCount})`,
+                    },
+                  ]
+                : []),
+            ]}
+            activeFilter={activeFolderId}
+            onFilterChange={({ filter }) => handleSwitchFolder({ folderId: filter })}
+          />
+        </div>
       )}
 
       {/* ── 5. Main Studio Area: Physical Folders Grid vs 2-Pane Journal Desk ── */}
@@ -1174,21 +1188,21 @@ export function NotesManager({
             {activeNote ? (
               <div className="flex-1 flex flex-col min-h-[660px]">
                 {/* Desk Control Bar */}
-                <div className="px-4 sm:px-6 py-3 border-b border-border/60 flex items-center justify-between gap-3 bg-surface-elevated">
+                <div className="px-3 sm:px-6 py-2 sm:py-3 border-b border-border/60 flex items-center justify-between gap-1.5 sm:gap-3 bg-surface-elevated overflow-x-hidden">
                   {/* Left: Mobile Back & Context Tags */}
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                     <button
                       type="button"
                       onClick={() => setMobileView("list")}
                       data-testid="back-to-notes-list"
-                      className="inline-flex lg:hidden h-8.5 items-center gap-1.5 rounded-xl border border-border bg-card px-2.5 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
+                      className="inline-flex lg:hidden h-8 sm:h-8.5 items-center gap-1 rounded-lg sm:rounded-xl border border-border bg-card px-2 sm:px-2.5 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer shrink-0"
                     >
                       <ChevronLeft className="size-4" />
-                      <span>Back</span>
+                      <span className="hidden sm:inline">Back</span>
                     </button>
 
                     {/* Collection Selector via shadcn Select */}
-                    <div className="shrink-0">
+                    <div className="min-w-0 max-w-[125px] sm:max-w-[180px] shrink-0">
                       <Select
                         value={activeNote.folderId || "none"}
                         onValueChange={(val) =>
@@ -1199,7 +1213,7 @@ export function NotesManager({
                       >
                         <SelectTrigger
                           data-testid="note-folder-select"
-                          className="h-8.5 w-[145px] sm:w-[170px]"
+                          className="h-8 sm:h-8.5 w-full text-xs px-2 sm:px-3"
                         >
                           <div className="flex items-center gap-1.5 truncate">
                             <FolderIcon className="size-3 text-primary shrink-0" />
@@ -1219,7 +1233,7 @@ export function NotesManager({
 
                     {/* Linked Plan / Scripture Badge */}
                     {activeNote.planTitle && (
-                      <span className="hidden sm:inline-flex h-8.5 items-center gap-1.5 rounded-xl border border-primary/20 bg-primary/10 px-2.5 text-xs font-semibold text-primary truncate max-w-[200px]">
+                      <span className="hidden md:inline-flex h-8 sm:h-8.5 items-center gap-1.5 rounded-lg sm:rounded-xl border border-primary/20 bg-primary/10 px-2.5 text-xs font-semibold text-primary truncate max-w-[180px]">
                         <Sparkles className="size-3 text-primary shrink-0" />
                         <span className="truncate">{activeNote.planTitle}</span>
                       </span>
@@ -1227,7 +1241,7 @@ export function NotesManager({
                   </div>
 
                   {/* Right: Actions (Autosave, Pin, Archive, Delete) */}
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     {/* Save button / indicator */}
                     <button
                       type="button"
@@ -1235,7 +1249,7 @@ export function NotesManager({
                       disabled={!isDirty || isSaving}
                       data-testid="save-note-button"
                       className={cn(
-                        "inline-flex h-8.5 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition-all",
+                        "inline-flex h-8 sm:h-8.5 items-center gap-1.5 rounded-lg sm:rounded-xl px-2 sm:px-3 text-xs font-semibold transition-all shrink-0",
                         isDirty
                           ? "bg-primary text-primary-foreground hover:opacity-90 active:scale-95 shadow-xs cursor-pointer"
                           : "border border-border/80 bg-card text-muted-foreground cursor-default"
@@ -1254,7 +1268,7 @@ export function NotesManager({
                       ) : isDirty ? (
                         <>
                           <Save className="size-3.5" />
-                          <span>Save</span>
+                          <span className="hidden sm:inline">Save</span>
                         </>
                       ) : (
                         <>
@@ -1269,7 +1283,7 @@ export function NotesManager({
                       type="button"
                       onClick={() => handleTogglePin({ note: activeNote })}
                       className={cn(
-                        "size-8.5 inline-flex items-center justify-center rounded-xl border transition-all cursor-pointer",
+                        "size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border transition-all cursor-pointer shrink-0",
                         activeNote.isPinned
                           ? "border-primary/30 bg-primary/10 text-primary shadow-2xs"
                           : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong"
@@ -1291,7 +1305,7 @@ export function NotesManager({
                       type="button"
                       onClick={() => handleToggleArchive({ note: activeNote })}
                       data-testid="archive-toggle-button"
-                      className="size-8.5 inline-flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong transition-all cursor-pointer"
+                      className="size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong transition-all cursor-pointer shrink-0"
                       title={
                         activeNote.isArchived
                           ? "Unarchive note"
@@ -1309,7 +1323,7 @@ export function NotesManager({
                     <button
                       type="button"
                       onClick={() => handleDeleteNote({ noteId: activeNote.id })}
-                      className="size-8.5 inline-flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/10 transition-all cursor-pointer"
+                      className="size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border border-border bg-card text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/10 transition-all cursor-pointer shrink-0"
                       title="Delete note"
                     >
                       <Trash2 className="size-3.5" />

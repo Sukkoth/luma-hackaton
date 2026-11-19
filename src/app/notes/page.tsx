@@ -71,7 +71,7 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
     >
-      <div className="w-full max-w-[1440px] mx-auto space-y-6 pb-12">
+      <div className="w-full max-w-[1440px] mx-auto space-y-4 sm:space-y-6 pb-12">
         <NotesManager
           initialNotes={initialNotes}
           initialFolders={initialFolders}
