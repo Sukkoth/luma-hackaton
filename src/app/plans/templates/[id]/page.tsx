@@ -54,9 +54,8 @@ async function PlanTemplateDetailContent({
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
     >
-      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
-        <main className="mt-1 space-y-4">
-          {/* Breadcrumb / Back button */}
+      <div className="w-full max-w-[1440px] mx-auto space-y-4">
+        {/* Breadcrumb / Back button */}
           <div>
             <Link href="/plans" className="ui-btn-secondary ui-btn-sm gap-1.5">
               <ArrowLeft className="size-3.5" strokeWidth={1.75} />
@@ -249,7 +248,6 @@ async function PlanTemplateDetailContent({
               )}
             </div>
           </div>
-        </main>
       </div>
     </AppShell>
   );

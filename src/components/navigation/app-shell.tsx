@@ -144,7 +144,7 @@ export function AppShell({
     return (
       <div className="min-h-screen bg-background text-foreground">
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur-md px-4 py-3 sm:px-6 md:px-8">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
             <Link href="/" className="group flex items-center gap-2">
               <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
                 <Flame className="size-4 fill-primary" />
@@ -201,7 +201,7 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:px-8">
+        <main className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 md:px-8">
           {children}
         </main>
       </div>
@@ -512,7 +512,7 @@ export function AppShell({
         {/* Content Viewport */}
         <main
           className={cn(
-            "flex-1 flex flex-col overflow-y-auto px-4 py-5 sm:px-6 md:px-8 pb-24 lg:pb-8",
+            "flex-1 flex flex-col overflow-y-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 pb-24 lg:pb-8",
             className
           )}
         >

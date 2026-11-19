@@ -99,21 +99,18 @@ export default async function PlansPage() {
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
     >
-      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
-        {/* Main Content Area */}
-        <main className="mt-1 w-full">
-          <PlanCatalog
-            activePlanInstances={activePlanInstances}
-            pausedPlanInstances={pausedPlanInstances}
-            finishedPlanInstances={finishedPlanInstances}
-            customPlans={customPlans}
-            activeTrackerId={trackersData.activeTracker?.id}
-            trackerName={trackersData.activeTracker?.name}
-            trackerCanon={
-              (trackersData.activeTracker?.canon as BibleCanon) || "protestant"
-            }
-          />
-        </main>
+      <div className="w-full max-w-[1440px] mx-auto">
+        <PlanCatalog
+          activePlanInstances={activePlanInstances}
+          pausedPlanInstances={pausedPlanInstances}
+          finishedPlanInstances={finishedPlanInstances}
+          customPlans={customPlans}
+          activeTrackerId={trackersData.activeTracker?.id}
+          trackerName={trackersData.activeTracker?.name}
+          trackerCanon={
+            (trackersData.activeTracker?.canon as BibleCanon) || "protestant"
+          }
+        />
       </div>
     </AppShell>
   );

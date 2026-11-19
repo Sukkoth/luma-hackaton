@@ -86,19 +86,17 @@ export default async function GroupPage({ params }: PageProps) {
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
     >
-      <div className="w-full px-4 sm:px-8 py-4 sm:py-6">
-        <main className="mt-1 w-full">
-          <Suspense fallback={null}>
-            <GroupWorkspaceView
-              group={group}
-              members={members}
-              pendingMembers={pendingMembers}
-              leaderboardsByPlanId={leaderboardsByPlanId}
-              trackers={trackersData.trackers}
-              activeTrackerId={trackersData.activeTracker?.id}
-            />
-          </Suspense>
-        </main>
+      <div className="w-full max-w-[1440px] mx-auto">
+        <Suspense fallback={null}>
+          <GroupWorkspaceView
+            group={group}
+            members={members}
+            pendingMembers={pendingMembers}
+            leaderboardsByPlanId={leaderboardsByPlanId}
+            trackers={trackersData.trackers}
+            activeTrackerId={trackersData.activeTracker?.id}
+          />
+        </Suspense>
       </div>
     </AppShell>
   );

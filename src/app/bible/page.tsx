@@ -35,10 +35,8 @@ export default async function BiblePage() {
         trackers={trackersData.trackers}
         activeTrackerId={trackersData.activeTracker?.id}
       >
-        <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
-          <main className="w-full pb-16">
-            <BibleLandingPage />
-          </main>
+        <div className="w-full max-w-[1440px] mx-auto pb-16">
+          <BibleLandingPage />
         </div>
       </AppShell>
     </Suspense>

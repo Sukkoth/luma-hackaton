@@ -69,7 +69,7 @@ export default async function HomePage() {
       activeTrackerId={activeTracker.id}
       className="h-full flex flex-col min-h-0"
     >
-      <div className="flex h-full w-full flex-1 min-h-0 flex-col px-6 sm:px-8 py-3.5 sm:py-4">
+      <div className="w-full max-w-[1440px] mx-auto flex h-full flex-1 min-h-0 flex-col">
         {/* Global Chart SVG Patterns & Gradients */}
         <ChartDefs />
 
@@ -78,7 +78,7 @@ export default async function HomePage() {
           Desktop (>= 1024px): Strictly 100dvh, 12-column grid with 2 rows, zero page scroll
           Mobile (< 1024px): Single column, natural vertical scroll
           ========================================================================= */}
-        <main className="mt-1 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[1.18fr_1fr] gap-3.5 lg:gap-3 pb-8 lg:pb-0 pr-0.5 lg:pr-0">
+        <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-[1.18fr_1fr] gap-3.5 lg:gap-3 pb-8 lg:pb-0 pr-0.5 lg:pr-0">
           {/* Card 1: Activity Rings (Mobile: order-1, xl: col-span-3 row-1) */}
           <div className="block lg:hidden xl:block xl:col-span-3 xl:row-start-1 h-[360px] lg:h-full min-h-0 order-1 xl:order-none">
             <ActivityRingsCard data={overviewData.activityRings} />
@@ -116,7 +116,7 @@ export default async function HomePage() {
           <div className="col-span-1 lg:col-span-4 xl:col-span-4 lg:row-start-2 h-[260px] lg:h-full min-h-0 order-6 xl:order-none">
             <PlanGaugeCard data={overviewData.planGauge} />
           </div>
-        </main>
+        </div>
       </div>
     </AppShell>
   );

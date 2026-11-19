@@ -70,23 +70,21 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
       streak={streak}
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
+      className="flex flex-col min-h-0"
     >
-      <div className="w-full px-6 sm:px-8 py-4 sm:py-6">
-        <main className="mt-1 w-full">
-          <NotesManager
-            key={resolvedParams.noteId ?? "default"}
-            initialNotes={initialNotes}
-            initialFolders={initialFolders}
-            defaultPlanId={resolvedParams.planId}
-            defaultSessionId={
-              resolvedParams.session
-                ? Number(resolvedParams.session)
-                : undefined
-            }
-            defaultFolderId={resolvedParams.folderId}
-            defaultNoteId={resolvedParams.noteId}
-          />
-        </main>
+      <div className="w-full max-w-[1440px] mx-auto flex-1 min-h-[600px] h-[calc(100dvh-124px)] lg:h-[calc(100dvh-112px)] flex flex-col">
+        <NotesManager
+          initialNotes={initialNotes}
+          initialFolders={initialFolders}
+          defaultPlanId={resolvedParams.planId}
+          defaultSessionId={
+            resolvedParams.session
+              ? Number(resolvedParams.session)
+              : undefined
+          }
+          defaultFolderId={resolvedParams.folderId}
+          defaultNoteId={resolvedParams.noteId}
+        />
       </div>
     </AppShell>
   );
