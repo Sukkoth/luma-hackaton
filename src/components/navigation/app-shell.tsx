@@ -320,9 +320,6 @@ export function AppShell({
               <span className="truncate text-xs font-semibold text-foreground leading-tight">
                 {effectiveUserName}
               </span>
-              <span className="truncate text-[11px] text-muted-foreground leading-tight mt-0.5">
-                {effectiveUserEmail}
-              </span>
             </div>
           </Link>
 
@@ -331,7 +328,7 @@ export function AppShell({
             onClick={handleLogout}
             disabled={isSigningOut}
             aria-label="Log out of session"
-            className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer disabled:opacity-50"
+            className="flex w-full items-center justify-between gap-2 rounded-xl bg-secondary px-3.5 py-2.5 text-xs font-semibold text-secondary-foreground border border-border/40 hover:bg-secondary/80 active:scale-[0.98] transition-all cursor-pointer shadow-2xs disabled:opacity-50"
           >
             <div className="flex items-center gap-2">
               {isSigningOut ? (
