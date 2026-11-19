@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryState, parseAsStringLiteral } from "nuqs";
 import {
   FolderKanban,
   Plus,
@@ -10,6 +11,9 @@ import {
   ShieldCheck,
   Calendar,
   ChevronDown,
+  Settings2,
+  User,
+  Download,
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { AppShell } from "@/components/navigation/app-shell";
@@ -28,7 +32,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { TabsBar, type TabItem } from "@/components/ui/tabs-bar";
 import { ProfileSettingsSection } from "./profile-settings-section";
+import { DataExportTab } from "./data-export-tab";
 import type { BibleCanon } from "@/data/bibleData";
 import { cn } from "@/lib/utils";
 
@@ -65,12 +71,15 @@ export type UserSettingsState = {
   dailyReminderTime: string;
 };
 
+export type SettingsTab = "settings" | "profile" | "export";
+
 export type SettingsViewProps = {
   user: SettingsUser;
   trackers?: ReadonlyArray<EnrichedTrackerSummary>;
   activeTrackerId?: string | null;
   streak?: StreakData;
   settings: UserSettingsState;
+  initialTab?: SettingsTab;
 };
 
 type TrackerCardProps = {
@@ -165,8 +174,34 @@ export function SettingsView({
   activeTrackerId,
   streak,
   settings: initialSettings,
+  initialTab = "settings",
 }: SettingsViewProps) {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(["settings", "profile", "export"] as const).withDefault(
+      initialTab
+    )
+  );
+
+  const tabs: ReadonlyArray<TabItem<SettingsTab>> = [
+    {
+      id: "settings",
+      label: "Settings",
+      icon: <Settings2 className="size-4" />,
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: <User className="size-4" />,
+    },
+    {
+      id: "export",
+      label: "Data Export",
+      icon: <Download className="size-4" />,
+    },
+  ];
+
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [switchingTrackerId, setSwitchingTrackerId] = useState<string | null>(null);
   const [isCreateTrackerOpen, setIsCreateTrackerOpen] = useState(false);
@@ -412,58 +447,54 @@ export function SettingsView({
           </div>
         </section>
 
-        {/* Section 1: Real Reading Trackers Manager */}
-        <section className="ui-card p-4 sm:p-6 lg:p-7 space-y-4">
-          <div className="flex flex-col gap-2 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <FolderKanban className="size-4 text-primary" />
-                <h2 className="text-base font-semibold tracking-tight text-foreground">
-                  Reading Trackers
-                </h2>
-                {trackers.length > 0 && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                    {trackers.length}
-                  </span>
-                )}
+        {/* ── Segmented Navigation Tabs ── */}
+        <TabsBar
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={({ tab }) => void setActiveTab(tab)}
+        />
+
+        {/* Tab 1: Settings (Reading Trackers & Reminders) */}
+        {activeTab === "settings" && (
+          <div className="space-y-6 animate-in fade-in-50 duration-200">
+            {/* Section 1: Real Reading Trackers Manager */}
+            <section className="ui-card p-4 sm:p-6 lg:p-7 space-y-4">
+              <div className="flex flex-col gap-2 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <FolderKanban className="size-4 text-primary" />
+                    <h2 className="text-base font-semibold tracking-tight text-foreground">
+                      Reading Trackers
+                    </h2>
+                    {trackers.length > 0 && (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                        {trackers.length}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Switch your active devotional tracker or create a new workspace for another canonical tradition.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  leftIcon={<Plus className="size-3.5" />}
+                  onClick={() => setIsCreateTrackerOpen(true)}
+                >
+                  Create Tracker
+                </Button>
               </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Switch your active devotional tracker or create a new workspace for another canonical tradition.
-              </p>
-            </div>
 
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              leftIcon={<Plus className="size-3.5" />}
-              onClick={() => setIsCreateTrackerOpen(true)}
-            >
-              Create Tracker
-            </Button>
-          </div>
-
-          <Collapsible
-            open={isTrackerListExpanded}
-            onOpenChange={setIsTrackerListExpanded}
-            className="space-y-3 pt-1"
-          >
-            <div className="space-y-3">
-              {initialTrackers.map((tracker) => (
-                <TrackerCard
-                  key={tracker.id}
-                  tracker={tracker}
-                  isActive={tracker.id === activeTrackerId}
-                  isSwitching={switchingTrackerId === tracker.id}
-                  onSwitch={handleSwitchTracker}
-                />
-              ))}
-            </div>
-
-            {hasMoreTrackers && (
-              <>
-                <CollapsibleContent className="space-y-3 pt-0">
-                  {extraTrackers.map((tracker) => (
+              <Collapsible
+                open={isTrackerListExpanded}
+                onOpenChange={setIsTrackerListExpanded}
+                className="space-y-3 pt-1"
+              >
+                <div className="space-y-3">
+                  {initialTrackers.map((tracker) => (
                     <TrackerCard
                       key={tracker.id}
                       tracker={tracker}
@@ -472,119 +503,142 @@ export function SettingsView({
                       onSwitch={handleSwitchTracker}
                     />
                   ))}
-                </CollapsibleContent>
+                </div>
 
-                <div className="pt-1 flex justify-center">
-                  <CollapsibleTrigger asChild>
+                {hasMoreTrackers && (
+                  <>
+                    <CollapsibleContent className="space-y-3 pt-0">
+                      {extraTrackers.map((tracker) => (
+                        <TrackerCard
+                          key={tracker.id}
+                          tracker={tracker}
+                          isActive={tracker.id === activeTrackerId}
+                          isSwitching={switchingTrackerId === tracker.id}
+                          onSwitch={handleSwitchTracker}
+                        />
+                      ))}
+                    </CollapsibleContent>
+
+                    <div className="pt-1 flex justify-center">
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="text-xs font-semibold text-muted-foreground hover:text-foreground gap-1.5 h-8 rounded-lg border-border/80"
+                        >
+                          <span>
+                            {isTrackerListExpanded
+                              ? "Show fewer trackers"
+                              : `View all ${trackers.length} trackers (${extraTrackers.length} more)`}
+                          </span>
+                          <ChevronDown
+                            className={cn(
+                              "size-3.5 transition-transform duration-200",
+                              isTrackerListExpanded && "rotate-180"
+                            )}
+                          />
+                        </Button>
+                      </CollapsibleTrigger>
+                    </div>
+                  </>
+                )}
+              </Collapsible>
+            </section>
+
+            {/* Section 2: General Notifications & Reading Reminders */}
+            <section className="ui-card p-4 sm:p-6 lg:p-7 space-y-5">
+              <div className="flex flex-col gap-2 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Bell className="size-4 text-primary" />
+                    <h2 className="text-base font-semibold tracking-tight text-foreground">
+                      Reminders & Notifications
+                    </h2>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Set a daily prompt to record your chapter readings. Plan-specific pacing alerts are scheduled separately in each plan.
+                  </p>
+                </div>
+
+                {/* Notification Permission Request */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    System Alerts:
+                  </span>
+                  {notificationPermission === "granted" ? (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                      <Check className="size-3" />
+                      <span>Enabled</span>
+                    </span>
+                  ) : notificationPermission === "denied" ? (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 border border-destructive/20 px-2 py-0.5 text-[11px] font-semibold text-destructive">
+                      <span>Blocked in Browser</span>
+                    </span>
+                  ) : (
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="text-xs font-semibold text-muted-foreground hover:text-foreground gap-1.5 h-8 rounded-lg border-border/80"
+                      onClick={requestNotificationPermission}
+                      className="text-xs h-7.5 px-2.5"
                     >
-                      <span>
-                        {isTrackerListExpanded
-                          ? "Show fewer trackers"
-                          : `View all ${trackers.length} trackers (${extraTrackers.length} more)`}
-                      </span>
-                      <ChevronDown
-                        className={cn(
-                          "size-3.5 transition-transform duration-200",
-                          isTrackerListExpanded && "rotate-180"
-                        )}
-                      />
+                      Enable Permissions
                     </Button>
-                  </CollapsibleTrigger>
+                  )}
                 </div>
-              </>
-            )}
-          </Collapsible>
-        </section>
-
-        {/* Section 2: General Notifications & Reading Reminders */}
-        <section className="ui-card p-4 sm:p-6 lg:p-7 space-y-5">
-          <div className="flex flex-col gap-2 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Bell className="size-4 text-primary" />
-                <h2 className="text-base font-semibold tracking-tight text-foreground">
-                  Reminders & Notifications
-                </h2>
-              </div>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Set a daily prompt to record your chapter readings. Plan-specific pacing alerts are scheduled separately in each plan.
-              </p>
-            </div>
-
-            {/* Notification Permission Request */}
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium text-muted-foreground">
-                System Alerts:
-              </span>
-              {notificationPermission === "granted" ? (
-                <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                  <Check className="size-3" />
-                  <span>Enabled</span>
-                </span>
-              ) : notificationPermission === "denied" ? (
-                <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 border border-destructive/20 px-2 py-0.5 text-[11px] font-semibold text-destructive">
-                  <span>Blocked in Browser</span>
-                </span>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={requestNotificationPermission}
-                  className="text-xs h-7.5 px-2.5"
-                >
-                  Enable Permissions
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-4 pt-1">
-            {/* Daily General Log Reminder */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-border bg-surface-elevated">
-              <div className="space-y-0.5">
-                <p className="text-sm font-semibold text-foreground">
-                  Daily Chapter Logging Reminder
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Receive a prompt to log your daily reading and maintain your spiritual streak.
-                </p>
               </div>
 
-              <div className="flex items-center gap-4 self-end sm:self-center">
-                {/* Time selector */}
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="size-3.5 text-muted-foreground" />
-                  <input
-                    type="time"
-                    value={settings.dailyReminderTime}
-                    disabled={!settings.dailyReminderEnabled || isPending}
-                    onChange={(e) => handleTimeChange(e.target.value)}
-                    className="h-8 rounded-lg border border-border bg-card px-2 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary disabled:opacity-50"
-                  />
+              <div className="space-y-4 pt-1">
+                {/* Daily General Log Reminder */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-border bg-surface-elevated">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-semibold text-foreground">
+                      Daily Chapter Logging Reminder
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Receive a prompt to log your daily reading and maintain your spiritual streak.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4 self-end sm:self-center">
+                    {/* Time selector */}
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="size-3.5 text-muted-foreground" />
+                      <input
+                        type="time"
+                        value={settings.dailyReminderTime}
+                        disabled={!settings.dailyReminderEnabled || isPending}
+                        onChange={(e) => handleTimeChange(e.target.value)}
+                        className="h-8 rounded-lg border border-border bg-card px-2 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary disabled:opacity-50"
+                      />
+                    </div>
+
+                    <Switch
+                      checked={settings.dailyReminderEnabled}
+                      disabled={isPending}
+                      onCheckedChange={handleToggleDailyReminder}
+                    />
+                  </div>
                 </div>
-
-                <Switch
-                  checked={settings.dailyReminderEnabled}
-                  disabled={isPending}
-                  onCheckedChange={handleToggleDailyReminder}
-                />
               </div>
-            </div>
+            </section>
           </div>
-        </section>
+        )}
 
-        {/* Section 4: Profile & Password Security Management */}
-        <ProfileSettingsSection
-          user={user}
-          onSignOut={() => setIsLogoutModalOpen(true)}
-          isSigningOut={isSigningOut}
-        />
+        {/* Tab 2: Profile & Password Security Management */}
+        {activeTab === "profile" && (
+          <div className="space-y-6 animate-in fade-in-50 duration-200">
+            <ProfileSettingsSection
+              user={user}
+              onSignOut={() => setIsLogoutModalOpen(true)}
+              isSigningOut={isSigningOut}
+            />
+          </div>
+        )}
+
+        {/* Tab 3: Data Export */}
+        {activeTab === "export" && <DataExportTab />}
 
         {/* Tracker Creation Modal */}
         <TrackerCreationModal

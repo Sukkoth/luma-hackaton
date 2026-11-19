@@ -4,21 +4,35 @@ import { eq, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { userSettings, trackerChapterProgress } from "@/db/schema";
-import { SettingsView } from "@/components/settings/settings-view";
+import { SettingsView, type SettingsTab } from "@/components/settings/settings-view";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { getCanonTestamentChapters, type BibleCanon } from "@/data/bibleData";
 
 export const instant = false;
 
-export default async function SettingsPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+type SettingsPageProps = {
+  searchParams: Promise<{
+    tab?: string;
+  }>;
+};
+
+export default async function SettingsPage({ searchParams }: SettingsPageProps) {
+  const [session, resolvedParams] = await Promise.all([
+    auth.api.getSession({
+      headers: await headers(),
+    }),
+    searchParams,
+  ]);
 
   if (!session) {
     redirect("/login?redirect=/settings");
   }
+
+  const initialTab: SettingsTab =
+    resolvedParams.tab === "profile" || resolvedParams.tab === "export"
+      ? resolvedParams.tab
+      : "settings";
 
   const { user } = session;
 
@@ -75,6 +89,7 @@ export default async function SettingsPage() {
         dailyReminderEnabled: settingsRecord?.dailyReminderEnabled ?? false,
         dailyReminderTime: settingsRecord?.dailyReminderTime ?? "20:00",
       }}
+      initialTab={initialTab}
     />
   );
 }
