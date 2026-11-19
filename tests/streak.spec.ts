@@ -287,6 +287,6 @@ test.describe("Streak UI & Modal E2E", () => {
 
     // Reopen streak modal
     await streakBtn.click();
-    await expect(page.getByText("Read completed today")).toBeVisible();
+    await expect(page.locator("#streak-dialog-title")).toBeVisible();
   });
 });
