@@ -22,6 +22,7 @@ import {
   type GroupSessionNote,
 } from "@/actions/groups";
 import { PlanNoteModal } from "./plan-note-modal";
+import { TabsBar } from "@/components/ui/tabs-bar";
 
 export type PlanSessionNotesProps = {
   instanceId: string;
@@ -197,32 +198,22 @@ export function PlanSessionNotes({
 
       {/* Sub-tab switcher if enrolled in a community fellowship */}
       {groupPlanId && (
-        <div className="flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 w-fit">
-          <button
-            type="button"
-            onClick={() => setActiveNotesTab("personal")}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-              activeNotesTab === "personal"
-                ? "bg-surface text-foreground shadow-xs font-semibold border border-border"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
-          >
-            <span>My Reflections ({sessionNotes.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveNotesTab("fellowship")}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-              activeNotesTab === "fellowship"
-                ? "bg-surface text-foreground shadow-xs font-semibold border border-border"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
-          >
-            <Users className="size-3" />
-            <span>Fellowship Peers ({peerNotes.length})</span>
-          </button>
-        </div>
+        <TabsBar
+          tabs={[
+            {
+              id: "personal",
+              label: `My Reflections (${sessionNotes.length})`,
+              icon: <FileText className="size-3.5" />,
+            },
+            {
+              id: "fellowship",
+              label: `Fellowship Peers (${peerNotes.length})`,
+              icon: <Users className="size-3.5" />,
+            },
+          ]}
+          activeTab={activeNotesTab}
+          onTabChange={({ tab }) => setActiveNotesTab(tab as "personal" | "fellowship")}
+        />
       )}
 
       {/* View: Personal Notes */}

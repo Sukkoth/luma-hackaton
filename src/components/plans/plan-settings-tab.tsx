@@ -27,6 +27,7 @@ import {
   resumePlanAction,
   type PlanInstanceDetail,
 } from "@/actions/plans";
+import { TabsBar } from "@/components/ui/tabs-bar";
 
 type PlanSettingsTabProps = {
   plan: PlanInstanceDetail;
@@ -347,38 +348,32 @@ export function PlanSettingsTab({
           </div>
 
           {/* Mode Tabs */}
-          <div className="grid grid-cols-2 gap-1 rounded-xl border border-border bg-surface-elevated p-1">
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() => handleSwitchMode("scheduled")}
-              className={`flex items-center justify-center gap-2 rounded-lg py-2.5 text-[13px] font-medium transition-all ${
-                mode === "scheduled"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Calendar className="size-4" />
-              <span>Calendar Schedule</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isPending || !plan.allowSelfPaced}
-              onClick={() => handleSwitchMode("flexible")}
-              className={`relative flex items-center justify-center gap-2 rounded-lg py-2.5 text-[13px] font-medium transition-all ${
-                mode === "flexible"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "text-foreground-secondary hover:text-foreground"
-              } ${!plan.allowSelfPaced ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-              <Compass className="size-4" />
-              <span>Self-Paced / Flexible</span>
-              {!plan.allowSelfPaced && (
-                <Lock className="size-3 text-foreground-dim" />
-              )}
-            </button>
-          </div>
+          <TabsBar
+            className="w-full grid grid-cols-2"
+            tabs={[
+              {
+                id: "scheduled",
+                label: "Calendar Schedule",
+                icon: <Calendar className="size-4" />,
+                disabled: isPending,
+              },
+              {
+                id: "flexible",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <span>Self-Paced / Flexible</span>
+                    {!plan.allowSelfPaced && (
+                      <Lock className="size-3 text-muted-foreground" />
+                    )}
+                  </span>
+                ),
+                icon: <Compass className="size-4" />,
+                disabled: isPending || !plan.allowSelfPaced,
+              },
+            ]}
+            activeTab={mode}
+            onTabChange={({ tab }) => handleSwitchMode(tab as "scheduled" | "flexible")}
+          />
 
           {!plan.allowSelfPaced && (
             <p className="flex items-center gap-1.5 text-[11.5px] text-foreground-secondary">
@@ -415,36 +410,17 @@ export function PlanSettingsTab({
 
           {/* Pacing Style Sub-Tabs (Only in Scheduled mode) */}
           {mode === "scheduled" && plan.allowCustomPace && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setSuccessMessage(null);
-                  setPaceType("by_daily_target");
-                }}
-                className={`rounded-xl px-3 py-1.5 text-[12px] transition-all cursor-pointer ${
-                  paceType === "by_daily_target"
-                    ? "bg-primary font-bold text-primary-foreground shadow-xs"
-                    : "border border-border bg-surface font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
-                }`}
-              >
-                By Chapters Per Day
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSuccessMessage(null);
-                  setPaceType("by_end_date");
-                }}
-                className={`rounded-xl px-3 py-1.5 text-[12px] transition-all cursor-pointer ${
-                  paceType === "by_end_date"
-                    ? "bg-primary font-bold text-primary-foreground shadow-xs"
-                    : "border border-border bg-surface font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
-                }`}
-              >
-                By Target Duration (Days)
-              </button>
-            </div>
+            <TabsBar
+              tabs={[
+                { id: "by_daily_target", label: "By Chapters Per Day" },
+                { id: "by_end_date", label: "By Target Duration (Days)" },
+              ]}
+              activeTab={paceType}
+              onTabChange={({ tab }) => {
+                setSuccessMessage(null);
+                setPaceType(tab as "by_daily_target" | "by_end_date");
+              }}
+            />
           )}
 
           {/* Option A: By Daily Target */}
