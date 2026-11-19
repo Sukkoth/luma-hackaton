@@ -24,7 +24,7 @@ import { BooksAuthModal } from "./books-auth-modal";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import type { VerseOfTheDayData } from "@/lib/youversion";
-import { cn } from "@/lib/utils";
+import { FilterPills } from "@/components/ui/filter-pills";
 
 type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
@@ -276,29 +276,13 @@ export function BooksView({
           </div>
 
           {/* Category Filter Pills - Horizontally scrollable on small screens */}
-          <div
-            data-testid="books-category-filter"
-            className="mt-4 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none md:flex-wrap"
-          >
-            {categoryFilters.map((cat) => {
-              const isSelected = selectedCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  className={cn(
-                    "shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
-                    isSelected
-                      ? "bg-primary text-primary-foreground shadow-2xs"
-                      : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
+          <FilterPills
+            containerTestId="books-category-filter"
+            className="mt-4"
+            items={categoryFilters.map((cat) => ({ id: cat, label: cat }))}
+            activeFilter={selectedCategory}
+            onFilterChange={({ filter }) => setSelectedCategory(filter)}
+          />
 
           {/* Books Grid */}
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">

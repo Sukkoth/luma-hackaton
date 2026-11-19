@@ -24,6 +24,8 @@ import {
 import type { UserGroupSummary } from "@/actions/groups";
 import { searchPublicGroupsAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import { TabsBar } from "@/components/ui/tabs-bar";
+import { FilterPills } from "@/components/ui/filter-pills";
 import { CreateGroupModal } from "@/components/groups/create-group-modal";
 import { JoinCodeModal } from "@/components/groups/join-code-modal";
 import { cn } from "@/lib/utils";
@@ -334,43 +336,26 @@ export function GroupsHubView({
         {/* Navigation Tabs and Search Bar */}
         <div className="flex flex-col gap-4 border-b border-border/60 pb-5 md:flex-row md:items-center md:justify-between">
           {/* Tab Switcher - Segmented control */}
-          <div
-            data-testid="groups-hub-tabs"
-            className="flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none"
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("my");
-                setFilter("all");
-              }}
-              className={cn(
-                "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
-                activeTab === "my"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "bg-transparent text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Users className="size-3.5" />
-              <span>My Fellowships ({myGroups.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("explore");
-                setFilter("all");
-              }}
-              className={cn(
-                "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
-                activeTab === "explore"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "bg-transparent text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Globe className="size-3.5" />
-              <span>Explore Public ({publicGroups.length})</span>
-            </button>
-          </div>
+          <TabsBar
+            containerTestId="groups-hub-tabs"
+            tabs={[
+              {
+                id: "my",
+                label: `My Fellowships (${myGroups.length})`,
+                icon: <Users className="size-3.5" />,
+              },
+              {
+                id: "explore",
+                label: `Explore Public (${publicGroups.length})`,
+                icon: <Globe className="size-3.5" />,
+              },
+            ]}
+            activeTab={activeTab}
+            onTabChange={({ tab }) => {
+              setActiveTab(tab);
+              setFilter("all");
+            }}
+          />
 
           {/* Search Input on Right */}
           <div className="relative w-full sm:w-72">
@@ -429,93 +414,25 @@ export function GroupsHubView({
           </div>
         </div>
 
-        {/* Filter Pills Row (Exact PlanFilterPills style: rounded-xl px-3.5 py-1.5 text-[12px] font-medium) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none md:flex-wrap">
-          {activeTab === "my" ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setFilter("all")}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  filter === "all" || (filter !== "active_plans" && filter !== "leading" && filter !== "pending")
-                    ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
-                    : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                All ({myGroups.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter("active_plans")}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  filter === "active_plans"
-                    ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
-                    : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                With Active Plans
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter("leading")}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  filter === "leading"
-                    ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
-                    : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                Leader / Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter("pending")}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  filter === "pending"
-                    ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
-                    : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                Pending Approval
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => setFilter("all")}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  filter === "all" || (filter !== "open" && filter !== "approval_required")
-                    ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
-                    : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                All Fellowships
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter("open")}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  filter === "open"
-                    ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
-                    : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                Open Access
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilter("approval_required")}
-                className={`shrink-0 rounded-xl px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                  filter === "approval_required"
-                    ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
-                    : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground"
-                }`}
-              >
-                Approval Required
-              </button>
-            </>
-          )}
-        </div>
+        {/* Filter Pills Row */}
+        <FilterPills
+          items={
+            activeTab === "my"
+              ? [
+                  { id: "all", label: `All (${myGroups.length})` },
+                  { id: "active_plans", label: "With Active Plans" },
+                  { id: "leading", label: "Leader / Admin" },
+                  { id: "pending", label: "Pending Approval" },
+                ]
+              : [
+                  { id: "all", label: "All Fellowships" },
+                  { id: "open", label: "Open Access" },
+                  { id: "approval_required", label: "Approval Required" },
+                ]
+          }
+          activeFilter={filter}
+          onFilterChange={({ filter: nextFilter }) => setFilter(nextFilter)}
+        />
 
         {/* ── Tab 1: My Fellowships Grid (Exact PlanCard Architecture) ── */}
         {activeTab === "my" && (

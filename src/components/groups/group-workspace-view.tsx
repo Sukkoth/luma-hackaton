@@ -40,7 +40,7 @@ import { GroupPinnedBulletin } from "@/components/groups/group-pinned-bulletin";
 import { GroupPinnedNoticeModal } from "@/components/groups/group-pinned-notice-modal";
 import { GroupJoinConfirmModal } from "@/components/groups/group-join-confirm-modal";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { TabsBar } from "@/components/ui/tabs-bar";
 
 export type GroupWorkspaceViewProps = {
   group: GroupDetails;
@@ -315,70 +315,37 @@ export function GroupWorkspaceView({
         onOpenNoticeModal={() => setIsNoticeModalOpen(true)}
       />
 
-      {/* ── Standalone Tabs (Segmented Control matching PlanCatalog style) ── */}
-      <div className="flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none w-fit max-w-full">
-        {/* Tab 1: Plans */}
-        <button
-          type="button"
-          onClick={() => setActiveTab("plans")}
-          className={cn(
-            "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
-            activeTab === "plans"
-              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-              : "bg-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <BookOpen className="size-3.5" />
-          <span>Plans ({group.activePlans.length})</span>
-        </button>
-
-        {/* Tab 2: Leaderboard */}
-        <button
-          type="button"
-          onClick={() => setActiveTab("leaderboard")}
-          className={cn(
-            "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
-            activeTab === "leaderboard"
-              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-              : "bg-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Trophy className="size-3.5" />
-          <span>Leaderboard</span>
-        </button>
-
-        {/* Tab 3: Members Directory */}
-        <button
-          type="button"
-          onClick={() => setActiveTab("members")}
-          className={cn(
-            "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
-            activeTab === "members"
-              ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-              : "bg-transparent text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Users className="size-3.5" />
-          <span>Members ({group.memberCount})</span>
-        </button>
-
-        {/* Tab 4: Administration / Settings (Admins Only) */}
-        {isAdmin && (
-          <button
-            type="button"
-            onClick={() => setActiveTab("admin")}
-            className={cn(
-              "shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer",
-              activeTab === "admin"
-                ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                : "bg-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Settings className="size-3.5" />
-            <span>Settings</span>
-          </button>
-        )}
-      </div>
+      {/* ── Standalone Tabs ── */}
+      <TabsBar
+        tabs={[
+          {
+            id: "plans",
+            label: `Plans (${group.activePlans.length})`,
+            icon: <BookOpen className="size-3.5" />,
+          },
+          {
+            id: "leaderboard",
+            label: "Leaderboard",
+            icon: <Trophy className="size-3.5" />,
+          },
+          {
+            id: "members",
+            label: `Members (${group.memberCount})`,
+            icon: <Users className="size-3.5" />,
+          },
+          ...(isAdmin
+            ? [
+                {
+                  id: "admin" as const,
+                  label: "Settings",
+                  icon: <Settings className="size-3.5" />,
+                },
+              ]
+            : []),
+        ]}
+        activeTab={activeTab}
+        onTabChange={({ tab }) => void setActiveTab(tab)}
+      />
 
       {/* ── Active Tab Display ── */}
       <section className="w-full space-y-6 pt-1">

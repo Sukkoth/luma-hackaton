@@ -10,7 +10,8 @@ import type {
 import type { AchievementCategory } from "@/data/achievements";
 import { AchievementCard } from "./achievement-card";
 import { ShareMilestoneModal } from "./share-milestone-modal";
-import { cn } from "@/lib/utils";
+import { TabsBar } from "@/components/ui/tabs-bar";
+import { FilterPills } from "@/components/ui/filter-pills";
 
 export type StatusFilter = "All" | "Unlocked" | "Locked";
 
@@ -131,76 +132,28 @@ export function AchievementsView({
             </p>
           </div>
 
-          <div
-            data-testid="achievement-status-filter"
-            className="flex items-center gap-1 rounded-xl border border-border bg-muted p-0.5 self-start sm:self-auto"
-          >
-            {(
-              [
-                { id: "All" as const, label: `All (${stats.total})` },
-                {
-                  id: "Unlocked" as const,
-                  label: `Unlocked (${stats.unlocked})`,
-                },
-                {
-                  id: "Locked" as const,
-                  label: `Locked (${stats.locked})`,
-                },
-              ] as const
-            ).map((status) => {
-              const isSelected = statusFilter === status.id;
-              return (
-                <button
-                  key={status.id}
-                  type="button"
-                  onClick={() => setStatusFilter(status.id)}
-                  className={cn(
-                    "flex items-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
-                    isSelected
-                      ? "bg-card text-foreground shadow-2xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {status.label}
-                </button>
-              );
-            })}
-          </div>
+          <TabsBar
+            containerTestId="achievement-status-filter"
+            tabs={[
+              { id: "All" as const, label: `All (${stats.total})` },
+              { id: "Unlocked" as const, label: `Unlocked (${stats.unlocked})` },
+              { id: "Locked" as const, label: `Locked (${stats.locked})` },
+            ]}
+            activeTab={statusFilter}
+            onTabChange={({ tab }) => setStatusFilter(tab)}
+            className="self-start sm:self-auto"
+          />
         </div>
 
         {/* Category Pills Strip */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <button
-            type="button"
-            onClick={() => setCategoryFilter("All")}
-            className={cn(
-              "shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
-              categoryFilter === "All"
-                ? "bg-primary text-primary-foreground shadow-2xs"
-                : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
-            )}
-          >
-            All Categories
-          </button>
-          {CATEGORIES.map((cat) => {
-            const isCatSelected = categoryFilter === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setCategoryFilter(cat)}
-                className={cn(
-                  "shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
-                  isCatSelected
-                    ? "bg-primary text-primary-foreground shadow-2xs"
-                    : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
+        <FilterPills
+          items={[
+            { id: "All", label: "All Categories" },
+            ...CATEGORIES.map((cat) => ({ id: cat, label: cat })),
+          ]}
+          activeFilter={categoryFilter}
+          onFilterChange={({ filter }) => setCategoryFilter(filter)}
+        />
 
         {/* Badges Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 pt-2">

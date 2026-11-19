@@ -29,6 +29,7 @@ import type { BibleCanon } from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
 import { PlanCard } from "./plan-card";
 import { PlanFilterPills } from "./plan-filter-pills";
+import { TabsBar } from "@/components/ui/tabs-bar";
 import {
   PlanActiveBanner,
   type ActivePlanInstance,
@@ -178,69 +179,37 @@ export function PlanCatalog({
         {/* Navigation Tabs and Search Bar */}
         <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
           {/* Tab Switcher - Segmented control */}
-          <div
-            data-testid="plan-catalog-tabs"
-            className="flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none"
-          >
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("catalog")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "catalog"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Compass className="size-3.5" />
-              <span>Plan Catalog ({availablePlans.length})</span>
-            </button>
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("active")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "active"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Calendar className="size-3.5" />
-              <span>
-                Active Plans ({session ? activePlanInstances.length : 0})
-              </span>
-            </button>
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("paused")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "paused"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Pause className="size-3.5" />
-              <span>
-                Paused Plans ({session ? pausedPlanInstances.length : 0})
-              </span>
-            </button>
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("finished")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "finished"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Trophy className="size-3.5" />
-              <span>
-                Finished Plans ({session ? finishedPlanInstances.length : 0})
-              </span>
-            </button>
-          </div>
+          <TabsBar
+            containerTestId="plan-catalog-tabs"
+            tabs={[
+              {
+                id: "catalog",
+                label: `Plan Catalog (${availablePlans.length})`,
+                icon: <Compass className="size-3.5" />,
+                disabled: !mounted,
+              },
+              {
+                id: "active",
+                label: `Active Plans (${session ? activePlanInstances.length : 0})`,
+                icon: <Calendar className="size-3.5" />,
+                disabled: !mounted,
+              },
+              {
+                id: "paused",
+                label: `Paused Plans (${session ? pausedPlanInstances.length : 0})`,
+                icon: <Pause className="size-3.5" />,
+                disabled: !mounted,
+              },
+              {
+                id: "finished",
+                label: `Finished Plans (${session ? finishedPlanInstances.length : 0})`,
+                icon: <Trophy className="size-3.5" />,
+                disabled: !mounted,
+              },
+            ]}
+            activeTab={activeTab}
+            onTabChange={({ tab }) => void setActiveTab(tab)}
+          />
 
           {/* Search Input */}
           {activeTab === "catalog" && (

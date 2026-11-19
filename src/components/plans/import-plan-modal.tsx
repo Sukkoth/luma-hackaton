@@ -18,6 +18,7 @@ import {
   type PlanValidationResult,
 } from "@/lib/plans/plan-import-parser";
 import { createCustomPlanTemplateAction } from "@/actions/plans";
+import { TabsBar } from "@/components/ui/tabs-bar";
 
 export type ImportPlanModalProps = {
   isOpen: boolean;
@@ -246,30 +247,14 @@ export function ImportPlanModal({
 
         {/* Source Tabs & Sample Actions */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-elevated/40 px-6 py-2.5 shrink-0">
-          <div className="flex items-center gap-1 rounded-xl border border-border bg-surface p-1">
-            <button
-              type="button"
-              onClick={() => setActiveTab("paste")}
-              className={`rounded-lg px-3 py-1 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "paste"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              Paste Text
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("upload")}
-              className={`rounded-lg px-3 py-1 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "upload"
-                  ? "bg-primary text-primary-foreground shadow-xs font-semibold"
-                  : "text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              Upload File
-            </button>
-          </div>
+          <TabsBar
+            tabs={[
+              { id: "paste", label: "Paste Text" },
+              { id: "upload", label: "Upload File" },
+            ]}
+            activeTab={activeTab}
+            onTabChange={({ tab }) => setActiveTab(tab as ImportSourceTab)}
+          />
 
           <div className="flex items-center gap-1.5">
             <button

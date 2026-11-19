@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { detectDefaultVersion } from "@/lib/bible-versions";
 import { Button } from "@/components/ui/button";
+import { TabsBar } from "@/components/ui/tabs-bar";
 
 const OLD_TESTAMENT_BOOKS = [
   { id: "gen", name: "Genesis", chapters: 50 },
@@ -385,30 +386,15 @@ export function BibleLandingPage() {
       {/* Book Grid Tabs */}
       {!searchQuery && (
         <>
-          <div className="flex gap-1 rounded-[12px] border border-border bg-surface p-1">
-            <button
-              type="button"
-              onClick={() => setActiveTab("ot")}
-              className={`flex-1 rounded-[10px] px-4 py-2 text-[12.5px] font-medium transition-all cursor-pointer ${
-                activeTab === "ot"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              Old Testament
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("nt")}
-              className={`flex-1 rounded-[10px] px-4 py-2 text-[12.5px] font-medium transition-all cursor-pointer ${
-                activeTab === "nt"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              New Testament
-            </button>
-          </div>
+          <TabsBar
+            className="w-full justify-center"
+            tabs={[
+              { id: "ot", label: "Old Testament" },
+              { id: "nt", label: "New Testament" },
+            ]}
+            activeTab={activeTab === "ot" ? "ot" : "nt"}
+            onTabChange={({ tab }) => setActiveTab(tab as "ot" | "nt")}
+          />
 
           {/* Book Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">

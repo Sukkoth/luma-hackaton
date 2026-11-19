@@ -28,6 +28,7 @@ import {
   catchUpIncreasePaceAction,
 } from "@/actions/plans";
 import { PlanSessionNotes } from "./plan-session-notes";
+import { TabsBar } from "@/components/ui/tabs-bar";
 import { PlanSettingsTab } from "./plan-settings-tab";
 import { PlanCatchUpModal } from "./plan-catchup-modal";
 import { PlanPausedLockModal } from "./plan-paused-lock-modal";
@@ -380,32 +381,22 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
           2. SEGMENTED TAB SWITCHER: [Plan Chapters] | [Pacing & Settings]
           ========================================================================= */}
       <div className="flex justify-center">
-        <div className="inline-flex rounded-xl bg-surface-elevated p-1 border border-border shadow-xs">
-          <button
-            type="button"
-            onClick={() => setActiveTab("chapters")}
-            className={`flex items-center gap-2 rounded-lg px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-              activeTab === "chapters"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
-          >
-            <BookOpen className="size-3.5" />
-            <span>Plan Chapters</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("settings")}
-            className={`flex items-center gap-2 rounded-lg px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-              activeTab === "settings"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
-          >
-            <Sliders className="size-3.5" />
-            <span>Pacing &amp; Settings</span>
-          </button>
-        </div>
+        <TabsBar
+          tabs={[
+            {
+              id: "chapters",
+              label: "Plan Chapters",
+              icon: <BookOpen className="size-3.5" />,
+            },
+            {
+              id: "settings",
+              label: "Pacing & Settings",
+              icon: <Sliders className="size-3.5" />,
+            },
+          ]}
+          activeTab={activeTab}
+          onTabChange={({ tab }) => setActiveTab(tab as "chapters" | "settings")}
+        />
       </div>
 
       {/* When Settings Tab is Active */}
