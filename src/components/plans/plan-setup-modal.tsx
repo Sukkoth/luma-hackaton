@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import type { ReadingPlanTemplate } from "@/data/readingPlans";
 import { startPlanAction } from "@/actions/plans";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   buildPlanSessions,
   exportPlanToPdf,
@@ -786,14 +787,9 @@ export function PlanSetupModal({
                     </div>
 
                     <div className="mt-2.5">
-                      <input
-                        type="date"
-                        value={startDateStr}
-                        onChange={(e) => setStartDateStr(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-[13px] text-foreground shadow-2xs focus:border-primary focus:outline-none"
+                      <DatePicker
+                        date={startDateStr}
+                        onDateChange={(_, dateStr) => setStartDateStr(dateStr)}
                       />
                     </div>
                   </div>
@@ -1049,14 +1045,9 @@ export function PlanSetupModal({
                     </div>
 
                     <div className="mt-2.5">
-                      <input
-                        type="date"
-                        value={startDateStr}
-                        onChange={(e) => setStartDateStr(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-[13px] text-foreground shadow-2xs focus:border-primary focus:outline-none"
+                      <DatePicker
+                        date={startDateStr}
+                        onDateChange={(_, dateStr) => setStartDateStr(dateStr)}
                       />
                     </div>
 

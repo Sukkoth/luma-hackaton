@@ -25,6 +25,7 @@ import type { BibleCanon } from "@/data/bibleData";
 import { ScheduleGroupPlanSchema } from "@/lib/schemas/groups";
 import { scheduleGroupPlanAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -462,12 +463,11 @@ export function GroupSchedulePlanModal({
                 >
                   Cohort Start Date
                 </label>
-                <input
+                <DatePicker
                   id="group-plan-start"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full h-11 rounded-xl border border-border bg-surface-elevated px-4 text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-foreground transition-all"
+                  date={startDate}
+                  onDateChange={(_, dateStr) => setStartDate(dateStr)}
+                  className="w-full h-11"
                 />
                 <p className="mt-1 text-[11.5px] text-foreground-dim">
                   All members will see day-by-day readings synchronized from this start date.
