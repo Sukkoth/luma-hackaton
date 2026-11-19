@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BookOpen, Sparkles, X, ArrowRight, Bookmark } from "lucide-react";
+import { Sparkles, X, ArrowRight, Bookmark } from "lucide-react";
 import type { VerseOfTheDayData } from "@/lib/youversion";
 import { Button } from "@/components/ui/button";
 
@@ -54,23 +54,12 @@ export function VerseOfTheDayBanner({
           <Link href="/plans">
             <Button
               type="button"
-              variant="outline"
-              size="default"
-              leftIcon={<Bookmark className="size-4" />}
-              className="rounded-xl font-medium"
-            >
-              Explore Plans
-            </Button>
-          </Link>
-          <Link href="/bible/GEN/1">
-            <Button
-              type="button"
               variant="default"
               size="default"
-              leftIcon={<BookOpen className="size-4" />}
+              leftIcon={<Bookmark className="size-4" />}
               className="rounded-xl font-semibold shadow-xs"
             >
-              Open Scripture Reader
+              Explore Plans
             </Button>
           </Link>
         </div>
