@@ -232,45 +232,59 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
         </div>
       </div>
 
-      {/* 3 Metric KPI Tiles */}
-      <div className="grid grid-cols-3 divide-x divide-border/60 border-t border-border/60 pt-3 sm:pt-4 my-auto">
+      {/* 3 Metric KPI Strip */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 border-t border-border/60 pt-3 sm:pt-3.5 my-auto">
         {/* Metric 1: Current Streak */}
-        <div className="flex flex-col items-center text-center px-1">
-          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-1.5 shadow-2xs">
-            <Flame className="size-4.5 sm:size-5 fill-primary" />
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+            <Flame className="size-3.5 text-primary fill-primary shrink-0" />
+            <span className="truncate">Current Streak</span>
+          </span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground tabular-nums">
+              {currentStreak}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              {currentStreak === 1 ? "day" : "days"}
+            </span>
           </div>
-          <span className="text-xl sm:text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums">
-            {currentStreak}
-          </span>
-          <span className="text-[10px] font-medium text-muted-foreground mt-1">
-            Current Days
-          </span>
         </div>
 
         {/* Metric 2: Best Streak */}
-        <div className="flex flex-col items-center text-center px-1">
-          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-muted border border-border text-foreground mb-1.5 shadow-2xs">
-            <Trophy className="size-4.5 sm:size-5 text-amber-600 dark:text-amber-400" />
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+            <Trophy className="size-3.5 text-muted-foreground shrink-0" />
+            <span className="truncate">Personal Best</span>
+          </span>
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground tabular-nums">
+              {longestStreak}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              {longestStreak === 1 ? "day" : "days"}
+            </span>
+            {currentStreak >= longestStreak && currentStreak > 0 && (
+              <span className="rounded-sm bg-primary/10 px-1 py-0.5 text-[9.5px] font-semibold text-primary">
+                Record
+              </span>
+            )}
           </div>
-          <span className="text-xl sm:text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums">
-            {longestStreak}
-          </span>
-          <span className="text-[10px] font-medium text-muted-foreground mt-1">
-            Best Record
-          </span>
         </div>
 
         {/* Metric 3: Streak Freezes */}
-        <div className="flex flex-col items-center text-center px-1">
-          <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-muted border border-border text-sky-600 dark:text-sky-400 mb-1.5 shadow-2xs">
-            <Snowflake className="size-4.5 sm:size-5" />
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+            <Snowflake className="size-3.5 text-muted-foreground shrink-0" />
+            <span className="truncate">Freezes</span>
+          </span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground tabular-nums">
+              {streakFreezes}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              left
+            </span>
           </div>
-          <span className="text-xl sm:text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums">
-            {streakFreezes}
-          </span>
-          <span className="text-[10px] font-medium text-muted-foreground mt-1">
-            Freezes Left
-          </span>
         </div>
       </div>
 
