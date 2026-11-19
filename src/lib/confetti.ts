@@ -26,13 +26,13 @@ export type FireConfettiParams = {
 };
 
 const CELEBRATION_COLORS: ReadonlyArray<string> = [
-  "#09090b", // Deep obsidian
-  "#27272a", // Charcoal
-  "#52525b", // Zinc dark
-  "#71717a", // Zinc medium
-  "#a1a1aa", // Silver
-  "#e4e4e7", // Platinum
-  "#ffffff", // Crisp white
+  "#f59e0b", // Radiant amber-gold (brand primary)
+  "#d97706", // Warm amber core
+  "#b45309", // Deep architectural amber
+  "#fbbf24", // Luminous warm honey
+  "#fef3c7", // Soft warm gold
+  "#78716c", // Warm stone
+  "#fafaf9", // Warm sanctuary cream
 ];
 
 export function fireConfetti({
