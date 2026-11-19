@@ -41,6 +41,7 @@ import { GroupPinnedNoticeModal } from "@/components/groups/group-pinned-notice-
 import { GroupJoinConfirmModal } from "@/components/groups/group-join-confirm-modal";
 import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
+import { toast } from "@/components/ui/sonner";
 
 export type GroupWorkspaceViewProps = {
   group: GroupDetails;
@@ -88,10 +89,11 @@ export function GroupWorkspaceView({
     try {
       const res = await leaveGroupAction({ groupId: group.id });
       if (res.success) {
+        toast.success("You have left the fellowship.");
         router.push("/groups");
         router.refresh();
       } else {
-        alert(res.error || "Failed to leave fellowship.");
+        toast.error(res.error || "Failed to leave fellowship.");
         setIsLeavingGroup(false);
       }
     } catch {

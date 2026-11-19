@@ -163,12 +163,26 @@ export const ClearGroupPinnedNoticeSchema = v.object({
   groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
 });
 
+export const DeleteGroupSchema = v.object({
+  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  confirmGroupName: v.pipe(
+    v.string("Confirmation name is required."),
+    v.trim(),
+    v.minLength(1, "Confirmation name is required.")
+  ),
+});
+
 export const TransferGroupOwnershipSchema = v.object({
   groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
   newOwnerUserId: v.pipe(
     v.string(),
     v.trim(),
     v.minLength(1, "Target user ID is required.")
+  ),
+  confirmGroupName: v.pipe(
+    v.string("Confirmation name is required."),
+    v.trim(),
+    v.minLength(1, "Confirmation name is required.")
   ),
 });
 
@@ -211,6 +225,7 @@ export type TransferGroupOwnershipInput = v.InferOutput<
 export type UpdateGroupPlanStatusInput = v.InferOutput<
   typeof UpdateGroupPlanStatusSchema
 >;
+export type DeleteGroupInput = v.InferOutput<typeof DeleteGroupSchema>;
 export type DeleteGroupPlanInput = v.InferOutput<
   typeof DeleteGroupPlanSchema
 >;

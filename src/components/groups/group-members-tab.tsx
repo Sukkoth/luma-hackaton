@@ -12,6 +12,7 @@ import {
   removeMemberAction,
 } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
 
 export type GroupMembersTabProps = {
   groupId: string;
@@ -51,9 +52,10 @@ export function GroupMembersTab({
       });
       if (res.success) {
         setMemberToKick(null);
+        toast.success("Member removed from fellowship.");
         router.refresh();
       } else {
-        alert(res.error || "Failed to remove member.");
+        toast.error(res.error || "Failed to remove member.");
       }
     } finally {
       setIsKicking(false);

@@ -7,7 +7,6 @@ import {
   Check,
   UserX,
   Trash2,
-  AlertTriangle,
   QrCode,
   ArrowRightLeft,
 } from "lucide-react";
@@ -16,7 +15,6 @@ import {
   updateMemberRoleAction,
   removeMemberAction,
   updateGroupSettingsAction,
-  deleteGroupAction,
 } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { GroupInviteModal } from "@/components/groups/group-invite-modal";
 import { GroupTransferOwnershipModal } from "@/components/groups/group-transfer-ownership-modal";
+import { GroupDeleteModal } from "@/components/groups/group-delete-modal";
 
 export type GroupAdminTabProps = {
   groupId: string;
@@ -74,7 +73,6 @@ export function GroupAdminTab({
 
   // Delete modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Transfer ownership modal state
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -153,21 +151,7 @@ export function GroupAdminTab({
     }
   }
 
-  async function handleDeleteGroup() {
-    setIsDeleting(true);
-    try {
-      const res = await deleteGroupAction({ groupId });
-      if (res.success) {
-        router.push("/groups");
-        router.refresh();
-      } else {
-        alert(res.error || "Failed to delete group.");
-        setIsDeleting(false);
-      }
-    } catch {
-      setIsDeleting(false);
-    }
-  }
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -459,44 +443,13 @@ export function GroupAdminTab({
         )}
       </div>
 
-      {/* Delete Group Confirmation Modal */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="rounded-2xl border border-border bg-card max-w-sm w-full p-5 sm:p-6 space-y-4 text-center shadow-lg">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive mx-auto border border-destructive/20">
-              <AlertTriangle className="size-6" />
-            </div>
-            <h4 className="text-base font-bold text-foreground">
-              Delete Fellowship?
-            </h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to delete &ldquo;{name}&rdquo;? All fellowship reading schedules, discussions, and member records will be permanently removed.
-            </p>
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsDeleteModalOpen(false)}
-                disabled={isDeleting}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                isLoading={isDeleting}
-                onClick={handleDeleteGroup}
-                className="flex-1"
-              >
-                Confirm Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Group Modal */}
+      <GroupDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        groupId={groupId}
+        groupName={name}
+      />
 
       {/* Remove Member Confirmation Modal */}
       {memberToRemove && (

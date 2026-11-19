@@ -38,6 +38,7 @@ import {
   LeaveGroupPlanSchema,
   SetGroupPinnedNoticeSchema,
   ClearGroupPinnedNoticeSchema,
+  DeleteGroupSchema,
   TransferGroupOwnershipSchema,
   UpdateGroupPlanStatusSchema,
   DeleteGroupPlanSchema,
@@ -509,15 +510,28 @@ export async function regenerateInviteCodeAction({
 
 export type DeleteGroupParams = {
   groupId: string;
+  confirmGroupName: string;
 };
 
 export async function deleteGroupAction({
   groupId,
+  confirmGroupName,
 }: DeleteGroupParams): Promise<{ success: boolean; error?: string }> {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(DeleteGroupSchema, {
+    groupId,
+    confirmGroupName,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message || "Invalid parameters.",
+    };
+  }
 
   try {
     const groupRecord = await db.query.groups.findFirst({
@@ -532,6 +546,16 @@ export async function deleteGroupAction({
       return {
         success: false,
         error: "Only the group owner can delete the fellowship.",
+      };
+    }
+
+    if (
+      groupRecord.name.trim().toLowerCase() !==
+      parsed.output.confirmGroupName.trim().toLowerCase()
+    ) {
+      return {
+        success: false,
+        error: `Confirmation name does not match "${groupRecord.name}".`,
       };
     }
 
@@ -1980,11 +2004,13 @@ export async function clearGroupPinnedNoticeAction({
 export type TransferGroupOwnershipParams = {
   groupId: string;
   newOwnerUserId: string;
+  confirmGroupName: string;
 };
 
 export async function transferGroupOwnershipAction({
   groupId,
   newOwnerUserId,
+  confirmGroupName,
 }: TransferGroupOwnershipParams): Promise<{
   success: boolean;
   error?: string;
@@ -1997,6 +2023,7 @@ export async function transferGroupOwnershipAction({
   const parsed = v.safeParse(TransferGroupOwnershipSchema, {
     groupId,
     newOwnerUserId,
+    confirmGroupName,
   });
   if (!parsed.success) {
     return {
@@ -2025,6 +2052,16 @@ export async function transferGroupOwnershipAction({
       return {
         success: false,
         error: "Only the current fellowship owner can transfer ownership.",
+      };
+    }
+
+    if (
+      groupRecord.name.trim().toLowerCase() !==
+      parsed.output.confirmGroupName.trim().toLowerCase()
+    ) {
+      return {
+        success: false,
+        error: `Confirmation name does not match "${groupRecord.name}".`,
       };
     }
 

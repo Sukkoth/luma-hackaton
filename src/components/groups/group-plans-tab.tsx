@@ -30,6 +30,7 @@ import {
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { Button } from "@/components/ui/button";
 import { GroupPlanEnrollModal } from "@/components/groups/group-plan-enroll-modal";
+import { toast } from "@/components/ui/sonner";
 
 export type GroupPlansTabProps = {
   groupId: string;
@@ -89,9 +90,10 @@ export function GroupPlansTab({
       const res = await leaveGroupPlanAction({ groupPlanId: planToLeave.id });
       if (res.success) {
         setPlanToLeave(null);
+        toast.success("Left group plan.");
         router.refresh();
       } else {
-        alert(res.error || "Failed to leave group plan.");
+        toast.error(res.error || "Failed to leave group plan.");
       }
     } finally {
       setIsLeavingPlan(false);
@@ -106,9 +108,10 @@ export function GroupPlansTab({
         status: "active",
       });
       if (res.success) {
+        toast.success("Plan started.");
         router.refresh();
       } else {
-        alert(res.error || "Failed to start plan.");
+        toast.error(res.error || "Failed to start plan.");
       }
     } finally {
       setIsUpdatingStatus(false);
@@ -125,9 +128,10 @@ export function GroupPlansTab({
       });
       if (res.success) {
         setPlanToComplete(null);
+        toast.success("Plan marked as completed.");
         router.refresh();
       } else {
-        alert(res.error || "Failed to complete plan.");
+        toast.error(res.error || "Failed to complete plan.");
       }
     } finally {
       setIsUpdatingStatus(false);
@@ -144,9 +148,10 @@ export function GroupPlansTab({
       });
       if (res.success) {
         setPlanToCancel(null);
+        toast.success("Plan cancelled.");
         router.refresh();
       } else {
-        alert(res.error || "Failed to cancel plan.");
+        toast.error(res.error || "Failed to cancel plan.");
       }
     } finally {
       setIsUpdatingStatus(false);
@@ -161,9 +166,10 @@ export function GroupPlansTab({
         status: "active",
       });
       if (res.success) {
+        toast.success("Plan reopened.");
         router.refresh();
       } else {
-        alert(res.error || "Failed to reopen plan.");
+        toast.error(res.error || "Failed to reopen plan.");
       }
     } finally {
       setIsUpdatingStatus(false);
@@ -179,9 +185,10 @@ export function GroupPlansTab({
       });
       if (res.success) {
         setPlanToDelete(null);
+        toast.success("Plan deleted.");
         router.refresh();
       } else {
-        alert(res.error || "Failed to delete plan.");
+        toast.error(res.error || "Failed to delete plan.");
       }
     } finally {
       setIsUpdatingStatus(false);
