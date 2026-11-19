@@ -304,25 +304,8 @@ export function AppShell({
           </div>
         </div>
 
-        {/* User Card & Log Out */}
-        <div className="mt-auto pt-4 border-t border-border/80 flex flex-col gap-2">
-          <Link
-            href="/settings"
-            className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-muted"
-            title="Profile & Settings"
-          >
-            <Avatar
-              src={effectiveUserImage}
-              fallback={initials}
-              size="md"
-            />
-            <div className="flex flex-col min-w-0 flex-1 text-left">
-              <span className="truncate text-xs font-semibold text-foreground leading-tight">
-                {effectiveUserName}
-              </span>
-            </div>
-          </Link>
-
+        {/* Log Out */}
+        <div className="mt-auto pt-4 border-t border-border/80">
           <button
             type="button"
             onClick={handleLogout}
