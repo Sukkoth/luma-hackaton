@@ -10,7 +10,7 @@ import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { getUserAchievementsData } from "@/actions/achievements";
-import { Button } from "@/components/ui/button";
+import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
 import {
   InsightsContainer,
   type InsightsTab,
@@ -195,26 +195,18 @@ export default async function InsightsPage({
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-            <Button
-              type="button"
-              variant="default"
-              size="default"
-              leftIcon={<Layers className="size-4" />}
-              className="rounded-xl font-semibold shadow-xs"
-            >
-              Current Tracker
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              leftIcon={<Globe className="size-4" />}
-              className="rounded-xl font-medium"
-            >
-              All Canons
-            </Button>
-          </div>
+          <HeaderActions>
+            <HeaderActionButton
+              type="primary"
+              icon={<Layers className="size-4" />}
+              label="Current Tracker"
+            />
+            <HeaderActionButton
+              type="secondary"
+              icon={<Globe className="size-4" />}
+              label="All Canons"
+            />
+          </HeaderActions>
         </section>
 
         {/* ── Signature Horizon Ribbon ── */}

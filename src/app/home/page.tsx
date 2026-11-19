@@ -11,7 +11,7 @@ import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import { getOverviewData } from "@/actions/overview";
-import { Button } from "@/components/ui/button";
+import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
 import { ChartDefs } from "@/components/overview/chart-tokens";
 import { ActivityRingsCard } from "@/components/overview/activity-rings-card";
 import { ProgressOverTimeCard } from "@/components/overview/progress-over-time-card";
@@ -103,30 +103,20 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-            <Link href="/plans">
-              <Button
-                type="button"
-                variant="outline"
-                size="default"
-                leftIcon={<Bookmark className="size-4" />}
-                className="rounded-xl font-medium"
-              >
-                Explore Bible Plans
-              </Button>
-            </Link>
-            <Link href={primaryPlanUrl}>
-              <Button
-                type="button"
-                variant="default"
-                size="default"
-                leftIcon={<Play className="size-4 fill-current" />}
-                className="rounded-xl font-semibold shadow-xs"
-              >
-                {primaryPlanLabel}
-              </Button>
-            </Link>
-          </div>
+          <HeaderActions>
+            <HeaderActionButton
+              type="secondary"
+              href="/plans"
+              icon={<Bookmark className="size-4" />}
+              label="Explore Bible Plans"
+            />
+            <HeaderActionButton
+              type="primary"
+              href={primaryPlanUrl}
+              icon={<Play className="size-4 fill-current" />}
+              label={primaryPlanLabel}
+            />
+          </HeaderActions>
         </section>
 
         {/* ── Signature Horizon Ribbon ── */}

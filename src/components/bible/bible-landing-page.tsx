@@ -12,8 +12,8 @@ import {
   Play,
 } from "lucide-react";
 import { detectDefaultVersion } from "@/lib/bible-versions";
-import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
+import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
 
 const OLD_TESTAMENT_BOOKS = [
   { id: "gen", name: "Genesis", chapters: 50 },
@@ -157,30 +157,20 @@ export function BibleLandingPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-          <Link href="/books">
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              leftIcon={<Compass className="size-4" />}
-              className="rounded-xl font-medium"
-            >
-              Canon Books
-            </Button>
-          </Link>
-          <Link href="/bible/GEN/1">
-            <Button
-              type="button"
-              variant="default"
-              size="default"
-              leftIcon={<BookOpen className="size-4" />}
-              className="rounded-xl font-semibold shadow-xs"
-            >
-              Genesis 1
-            </Button>
-          </Link>
-        </div>
+        <HeaderActions>
+          <HeaderActionButton
+            type="secondary"
+            href="/books"
+            icon={<Compass className="size-4" />}
+            label="Canon Books"
+          />
+          <HeaderActionButton
+            type="primary"
+            href="/bible/GEN/1"
+            icon={<BookOpen className="size-4" />}
+            label="Genesis 1"
+          />
+        </HeaderActions>
       </section>
 
       {/* ── Signature Horizon Ribbon ── */}

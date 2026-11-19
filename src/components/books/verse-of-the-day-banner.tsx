@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, X, ArrowRight, Bookmark } from "lucide-react";
 import type { VerseOfTheDayData } from "@/lib/youversion";
-import { Button } from "@/components/ui/button";
+import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
 
 type Props = {
   totalReadChapters: number;
@@ -50,19 +49,14 @@ export function VerseOfTheDayBanner({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-          <Link href="/plans">
-            <Button
-              type="button"
-              variant="default"
-              size="default"
-              leftIcon={<Bookmark className="size-4" />}
-              className="rounded-xl font-semibold shadow-xs"
-            >
-              Explore Plans
-            </Button>
-          </Link>
-        </div>
+        <HeaderActions>
+          <HeaderActionButton
+            type="primary"
+            href="/plans"
+            icon={<Bookmark className="size-4" />}
+            label="Explore Plans"
+          />
+        </HeaderActions>
       </section>
 
       {/* ── Signature Horizon Ribbon ── */}

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Compass, LogIn, Play, Plus, Upload } from "lucide-react";
 import type { useSession } from "@/lib/auth-client";
 import { READING_PLANS } from "@/data/readingPlans";
-import { Button } from "@/components/ui/button";
+import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
 
 export type ActivePlanInstance = {
   id: string;
@@ -63,50 +63,37 @@ export function PlanActiveBanner({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+        <HeaderActions>
           {!session ? (
-            <Link href="/login?redirect=/plans">
-              <Button
-                type="button"
-                variant="default"
-                size="default"
-                leftIcon={<LogIn className="size-4" />}
-                className="rounded-xl font-semibold shadow-xs"
-              >
-                Sign In to Start Plan
-              </Button>
-            </Link>
+            <HeaderActionButton
+              type="primary"
+              href="/login?redirect=/plans"
+              icon={<LogIn className="size-4" />}
+              label="Sign In to Start Plan"
+            />
           ) : (
             <>
               {onImportPlan && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="default"
+                <HeaderActionButton
+                  type="secondary"
                   onClick={onImportPlan}
-                  data-testid="open-import-plan-modal-btn"
-                  leftIcon={<Upload className="size-4" />}
-                  className="rounded-xl font-medium"
-                >
-                  Import Plan
-                </Button>
+                  testId="open-import-plan-modal-btn"
+                  icon={<Upload className="size-4" />}
+                  label="Import Plan"
+                />
               )}
               {onCreateCustom && (
-                <Button
-                  type="button"
-                  variant="default"
-                  size="default"
+                <HeaderActionButton
+                  type="primary"
                   onClick={onCreateCustom}
-                  data-testid="open-custom-plan-wizard-btn"
-                  leftIcon={<Plus className="size-4" />}
-                  className="rounded-xl font-semibold shadow-xs"
-                >
-                  Create Custom
-                </Button>
+                  testId="open-custom-plan-wizard-btn"
+                  icon={<Plus className="size-4" />}
+                  label="Create Custom"
+                />
               )}
             </>
           )}
-        </div>
+        </HeaderActions>
       </section>
 
       {/* ── Signature Horizon Ribbon ── */}

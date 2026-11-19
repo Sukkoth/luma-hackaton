@@ -26,6 +26,7 @@ import { searchPublicGroupsAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { FilterPills } from "@/components/ui/filter-pills";
+import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
 import { CreateGroupModal } from "@/components/groups/create-group-modal";
 import { JoinCodeModal } from "@/components/groups/join-code-modal";
 import { cn } from "@/lib/utils";
@@ -184,28 +185,20 @@ export function GroupsHubView({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-          <Button
-            type="button"
-            variant="outline"
-            size="default"
+        <HeaderActions>
+          <HeaderActionButton
+            type="secondary"
             onClick={() => setIsJoinCodeOpen(true)}
-            leftIcon={<KeyRound className="size-4" />}
-            className="rounded-xl font-medium"
-          >
-            Join with Code
-          </Button>
-          <Button
-            type="button"
-            variant="default"
-            size="default"
+            icon={<KeyRound className="size-4" />}
+            label="Join with Code"
+          />
+          <HeaderActionButton
+            type="primary"
             onClick={() => setIsCreateOpen(true)}
-            leftIcon={<Plus className="size-4" />}
-            className="rounded-xl font-semibold shadow-xs"
-          >
-            Create Fellowship
-          </Button>
-        </div>
+            icon={<Plus className="size-4" />}
+            label="Create Fellowship"
+          />
+        </HeaderActions>
       </section>
 
       {/* ── Signature Community Horizon Ribbon ── */}

@@ -47,6 +47,7 @@ import { FolderCard } from "./folder-card";
 import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { FilterPills } from "@/components/ui/filter-pills";
+import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
 import {
   Select,
   SelectContent,
@@ -774,32 +775,24 @@ export function NotesManager({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-          <Button
-            type="button"
-            variant="outline"
-            size="default"
+        <HeaderActions>
+          <HeaderActionButton
+            type="secondary"
             onClick={() => setShowFolderModal(true)}
             disabled={isPending}
-            data-testid="create-new-folder-button"
-            leftIcon={<FolderPlus className="size-4" />}
-            className="rounded-xl font-medium"
-          >
-            New Collection
-          </Button>
-          <Button
-            type="button"
-            variant="default"
-            size="default"
+            testId="create-new-folder-button"
+            icon={<FolderPlus className="size-4" />}
+            label="New Collection"
+          />
+          <HeaderActionButton
+            type="primary"
             onClick={handleCreateNewNote}
             disabled={isPending}
-            data-testid="create-new-note-button"
-            leftIcon={<Plus className="size-4" />}
-            className="rounded-xl font-semibold shadow-xs"
-          >
-            Create Note
-          </Button>
-        </div>
+            testId="create-new-note-button"
+            icon={<Plus className="size-4" />}
+            label="Create Note"
+          />
+        </HeaderActions>
       </section>
 
       {/* ── 2. Signature Horizon Ribbon ── */}
