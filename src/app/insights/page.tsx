@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { BookOpen, Compass, Flame } from "lucide-react";
+import { Flame, Layers, Globe } from "lucide-react";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
@@ -197,28 +196,24 @@ export default async function InsightsPage({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-            <Link href="/home">
-              <Button
-                type="button"
-                variant="outline"
-                size="default"
-                leftIcon={<Compass className="size-4" />}
-                className="rounded-xl font-medium"
-              >
-                Reading Hub
-              </Button>
-            </Link>
-            <Link href="/books">
-              <Button
-                type="button"
-                variant="default"
-                size="default"
-                leftIcon={<BookOpen className="size-4" />}
-                className="rounded-xl font-semibold shadow-xs"
-              >
-                Scripture Canon
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="default"
+              size="default"
+              leftIcon={<Layers className="size-4" />}
+              className="rounded-xl font-semibold shadow-xs"
+            >
+              Current Tracker
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              leftIcon={<Globe className="size-4" />}
+              className="rounded-xl font-medium"
+            >
+              All Canons
+            </Button>
           </div>
         </section>
 
