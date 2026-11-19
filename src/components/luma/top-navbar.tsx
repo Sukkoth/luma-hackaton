@@ -21,6 +21,7 @@ import {
   type StreakData,
 } from "@/components/streak/streak-detail-modal";
 import { TrackerSwitcher } from "@/components/trackers/tracker-switcher";
+import { LumaIcon } from "@/components/ui/luma-icon";
 import type { UserTrackerSummary } from "@/actions/trackers";
 
 type TopNavbarProps = {
@@ -67,7 +68,10 @@ export function TopNavbar({
               activeTrackerId={activeTrackerId}
             />
           ) : (
-            <Link href="/" className="group flex items-center">
+            <Link href="/" className="group flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] text-primary border border-border/80 shadow-2xs">
+                <LumaIcon className="size-4.5 text-primary" />
+              </span>
               <span className="text-[22px] lg:text-[24px] font-semibold tracking-tight text-foreground">
                 Luma<span className="text-foreground-dim">.</span>
               </span>
