@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { userSettings, readingLogs } from "@/db/schema";
+import { createNotificationAction } from "@/actions/notifications";
 import { getLocalDateString } from "./timezone";
 import { evaluateUserStreak, type StreakEvaluationResult } from "./streak";
 
@@ -83,6 +84,36 @@ export async function syncUserStreak({
         updatedAt: new Date(),
       })
       .where(eq(userSettings.userId, userId));
+
+    // Check if a streak freeze was newly consumed
+    if (result.frozenDates.length > frozenDates.size) {
+      await createNotificationAction({
+        userId,
+        input: {
+          type: "freeze_used",
+          title: "Streak Protected",
+          body: "A streak freeze was automatically used to protect your reading streak.",
+          actionUrl: "/home",
+        },
+      });
+    }
+
+    // Check if a streak milestone was reached
+    const STREAK_MILESTONES = [3, 7, 14, 21, 30, 50, 100, 365];
+    if (
+      result.currentStreak > settings.currentStreak &&
+      STREAK_MILESTONES.includes(result.currentStreak)
+    ) {
+      await createNotificationAction({
+        userId,
+        input: {
+          type: "streak_alert",
+          title: `${result.currentStreak}-Day Streak!`,
+          body: `Incredible dedication! You've kept your daily Bible reading active for ${result.currentStreak} consecutive days.`,
+          actionUrl: "/home",
+        },
+      });
+    }
   }
 
   return {

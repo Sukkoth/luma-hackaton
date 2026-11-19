@@ -835,3 +835,36 @@ export const groupMemberEnrollmentsRelations = relations(
     }),
   })
 );
+
+// --- Notifications ---
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: varchar("type", { length: 50 }).notNull(), // 'streak_alert' | 'freeze_used' | 'plan_reminder' | 'group_activity' | 'achievement' | 'system'
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    actionUrl: text("action_url"),
+    isRead: boolean("is_read").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_notifications_user").on(table.userId),
+    index("idx_notifications_user_unread").on(table.userId, table.isRead),
+    index("idx_notifications_created").on(table.createdAt),
+  ]
+);
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(user, {
+    fields: [notifications.userId],
+    references: [user.id],
+  }),
+}));

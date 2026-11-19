@@ -11,6 +11,7 @@ import {
   planInstances,
   unlockedAchievements,
 } from "@/db/schema";
+import { createNotificationAction } from "@/actions/notifications";
 import {
   ACHIEVEMENTS,
   type Achievement,
@@ -285,6 +286,19 @@ export async function evaluateAndUnlockAchievementsAction({
         }))
       )
       .onConflictDoNothing();
+
+    // Trigger in-app notifications for each newly unlocked achievement
+    for (const ach of newlyUnlocked) {
+      await createNotificationAction({
+        userId,
+        input: {
+          type: "achievement",
+          title: `Milestone Unlocked: ${ach.title}`,
+          body: ach.description,
+          actionUrl: "/insights?tab=achievements",
+        },
+      });
+    }
   }
 
   return {

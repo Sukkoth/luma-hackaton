@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { and, eq, desc, ilike, inArray, sql } from "drizzle-orm";
+import { and, eq, desc, ilike, inArray, ne, sql } from "drizzle-orm";
 import * as v from "valibot";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
@@ -23,6 +23,7 @@ import {
   type GroupLateJoinPolicy,
   type GroupMembershipStatus,
 } from "@/db/schema";
+import { createNotificationAction } from "@/actions/notifications";
 import {
   CreateGroupSchema,
   UpdateGroupSettingsSchema,
@@ -196,6 +197,17 @@ export async function createGroupAction({
       role: "owner",
       status: "active",
       hideProgress: false,
+    });
+
+    // Notify creator of group creation
+    await createNotificationAction({
+      userId: session.user.id,
+      input: {
+        type: "group_activity",
+        title: "Group Created",
+        body: `You created "${newGroup.name}". Share invite code ${newGroup.inviteCode} to invite members.`,
+        actionUrl: `/groups/${newGroup.id}`,
+      },
     });
 
     revalidatePath("/groups");
@@ -770,6 +782,58 @@ export async function joinGroupAction({
       hideProgress: false,
     });
 
+    if (status === "active") {
+      // 1. Notify joining user
+      await createNotificationAction({
+        userId: session.user.id,
+        input: {
+          type: "group_activity",
+          title: "Joined Group",
+          body: `Welcome to "${groupRecord.name}"! You are now an active member.`,
+          actionUrl: `/groups/${groupRecord.id}`,
+        },
+      });
+
+      // 2. Notify group owner
+      if (groupRecord.ownerId !== session.user.id) {
+        const joinerName = session.user.name || "A new member";
+        await createNotificationAction({
+          userId: groupRecord.ownerId,
+          input: {
+            type: "group_activity",
+            title: "New Group Member",
+            body: `${joinerName} joined your group "${groupRecord.name}".`,
+            actionUrl: `/groups/${groupRecord.id}`,
+          },
+        });
+      }
+    } else {
+      // 1. Notify applicant
+      await createNotificationAction({
+        userId: session.user.id,
+        input: {
+          type: "group_activity",
+          title: "Join Request Sent",
+          body: `Your request to join "${groupRecord.name}" is pending admin approval.`,
+          actionUrl: `/groups/${groupRecord.id}`,
+        },
+      });
+
+      // 2. Notify group owner
+      if (groupRecord.ownerId !== session.user.id) {
+        const joinerName = session.user.name || "Someone";
+        await createNotificationAction({
+          userId: groupRecord.ownerId,
+          input: {
+            type: "group_activity",
+            title: "New Join Request",
+            body: `${joinerName} requested to join "${groupRecord.name}". Tap to review.`,
+            actionUrl: `/groups/${groupRecord.id}`,
+          },
+        });
+      }
+    }
+
     revalidatePath("/groups");
     revalidatePath(`/groups/${groupRecord.id}`);
 
@@ -897,6 +961,21 @@ export async function approveMemberAction({
         )
       );
 
+    const groupRecord = await db.query.groups.findFirst({
+      where: eq(groups.id, groupId),
+      columns: { name: true },
+    });
+
+    await createNotificationAction({
+      userId: targetUserId,
+      input: {
+        type: "group_activity",
+        title: "Join Request Approved",
+        body: `Your request to join "${groupRecord?.name || "the group"}" was approved!`,
+        actionUrl: `/groups/${groupId}`,
+      },
+    });
+
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
   } catch (err) {
@@ -935,6 +1014,11 @@ export async function rejectMemberAction({
       return { success: false, error: "Only admins or owners can reject members." };
     }
 
+    const groupRecord = await db.query.groups.findFirst({
+      where: eq(groups.id, groupId),
+      columns: { name: true },
+    });
+
     await db
       .delete(groupMembers)
       .where(
@@ -943,6 +1027,15 @@ export async function rejectMemberAction({
           eq(groupMembers.userId, targetUserId)
         )
       );
+
+    await createNotificationAction({
+      userId: targetUserId,
+      input: {
+        type: "group_activity",
+        title: "Join Request Declined",
+        body: `Your request to join "${groupRecord?.name || "the group"}" was declined.`,
+      },
+    });
 
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
@@ -1145,6 +1238,11 @@ export async function removeMemberAction({
         );
     }
 
+    const groupRecord = await db.query.groups.findFirst({
+      where: eq(groups.id, groupId),
+      columns: { name: true },
+    });
+
     await db
       .delete(groupMembers)
       .where(
@@ -1153,6 +1251,15 @@ export async function removeMemberAction({
           eq(groupMembers.userId, targetUserId)
         )
       );
+
+    await createNotificationAction({
+      userId: targetUserId,
+      input: {
+        type: "group_activity",
+        title: "Removed from Group",
+        body: `You have been removed from "${groupRecord?.name || "the group"}".`,
+      },
+    });
 
     revalidatePath(`/groups/${groupId}`);
     revalidatePath("/groups");
@@ -1429,6 +1536,33 @@ export async function scheduleGroupPlanAction({
 
     if (!newPlan) {
       return { success: false, error: "Failed to schedule group plan." };
+    }
+
+    const groupRecord = await db.query.groups.findFirst({
+      where: eq(groups.id, groupId),
+      columns: { name: true },
+    });
+
+    // Notify all other active group members of the new group plan
+    const otherMembers = await db.query.groupMembers.findMany({
+      where: and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.status, "active"),
+        ne(groupMembers.userId, session.user.id)
+      ),
+      columns: { userId: true },
+    });
+
+    for (const m of otherMembers) {
+      await createNotificationAction({
+        userId: m.userId,
+        input: {
+          type: "group_activity",
+          title: "New Fellowship Plan",
+          body: `"${template.title}" was scheduled in "${groupRecord?.name || "your group"}". Tap to join.`,
+          actionUrl: `/groups/${groupId}`,
+        },
+      });
     }
 
     revalidatePath(`/groups/${groupId}`);
@@ -1886,7 +2020,7 @@ export async function setGroupPinnedNoticeAction({
 
   const groupRecord = await db.query.groups.findFirst({
     where: eq(groups.id, groupId),
-    columns: { ownerId: true },
+    columns: { ownerId: true, name: true },
   });
 
   if (!groupRecord) {
@@ -1923,6 +2057,31 @@ export async function setGroupPinnedNoticeAction({
       })
       .where(eq(groups.id, groupId));
 
+    // Notify all active group members of the announcement
+    const otherMembers = await db.query.groupMembers.findMany({
+      where: and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.status, "active"),
+        ne(groupMembers.userId, session.user.id)
+      ),
+      columns: { userId: true },
+    });
+
+    const noticeTitle = parsed.output.title
+      ? parsed.output.title.trim()
+      : "Announcement";
+    for (const m of otherMembers) {
+      await createNotificationAction({
+        userId: m.userId,
+        input: {
+          type: "group_activity",
+          title: `Announcement: "${groupRecord.name}"`,
+          body: `${noticeTitle}: ${parsed.output.content.trim().slice(0, 100)}`,
+          actionUrl: `/groups/${groupId}`,
+        },
+      });
+    }
+
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
   } catch (err) {
@@ -1951,7 +2110,7 @@ export async function clearGroupPinnedNoticeAction({
 
   const groupRecord = await db.query.groups.findFirst({
     where: eq(groups.id, groupId),
-    columns: { ownerId: true },
+    columns: { ownerId: true, name: true },
   });
 
   if (!groupRecord) {

@@ -41,6 +41,7 @@ import {
 import { type BibleCanon, getBibleBookById } from "@/data/bibleData";
 import { syncUserStreak } from "@/lib/streak-service";
 import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
+import { createNotificationAction } from "@/actions/notifications";
 import type { SerializableAchievement } from "@/data/achievements";
 
 export type StartPlanResult =
@@ -601,6 +602,16 @@ export async function startPlanAction({
 
     const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
       userId: session.user.id,
+    });
+
+    await createNotificationAction({
+      userId: session.user.id,
+      input: {
+        type: "plan_reminder",
+        title: `Plan Started: ${blueprint.title}`,
+        body: `Your reading plan "${blueprint.title}" is active. Daily reading target: ${input.dailyTarget} chapters.`,
+        actionUrl: `/plans/${instanceId}`,
+      },
     });
 
     revalidatePath("/plans");
@@ -1366,6 +1377,16 @@ export async function togglePlanReadingItemAction({
       .update(planInstances)
       .set({ status: "completed", completedAt: now })
       .where(eq(planInstances.id, instance.id));
+
+    await createNotificationAction({
+      userId: session.user.id,
+      input: {
+        type: "plan_reminder",
+        title: "Plan Completed!",
+        body: `Congratulations! You finished all chapters in "${instance.title || "your reading plan"}".`,
+        actionUrl: `/plans/${instance.id}`,
+      },
+    });
   }
 
   await syncUserStreak({ userId: session.user.id });

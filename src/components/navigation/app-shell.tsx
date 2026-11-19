@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -13,10 +13,8 @@ import {
   TrendingUp,
   FileText,
   LayoutDashboard,
-  Bell,
   LogOut,
   Loader2,
-  BookmarkCheck,
   Users,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -28,6 +26,8 @@ import {
 import { TrackerSwitcher } from "@/components/trackers/tracker-switcher";
 import { LogoutConfirmModal } from "@/components/auth/logout-confirm-modal";
 import { Avatar } from "@/components/ui/avatar";
+import { LumaIcon } from "@/components/ui/luma-icon";
+import { NotificationCenter } from "@/components/notifications/notification-center";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { cn } from "@/lib/utils";
 
@@ -66,21 +66,14 @@ export function AppShell({
   const { data: session } = useSession();
 
   const [isStreakOpen, setIsStreakOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [hasDismissedNotification, setHasDismissedNotification] =
-    useState(false);
-
-  const notificationsRef = useRef<HTMLDivElement>(null);
 
   const effectiveUserName = session?.user?.name || userName;
   const effectiveUserEmail = session?.user?.email || userEmail;
   const effectiveUserImage = session?.user?.image || userImage;
 
   const isAuthenticated = !!session || (!!trackers && trackers.length > 0);
-  const activeTracker =
-    trackers?.find((t) => t.id === activeTrackerId) || trackers?.[0];
 
   const initials = effectiveUserName
     ? effectiveUserName
@@ -107,24 +100,6 @@ export function AppShell({
     viewTitle = "Preferences & Settings";
   }
 
-  // Handle outside click for notifications popover
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node)
-      ) {
-        setIsNotificationsOpen(false);
-      }
-    }
-    if (isNotificationsOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isNotificationsOpen]);
-
   const handleLogout = async () => {
     setIsSigningOut(true);
     try {
@@ -147,9 +122,9 @@ export function AppShell({
       <div className="min-h-screen bg-background text-foreground">
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur-md px-4 py-3 sm:px-6 md:px-8">
           <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
-            <Link href="/" className="group flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
-                <Flame className="size-4 fill-primary" />
+            <Link href="/" className="group flex items-center gap-2.5">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] text-primary border border-border/80 shadow-2xs">
+                <LumaIcon className="size-4.5 text-primary" />
               </span>
               <span className="text-xl font-bold tracking-tight text-foreground">
                 Luma
@@ -221,8 +196,8 @@ export function AppShell({
           {/* Brand */}
           <div className="flex items-center justify-between px-2 pt-1">
             <Link href="/home" className="flex items-center gap-2.5 group">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 transition-transform group-hover:scale-105">
-                <Flame className="size-4.5 fill-primary" />
+              <span className="flex size-8 items-center justify-center rounded-xl bg-[#0c0a09] text-primary border border-border/80 transition-transform group-hover:scale-105 shadow-2xs">
+                <LumaIcon className="size-5.5 text-primary" />
               </span>
               <div className="flex flex-col">
                 <span className="text-lg font-bold tracking-tight text-foreground leading-none">
@@ -344,7 +319,9 @@ export function AppShell({
               href="/home"
               className="flex items-center gap-2 text-lg font-bold text-foreground"
             >
-              <Flame className="size-4.5 fill-primary text-primary" />
+              <span className="flex size-6 items-center justify-center rounded-md bg-[#0c0a09] text-primary border border-border/80 shadow-2xs">
+                <LumaIcon className="size-4 text-primary" />
+              </span>
               <span>Luma</span>
             </Link>
           )}
@@ -363,6 +340,7 @@ export function AppShell({
               <span className="tabular-nums">{streak.currentStreak}</span>
             </button>
           )}
+          <NotificationCenter isMobile={true} />
           <ThemeToggle />
           <Link
             href="/settings"
@@ -405,67 +383,8 @@ export function AppShell({
 
             <ThemeToggle />
 
-            {/* Notifications Popover */}
-            <div className="relative" ref={notificationsRef}>
-              <button
-                type="button"
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                aria-label="Notifications"
-                className="relative flex size-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border transition-all cursor-pointer shadow-2xs"
-              >
-                <Bell className="size-4" />
-                {!hasDismissedNotification && (
-                  <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary ring-2 ring-card" />
-                )}
-              </button>
-
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-border bg-card p-4 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between border-b border-border/60 pb-2 mb-3">
-                    <span className="text-xs font-semibold text-foreground">
-                      Notifications
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setHasDismissedNotification(true)}
-                      className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2.5 rounded-xl p-2.5 bg-muted/60">
-                      <Flame className="size-4 fill-primary text-primary shrink-0 mt-0.5" />
-                      <div className="flex flex-col text-left text-xs">
-                        <span className="font-semibold text-foreground">
-                          Streak on Track!
-                        </span>
-                        <span className="text-muted-foreground text-[11px] mt-0.5">
-                          {streak
-                            ? `You're on a ${streak.currentStreak}-day reading streak.`
-                            : "Keep reading daily to build your momentum."}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-2.5 rounded-xl p-2.5 bg-muted/60">
-                      <BookmarkCheck className="size-4 text-primary shrink-0 mt-0.5" />
-                      <div className="flex flex-col text-left text-xs">
-                        <span className="font-semibold text-foreground">
-                          Active Tracker
-                        </span>
-                        <span className="text-muted-foreground text-[11px] mt-0.5">
-                          {activeTracker
-                            ? `"${activeTracker.name}" is your active canon.`
-                            : "Select or create a tracker to begin."}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Notification Center */}
+            <NotificationCenter isMobile={false} />
 
             <div className="h-6 w-px bg-border/80 mx-1" />
 
