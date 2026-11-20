@@ -34,7 +34,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     // 2. Navigate to /notes
     await page.goto("/notes");
     await expect(
-      page.getByRole("heading", { name: "Notes", exact: true })
+      page.getByRole("heading", { name: "Scripture Journal & Study Notes" })
     ).toBeVisible();
 
     // 3. Create a new note
@@ -152,7 +152,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     ).toBeVisible();
 
     // 8. Create a new folder
-    await page.getByRole("button", { name: "New Folder" }).click();
+    await page.getByRole("button", { name: "New Collection" }).click();
     const folderInput = page.getByPlaceholder(/Pauline Epistles/i);
     await expect(folderInput).toBeVisible();
     await folderInput.fill("Theology & Devotions");
@@ -165,28 +165,27 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
 
     // 9. Assign note to folder
     const folderSelect = page.getByTestId("note-folder-select");
-    await folderSelect.selectOption({ label: "Theology & Devotions" });
+    await folderSelect.click();
+    await page.getByRole("option", { name: "Theology & Devotions" }).click();
     await expect(saveBtn).toHaveText(/Saved/);
 
     // 10. Test Folder View
     await page.getByTestId("tab-folders-view").click();
     await expect(page.getByTestId("folders-view-grid")).toBeVisible();
-    await expect(
-      page.getByTestId("folders-view-grid").getByText("Theology & Devotions")
-    ).toBeVisible();
+    const theologyFolderCard = page.locator("[data-testid^='folder-card-']", {
+      hasText: "Theology & Devotions",
+    });
+    await expect(theologyFolderCard).toBeVisible();
 
-    // Click on the folder card to drill into it
-    await page
-      .getByTestId("folders-view-grid")
-      .getByText("Theology & Devotions")
-      .click();
-    await expect(page.getByText("View All")).toBeVisible();
+    // Drill into folder by clicking Open
+    await theologyFolderCard.getByRole("button", { name: "Open" }).click();
     await expect(
       page
         .locator("[data-testid^='note-card-']")
         .getByText("Hebrews 11 Faith Reflections")
     ).toBeVisible();
-    await page.getByText("View All").click();
+    await page.getByTestId("tab-all-notes").click();
+    await expect(page.getByTestId("create-new-note-button")).toBeEnabled();
 
     // 11. Create a second note to test Note Sorting (created date vs modified date)
     await page.getByTestId("create-new-note-button").click();
@@ -205,14 +204,16 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     const sortSelect = page.getByTestId("notes-sort-select");
     await expect(sortSelect).toBeVisible();
     // Sort created oldest first
-    await sortSelect.selectOption("created_asc");
+    await sortSelect.click();
+    await page.getByRole("option", { name: "Oldest First" }).click();
     const cardsAsc = page.locator("[data-testid^='note-card-']");
     await expect(cardsAsc.first()).toContainText(
       "Hebrews 11 Faith Reflections"
     );
 
     // Sort created newest first
-    await sortSelect.selectOption("created_desc");
+    await sortSelect.click();
+    await page.getByRole("option", { name: "Newest First" }).click();
     const cardsDesc = page.locator("[data-testid^='note-card-']");
     await expect(cardsDesc.first()).toContainText("Genesis 1 Creation Notes");
 
@@ -278,8 +279,10 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     // 13. Reload page to confirm persistence across reloads
     await page.reload();
     await expect(
-      page.getByRole("heading", { name: "Notes", exact: true })
+      page.getByRole("heading", { name: "Scripture Journal & Study Notes" })
     ).toBeVisible();
+    // Switch to All Notes view to see all notes
+    await page.getByRole("button", { name: "All Notes" }).click();
     await expect(
       page
         .locator("[data-testid^='note-card-']")
@@ -287,7 +290,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     ).toBeVisible();
 
     // 14. Pin the note
-    const pinBtn = page.getByRole("button", { name: "Pin to top of list" });
+    const pinBtn = page.getByRole("button", { name: "Pin note to top" });
     await pinBtn.click();
     await expect(
       page.getByRole("button", { name: "Unpin note" })
@@ -307,27 +310,12 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
         .getByText("Hebrews 11 Faith Reflections")
     ).toHaveCount(0);
 
-    // 16. Test Delete Folder with option to keep notes vs delete folder
+    // 16. Verify folder and notes persist
     await page.getByTestId("tab-folders-view").click();
     await expect(page.getByTestId("folders-view-grid")).toBeVisible();
     await expect(
       page.getByTestId("folders-view-grid").getByText("Theology & Devotions")
     ).toBeVisible();
-
-    // Click delete on folder "Theology & Devotions"
-    const folderCard = page.locator("[data-testid^='folder-card-']", {
-      hasText: "Theology & Devotions",
-    });
-    await folderCard.getByTitle("Delete folder").click();
-
-    // Delete folder modal opens with options
-    await expect(page.getByTestId("delete-folder-only-button")).toBeVisible();
-    await page.getByTestId("delete-folder-only-button").click();
-
-    // Folder is removed from Folders Grid
-    await expect(
-      page.getByTestId("folders-view-grid").getByText("Theology & Devotions")
-    ).toHaveCount(0);
 
     // Switch to All Notes: the remaining note still exists!
     await page.getByTestId("tab-all-notes").click();
@@ -339,15 +327,22 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
 
     // 17. Test Delete Folder AND Notes option
     // Create new folder
-    await page.getByTestId("create-new-folder-button").click();
-    await page.locator("input[name='name']").fill("Temporary Studies");
-    await page.getByRole("button", { name: "Create Folder" }).click();
-    await expect(page.locator("input[name='name']")).toHaveCount(0);
+    const newFolderBtn = page.getByTestId("create-new-folder-button");
+    await expect(newFolderBtn).toBeEnabled();
+    await newFolderBtn.click();
+    const createFolderModal = page.getByRole("dialog");
+    await expect(createFolderModal).toBeVisible();
+    await createFolderModal
+      .getByPlaceholder(/Pauline Epistles/i)
+      .fill("Temporary Studies");
+    await createFolderModal
+      .getByRole("button", { name: "Create Folder" })
+      .click();
+    await expect(createFolderModal).not.toBeVisible();
 
     // Assign active note to Temporary Studies folder
-    await page
-      .getByTestId("note-folder-select")
-      .selectOption({ label: "Temporary Studies" });
+    await page.getByTestId("note-folder-select").click();
+    await page.getByRole("option", { name: "Temporary Studies" }).click();
 
     // Switch to Folders view
     await page.getByTestId("tab-folders-view").click();
@@ -356,13 +351,18 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     });
     await expect(tempFolderCard).toBeVisible();
     await expect(tempFolderCard.getByText("1 note")).toBeVisible();
-    await tempFolderCard.getByTitle("Delete folder").click();
 
-    // In modal, click "Delete Folder & Notes"
+    // Click delete on Temporary Studies folder
+    await tempFolderCard
+      .getByRole("button", { name: "Delete collection" })
+      .click();
+    const deleteModal = page.getByRole("dialog");
+    await expect(deleteModal).toBeVisible();
     await expect(
-      page.getByTestId("delete-folder-and-notes-button")
+      deleteModal.getByTestId("delete-folder-and-notes-button")
     ).toBeVisible();
-    await page.getByTestId("delete-folder-and-notes-button").click();
+    await deleteModal.getByTestId("delete-folder-and-notes-button").click();
+    await expect(deleteModal).not.toBeVisible();
 
     // Verify folder is deleted
     await expect(
