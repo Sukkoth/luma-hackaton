@@ -46,9 +46,10 @@ test.describe("Settings & Profile E2E", () => {
 
     await createAndOnboardUser({ page, fullName: initialName, email });
 
-    // 1. Navigate to /settings
+    // 1. Navigate to /settings and click Profile tab
     await page.goto("/settings");
     await expect(page).toHaveURL(/\/settings/);
+    await page.getByRole("button", { name: "Profile" }).click();
     await expect(
       page.getByRole("heading", { name: "Profile Details" })
     ).toBeVisible();
@@ -76,6 +77,7 @@ test.describe("Settings & Profile E2E", () => {
     // 6. Navigate to /home and back to /settings to check persistence
     await page.goto("/home");
     await page.goto("/settings");
+    await page.getByRole("button", { name: "Profile" }).click();
     await expect(page.locator("#profile-name")).toHaveValue(updatedName);
     await expect(page.locator("#profile-image")).toHaveValue(avatarUrl);
   });
@@ -97,6 +99,7 @@ test.describe("Settings & Profile E2E", () => {
     });
 
     await page.goto("/settings");
+    await page.getByRole("button", { name: "Profile" }).click();
     await expect(
       page.getByRole("heading", { name: "Password & Security" })
     ).toBeVisible();

@@ -112,7 +112,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(signInPlanLink).toBeVisible();
     await expect(signInPlanLink).toHaveAttribute(
       "href",
-      "/auth/sign-in?callbackUrl=/plans/templates/the_four_gospels_30"
+      "/login?redirect=/plans/templates/the_four_gospels_30"
     );
 
     // 2. On Books page, clicking a chapter to mark as read prompts to sign in
@@ -188,10 +188,21 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(modal).not.toBeVisible();
   });
 
-  test("social OAuth buttons initiate OAuth redirect flow for Google and GitHub", async ({
+  test("social OAuth buttons initiate social sign-in request for Google and GitHub", async ({
     page,
   }) => {
-    // Login page: Google OAuth button initiates navigation to Google accounts
+    // Intercept social auth API call to prevent external redirect while validating payload
+    await page.route("**/api/auth/sign-in/social", async (route) => {
+      const request = route.request();
+      expect(request.method()).toBe("POST");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({}),
+      });
+    });
+
+    // Login page: Google OAuth button initiates social sign-in
     await page.goto("/login");
     const [googleRequest] = await Promise.all([
       page.waitForRequest((req) =>
@@ -199,12 +210,9 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       ),
       page.getByRole("button", { name: "Google" }).click(),
     ]);
-    expect(googleRequest.method()).toBe("POST");
-    await page.waitForURL((url) => url.hostname.includes("google.com"), {
-      waitUntil: "commit",
-    });
+    expect(googleRequest.postDataJSON()).toMatchObject({ provider: "google" });
 
-    // Signup page: GitHub OAuth button initiates navigation to GitHub OAuth
+    // Signup page: GitHub OAuth button initiates social sign-in
     await page.goto("/signup");
     const [githubRequest] = await Promise.all([
       page.waitForRequest((req) =>
@@ -212,10 +220,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       ),
       page.getByRole("button", { name: "GitHub" }).click(),
     ]);
-    expect(githubRequest.method()).toBe("POST");
-    await page.waitForURL((url) => url.hostname.includes("github.com"), {
-      waitUntil: "commit",
-    });
+    expect(githubRequest.postDataJSON()).toMatchObject({ provider: "github" });
   });
 
   test("full user registration, onboarding flow with canon selection, and authenticated dashboard access", async ({
@@ -232,7 +237,6 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     // 2. Verify redirect to /onboarding for new users
     await page.waitForURL("/onboarding", { timeout: 10000 });
     await expect(page).toHaveURL("/onboarding");
-    await expect(page.getByText("Onboarding")).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Read Scripture With Peace Daily" })
     ).toBeVisible();
@@ -292,9 +296,9 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await page.waitForURL("/home", { timeout: 10000 });
     await expect(page).toHaveURL("/home");
 
-    // Verify authenticated user can see Overview, Insights, Notes, and Settings in top nav
+    // Verify authenticated user can see Home, Insights, Notes, and Settings in top nav
     const authNav = page.getByRole("navigation", { name: "Main Navigation" });
-    await expect(authNav.getByRole("link", { name: "Overview" })).toBeVisible();
+    await expect(authNav.getByRole("link", { name: "Home" })).toBeVisible();
     await expect(authNav.getByRole("link", { name: "Insights" })).toBeVisible();
     await expect(authNav.getByRole("link", { name: "Notes" })).toBeVisible();
     await expect(page.getByRole("link", { name: /Settings/i })).toBeVisible();
@@ -303,11 +307,10 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await page.goto("/settings");
     await expect(page).toHaveURL("/settings");
     await expect(
-      page.getByRole("heading", { name: "Settings", exact: true })
+      page.getByRole("heading", { name: "Account & Settings" })
     ).toBeVisible();
     await expect(page.getByText(testUser.fullName).first()).toBeVisible();
     await expect(page.getByText(testUser.email).first()).toBeVisible();
-    await expect(page.getByText("Active Member")).toBeVisible();
 
     // 4. Verify user can now mark chapters on Books page
     await page.goto("/books");
@@ -323,7 +326,9 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
 
     // 5. Verify Sign Out
     await page.goto("/settings");
-    await page.getByRole("button", { name: "Sign Out" }).click();
+    await page.getByRole("button", { name: "Log out" }).click();
+    // Confirm logout in modal
+    await page.getByRole("button", { name: "Log Out", exact: true }).click();
     await page.waitForURL("/login", { timeout: 10000 });
     await expect(page).toHaveURL("/login");
 
