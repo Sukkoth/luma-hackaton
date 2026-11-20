@@ -14,7 +14,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 2,
   reporter: [["html", { open: "never" }], ["list"]],
   use: {
     baseURL: BASE_URL,
@@ -34,5 +34,8 @@ export default defineConfig({
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    env: {
+      DISABLE_RATE_LIMIT: "true",
+    },
   },
 });
