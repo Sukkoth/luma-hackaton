@@ -126,7 +126,10 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   const completedSessionsCount = sessions.filter((s) => s.isCompleted).length;
 
   // Upcoming future scheduled plan detection
-  const planStartDateObj = new Date(currentPlan.startDate);
+  // Parse date string (YYYY-MM-DD) as LOCAL midnight, not UTC.
+  // new Date("2026-11-21") parses as UTC per ES6 spec, causing timezone bugs.
+  const [year, month, day] = currentPlan.startDate.split("-").map(Number);
+  const planStartDateObj = new Date(year, month - 1, day);
   const nowMidnight = new Date();
   nowMidnight.setHours(0, 0, 0, 0);
   const isScheduledFuture =
