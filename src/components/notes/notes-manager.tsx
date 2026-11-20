@@ -47,7 +47,10 @@ import { FolderCard } from "./folder-card";
 import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { FilterPills } from "@/components/ui/filter-pills";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
 import {
   Select,
   SelectContent,
@@ -67,10 +70,7 @@ export type NotesManagerProps = {
 };
 
 export type NoteSortOption =
-  | "updated_desc"
-  | "updated_asc"
-  | "created_desc"
-  | "created_asc";
+  "updated_desc" | "updated_asc" | "created_desc" | "created_asc";
 
 type SelectNoteParams = { noteId: string };
 type TitleChangeParams = { newTitle: string };
@@ -119,9 +119,11 @@ export function NotesManager({
 
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsStringLiteral(["active", "folders", "archived"] as const).withDefault(
-      "active"
-    )
+    parseAsStringLiteral([
+      "active",
+      "folders",
+      "archived",
+    ] as const).withDefault("active")
   );
 
   const [notesList, setNotesList] = useState<NoteDetail[]>(initialNotes);
@@ -168,7 +170,8 @@ export function NotesManager({
   const [mobileView, setMobileView] = useState<"list" | "editor">(() => {
     const planId = defaultPlanId || searchParams.get("planId");
     const sessionParam = defaultSessionId || searchParams.get("session");
-    if (activeNoteId || defaultNoteId || (planId && sessionParam)) return "editor";
+    if (activeNoteId || defaultNoteId || (planId && sessionParam))
+      return "editor";
     return "list";
   });
 
@@ -571,8 +574,8 @@ export function NotesManager({
       activeNote && notesInFolder.some((n) => n.id === activeNote.id);
 
     const noteToSelect = currentStillInFolder
-      ? notesInFolder.find((n) => n.id === activeNote?.id) ?? null
-      : sorted[0] ?? null;
+      ? (notesInFolder.find((n) => n.id === activeNote?.id) ?? null)
+      : (sorted[0] ?? null);
 
     void setActiveNoteId(noteToSelect?.id ?? "");
     setFallbackNoteId(noteToSelect?.id ?? null);
@@ -741,19 +744,13 @@ export function NotesManager({
   const sortedNotes = [...filteredNotes].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
     if (sortBy === "created_desc") {
-      return (
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
     if (sortBy === "created_asc") {
-      return (
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     }
     if (sortBy === "updated_asc") {
-      return (
-        new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
-      );
+      return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
     }
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
   });
@@ -770,13 +767,16 @@ export function NotesManager({
         <div className="space-y-1.5 max-w-xl">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
             <span className="size-1.5 rounded-full bg-primary" />
-            <span>Theological Reflections • Scripture Marginalia &amp; Study Journal</span>
+            <span>
+              Theological Reflections • Scripture Marginalia &amp; Study Journal
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
             Scripture Journal &amp; Study Notes
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Record spiritual insights, theological thoughts, and devotional reflections anchored to your canonical reading.
+            Record spiritual insights, theological thoughts, and devotional
+            reflections anchored to your canonical reading.
           </p>
         </div>
 
@@ -820,7 +820,9 @@ export function NotesManager({
               <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
                 {activeNotesCount}
               </span>
-              <span className="text-xs text-muted-foreground">recorded entries</span>
+              <span className="text-xs text-muted-foreground">
+                recorded entries
+              </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               {pinnedNotesCount > 0
@@ -844,10 +846,13 @@ export function NotesManager({
               <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
                 {folders.length}
               </span>
-              <span className="text-xs text-muted-foreground">curated folders</span>
+              <span className="text-xs text-muted-foreground">
+                curated folders
+              </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Group notes by sermon series, theological doctrines, or topical studies.
+              Group notes by sermon series, theological doctrines, or topical
+              studies.
             </p>
           </div>
 
@@ -864,10 +869,13 @@ export function NotesManager({
               <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
                 {linkedScriptureCount}
               </span>
-              <span className="text-xs text-muted-foreground">plan sessions linked</span>
+              <span className="text-xs text-muted-foreground">
+                plan sessions linked
+              </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Reflections synchronized with your active reading tracker schedule.
+              Reflections synchronized with your active reading tracker
+              schedule.
             </p>
           </div>
         </div>
@@ -939,8 +947,8 @@ export function NotesManager({
                 activeTab === "folders"
                   ? "Search collections..."
                   : activeTab === "archived"
-                  ? "Search archived..."
-                  : "Search study notes..."
+                    ? "Search archived..."
+                    : "Search study notes..."
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -986,7 +994,9 @@ export function NotesManager({
 
       {/* ── 4. Quick Collection Filter Pills (when in active tab) ── */}
       {activeTab === "active" && (
-        <div className={cn(mobileView === "editor" ? "hidden lg:block" : "block")}>
+        <div
+          className={cn(mobileView === "editor" ? "hidden lg:block" : "block")}
+        >
           <FilterPills
             containerTestId="notes-folders-filter"
             className="py-1"
@@ -998,7 +1008,9 @@ export function NotesManager({
                   <span className="inline-flex items-center gap-1.5">
                     <FolderIcon className="size-3 shrink-0" />
                     <span>{folder.name}</span>
-                    <span className="opacity-75 text-[10px]">({folder.notesCount})</span>
+                    <span className="opacity-75 text-[10px]">
+                      ({folder.notesCount})
+                    </span>
                   </span>
                 ),
               })),
@@ -1012,7 +1024,9 @@ export function NotesManager({
                 : []),
             ]}
             activeFilter={activeFolderId}
-            onFilterChange={({ filter }) => handleSwitchFolder({ folderId: filter })}
+            onFilterChange={({ filter }) =>
+              handleSwitchFolder({ folderId: filter })
+            }
           />
         </div>
       )}
@@ -1072,8 +1086,8 @@ export function NotesManager({
                   {activeTab === "archived"
                     ? "Archived Notes"
                     : currentFolder
-                    ? currentFolder.name
-                    : "All Study Notes"}
+                      ? currentFolder.name
+                      : "All Study Notes"}
                 </span>
               </span>
               <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
@@ -1095,8 +1109,8 @@ export function NotesManager({
                     {searchQuery
                       ? "Try searching with different keywords."
                       : activeTab === "archived"
-                      ? "Archived reflections will appear here."
-                      : "Create your first study reflection to begin your spiritual journal."}
+                        ? "Archived reflections will appear here."
+                        : "Create your first study reflection to begin your spiritual journal."}
                   </p>
                   {activeTab === "active" && !searchQuery && (
                     <Button
@@ -1114,13 +1128,12 @@ export function NotesManager({
               ) : (
                 sortedNotes.map((note) => {
                   const isSelected = activeNote?.id === note.id;
-                  const dateToDisplay = new Date(note.updatedAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      month: "short",
-                      day: "numeric",
-                    }
-                  );
+                  const dateToDisplay = new Date(
+                    note.updatedAt
+                  ).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
 
                   return (
                     <div
@@ -1322,7 +1335,9 @@ export function NotesManager({
                     {/* Delete Note */}
                     <button
                       type="button"
-                      onClick={() => handleDeleteNote({ noteId: activeNote.id })}
+                      onClick={() =>
+                        handleDeleteNote({ noteId: activeNote.id })
+                      }
                       className="size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border border-border bg-card text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/10 transition-all cursor-pointer shrink-0"
                       title="Delete note"
                     >
@@ -1386,7 +1401,8 @@ export function NotesManager({
                   Theological Sanctuary &amp; Journal
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mt-1 leading-relaxed">
-                  Select a reflection from the shelf to continue reading and editing, or create a new journal entry.
+                  Select a reflection from the shelf to continue reading and
+                  editing, or create a new journal entry.
                 </p>
                 <Button
                   type="button"

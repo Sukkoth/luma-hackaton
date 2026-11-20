@@ -217,7 +217,7 @@ function CustomTreemapContent({
   const hasProgress = percent > 0 && !isCompleted;
 
   const shortLabel = getBookShortLabel({ name });
-  const canFitFullName = Boolean(name && (name.length * 6.2 + 10) <= cellW);
+  const canFitFullName = Boolean(name && name.length * 6.2 + 10 <= cellW);
   const displayLabel = canFitFullName ? (name ?? "") : shortLabel;
 
   const canShowLabel = cellW >= 24 && cellH >= 16;
@@ -231,13 +231,7 @@ function CustomTreemapContent({
     <g>
       <defs>
         <clipPath id={clipId}>
-          <rect
-            x={cellX}
-            y={cellY}
-            width={cellW}
-            height={cellH}
-            rx={4}
-          />
+          <rect x={cellX} y={cellY} width={cellW} height={cellH} rx={4} />
         </clipPath>
       </defs>
 
@@ -254,8 +248,8 @@ function CustomTreemapContent({
             isCompleted
               ? "var(--primary)"
               : hasProgress
-              ? "var(--primary)"
-              : "var(--border)"
+                ? "var(--primary)"
+                : "var(--border)"
           }
           strokeOpacity={isCompleted ? 1 : hasProgress ? 0.45 : 0.4}
           strokeWidth={1}
@@ -294,16 +288,15 @@ function CustomTreemapContent({
               dominantBaseline="central"
               stroke="none"
               fill={
-                isCompleted
-                  ? "var(--primary-foreground)"
-                  : "var(--foreground)"
+                isCompleted ? "var(--primary-foreground)" : "var(--foreground)"
               }
               fillOpacity={isCompleted ? 1 : hasProgress ? 0.95 : 0.72}
               fontSize={cellW < 40 ? 9 : 10.5}
               fontWeight={isCompleted ? 700 : 600}
               letterSpacing="-0.01em"
               style={{
-                fontFamily: "var(--font-sans), system-ui, -apple-system, sans-serif",
+                fontFamily:
+                  "var(--font-sans), system-ui, -apple-system, sans-serif",
                 WebkitFontSmoothing: "antialiased",
                 MozOsxFontSmoothing: "grayscale",
                 textRendering: "geometricPrecision",
@@ -325,14 +318,15 @@ function CustomTreemapContent({
                   isCompleted
                     ? "var(--primary-foreground)"
                     : hasProgress
-                    ? "var(--primary)"
-                    : "var(--muted-foreground)"
+                      ? "var(--primary)"
+                      : "var(--muted-foreground)"
                 }
                 fillOpacity={isCompleted ? 0.85 : hasProgress ? 1 : 0.55}
                 fontSize={cellW < 40 ? 8 : 9}
                 fontWeight={isCompleted ? 600 : hasProgress ? 600 : 400}
                 style={{
-                  fontFamily: "var(--font-sans), system-ui, -apple-system, sans-serif",
+                  fontFamily:
+                    "var(--font-sans), system-ui, -apple-system, sans-serif",
                   WebkitFontSmoothing: "antialiased",
                   MozOsxFontSmoothing: "grayscale",
                   textRendering: "geometricPrecision",
@@ -573,9 +567,7 @@ export function SunburstCard({ data }: SunburstCardProps) {
 
       {/* Takeaway line */}
       <div className="mt-2 border-t border-border/60 pt-2 shrink-0">
-        <p className="text-xs text-muted-foreground truncate">
-          {takeaway}
-        </p>
+        <p className="text-xs text-muted-foreground truncate">{takeaway}</p>
       </div>
     </div>
   );

@@ -249,7 +249,8 @@ export function BooksView({
                 )}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Select any book to check off chapters or open the Scripture reader.
+                Select any book to check off chapters or open the Scripture
+                reader.
               </p>
             </div>
 

@@ -274,9 +274,7 @@ export function PlanGaugeCard({ data }: PlanGaugeCardProps) {
 
       {/* Takeaway line */}
       <div className="mt-2 border-t border-border/60 pt-2 shrink-0">
-        <p className="text-xs text-muted-foreground truncate">
-          {takeaway}
-        </p>
+        <p className="text-xs text-muted-foreground truncate">{takeaway}</p>
       </div>
     </div>
   );

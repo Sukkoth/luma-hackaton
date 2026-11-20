@@ -85,7 +85,8 @@ export function LogoutConfirmModal({
             id="logout-modal-description"
             className="text-xs text-muted-foreground leading-relaxed"
           >
-            Are you sure you want to sign out? Your reading progress and study notes are safely synced to your account.
+            Are you sure you want to sign out? Your reading progress and study
+            notes are safely synced to your account.
           </p>
         </div>
 

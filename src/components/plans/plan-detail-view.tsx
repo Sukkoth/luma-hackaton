@@ -44,7 +44,9 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   const [isPending, startTransition] = useTransition();
 
   // Active top tab switcher: "chapters" vs "settings"
-  const [activeTab, setActiveTab] = useState<"chapters" | "settings">("chapters");
+  const [activeTab, setActiveTab] = useState<"chapters" | "settings">(
+    "chapters"
+  );
 
   // Core plan state
   const [prevPlan, setPrevPlan] = useState<PlanInstanceDetail>(plan);
@@ -93,7 +95,8 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
 
   // Active Part & Session navigation (preserves user selection across completions)
   const [activePartIndex, setActivePartIndex] = useState(initialPartIdx);
-  const [activeSessionIndex, setActiveSessionIndex] = useState(initialSessionIdx);
+  const [activeSessionIndex, setActiveSessionIndex] =
+    useState(initialSessionIdx);
 
   // Modals state
   const [isCatchUpModalOpen, setIsCatchUpModalOpen] = useState(false);
@@ -116,7 +119,10 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     partSessions[0] ||
     sessions[0];
 
-  const remainingChapters = Math.max(0, currentPlan.totalChapters - completedChapters);
+  const remainingChapters = Math.max(
+    0,
+    currentPlan.totalChapters - completedChapters
+  );
   const completedSessionsCount = sessions.filter((s) => s.isCompleted).length;
 
   // Upcoming future scheduled plan detection
@@ -131,7 +137,8 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   let formattedPlanStartDate = "";
   if (isScheduledFuture) {
     daysUntilStart = Math.ceil(
-      (planStartDateObj.getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24)
+      (planStartDateObj.getTime() - nowMidnight.getTime()) /
+        (1000 * 60 * 60 * 24)
     );
     formattedPlanStartDate = planStartDateObj.toLocaleDateString(undefined, {
       weekday: "short",
@@ -327,11 +334,14 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                   Cohort Plan Starts {formattedPlanStartDate}
                 </span>
                 <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] font-medium text-foreground-secondary">
-                  {daysUntilStart === 1 ? "Starts tomorrow" : `Starts in ${daysUntilStart} days`}
+                  {daysUntilStart === 1
+                    ? "Starts tomorrow"
+                    : `Starts in ${daysUntilStart} days`}
                 </span>
               </div>
               <p className="text-[11.5px] text-foreground-dim mt-0.5">
-                You are pre-enrolled with your cohort. Day 1 readings will unlock when the start date arrives.
+                You are pre-enrolled with your cohort. Day 1 readings will
+                unlock when the start date arrives.
               </p>
             </div>
           </div>
@@ -350,32 +360,34 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
       {/* =========================================================================
           OVERDUE CATCH-UP BANNER (IF APPLICABLE)
           ========================================================================= */}
-      {currentPlan.overdueInfo && currentPlan.overdueInfo.overdueDaysCount > 0 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-foreground">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/20 text-amber-500 shrink-0">
-              <AlertCircle className="size-5" />
+      {currentPlan.overdueInfo &&
+        currentPlan.overdueInfo.overdueDaysCount > 0 && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-foreground">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-amber-500/20 text-amber-500 shrink-0">
+                <AlertCircle className="size-5" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-semibold">
+                  You are {currentPlan.overdueInfo.overdueDaysCount} session
+                  {currentPlan.overdueInfo.overdueDaysCount > 1 ? "s" : ""}{" "}
+                  behind schedule
+                </p>
+                <p className="text-[11px] text-foreground-dim">
+                  Adjust dates or daily pace to get back on track.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs sm:text-sm font-semibold">
-                You are {currentPlan.overdueInfo.overdueDaysCount} session
-                {currentPlan.overdueInfo.overdueDaysCount > 1 ? "s" : ""} behind schedule
-              </p>
-              <p className="text-[11px] text-foreground-dim">
-                Adjust dates or daily pace to get back on track.
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsCatchUpModalOpen(true)}
+              className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-95 cursor-pointer shadow-xs"
+            >
+              <Zap className="size-3.5 fill-current" />
+              <span>Catch Up Plan</span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsCatchUpModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-95 cursor-pointer shadow-xs"
-          >
-            <Zap className="size-3.5 fill-current" />
-            <span>Catch Up Plan</span>
-          </button>
-        </div>
-      )}
+        )}
 
       {/* =========================================================================
           2. SEGMENTED TAB SWITCHER: [Plan Chapters] | [Pacing & Settings]
@@ -395,7 +407,9 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
             },
           ]}
           activeTab={activeTab}
-          onTabChange={({ tab }) => setActiveTab(tab as "chapters" | "settings")}
+          onTabChange={({ tab }) =>
+            setActiveTab(tab as "chapters" | "settings")
+          }
         />
       </div>
 
@@ -531,13 +545,17 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                   const isPreviousIncomplete =
                     currentPlan.mode === "scheduled" &&
                     session.sessionIndex > 1 &&
-                    sessions.slice(0, session.sessionIndex - 1).some((s) => !s.isCompleted);
+                    sessions
+                      .slice(0, session.sessionIndex - 1)
+                      .some((s) => !s.isCompleted);
                   const isLocked = isScheduledFuture || isPreviousIncomplete;
 
                   return (
                     <div
                       key={session.sessionIndex}
-                      onClick={() => setActiveSessionIndex(session.sessionIndex)}
+                      onClick={() =>
+                        setActiveSessionIndex(session.sessionIndex)
+                      }
                       className={`w-[210px] sm:w-[230px] shrink-0 cursor-pointer snap-start rounded-2xl border p-3.5 sm:p-4 transition-all duration-200 select-none ${
                         isSelected
                           ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/40"

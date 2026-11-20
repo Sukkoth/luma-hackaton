@@ -84,7 +84,12 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
 
     const colParts = weekSundayDateStr.split("-").map(Number);
     const colDate = new Date(
-      Date.UTC(colParts[0] ?? 2026, (colParts[1] ?? 1) - 1, colParts[2] ?? 1, 12)
+      Date.UTC(
+        colParts[0] ?? 2026,
+        (colParts[1] ?? 1) - 1,
+        colParts[2] ?? 1,
+        12
+      )
     );
     const dayOfMonth = colDate.getUTCDate();
 
@@ -151,7 +156,12 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
   ] as const;
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onCloseAction(); }}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onCloseAction();
+      }}
+    >
       <SheetContent
         side="bottom"
         showHandle={true}
@@ -192,7 +202,10 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground border border-border/60">
                     <Trophy className="size-3 text-muted-foreground" />
-                    Best: <strong className="font-semibold text-foreground">{streak.longestStreak}d</strong>
+                    Best:{" "}
+                    <strong className="font-semibold text-foreground">
+                      {streak.longestStreak}d
+                    </strong>
                   </span>
                 </div>
 
@@ -285,11 +298,26 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
               {/* Heatmap Legend */}
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground self-start sm:self-center">
                 <span>Less</span>
-                <span title="0 chapters" className="size-2.5 rounded-xs bg-muted border border-border/80" />
-                <span title="1 chapter" className="size-2.5 rounded-xs bg-primary/25" />
-                <span title="2-3 chapters" className="size-2.5 rounded-xs bg-primary/50" />
-                <span title="4-6 chapters" className="size-2.5 rounded-xs bg-primary/80" />
-                <span title="7+ chapters" className="size-2.5 rounded-xs bg-primary" />
+                <span
+                  title="0 chapters"
+                  className="size-2.5 rounded-xs bg-muted border border-border/80"
+                />
+                <span
+                  title="1 chapter"
+                  className="size-2.5 rounded-xs bg-primary/25"
+                />
+                <span
+                  title="2-3 chapters"
+                  className="size-2.5 rounded-xs bg-primary/50"
+                />
+                <span
+                  title="4-6 chapters"
+                  className="size-2.5 rounded-xs bg-primary/80"
+                />
+                <span
+                  title="7+ chapters"
+                  className="size-2.5 rounded-xs bg-primary"
+                />
                 <span>More</span>
               </div>
             </div>

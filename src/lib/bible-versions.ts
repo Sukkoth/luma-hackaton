@@ -223,14 +223,19 @@ export function detectDefaultVersion({
   }
 
   // Default to NIV
-  return BIBLE_VERSIONS.find((v) => v.id === DEFAULT_BIBLE_VERSION_ID) || BIBLE_VERSIONS[0];
+  return (
+    BIBLE_VERSIONS.find((v) => v.id === DEFAULT_BIBLE_VERSION_ID) ||
+    BIBLE_VERSIONS[0]
+  );
 }
 
 type SaveSelectedVersionParams = {
   versionId: number;
 };
 
-export function saveSelectedVersion({ versionId }: SaveSelectedVersionParams): void {
+export function saveSelectedVersion({
+  versionId,
+}: SaveSelectedVersionParams): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(BIBLE_VERSION_STORAGE_KEY, versionId.toString());
   }

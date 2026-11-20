@@ -4,7 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { Sparkles, X, ArrowRight, Bookmark } from "lucide-react";
 import type { VerseOfTheDayData } from "@/lib/youversion";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
 
 type Props = {
   totalReadChapters: number;
@@ -85,7 +88,8 @@ export function VerseOfTheDayBanner({
                   {totalReadChapters}
                 </span>
                 <span className="text-xs font-semibold text-primary">
-                  of {totalChaptersAcrossCanon} chapters read ({canonPercentage}%)
+                  of {totalChaptersAcrossCanon} chapters read ({canonPercentage}
+                  %)
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -106,7 +110,9 @@ export function VerseOfTheDayBanner({
               <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full bg-primary rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, Math.max(2, canonPercentage))}%` }}
+                  style={{
+                    width: `${Math.min(100, Math.max(2, canonPercentage))}%`,
+                  }}
                 />
               </div>
             </div>
@@ -147,7 +153,9 @@ export function VerseOfTheDayBanner({
 
               <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-primary">{reference}</span>
+                  <span className="font-semibold text-primary">
+                    {reference}
+                  </span>
                   <span className="text-muted-foreground text-[11px]">
                     {version}
                   </span>
@@ -182,9 +190,7 @@ export function VerseOfTheDayBanner({
                 <span className="text-sm font-semibold text-foreground">
                   {reference}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {version}
-                </span>
+                <span className="text-xs text-muted-foreground">{version}</span>
               </div>
               <button
                 type="button"

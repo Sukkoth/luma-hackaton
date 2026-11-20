@@ -139,7 +139,8 @@ function TrackerCard({
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            {canonTitle} • {tracker.readChaptersCount} / {tracker.totalChaptersCount} chapters read ({progressPct}%)
+            {canonTitle} • {tracker.readChaptersCount} /{" "}
+            {tracker.totalChaptersCount} chapters read ({progressPct}%)
           </p>
         </div>
       </div>
@@ -179,9 +180,11 @@ export function SettingsView({
   const router = useRouter();
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsStringLiteral(["settings", "profile", "export"] as const).withDefault(
-      initialTab
-    )
+    parseAsStringLiteral([
+      "settings",
+      "profile",
+      "export",
+    ] as const).withDefault(initialTab)
   );
 
   const tabs: ReadonlyArray<TabItem<SettingsTab>> = [
@@ -203,7 +206,9 @@ export function SettingsView({
   ];
 
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [switchingTrackerId, setSwitchingTrackerId] = useState<string | null>(null);
+  const [switchingTrackerId, setSwitchingTrackerId] = useState<string | null>(
+    null
+  );
   const [isCreateTrackerOpen, setIsCreateTrackerOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isTrackerListExpanded, setIsTrackerListExpanded] = useState(false);
@@ -213,9 +218,8 @@ export function SettingsView({
   const [isPending, startTransition] = useTransition();
 
   // Browser notification permission state
-  const [permissionOverride, setPermissionOverride] = useState<
-    NotificationPermission | null
-  >(null);
+  const [permissionOverride, setPermissionOverride] =
+    useState<NotificationPermission | null>(null);
 
   const browserPermission = useSyncExternalStore(
     () => () => {},
@@ -279,7 +283,9 @@ export function SettingsView({
         settings: { dailyReminderEnabled: enabled },
       });
       if (res.success) {
-        toast.success(enabled ? "Daily reminder enabled" : "Daily reminder disabled");
+        toast.success(
+          enabled ? "Daily reminder enabled" : "Daily reminder disabled"
+        );
         router.refresh();
       } else {
         toast.error(res.error);
@@ -303,7 +309,8 @@ export function SettingsView({
   };
 
   const displayName = user.name.split(" ")[0] || user.name || "Reader";
-  const activeTracker = trackers.find((t) => t.id === activeTrackerId) ?? trackers[0];
+  const activeTracker =
+    trackers.find((t) => t.id === activeTrackerId) ?? trackers[0];
 
   const sortedTrackers = [...trackers].sort((a, b) => {
     if (a.id === activeTrackerId) return -1;
@@ -360,7 +367,11 @@ export function SettingsView({
                   </span>
                 </div>
                 <span className="text-[11px] font-medium text-muted-foreground">
-                  {activeTracker ? formatCanonTitle({ canon: activeTracker.canon as BibleCanon }) : "Workspace"}
+                  {activeTracker
+                    ? formatCanonTitle({
+                        canon: activeTracker.canon as BibleCanon,
+                      })
+                    : "Workspace"}
                 </span>
               </div>
 
@@ -383,7 +394,9 @@ export function SettingsView({
               <div className="space-y-1 pt-0.5">
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>Reading Isolation</span>
-                  <span className="text-primary font-medium">Protected per Canon</span>
+                  <span className="text-primary font-medium">
+                    Protected per Canon
+                  </span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                   <div
@@ -391,7 +404,14 @@ export function SettingsView({
                     style={{
                       width: `${
                         activeTracker && activeTracker.totalChaptersCount > 0
-                          ? Math.min(100, Math.round((activeTracker.readChaptersCount / activeTracker.totalChaptersCount) * 100))
+                          ? Math.min(
+                              100,
+                              Math.round(
+                                (activeTracker.readChaptersCount /
+                                  activeTracker.totalChaptersCount) *
+                                  100
+                              )
+                            )
                           : 0
                       }%`,
                     }}
@@ -470,7 +490,8 @@ export function SettingsView({
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Switch your active devotional tracker or create a new workspace for another canonical tradition.
+                    Switch your active devotional tracker or create a new
+                    workspace for another canonical tradition.
                   </p>
                 </div>
 
@@ -554,7 +575,9 @@ export function SettingsView({
                     </h2>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Set a daily prompt to record your chapter readings. Plan-specific pacing alerts are scheduled separately in each plan.
+                    Set a daily prompt to record your chapter readings.
+                    Plan-specific pacing alerts are scheduled separately in each
+                    plan.
                   </p>
                 </div>
 
@@ -594,7 +617,8 @@ export function SettingsView({
                       Daily Chapter Logging Reminder
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Receive a prompt to log your daily reading and maintain your spiritual streak.
+                      Receive a prompt to log your daily reading and maintain
+                      your spiritual streak.
                     </p>
                   </div>
 

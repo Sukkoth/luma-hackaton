@@ -96,9 +96,7 @@ export function InsightsKpiCards({
             <BookOpen className="size-4 text-primary" />
             <span>Active Tracker</span>
           </span>
-          <span className="text-xs font-semibold text-primary">
-            Active
-          </span>
+          <span className="text-xs font-semibold text-primary">Active</span>
         </div>
         <div className="mt-3">
           <span className="block truncate text-xl sm:text-2xl font-bold leading-tight tracking-tight text-foreground">

@@ -15,10 +15,7 @@ import {
   Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  updateProfileAction,
-  changePasswordAction,
-} from "@/actions/profile";
+import { updateProfileAction, changePasswordAction } from "@/actions/profile";
 
 type SettingsUser = {
   id: string;
@@ -94,7 +91,8 @@ export function ProfileSettingsSection({
         });
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to update profile";
+      const msg =
+        err instanceof Error ? err.message : "Failed to update profile";
       setProfileMessage({ type: "error", text: msg });
     } finally {
       setIsUpdatingProfile(false);
@@ -403,7 +401,11 @@ export function ProfileSettingsSection({
               Active Account Session
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Signed in as <span className="font-semibold text-foreground">{user.email}</span>. You can sign out of this device below.
+              Signed in as{" "}
+              <span className="font-semibold text-foreground">
+                {user.email}
+              </span>
+              . You can sign out of this device below.
             </p>
           </div>
 

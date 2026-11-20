@@ -64,7 +64,9 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
           {!isTodayCompleted && timeLeftUntilMidnight ? (
             <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 shrink-0">
               <Clock className="size-3.5" />
-              <span className="tabular-nums font-semibold">{timeLeftUntilMidnight} left</span>
+              <span className="tabular-nums font-semibold">
+                {timeLeftUntilMidnight} left
+              </span>
             </span>
           ) : (
             <span className="text-emerald-700 dark:text-emerald-400 font-semibold shrink-0">
@@ -290,9 +292,7 @@ export function StreakHeatmapCard({ data }: StreakHeatmapCardProps) {
 
       {/* Takeaway Line */}
       <div className="border-t border-border/60 pt-1.5 shrink-0">
-        <p className="text-xs text-muted-foreground truncate">
-          {takeaway}
-        </p>
+        <p className="text-xs text-muted-foreground truncate">{takeaway}</p>
       </div>
     </div>
   );

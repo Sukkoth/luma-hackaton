@@ -69,7 +69,8 @@ export function GroupAdminTab({
 
   // Member management state
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
-  const [memberToRemove, setMemberToRemove] = useState<GroupMemberSummary | null>(null);
+  const [memberToRemove, setMemberToRemove] =
+    useState<GroupMemberSummary | null>(null);
 
   // Delete modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -88,10 +89,7 @@ export function GroupAdminTab({
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function handleRoleChange(
-    userId: string,
-    newRole: "admin" | "member"
-  ) {
+  async function handleRoleChange(userId: string, newRole: "admin" | "member") {
     setLoadingUserId(userId);
     try {
       await updateMemberRoleAction({
@@ -150,8 +148,6 @@ export function GroupAdminTab({
       setIsSavingSettings(false);
     }
   }
-
-
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -413,7 +409,8 @@ export function GroupAdminTab({
                 Danger Zone
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Irreversible actions for fellowship management and data deletion.
+                Irreversible actions for fellowship management and data
+                deletion.
               </p>
             </div>
 
@@ -462,7 +459,8 @@ export function GroupAdminTab({
               Remove Member?
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Remove &ldquo;{memberToRemove.name}&rdquo; from this fellowship? They will lose access to cohort plans and reading accountability.
+              Remove &ldquo;{memberToRemove.name}&rdquo; from this fellowship?
+              They will lose access to cohort plans and reading accountability.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button

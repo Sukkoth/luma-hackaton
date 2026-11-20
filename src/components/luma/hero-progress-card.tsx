@@ -84,7 +84,9 @@ export function HeroProgressCard({
 
           {/* Center Content Inside Circular Gauge */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span className="text-3xl font-bold tracking-tight text-foreground">{percentage}%</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground">
+              {percentage}%
+            </span>
             <span className="mt-1 text-xs font-medium text-foreground-secondary">
               {readChapters} of {totalChapters}
             </span>

@@ -52,7 +52,8 @@ export function FilterPills<T extends string = string>({
               isActive
                 ? "border border-primary bg-primary text-primary-foreground shadow-xs font-semibold"
                 : "border border-border bg-surface-elevated text-muted-foreground hover:border-border-strong hover:text-foreground",
-              item.disabled && "opacity-50 cursor-not-allowed pointer-events-none"
+              item.disabled &&
+                "opacity-50 cursor-not-allowed pointer-events-none"
             )}
           >
             <span>{item.label}</span>

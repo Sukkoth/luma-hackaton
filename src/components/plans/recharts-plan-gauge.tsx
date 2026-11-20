@@ -61,7 +61,9 @@ export function RechartsPlanGauge({
               tick={false}
             />
             <RadialBar
-              background={{ fill: "color-mix(in srgb, var(--border) 70%, transparent)" }}
+              background={{
+                fill: "color-mix(in srgb, var(--border) 70%, transparent)",
+              }}
               dataKey="value"
               cornerRadius={9}
               animationDuration={800}

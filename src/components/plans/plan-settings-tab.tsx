@@ -372,7 +372,9 @@ export function PlanSettingsTab({
               },
             ]}
             activeTab={mode}
-            onTabChange={({ tab }) => handleSwitchMode(tab as "scheduled" | "flexible")}
+            onTabChange={({ tab }) =>
+              handleSwitchMode(tab as "scheduled" | "flexible")
+            }
           />
 
           {!plan.allowSelfPaced && (

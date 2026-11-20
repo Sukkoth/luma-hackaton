@@ -1,6 +1,9 @@
 "use client";
 
-import { BibleReaderCore, type BibleReaderCoreProps } from "./bible-reader-core";
+import {
+  BibleReaderCore,
+  type BibleReaderCoreProps,
+} from "./bible-reader-core";
 
 export type BibleReaderPageProps = {
   bookId: string;

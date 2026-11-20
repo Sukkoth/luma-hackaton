@@ -4,7 +4,10 @@ import Link from "next/link";
 import { Compass, LogIn, Play, Plus, Upload } from "lucide-react";
 import type { useSession } from "@/lib/auth-client";
 import { READING_PLANS } from "@/data/readingPlans";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
 
 export type ActivePlanInstance = {
   id: string;
@@ -183,7 +186,9 @@ export function PlanActiveBanner({
                   <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, Math.max(0, activePlan.progressPercent))}%` }}
+                      style={{
+                        width: `${Math.min(100, Math.max(0, activePlan.progressPercent))}%`,
+                      }}
                     />
                   </div>
                   <div className="flex items-center justify-between text-[11px] pt-1">

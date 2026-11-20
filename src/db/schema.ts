@@ -636,7 +636,8 @@ export const unlockedAchievementsRelations = relations(
 // --- Community & Cohort Reading ---
 
 export type GroupRole = "owner" | "admin" | "member";
-export type GroupPlanStatus = "scheduled" | "active" | "completed" | "cancelled";
+export type GroupPlanStatus =
+  "scheduled" | "active" | "completed" | "cancelled";
 export type GroupLateJoinPolicy = "strict_locked" | "skip_ahead" | "backfill";
 export type GroupMembershipStatus = "active" | "pending_approval";
 
@@ -657,9 +658,16 @@ export const groups = pgTable(
     requiresApproval: boolean("requires_approval").default(false).notNull(),
     pinnedNoticeTitle: varchar("pinned_notice_title", { length: 150 }),
     pinnedNoticeContent: text("pinned_notice_content"),
-    pinnedNoticeExpiresAt: timestamp("pinned_notice_expires_at", { withTimezone: true }),
-    pinnedNoticeAuthorId: text("pinned_notice_author_id").references(() => user.id, { onDelete: "set null" }),
-    pinnedNoticeUpdatedAt: timestamp("pinned_notice_updated_at", { withTimezone: true }),
+    pinnedNoticeExpiresAt: timestamp("pinned_notice_expires_at", {
+      withTimezone: true,
+    }),
+    pinnedNoticeAuthorId: text("pinned_notice_author_id").references(
+      () => user.id,
+      { onDelete: "set null" }
+    ),
+    pinnedNoticeUpdatedAt: timestamp("pinned_notice_updated_at", {
+      withTimezone: true,
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -762,16 +770,19 @@ export const groupActivities = pgTable(
   ]
 );
 
-export const groupActivitiesRelations = relations(groupActivities, ({ one }) => ({
-  group: one(groups, {
-    fields: [groupActivities.groupId],
-    references: [groups.id],
-  }),
-  actor: one(user, {
-    fields: [groupActivities.actorId],
-    references: [user.id],
-  }),
-}));
+export const groupActivitiesRelations = relations(
+  groupActivities,
+  ({ one }) => ({
+    group: one(groups, {
+      fields: [groupActivities.groupId],
+      references: [groups.id],
+    }),
+    actor: one(user, {
+      fields: [groupActivities.actorId],
+      references: [user.id],
+    }),
+  })
+);
 
 export const groupPlans = pgTable(
   "group_plans",
@@ -793,7 +804,9 @@ export const groupPlans = pgTable(
       .default("skip_ahead")
       .notNull(), // 'strict_locked' | 'skip_ahead' | 'backfill'
     dailyChapterTarget: integer("daily_chapter_target").default(3).notNull(),
-    activeWeekdaysMask: text("active_weekdays_mask").default("1111111").notNull(),
+    activeWeekdaysMask: text("active_weekdays_mask")
+      .default("1111111")
+      .notNull(),
     createdBy: text("created_by")
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),

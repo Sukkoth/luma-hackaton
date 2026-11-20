@@ -404,7 +404,9 @@ html.dark body {
   min-height: 2.75rem;
   padding: 0.5rem 0.875rem;
   font-size: 0.9375rem;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .ui-input:focus {

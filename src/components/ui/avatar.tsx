@@ -44,7 +44,9 @@ export function Avatar({
           onError={() => setHasError(true)}
         />
       ) : (
-        <span className="font-semibold uppercase tracking-wider">{fallback}</span>
+        <span className="font-semibold uppercase tracking-wider">
+          {fallback}
+        </span>
       )}
     </div>
   );

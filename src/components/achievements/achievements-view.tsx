@@ -128,7 +128,8 @@ export function AchievementsView({
               Milestone Gallery
             </h2>
             <p className="text-xs text-muted-foreground">
-              Earn distinctive badges as you read and build consistency across canons.
+              Earn distinctive badges as you read and build consistency across
+              canons.
             </p>
           </div>
 
@@ -136,7 +137,10 @@ export function AchievementsView({
             containerTestId="achievement-status-filter"
             tabs={[
               { id: "All" as const, label: `All (${stats.total})` },
-              { id: "Unlocked" as const, label: `Unlocked (${stats.unlocked})` },
+              {
+                id: "Unlocked" as const,
+                label: `Unlocked (${stats.unlocked})`,
+              },
               { id: "Locked" as const, label: `Locked (${stats.locked})` },
             ]}
             activeTab={statusFilter}

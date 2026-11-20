@@ -38,7 +38,11 @@ const SEED_USERS: ReadonlyArray<SeedUserData> = [
   // Admins (5)
   { email: "admin1@example.com", name: "Michael Admin", roleType: "admin" },
   { email: "admin2@example.com", name: "Grace Facilitator", roleType: "admin" },
-  { email: "admin3@example.com", name: "Joshua Coordinator", roleType: "admin" },
+  {
+    email: "admin3@example.com",
+    name: "Joshua Coordinator",
+    roleType: "admin",
+  },
   { email: "admin4@example.com", name: "Hannah Organizer", roleType: "admin" },
   { email: "admin5@example.com", name: "Caleb Moderator", roleType: "admin" },
 
@@ -57,7 +61,11 @@ const SEED_USERS: ReadonlyArray<SeedUserData> = [
   { email: "member12@example.com", name: "Luke Miller", roleType: "member" },
   { email: "member13@example.com", name: "Mary Nelson", roleType: "member" },
   { email: "member14@example.com", name: "Nathan Owens", roleType: "member" },
-  { email: "member15@example.com", name: "Priscilla Price", roleType: "member" },
+  {
+    email: "member15@example.com",
+    name: "Priscilla Price",
+    roleType: "member",
+  },
   { email: "member16@example.com", name: "Rachel Quinn", roleType: "member" },
   { email: "member17@example.com", name: "Samuel Reed", roleType: "member" },
   { email: "member18@example.com", name: "Tabitha Scott", roleType: "member" },
@@ -85,7 +93,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   // 10 Public Groups
   {
     name: "Berean Scripture Seekers",
-    description: "Acts 17:11 daily Scripture study examining the Word together with diligence and prayer.",
+    description:
+      "Acts 17:11 daily Scripture study examining the Word together with diligence and prayer.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner1@example.com",
@@ -94,7 +103,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Addis Youth Fellowship",
-    description: "High school and college youth gathering weekly to read through the New Testament with shared pacing.",
+    description:
+      "High school and college youth gathering weekly to read through the New Testament with shared pacing.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner1@example.com",
@@ -103,7 +113,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Gospel & Grace Cohort",
-    description: "Walking step by step through the four Gospels to understand the life, sacrifice, and teachings of Jesus.",
+    description:
+      "Walking step by step through the four Gospels to understand the life, sacrifice, and teachings of Jesus.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner2@example.com",
@@ -112,7 +123,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Early Morning Proverbs Walk",
-    description: "31 days of biblical wisdom. One chapter of Proverbs every morning for personal and work guidance.",
+    description:
+      "31 days of biblical wisdom. One chapter of Proverbs every morning for personal and work guidance.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner2@example.com",
@@ -121,7 +133,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Romans Theology Circle",
-    description: "Exploring Paul's magnificent letter on justification by faith, grace, and Christian ethics.",
+    description:
+      "Exploring Paul's magnificent letter on justification by faith, grace, and Christian ethics.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner3@example.com",
@@ -130,7 +143,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "New Testament Scholars",
-    description: "Rigorous exegetical reading of the epistles and historical narratives of the early apostolic church.",
+    description:
+      "Rigorous exegetical reading of the epistles and historical narratives of the early apostolic church.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner3@example.com",
@@ -139,7 +153,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Psalms of Ascent Prayer Group",
-    description: "Daily liturgical prayer and meditation on the songs and praises of ancient Israel.",
+    description:
+      "Daily liturgical prayer and meditation on the songs and praises of ancient Israel.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner4@example.com",
@@ -148,7 +163,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Young Adults Bible Study",
-    description: "Community fellowship for young professionals seeking kingdom purpose in modern everyday life.",
+    description:
+      "Community fellowship for young professionals seeking kingdom purpose in modern everyday life.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner4@example.com",
@@ -157,7 +173,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Genesis Foundations Community",
-    description: "Tracing God's covenant from the dawn of creation to the patriarchs Abraham, Isaac, and Jacob.",
+    description:
+      "Tracing God's covenant from the dawn of creation to the patriarchs Abraham, Isaac, and Jacob.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner5@example.com",
@@ -166,7 +183,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Faith & Deeds Discipleship",
-    description: "Living out active faith through Scripture meditation, prayer, and mutual community support.",
+    description:
+      "Living out active faith through Scripture meditation, prayer, and mutual community support.",
     isPrivate: false,
     requiresApproval: false,
     ownerEmail: "owner5@example.com",
@@ -177,7 +195,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   // 5 Private Groups
   {
     name: "Pastoral Leadership Council",
-    description: "Confidential pastoral leadership reading circle for elder and minister spiritual formation.",
+    description:
+      "Confidential pastoral leadership reading circle for elder and minister spiritual formation.",
     isPrivate: true,
     requiresApproval: true,
     ownerEmail: "owner1@example.com",
@@ -186,7 +205,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Mekane Yesus Elders Circle",
-    description: "Senior leaders and elders cohort dedicated to prayerful oversight and scriptural grounding.",
+    description:
+      "Senior leaders and elders cohort dedicated to prayerful oversight and scriptural grounding.",
     isPrivate: true,
     requiresApproval: true,
     ownerEmail: "owner2@example.com",
@@ -195,7 +215,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Home Fellowship Cell 4",
-    description: "Weekly neighborhood house church meeting for dinner, worship, and Scripture discussion.",
+    description:
+      "Weekly neighborhood house church meeting for dinner, worship, and Scripture discussion.",
     isPrivate: true,
     requiresApproval: false,
     ownerEmail: "owner3@example.com",
@@ -204,7 +225,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Mentorship & Accountability Band",
-    description: "Close-knit brotherhood for honest spiritual accountability and daily Bible habits.",
+    description:
+      "Close-knit brotherhood for honest spiritual accountability and daily Bible habits.",
     isPrivate: true,
     requiresApproval: true,
     ownerEmail: "owner4@example.com",
@@ -213,7 +235,8 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
   },
   {
     name: "Family Bible Reading Circle",
-    description: "Multi-generational family reading group walking through biblical books together.",
+    description:
+      "Multi-generational family reading group walking through biblical books together.",
     isPrivate: true,
     requiresApproval: false,
     ownerEmail: "owner5@example.com",
@@ -229,7 +252,10 @@ export async function seedCommunityData(): Promise<void> {
 
   // 1. Ensure all seed users exist with "Password123!"
   console.log("Creating/verifying 35 seed users...");
-  const userMap = new Map<string, { id: string; name: string; email: string; trackerId: string }>();
+  const userMap = new Map<
+    string,
+    { id: string; name: string; email: string; trackerId: string }
+  >();
 
   for (const u of SEED_USERS) {
     let existing = await db.query.user.findFirst({
@@ -318,7 +344,9 @@ export async function seedCommunityData(): Promise<void> {
     }
   }
 
-  console.log(`Verified ${userMap.size} users with active credentials (Password123!).`);
+  console.log(
+    `Verified ${userMap.size} users with active credentials (Password123!).`
+  );
 
   // 2. Ensure plan templates exist in database
   const requiredTemplates = [
@@ -428,7 +456,10 @@ export async function seedCommunityData(): Promise<void> {
 
     // Add 1-2 pending approval members in groups that require approval
     if (gDef.requiresApproval) {
-      const pendingCandidates = ["member23@example.com", "member24@example.com"];
+      const pendingCandidates = [
+        "member23@example.com",
+        "member24@example.com",
+      ];
       for (const pEmail of pendingCandidates) {
         const pUser = userMap.get(pEmail);
         if (pUser && !selectedMemberEmails.includes(pEmail)) {
@@ -477,7 +508,9 @@ export async function seedCommunityData(): Promise<void> {
 
         for (let mIdx = 0; mIdx < allGroupMembers.length; mIdx++) {
           const gm = allGroupMembers[mIdx]!;
-          const uData = Array.from(userMap.values()).find((u) => u.id === gm.userId);
+          const uData = Array.from(userMap.values()).find(
+            (u) => u.id === gm.userId
+          );
           if (!uData) continue;
 
           // Determine realistic completion percentage based on member index
@@ -533,7 +566,9 @@ export async function seedCommunityData(): Promise<void> {
               .values({
                 instanceId,
                 readingItemId: rItem.id,
-                completedAt: new Date(Date.now() - (chaptersToComplete - c) * 3600000),
+                completedAt: new Date(
+                  Date.now() - (chaptersToComplete - c) * 3600000
+                ),
               })
               .onConflictDoNothing();
 
@@ -544,7 +579,9 @@ export async function seedCommunityData(): Promise<void> {
                 trackerId: uData.trackerId,
                 bookId: rItem.bookId,
                 chapter: rItem.chapter,
-                completedAt: new Date(Date.now() - (chaptersToComplete - c) * 3600000),
+                completedAt: new Date(
+                  Date.now() - (chaptersToComplete - c) * 3600000
+                ),
               })
               .onConflictDoNothing();
           }
@@ -581,7 +618,9 @@ export async function seedCommunityData(): Promise<void> {
     });
 
     for (const dGroup of demoGroups) {
-      console.log(`Enriching existing user group "${dGroup.name}" with community members...`);
+      console.log(
+        `Enriching existing user group "${dGroup.name}" with community members...`
+      );
       // Add admin1
       const admin1 = userMap.get("admin1@example.com");
       if (admin1) {
@@ -634,12 +673,13 @@ export async function seedCommunityData(): Promise<void> {
             if (!uData) continue;
 
             // Check if already enrolled
-            const existingEnrollment = await db.query.groupMemberEnrollments.findFirst({
-              where: and(
-                eq(groupMemberEnrollments.groupPlanId, activePlan.id),
-                eq(groupMemberEnrollments.userId, uData.id)
-              ),
-            });
+            const existingEnrollment =
+              await db.query.groupMemberEnrollments.findFirst({
+                where: and(
+                  eq(groupMemberEnrollments.groupPlanId, activePlan.id),
+                  eq(groupMemberEnrollments.userId, uData.id)
+                ),
+              });
             if (existingEnrollment) continue;
 
             let percent = 0;
@@ -687,7 +727,9 @@ export async function seedCommunityData(): Promise<void> {
                 .values({
                   instanceId,
                   readingItemId: rItem.id,
-                  completedAt: new Date(Date.now() - (chaptersToComplete - c) * 3600000),
+                  completedAt: new Date(
+                    Date.now() - (chaptersToComplete - c) * 3600000
+                  ),
                 })
                 .onConflictDoNothing();
 
@@ -697,7 +739,9 @@ export async function seedCommunityData(): Promise<void> {
                   trackerId: uData.trackerId,
                   bookId: rItem.bookId,
                   chapter: rItem.chapter,
-                  completedAt: new Date(Date.now() - (chaptersToComplete - c) * 3600000),
+                  completedAt: new Date(
+                    Date.now() - (chaptersToComplete - c) * 3600000
+                  ),
                 })
                 .onConflictDoNothing();
             }

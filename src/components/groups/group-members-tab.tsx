@@ -4,7 +4,15 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsString } from "nuqs";
-import { Search, Shield, ShieldCheck, UserCheck, UserX, Lock, UserPlus } from "lucide-react";
+import {
+  Search,
+  Shield,
+  ShieldCheck,
+  UserCheck,
+  UserX,
+  Lock,
+  UserPlus,
+} from "lucide-react";
 import type { GroupMemberSummary } from "@/actions/groups";
 import {
   approveMemberAction,
@@ -92,7 +100,8 @@ export function GroupMembersTab({
           Member Directory is Private
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-6 max-w-sm">
-          You have to join this fellowship to see the list of members, connect with fellow readers, and walk through Scripture together.
+          You have to join this fellowship to see the list of members, connect
+          with fellow readers, and walk through Scripture together.
         </p>
         {onJoinClick && (
           <Button
@@ -130,7 +139,8 @@ export function GroupMembersTab({
                 Pending Join Requests ({pendingMembers.length})
               </h3>
               <p className="text-xs text-muted-foreground">
-                Readers who requested to join this fellowship cohort and require approval.
+                Readers who requested to join this fellowship cohort and require
+                approval.
               </p>
             </div>
           </div>
@@ -211,7 +221,8 @@ export function GroupMembersTab({
               Fellowship Directory
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {members.length} {members.length === 1 ? "reader" : "readers"} enrolled in this cohort
+              {members.length} {members.length === 1 ? "reader" : "readers"}{" "}
+              enrolled in this cohort
             </p>
           </div>
 
@@ -230,7 +241,9 @@ export function GroupMembersTab({
         {/* Members Roster */}
         {filtered.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-muted/20">
-            <p className="text-sm font-semibold text-foreground">No members found</p>
+            <p className="text-sm font-semibold text-foreground">
+              No members found
+            </p>
             <p className="text-xs text-muted-foreground mt-1">
               Try adjusting your search query.
             </p>
@@ -338,7 +351,9 @@ export function GroupMembersTab({
               Remove Member?
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to remove &ldquo;{memberToKick.name}&rdquo; from this fellowship? They will lose access to cohort plans and reading accountability.
+              Are you sure you want to remove &ldquo;{memberToKick.name}&rdquo;
+              from this fellowship? They will lose access to cohort plans and
+              reading accountability.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button

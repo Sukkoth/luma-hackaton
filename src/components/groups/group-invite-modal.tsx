@@ -109,7 +109,9 @@ export function GroupInviteModal({
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to regenerate invite link.";
+        err instanceof Error
+          ? err.message
+          : "Failed to regenerate invite link.";
       setRegenerateError(message);
     } finally {
       setIsRegenerating(false);
@@ -233,7 +235,8 @@ export function GroupInviteModal({
               </button>
             </div>
             <div className="p-3 rounded-xl border border-border bg-muted/20 text-xs text-muted-foreground leading-relaxed">
-              &ldquo;Join our Scripture reading fellowship &ldquo;{groupName}&rdquo; on Luma Bible: {inviteUrl}&rdquo;
+              &ldquo;Join our Scripture reading fellowship &ldquo;{groupName}
+              &rdquo; on Luma Bible: {inviteUrl}&rdquo;
             </div>
           </div>
 
@@ -249,7 +252,8 @@ export function GroupInviteModal({
                         Regenerate Invitation Link?
                       </h4>
                       <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                        The current link and any previously printed or shared QR codes will stop working immediately.
+                        The current link and any previously printed or shared QR
+                        codes will stop working immediately.
                       </p>
                     </div>
                   </div>
@@ -284,7 +288,9 @@ export function GroupInviteModal({
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsConfirmingRegenerate(true)}
-                    leftIcon={<RefreshCw className="size-3 text-muted-foreground" />}
+                    leftIcon={
+                      <RefreshCw className="size-3 text-muted-foreground" />
+                    }
                     className="text-xs"
                   >
                     Regenerate Code

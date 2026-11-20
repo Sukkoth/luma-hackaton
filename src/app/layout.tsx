@@ -16,7 +16,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Luma Bible Tracker & Study Platform",
-  description: "Aesthetic, habit-forming Bible reading companion and study journal.",
+  description:
+    "Aesthetic, habit-forming Bible reading companion and study journal.",
   icons: {
     icon: [
       { url: "/favicon.ico" },

@@ -111,7 +111,9 @@ export function ActivityRingsCard({ data }: ActivityRingsCardProps) {
           </span>
         </div>
         <div className="flex flex-col text-right">
-          <span className="text-[11px] text-muted-foreground">30-Day Velocity</span>
+          <span className="text-[11px] text-muted-foreground">
+            30-Day Velocity
+          </span>
           <span className="text-sm font-semibold text-foreground tabular-nums">
             {avgDay30d} ch/day
           </span>
@@ -127,13 +129,17 @@ export function ActivityRingsCard({ data }: ActivityRingsCardProps) {
           >
             <div className="flex items-center gap-1.5 truncate">
               <BookOpen className="size-3.5 text-primary shrink-0" />
-              <span className="truncate">Next: {nextReading.bookName} {nextReading.chapter}</span>
+              <span className="truncate">
+                Next: {nextReading.bookName} {nextReading.chapter}
+              </span>
             </div>
             <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5 shrink-0" />
           </Link>
         ) : (
           <p className="text-xs text-muted-foreground truncate">
-            {projectedFinishDate ? `Projected completion: ${projectedFinishDate}` : "Start reading to view pace"}
+            {projectedFinishDate
+              ? `Projected completion: ${projectedFinishDate}`
+              : "Start reading to view pace"}
           </p>
         )}
       </div>

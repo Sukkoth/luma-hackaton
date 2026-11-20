@@ -406,11 +406,7 @@ export function AppShell({
               className="flex items-center gap-2.5 pl-1 group transition-opacity hover:opacity-90"
               title="Profile & Settings"
             >
-              <Avatar
-                src={effectiveUserImage}
-                fallback={initials}
-                size="md"
-              />
+              <Avatar src={effectiveUserImage} fallback={initials} size="md" />
               <div className="flex flex-col text-left">
                 <span className="text-xs font-semibold text-foreground leading-tight group-hover:underline">
                   {effectiveUserName}

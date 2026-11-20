@@ -87,7 +87,10 @@ function extractChapterContent({
     allowedSchemesByTag: { a: ["http", "https"] },
     allowProtocolRelative: false,
     transformTags: {
-      a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+      a: sanitizeHtml.simpleTransform("a", {
+        target: "_blank",
+        rel: "noopener noreferrer",
+      }),
     },
     exclusiveFilter: (frame) => {
       // Aggressively filter out ads, images, navigation, promo content
@@ -101,7 +104,8 @@ function extractChapterContent({
       const backgroundImage = frame.attribs?.["background-image"] || "";
 
       // Also check for background-image in style attribute
-      const hasBackgroundImage = style.includes("background-image") || backgroundImage !== "";
+      const hasBackgroundImage =
+        style.includes("background-image") || backgroundImage !== "";
 
       return (
         tag === "img" ||
@@ -259,7 +263,21 @@ function extractHeadLinks({ html }: ExtractHeadLinksParams): string {
  */
 function extractPlainTextContent({ html }: { html: string }): string {
   return sanitizeHtml(html, {
-    allowedTags: ["p", "span", "a", "br", "strong", "em", "b", "i", "sup", "h1", "h2", "h3", "h4"],
+    allowedTags: [
+      "p",
+      "span",
+      "a",
+      "br",
+      "strong",
+      "em",
+      "b",
+      "i",
+      "sup",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+    ],
     allowedAttributes: {
       a: ["href"],
       span: ["data-usfm"],
@@ -273,7 +291,10 @@ function extractPlainTextContent({ html }: { html: string }): string {
     allowedSchemesByTag: { a: ["http", "https"] },
     allowProtocolRelative: false,
     transformTags: {
-      a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+      a: sanitizeHtml.simpleTransform("a", {
+        target: "_blank",
+        rel: "noopener noreferrer",
+      }),
     },
     exclusiveFilter: (frame) => {
       // Drop nav, header, footer, script containers, ads, etc.
@@ -347,7 +368,10 @@ function sanitizeHtmlContent({ html }: { html: string }): string {
     allowedSchemesByTag: { a: ["http", "https"] },
     allowProtocolRelative: false,
     transformTags: {
-      a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+      a: sanitizeHtml.simpleTransform("a", {
+        target: "_blank",
+        rel: "noopener noreferrer",
+      }),
     },
     exclusiveFilter: (frame) => {
       const tag = frame.tag;
@@ -731,7 +755,10 @@ export async function GET(request: NextRequest): Promise<Response> {
   // Strict validation to prevent SSRF and path traversal:
   // Must match {versionId}/{USFM_BOOK}.{chapter} or {versionId}/{USFM_BOOK}.{chapter}.{verses}
   // Example: 114/HEB.1 or 3867/GEN.1 or 111/JHN.3.16-17
-  const isValidPath = /^[0-9]{1,6}\/[1-3]?[A-Za-z]{2,5}\.[0-9]{1,3}(?:\.[0-9]{1,3}(?:-[0-9]{1,3})?)?$/.test(path);
+  const isValidPath =
+    /^[0-9]{1,6}\/[1-3]?[A-Za-z]{2,5}\.[0-9]{1,3}(?:\.[0-9]{1,3}(?:-[0-9]{1,3})?)?$/.test(
+      path
+    );
   if (!isValidPath) {
     return new Response("Invalid Bible reference path format", { status: 400 });
   }

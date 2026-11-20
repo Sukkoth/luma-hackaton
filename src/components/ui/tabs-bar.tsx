@@ -54,7 +54,8 @@ export function TabsBar<T extends string = string>({
               isActive
                 ? "bg-primary text-primary-foreground shadow-2xs font-semibold"
                 : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted",
-              tab.disabled && "opacity-50 cursor-not-allowed pointer-events-none"
+              tab.disabled &&
+                "opacity-50 cursor-not-allowed pointer-events-none"
             )}
           >
             {tab.icon && (

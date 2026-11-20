@@ -197,31 +197,37 @@ export function BibleReaderCore({
         isCompleted: Boolean(r.isCompleted),
       }));
     }
-    return [{
-      id: "standalone",
-      bookId,
-      bookName: bookId.toUpperCase(),
-      chapter,
-      startVerse,
-      endVerse,
-      displayText: bookId.toUpperCase(),
-      isCompleted: false,
-      sessionIndex: 1,
-      sessionTitle: "Bible",
-    }];
+    return [
+      {
+        id: "standalone",
+        bookId,
+        bookName: bookId.toUpperCase(),
+        chapter,
+        startVerse,
+        endVerse,
+        displayText: bookId.toUpperCase(),
+        isCompleted: false,
+        sessionIndex: 1,
+        sessionTitle: "Bible",
+      },
+    ];
   }, [planContext, bookId, chapter, startVerse, endVerse]);
 
   // Find current reading index
   const currentIndex = useMemo(() => {
     if (planContext) {
-      return flattenedReadings.findIndex((r) => r.id === planContext.reading.id);
+      return flattenedReadings.findIndex(
+        (r) => r.id === planContext.reading.id
+      );
     }
     return 0;
   }, [flattenedReadings, planContext]);
 
-  const currentReading = flattenedReadings[currentIndex] ?? flattenedReadings[0];
+  const currentReading =
+    flattenedReadings[currentIndex] ?? flattenedReadings[0];
   const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex >= 0 && currentIndex < flattenedReadings.length - 1;
+  const hasNext =
+    currentIndex >= 0 && currentIndex < flattenedReadings.length - 1;
 
   // Build Bible proxy path
   const biblePath = currentReading
@@ -260,11 +266,23 @@ export function BibleReaderCore({
     if (planContext) {
       const params = new URLSearchParams(searchParams.toString());
       params.set("readingId", prev.id);
-      router.replace(`/bible/${prev.bookId.toLowerCase()}/${prev.chapter}?${params.toString()}`);
+      router.replace(
+        `/bible/${prev.bookId.toLowerCase()}/${prev.chapter}?${params.toString()}`
+      );
     } else {
-      router.replace(`/bible/${prev.bookId.toLowerCase()}/${prev.chapter}?v=${selectedVersion.id}`);
+      router.replace(
+        `/bible/${prev.bookId.toLowerCase()}/${prev.chapter}?v=${selectedVersion.id}`
+      );
     }
-  }, [hasPrev, currentIndex, flattenedReadings, planContext, searchParams, router, selectedVersion.id]);
+  }, [
+    hasPrev,
+    currentIndex,
+    flattenedReadings,
+    planContext,
+    searchParams,
+    router,
+    selectedVersion.id,
+  ]);
 
   const handleNext = useCallback(() => {
     if (!hasNext) return;
@@ -274,11 +292,23 @@ export function BibleReaderCore({
     if (planContext) {
       const params = new URLSearchParams(searchParams.toString());
       params.set("readingId", next.id);
-      router.replace(`/bible/${next.bookId.toLowerCase()}/${next.chapter}?${params.toString()}`);
+      router.replace(
+        `/bible/${next.bookId.toLowerCase()}/${next.chapter}?${params.toString()}`
+      );
     } else {
-      router.replace(`/bible/${next.bookId.toLowerCase()}/${next.chapter}?v=${selectedVersion.id}`);
+      router.replace(
+        `/bible/${next.bookId.toLowerCase()}/${next.chapter}?v=${selectedVersion.id}`
+      );
     }
-  }, [hasNext, currentIndex, flattenedReadings, planContext, searchParams, router, selectedVersion.id]);
+  }, [
+    hasNext,
+    currentIndex,
+    flattenedReadings,
+    planContext,
+    searchParams,
+    router,
+    selectedVersion.id,
+  ]);
 
   const handleIframeLoad = () => {
     setLoadedSrc(iframeSrc);
@@ -373,7 +403,9 @@ export function BibleReaderCore({
     selectedVersion.id,
   ]);
 
-  const readingTitle = currentReading.displayText || `${currentReading.bookName} ${currentReading.chapter}`;
+  const readingTitle =
+    currentReading.displayText ||
+    `${currentReading.bookName} ${currentReading.chapter}`;
 
   return (
     <div className="flex flex-col h-full bg-background text-foreground">
@@ -528,7 +560,9 @@ export function BibleReaderCore({
                   {fontSize !== DEFAULT_FONT_SIZE && (
                     <button
                       type="button"
-                      onClick={() => handleUpdateFontSize({ newSize: DEFAULT_FONT_SIZE })}
+                      onClick={() =>
+                        handleUpdateFontSize({ newSize: DEFAULT_FONT_SIZE })
+                      }
                       aria-label="Reset font size to default"
                       className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                     >
@@ -542,7 +576,9 @@ export function BibleReaderCore({
                 <div className="flex items-center justify-between rounded-[12px] border border-border bg-background p-1">
                   <button
                     type="button"
-                    onClick={() => handleUpdateFontSize({ newSize: fontSize - 2 })}
+                    onClick={() =>
+                      handleUpdateFontSize({ newSize: fontSize - 2 })
+                    }
                     disabled={fontSize <= MIN_FONT_SIZE}
                     aria-label="Decrease font size"
                     className="flex size-8 items-center justify-center rounded-[8px] text-foreground transition-colors hover:bg-surface-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
@@ -561,7 +597,9 @@ export function BibleReaderCore({
 
                   <button
                     type="button"
-                    onClick={() => handleUpdateFontSize({ newSize: fontSize + 2 })}
+                    onClick={() =>
+                      handleUpdateFontSize({ newSize: fontSize + 2 })
+                    }
                     disabled={fontSize >= MAX_FONT_SIZE}
                     aria-label="Increase font size"
                     className="flex size-8 items-center justify-center rounded-[8px] text-foreground transition-colors hover:bg-surface-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
@@ -583,7 +621,9 @@ export function BibleReaderCore({
                       <button
                         key={preset.size}
                         type="button"
-                        onClick={() => handleUpdateFontSize({ newSize: preset.size })}
+                        onClick={() =>
+                          handleUpdateFontSize({ newSize: preset.size })
+                        }
                         className={`rounded-[8px] py-1 text-[11px] font-medium transition-colors cursor-pointer ${
                           isActive
                             ? "bg-primary text-primary-foreground font-semibold"
@@ -616,7 +656,9 @@ export function BibleReaderCore({
                 }
               }}
               aria-pressed={currentReading.isCompleted}
-              aria-label={currentReading.isCompleted ? "Mark as unread" : "Mark as read"}
+              aria-label={
+                currentReading.isCompleted ? "Mark as unread" : "Mark as read"
+              }
               className={`flex items-center gap-1.5 rounded-[12px] border px-2.5 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium transition-all cursor-pointer shadow-2xs ${
                 currentReading.isCompleted
                   ? "border-border bg-surface text-foreground hover:bg-surface-elevated hover:border-border-strong"

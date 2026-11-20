@@ -21,7 +21,10 @@ export async function generateMetadata({
   const { id } = await params;
   const res = await getGroupDetailsAction({ groupId: id });
   return {
-    title: res.success && res.group ? `${res.group.name} • Fellowship` : "Fellowship • Luma",
+    title:
+      res.success && res.group
+        ? `${res.group.name} • Fellowship`
+        : "Fellowship • Luma",
   };
 }
 
@@ -55,12 +58,18 @@ export default async function GroupPage({ params }: PageProps) {
   }
 
   const group = groupRes.group;
-  const members = membersRes.success && membersRes.members ? membersRes.members : [];
+  const members =
+    membersRes.success && membersRes.members ? membersRes.members : [];
   const pendingMembers =
-    membersRes.success && membersRes.pendingMembers ? membersRes.pendingMembers : [];
+    membersRes.success && membersRes.pendingMembers
+      ? membersRes.pendingMembers
+      : [];
 
   // Fetch leaderboards for all active plans in parallel
-  const leaderboardsByPlanId: Record<string, ReadonlyArray<LeaderboardEntry>> = {};
+  const leaderboardsByPlanId: Record<
+    string,
+    ReadonlyArray<LeaderboardEntry>
+  > = {};
   if (group.activePlans.length > 0) {
     const leaderboardResults = await Promise.all(
       group.activePlans.map(async (p) => {

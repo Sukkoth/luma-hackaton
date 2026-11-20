@@ -133,7 +133,9 @@ export function GroupJoinConfirmModal({
       onClose();
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to enroll in the selected plan."
+        err instanceof Error
+          ? err.message
+          : "Failed to enroll in the selected plan."
       );
       setIsSubmitting(false);
     }
@@ -179,7 +181,8 @@ export function GroupJoinConfirmModal({
                 {step === "pending_success" && "Request Submitted"}
               </h2>
               <p className="text-xs text-muted-foreground">
-                {step === "confirm" && "Step 1 of 2: Confirm fellowship membership"}
+                {step === "confirm" &&
+                  "Step 1 of 2: Confirm fellowship membership"}
                 {step === "plans" && "Step 2 of 2: Optional plan enrollment"}
                 {step === "pending_success" && "Awaiting leader approval"}
               </p>
@@ -295,7 +298,8 @@ export function GroupJoinConfirmModal({
                 You&apos;re now a member of {group.name}!
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Choose an active reading plan to read in lockstep with your cohort, or skip to remain in the group without enrolling.
+                Choose an active reading plan to read in lockstep with your
+                cohort, or skip to remain in the group without enrolling.
               </p>
             </div>
 
@@ -325,7 +329,9 @@ export function GroupJoinConfirmModal({
                           : "border-border"
                       )}
                     >
-                      {isSelected && <span className="size-1.5 rounded-full bg-primary-foreground" />}
+                      {isSelected && (
+                        <span className="size-1.5 rounded-full bg-primary-foreground" />
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -353,7 +359,9 @@ export function GroupJoinConfirmModal({
                         <span>•</span>
                         <span className="flex items-center gap-1">
                           <Compass className="size-3" />
-                          <span>{plan.enrolledMembersCount} readers enrolled</span>
+                          <span>
+                            {plan.enrolledMembersCount} readers enrolled
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -433,7 +441,9 @@ export function GroupJoinConfirmModal({
                 Join Request Submitted!
               </h3>
               <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                Your request to join <strong>{group.name}</strong> has been sent to the fellowship administrators. You will be enrolled once an admin approves your request.
+                Your request to join <strong>{group.name}</strong> has been sent
+                to the fellowship administrators. You will be enrolled once an
+                admin approves your request.
               </p>
             </div>
 

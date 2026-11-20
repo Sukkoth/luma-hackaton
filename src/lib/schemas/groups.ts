@@ -34,7 +34,11 @@ export const CreateGroupSchema = v.object({
 });
 
 export const UpdateGroupSettingsSchema = v.object({
-  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  groupId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group ID is required.")
+  ),
   name: v.pipe(
     v.string("Group name is required."),
     v.trim(),
@@ -63,7 +67,11 @@ export const JoinGroupSchema = v.object({
 });
 
 export const ScheduleGroupPlanSchema = v.object({
-  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  groupId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group ID is required.")
+  ),
   planTemplateId: v.pipe(
     v.string("Plan template ID is required."),
     v.trim(),
@@ -137,7 +145,11 @@ export const LeaveGroupPlanSchema = v.object({
 });
 
 export const SetGroupPinnedNoticeSchema = v.object({
-  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  groupId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group ID is required.")
+  ),
   title: v.optional(
     v.pipe(
       v.string(),
@@ -160,11 +172,19 @@ export const SetGroupPinnedNoticeSchema = v.object({
 });
 
 export const ClearGroupPinnedNoticeSchema = v.object({
-  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  groupId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group ID is required.")
+  ),
 });
 
 export const DeleteGroupSchema = v.object({
-  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  groupId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group ID is required.")
+  ),
   confirmGroupName: v.pipe(
     v.string("Confirmation name is required."),
     v.trim(),
@@ -173,7 +193,11 @@ export const DeleteGroupSchema = v.object({
 });
 
 export const TransferGroupOwnershipSchema = v.object({
-  groupId: v.pipe(v.string(), v.trim(), v.minLength(1, "Group ID is required.")),
+  groupId: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Group ID is required.")
+  ),
   newOwnerUserId: v.pipe(
     v.string(),
     v.trim(),
@@ -226,6 +250,4 @@ export type UpdateGroupPlanStatusInput = v.InferOutput<
   typeof UpdateGroupPlanStatusSchema
 >;
 export type DeleteGroupInput = v.InferOutput<typeof DeleteGroupSchema>;
-export type DeleteGroupPlanInput = v.InferOutput<
-  typeof DeleteGroupPlanSchema
->;
+export type DeleteGroupPlanInput = v.InferOutput<typeof DeleteGroupPlanSchema>;

@@ -63,10 +63,12 @@ export function PlanSessionNotes({
 }: PlanSessionNotesProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [noteToEdit, setNoteToEdit] = useState<PlanNoteDetail | null>(null);
-  const [activeNotesTab, setActiveNotesTab] = useState<"personal" | "fellowship">(
-    "personal"
+  const [activeNotesTab, setActiveNotesTab] = useState<
+    "personal" | "fellowship"
+  >("personal");
+  const [peerNotes, setPeerNotes] = useState<ReadonlyArray<GroupSessionNote>>(
+    []
   );
-  const [peerNotes, setPeerNotes] = useState<ReadonlyArray<GroupSessionNote>>([]);
   const [isLoadingPeers, setIsLoadingPeers] = useState(false);
   const [togglingNoteId, setTogglingNoteId] = useState<string | null>(null);
 
@@ -128,10 +130,7 @@ export function PlanSessionNotes({
   }
 
   return (
-    <div
-      data-testid="plan-session-notes-section"
-      className="space-y-4"
-    >
+    <div data-testid="plan-session-notes-section" className="space-y-4">
       {/* Header Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border">
         <div className="flex items-center gap-3">
@@ -212,7 +211,9 @@ export function PlanSessionNotes({
             },
           ]}
           activeTab={activeNotesTab}
-          onTabChange={({ tab }) => setActiveNotesTab(tab as "personal" | "fellowship")}
+          onTabChange={({ tab }) =>
+            setActiveNotesTab(tab as "personal" | "fellowship")
+          }
         />
       )}
 
@@ -334,7 +335,8 @@ export function PlanSessionNotes({
                 No reflections recorded for {activeSession.title}
               </h4>
               <p className="mt-1 max-w-sm text-xs leading-relaxed text-foreground-dim">
-                Record what God speaks to you, key passages, or prayer requests as you complete your daily reading.
+                Record what God speaks to you, key passages, or prayer requests
+                as you complete your daily reading.
               </p>
               <button
                 type="button"
@@ -372,10 +374,12 @@ export function PlanSessionNotes({
             <div className="rounded-2xl border border-dashed border-border bg-surface-elevated/30 p-8 text-center space-y-2">
               <MessageSquare className="size-6 text-foreground-dim mx-auto" />
               <h4 className="text-xs font-semibold text-foreground">
-                No peers have shared reflections for Day {activeSession.sessionIndex} yet
+                No peers have shared reflections for Day{" "}
+                {activeSession.sessionIndex} yet
               </h4>
               <p className="text-[11px] text-foreground-dim max-w-xs mx-auto">
-                Be the first to share your takeaways with the fellowship! Write a reflection and toggle &quot;Shared&quot;.
+                Be the first to share your takeaways with the fellowship! Write
+                a reflection and toggle &quot;Shared&quot;.
               </p>
             </div>
           ) : (

@@ -2,7 +2,14 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { X, Calendar, Bookmark, Check, CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  X,
+  Calendar,
+  Bookmark,
+  Check,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { enrollInGroupPlanAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
@@ -65,7 +72,11 @@ export function GroupPlanEnrollModal({
       year: "numeric",
     });
 
-    return { isFuture: isFut, relativeDaysStr: relStr, formattedStartDate: fmtStr };
+    return {
+      isFuture: isFut,
+      relativeDaysStr: relStr,
+      formattedStartDate: fmtStr,
+    };
   }, [scheduledStartDate]);
 
   if (!isOpen) return null;
@@ -100,7 +111,9 @@ export function GroupPlanEnrollModal({
         router.refresh();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to enroll in plan.");
+      setError(
+        err instanceof Error ? err.message : "Failed to enroll in plan."
+      );
       setIsSubmitting(false);
     }
   }
@@ -141,7 +154,8 @@ export function GroupPlanEnrollModal({
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Your reading tracker is linked. When Day 1 arrives, readings will automatically unlock and synchronize with your fellowship.
+                Your reading tracker is linked. When Day 1 arrives, readings
+                will automatically unlock and synchronize with your fellowship.
               </p>
             </div>
 
@@ -186,7 +200,9 @@ export function GroupPlanEnrollModal({
                     id="enroll-plan-title"
                     className="text-base font-semibold tracking-tight text-foreground"
                   >
-                    {isFuture ? "Pre-enroll in Scheduled Plan" : "Enroll in Reading Plan"}
+                    {isFuture
+                      ? "Pre-enroll in Scheduled Plan"
+                      : "Enroll in Reading Plan"}
                   </h2>
                   <p className="text-xs text-foreground-secondary line-clamp-1">
                     {planTitle}
@@ -287,7 +303,9 @@ export function GroupPlanEnrollModal({
                   isLoading={isSubmitting}
                   onClick={handleEnroll}
                 >
-                  {isFuture ? "Confirm Pre-enrollment" : "Confirm & Start Reading"}
+                  {isFuture
+                    ? "Confirm Pre-enrollment"
+                    : "Confirm & Start Reading"}
                 </Button>
               </div>
             </div>

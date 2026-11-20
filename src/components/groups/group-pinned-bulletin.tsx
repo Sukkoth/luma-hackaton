@@ -84,7 +84,8 @@ export function GroupPinnedBulletin({
               No active bulletin announcement
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              Pin a timed notice for upcoming cohort meetings, prayer points, or reading goals.
+              Pin a timed notice for upcoming cohort meetings, prayer points, or
+              reading goals.
             </p>
           </div>
         </div>
@@ -152,7 +153,11 @@ export function GroupPinnedBulletin({
       <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground border-t border-border/50 pt-2.5">
         <span className="flex items-center gap-1">
           <User className="size-3" />
-          <span>{notice.authorName ? `Posted by ${notice.authorName}` : "Posted by Leader"}</span>
+          <span>
+            {notice.authorName
+              ? `Posted by ${notice.authorName}`
+              : "Posted by Leader"}
+          </span>
         </span>
         <span>•</span>
         <span className="flex items-center gap-1">

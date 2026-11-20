@@ -58,9 +58,13 @@ function formatRelativeTime({ date }: { date: Date | string }): string {
 function NotificationTypeIcon({ type }: { type: NotificationType }) {
   switch (type) {
     case "streak_alert":
-      return <Flame className="size-4 text-amber-500 fill-amber-500 shrink-0" />;
+      return (
+        <Flame className="size-4 text-amber-500 fill-amber-500 shrink-0" />
+      );
     case "freeze_used":
-      return <Shield className="size-4 text-primary fill-primary/20 shrink-0" />;
+      return (
+        <Shield className="size-4 text-primary fill-primary/20 shrink-0" />
+      );
     case "plan_reminder":
       return <BookOpen className="size-4 text-blue-500 shrink-0" />;
     case "group_activity":
@@ -86,7 +90,10 @@ export function NotificationCenter({ isMobile = false }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchUnreadCountOnly = useCallback(async () => {
-    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+    if (
+      typeof document !== "undefined" &&
+      document.visibilityState === "hidden"
+    ) {
       return;
     }
     const seq = ++fetchSeqRef.current;
@@ -455,7 +462,9 @@ export function NotificationCenter({ isMobile = false }: Props) {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Notifications"
         data-testid={
-          isMobile ? "mobile-notifications-button" : "desktop-notifications-button"
+          isMobile
+            ? "mobile-notifications-button"
+            : "desktop-notifications-button"
         }
         className={cn(
           "relative flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border transition-all cursor-pointer shadow-2xs",

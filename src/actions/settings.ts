@@ -12,8 +12,7 @@ import {
 } from "@/lib/schemas/settings";
 
 export type UpdateUserSettingsActionResult =
-  | { success: true }
-  | { success: false; error: string };
+  { success: true } | { success: false; error: string };
 
 export type UpdateUserSettingsActionParams = {
   settings: UpdateUserSettingsInput;

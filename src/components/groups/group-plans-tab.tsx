@@ -68,12 +68,15 @@ export function GroupPlansTab({
   const [isLeavingPlan, setIsLeavingPlan] = useState(false);
 
   // Group Plan Lifecycle state
-  const [planToComplete, setPlanToComplete] =
-    useState<GroupPlanSummary | null>(null);
-  const [planToCancel, setPlanToCancel] =
-    useState<GroupPlanSummary | null>(null);
-  const [planToDelete, setPlanToDelete] =
-    useState<GroupPlanSummary | null>(null);
+  const [planToComplete, setPlanToComplete] = useState<GroupPlanSummary | null>(
+    null
+  );
+  const [planToCancel, setPlanToCancel] = useState<GroupPlanSummary | null>(
+    null
+  );
+  const [planToDelete, setPlanToDelete] = useState<GroupPlanSummary | null>(
+    null
+  );
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const selectedPlanForEnroll =
@@ -231,7 +234,8 @@ export function GroupPlansTab({
                 Active Reading Plans ({activePlans.length})
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                Curricula currently active and synchronized across all cohort readers.
+                Curricula currently active and synchronized across all cohort
+                readers.
               </p>
             </div>
 
@@ -273,7 +277,13 @@ export function GroupPlansTab({
                     <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-elevated px-3 py-1 text-xs font-semibold text-foreground border border-border/70 shadow-2xs">
                         <Clock className="size-3 text-muted-foreground" />
-                        <span>{plan.dailyChapterTarget} {plan.dailyChapterTarget === 1 ? "chapter" : "chapters"} / day</span>
+                        <span>
+                          {plan.dailyChapterTarget}{" "}
+                          {plan.dailyChapterTarget === 1
+                            ? "chapter"
+                            : "chapters"}{" "}
+                          / day
+                        </span>
                       </span>
 
                       {isAdmin && (
@@ -284,7 +294,9 @@ export function GroupPlansTab({
                             size="sm"
                             onClick={() => setPlanToComplete(plan)}
                             className="text-xs h-8 px-2.5 rounded-lg"
-                            leftIcon={<CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />}
+                            leftIcon={
+                              <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                            }
                           >
                             Complete
                           </Button>
@@ -309,7 +321,8 @@ export function GroupPlansTab({
                       {plan.templateTitle}
                     </h3>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl">
-                      A structured curriculum of {plan.totalChapters} chapters synchronized daily across all cohort readers.
+                      A structured curriculum of {plan.totalChapters} chapters
+                      synchronized daily across all cohort readers.
                     </p>
                   </div>
 
@@ -321,7 +334,9 @@ export function GroupPlansTab({
                       </span>
                       <div className="text-sm sm:text-base font-bold text-foreground flex items-baseline gap-1">
                         <span>{plan.dailyChapterTarget}</span>
-                        <span className="text-xs font-normal text-muted-foreground">ch / day</span>
+                        <span className="text-xs font-normal text-muted-foreground">
+                          ch / day
+                        </span>
                       </div>
                     </div>
 
@@ -331,7 +346,9 @@ export function GroupPlansTab({
                       </span>
                       <div className="text-sm sm:text-base font-bold text-foreground flex items-baseline gap-1">
                         <span>{plan.totalChapters}</span>
-                        <span className="text-xs font-normal text-muted-foreground">chapters</span>
+                        <span className="text-xs font-normal text-muted-foreground">
+                          chapters
+                        </span>
                       </div>
                     </div>
 
@@ -342,7 +359,10 @@ export function GroupPlansTab({
                       <div className="text-sm sm:text-base font-bold text-primary flex items-baseline gap-1">
                         <span>{plan.enrolledMembersCount}</span>
                         <span className="text-xs font-normal text-muted-foreground">
-                          {plan.enrolledMembersCount === 1 ? "reader" : "readers"} in sync
+                          {plan.enrolledMembersCount === 1
+                            ? "reader"
+                            : "readers"}{" "}
+                          in sync
                         </span>
                       </div>
                     </div>
@@ -362,7 +382,10 @@ export function GroupPlansTab({
                     <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-t border-border/60">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span className="size-2 rounded-full bg-primary shrink-0 animate-pulse" />
-                        <span>You are enrolled in this plan with fellowship notes &amp; reflections enabled.</span>
+                        <span>
+                          You are enrolled in this plan with fellowship notes
+                          &amp; reflections enabled.
+                        </span>
                       </div>
 
                       <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -393,7 +416,8 @@ export function GroupPlansTab({
                           Join Fellowship Reading Journey
                         </h4>
                         <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
-                          Synchronize your personal reader with this cohort to share daily milestones, study notes, and reflections.
+                          Synchronize your personal reader with this cohort to
+                          share daily milestones, study notes, and reflections.
                         </p>
                       </div>
 
@@ -415,7 +439,9 @@ export function GroupPlansTab({
                           Curriculum Open to Fellowship Members
                         </h4>
                         <p className="text-xs text-muted-foreground max-w-lg leading-relaxed">
-                          Join this fellowship to follow this reading plan, sync your chapter progress, and read together with the community.
+                          Join this fellowship to follow this reading plan, sync
+                          your chapter progress, and read together with the
+                          community.
                         </p>
                       </div>
 
@@ -448,7 +474,8 @@ export function GroupPlansTab({
               Upcoming Scheduled Plans ({scheduledPlans.length})
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Curricula scheduled to launch on synchronized start dates for this fellowship.
+              Curricula scheduled to launch on synchronized start dates for this
+              fellowship.
             </p>
           </div>
 
@@ -463,14 +490,15 @@ export function GroupPlansTab({
               const nowMidnight = new Date();
               nowMidnight.setHours(0, 0, 0, 0);
               const diffDays = Math.ceil(
-                (startDateObj.getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24)
+                (startDateObj.getTime() - nowMidnight.getTime()) /
+                  (1000 * 60 * 60 * 24)
               );
               const countdownLabel =
                 diffDays <= 0
                   ? "Starts Today"
                   : diffDays === 1
-                  ? "Starts Tomorrow"
-                  : `In ${diffDays} days`;
+                    ? "Starts Tomorrow"
+                    : `In ${diffDays} days`;
 
               return (
                 <div
@@ -493,7 +521,8 @@ export function GroupPlansTab({
                         {plan.templateTitle}
                       </h4>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {plan.totalChapters} chapters • {plan.dailyChapterTarget} ch / day
+                        {plan.totalChapters} chapters •{" "}
+                        {plan.dailyChapterTarget} ch / day
                       </p>
                     </div>
                   </div>
@@ -501,7 +530,9 @@ export function GroupPlansTab({
                   <div className="flex items-center justify-between pt-3 border-t border-border/60 text-xs">
                     <span className="text-muted-foreground font-medium">
                       {plan.enrolledMembersCount}{" "}
-                      {plan.enrolledMembersCount === 1 ? "reader waiting" : "readers waiting"}
+                      {plan.enrolledMembersCount === 1
+                        ? "reader waiting"
+                        : "readers waiting"}
                     </span>
 
                     {plan.userEnrolledInstanceId ? (
@@ -542,7 +573,9 @@ export function GroupPlansTab({
                         size="sm"
                         disabled={isUpdatingStatus}
                         onClick={() => handleStartPlanNow(plan)}
-                        leftIcon={<Play className="size-3 text-emerald-600 dark:text-emerald-400" />}
+                        leftIcon={
+                          <Play className="size-3 text-emerald-600 dark:text-emerald-400" />
+                        }
                         className="text-xs h-8 px-3 flex-1"
                       >
                         Start Now
@@ -575,7 +608,8 @@ export function GroupPlansTab({
               Completed &amp; Archived Plans ({completedPlans.length})
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Previous curricula that were concluded or archived for this fellowship.
+              Previous curricula that were concluded or archived for this
+              fellowship.
             </p>
           </div>
 
@@ -679,7 +713,10 @@ export function GroupPlansTab({
               Leave Reading Plan?
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to unenroll from &ldquo;{planToLeave.templateTitle}&rdquo;? Your reading progress will be unlinked from the fellowship leaderboard. Your personal reading tracker will remain intact.
+              Are you sure you want to unenroll from &ldquo;
+              {planToLeave.templateTitle}&rdquo;? Your reading progress will be
+              unlinked from the fellowship leaderboard. Your personal reading
+              tracker will remain intact.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button
@@ -718,7 +755,9 @@ export function GroupPlansTab({
               Complete Reading Plan?
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Mark &ldquo;{planToComplete.templateTitle}&rdquo; as completed for this fellowship? It will move to the Completed &amp; Archived section.
+              Mark &ldquo;{planToComplete.templateTitle}&rdquo; as completed for
+              this fellowship? It will move to the Completed &amp; Archived
+              section.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button
@@ -757,7 +796,9 @@ export function GroupPlansTab({
               Cancel Reading Plan?
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to cancel &ldquo;{planToCancel.templateTitle}&rdquo;? It will be deactivated and moved to archived plans.
+              Are you sure you want to cancel &ldquo;
+              {planToCancel.templateTitle}&rdquo;? It will be deactivated and
+              moved to archived plans.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button
@@ -796,7 +837,9 @@ export function GroupPlansTab({
               Permanently Delete Plan?
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to delete &ldquo;{planToDelete.templateTitle}&rdquo;? This will remove all associated cohort enrollment records.
+              Are you sure you want to delete &ldquo;
+              {planToDelete.templateTitle}&rdquo;? This will remove all
+              associated cohort enrollment records.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button

@@ -22,7 +22,11 @@ export type ExportUserDataParams = {
 
 function extractPlainTextSnippet({ html }: { html: string }): string {
   if (!html) return "";
-  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 200);
 }
 
 export async function exportUserData({
@@ -137,9 +141,13 @@ export async function exportUserData({
   const exportNotes = notesList.map((n) => ({
     title: n.title,
     body: n.bodyHtml || undefined,
-    folder: n.folderId ? folderIdToRef.get(n.folderId) ?? null : undefined,
-    tracker: n.trackerId ? trackerIdToRef.get(n.trackerId) ?? null : undefined,
-    plan: n.planInstanceId ? planIdToRef.get(n.planInstanceId) ?? null : undefined,
+    folder: n.folderId ? (folderIdToRef.get(n.folderId) ?? null) : undefined,
+    tracker: n.trackerId
+      ? (trackerIdToRef.get(n.trackerId) ?? null)
+      : undefined,
+    plan: n.planInstanceId
+      ? (planIdToRef.get(n.planInstanceId) ?? null)
+      : undefined,
     day: n.planDayNumber ?? undefined,
     session: n.planSessionId ?? undefined,
     pinned: n.isPinned ? true : undefined,
@@ -178,7 +186,9 @@ export async function exportUserData({
   // Compact Reading Log Tuples: [trackerRef, bookId, chapter, loggedAtISO, planRef?]
   const exportLogs = logsList.map((l) => {
     const tRef = trackerIdToRef.get(l.trackerId) ?? "t_0";
-    const pRef = l.planInstanceId ? planIdToRef.get(l.planInstanceId) ?? null : null;
+    const pRef = l.planInstanceId
+      ? (planIdToRef.get(l.planInstanceId) ?? null)
+      : null;
 
     const tuple: [string, string, number, string, ...(string | null)[]] = pRef
       ? [tRef, l.bookId, l.chapter, l.loggedAt.toISOString(), pRef]
@@ -202,7 +212,9 @@ export async function exportUserData({
     plans: exportPlans.length > 0 ? exportPlans : undefined,
     logs: exportLogs.length > 0 ? exportLogs : undefined,
     achievements:
-      Object.keys(exportAchievements).length > 0 ? exportAchievements : undefined,
+      Object.keys(exportAchievements).length > 0
+        ? exportAchievements
+        : undefined,
   };
 }
 
@@ -297,7 +309,9 @@ export async function importUserData({
         trackerRefToDbId.set(tracker.ref, targetTrackerId);
 
         // Merge grouped chapter progress
-        for (const [bookId, chapters] of Object.entries(tracker.progress ?? {})) {
+        for (const [bookId, chapters] of Object.entries(
+          tracker.progress ?? {}
+        )) {
           for (const ch of chapters) {
             await tx
               .insert(trackerChapterProgress)
@@ -313,7 +327,9 @@ export async function importUserData({
         }
 
         // Merge grouped verse progress (if present)
-        for (const [bookId, chaptersObj] of Object.entries(tracker.verses ?? {})) {
+        for (const [bookId, chaptersObj] of Object.entries(
+          tracker.verses ?? {}
+        )) {
           for (const [chStr, verses] of Object.entries(chaptersObj)) {
             const chNum = parseInt(chStr, 10);
             for (const vNum of verses) {
@@ -342,7 +358,8 @@ export async function importUserData({
       let targetFolderId: string | undefined;
 
       const existing = existingFolders.find(
-        (ef) => ef.name.trim().toLowerCase() === folder.name.trim().toLowerCase()
+        (ef) =>
+          ef.name.trim().toLowerCase() === folder.name.trim().toLowerCase()
       );
 
       if (existing) {
@@ -452,13 +469,13 @@ export async function importUserData({
 
       if (!isDuplicate) {
         const targetFolderId = note.folder
-          ? folderRefToDbId.get(note.folder) ?? null
+          ? (folderRefToDbId.get(note.folder) ?? null)
           : null;
         const targetTrackerId = note.tracker
-          ? trackerRefToDbId.get(note.tracker) ?? null
+          ? (trackerRefToDbId.get(note.tracker) ?? null)
           : null;
         const targetPlanId = note.plan
-          ? planRefToDbId.get(note.plan) ?? null
+          ? (planRefToDbId.get(note.plan) ?? null)
           : null;
 
         const bodyHtml = note.body ?? "";
@@ -485,7 +502,8 @@ export async function importUserData({
     // 6. Merge Reading Log Tuples: [trackerRef, bookId, chapter, loggedAtISO, planRef?]
     for (const logTuple of data.logs ?? []) {
       const [tRef, bookIdRaw, chapterRaw, loggedAtRaw, pRefRaw] = logTuple;
-      if (!tRef || !bookIdRaw || chapterRaw === undefined || !loggedAtRaw) continue;
+      if (!tRef || !bookIdRaw || chapterRaw === undefined || !loggedAtRaw)
+        continue;
 
       const trackerRef = String(tRef);
       const bookId = String(bookIdRaw);
@@ -497,7 +515,9 @@ export async function importUserData({
         trackerRefToDbId.get(trackerRef) ?? fallbackTrackerId;
       if (!targetTrackerId) continue;
 
-      const targetPlanId = planRef ? planRefToDbId.get(planRef) ?? null : null;
+      const targetPlanId = planRef
+        ? (planRefToDbId.get(planRef) ?? null)
+        : null;
 
       const existingLog = await tx.query.readingLogs.findFirst({
         where: and(

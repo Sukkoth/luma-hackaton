@@ -163,7 +163,9 @@ export function ProgressStreakMergedCard({
             href={`/bible/${nextReading.bookId}/${nextReading.chapter}`}
             className="flex items-center justify-between text-xs text-foreground font-medium hover:text-primary transition-colors"
           >
-            <span className="truncate">Next: {nextReading.bookName} {nextReading.chapter}</span>
+            <span className="truncate">
+              Next: {nextReading.bookName} {nextReading.chapter}
+            </span>
             <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
           </Link>
         ) : (

@@ -9,10 +9,12 @@ type Props = {
 };
 
 export function PlanFilterPills({ selectedFilter, onSelectFilter }: Props) {
-  const items: ReadonlyArray<FilterPillItem<PlanFilterType>> = PLAN_FILTERS.map((f) => ({
-    id: f.id,
-    label: f.label,
-  }));
+  const items: ReadonlyArray<FilterPillItem<PlanFilterType>> = PLAN_FILTERS.map(
+    (f) => ({
+      id: f.id,
+      label: f.label,
+    })
+  );
 
   return (
     <FilterPills

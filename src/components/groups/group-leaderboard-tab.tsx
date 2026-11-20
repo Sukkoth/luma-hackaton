@@ -97,7 +97,8 @@ export function GroupLeaderboardTab({
           No Active Leaderboard
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mb-5 leading-relaxed">
-          Leaderboards are generated when a reading plan is active for this fellowship.
+          Leaderboards are generated when a reading plan is active for this
+          fellowship.
         </p>
         {onOpenScheduleModal && (
           <Button
@@ -122,17 +123,15 @@ export function GroupLeaderboardTab({
             Fellowship Leaderboard
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Real-time reading progress, milestone tracking, and daily accountability.
+            Real-time reading progress, milestone tracking, and daily
+            accountability.
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {/* Plan Selector if multiple plans exist */}
           {activePlans.length > 1 && currentPlan && (
-            <Select
-              value={currentPlan.id}
-              onValueChange={setSelectedPlanId}
-            >
+            <Select value={currentPlan.id} onValueChange={setSelectedPlanId}>
               <SelectTrigger className="h-9 w-[180px] text-xs">
                 <SelectValue placeholder="Select plan" />
               </SelectTrigger>
@@ -156,8 +155,8 @@ export function GroupLeaderboardTab({
                 isCooldownActive
                   ? "Visibility updated recently (24-hour rate limit active)"
                   : hideProgress
-                  ? "Make your reading progress visible to the cohort"
-                  : "Hide your reading progress from fellow cohort members"
+                    ? "Make your reading progress visible to the cohort"
+                    : "Hide your reading progress from fellow cohort members"
               }
             >
               {hideProgress ? (
@@ -283,21 +282,24 @@ export function GroupLeaderboardTab({
               The Circle is Waiting for Readers
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-sm leading-relaxed">
-              No members are currently enrolled in {currentPlan?.templateTitle}. Enroll now or invite fellow readers to begin.
+              No members are currently enrolled in {currentPlan?.templateTitle}.
+              Enroll now or invite fellow readers to begin.
             </p>
           </div>
 
           <div className="pt-2 flex items-center gap-3">
-            {onSelectPlanForEnroll && currentPlan && !currentPlan.userEnrolledInstanceId && (
-              <Button
-                type="button"
-                variant="default"
-                size="sm"
-                onClick={() => onSelectPlanForEnroll(currentPlan)}
-              >
-                Enroll in this Plan
-              </Button>
-            )}
+            {onSelectPlanForEnroll &&
+              currentPlan &&
+              !currentPlan.userEnrolledInstanceId && (
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={() => onSelectPlanForEnroll(currentPlan)}
+                >
+                  Enroll in this Plan
+                </Button>
+              )}
 
             {onCopyInvite && (
               <Button
@@ -355,15 +357,24 @@ export function GroupLeaderboardTab({
                   {isUserHidden ? (
                     <span className="text-muted-foreground">—</span>
                   ) : rank === 1 ? (
-                    <span className="flex size-7 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 font-bold text-xs" title="1st Place">
+                    <span
+                      className="flex size-7 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 font-bold text-xs"
+                      title="1st Place"
+                    >
                       <Medal className="size-3.5 text-amber-600 dark:text-amber-400" />
                     </span>
                   ) : rank === 2 ? (
-                    <span className="flex size-7 items-center justify-center rounded-lg bg-slate-400/10 border border-slate-400/25 text-slate-600 dark:text-slate-300 font-bold text-xs" title="2nd Place">
+                    <span
+                      className="flex size-7 items-center justify-center rounded-lg bg-slate-400/10 border border-slate-400/25 text-slate-600 dark:text-slate-300 font-bold text-xs"
+                      title="2nd Place"
+                    >
                       <Medal className="size-3.5 text-slate-500 dark:text-slate-400" />
                     </span>
                   ) : rank === 3 ? (
-                    <span className="flex size-7 items-center justify-center rounded-lg bg-amber-800/10 border border-amber-800/25 text-amber-800 dark:text-amber-500 font-bold text-xs" title="3rd Place">
+                    <span
+                      className="flex size-7 items-center justify-center rounded-lg bg-amber-800/10 border border-amber-800/25 text-amber-800 dark:text-amber-500 font-bold text-xs"
+                      title="3rd Place"
+                    >
                       <Medal className="size-3.5 text-amber-700 dark:text-amber-500" />
                     </span>
                   ) : (
@@ -485,12 +496,13 @@ export function GroupLeaderboardTab({
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div
                       style={{
-                        width: isUserHidden || isOtherHidden
-                          ? "0%"
-                          : `${Math.min(
-                              100,
-                              Math.max(member.progressPercent, 2)
-                            )}%`,
+                        width:
+                          isUserHidden || isOtherHidden
+                            ? "0%"
+                            : `${Math.min(
+                                100,
+                                Math.max(member.progressPercent, 2)
+                              )}%`,
                       }}
                       className="h-full rounded-full bg-primary transition-all duration-300"
                     />
@@ -537,7 +549,10 @@ export function GroupLeaderboardTab({
         groupId={groupId}
         currentHideProgress={hideProgress}
         privacyUpdatedAt={privacyUpdatedAt}
-        onSuccess={({ hideProgress: newHide, privacyUpdatedAt: newUpdatedAt }) => {
+        onSuccess={({
+          hideProgress: newHide,
+          privacyUpdatedAt: newUpdatedAt,
+        }) => {
           setHideProgress(newHide);
           setPrivacyUpdatedAt(newUpdatedAt);
         }}

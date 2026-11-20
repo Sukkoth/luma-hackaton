@@ -9,11 +9,7 @@ export const UpdateProfileSchema = v.object({
     v.maxLength(100, "Name must not exceed 100 characters")
   ),
   image: v.optional(
-    v.pipe(
-      v.string(),
-      v.trim(),
-      v.maxLength(1000, "Image URL is too long")
-    ),
+    v.pipe(v.string(), v.trim(), v.maxLength(1000, "Image URL is too long")),
     ""
   ),
 });

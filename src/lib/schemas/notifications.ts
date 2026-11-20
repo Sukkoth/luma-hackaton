@@ -35,7 +35,10 @@ export type GetNotificationsQueryInput = v.InferInput<
 >;
 
 export const NotificationIdSchema = v.object({
-  notificationId: v.pipe(v.string(), v.minLength(1, "Notification ID is required")),
+  notificationId: v.pipe(
+    v.string(),
+    v.minLength(1, "Notification ID is required")
+  ),
 });
 
 export type NotificationIdInput = v.InferInput<typeof NotificationIdSchema>;

@@ -41,7 +41,10 @@ export const CompactNoteSchema = v.object({
 export const CompactPlanSchema = v.object({
   ref: v.pipe(v.string(), v.minLength(1, "Plan reference is required")),
   templateId: v.pipe(v.string(), v.minLength(1, "Template ID is required")),
-  tracker: v.pipe(v.string(), v.minLength(1, "Plan tracker reference is required")),
+  tracker: v.pipe(
+    v.string(),
+    v.minLength(1, "Plan tracker reference is required")
+  ),
   title: v.pipe(v.string(), v.minLength(1, "Plan title is required")),
   status: v.optional(v.string()),
   mode: v.optional(v.string()),
@@ -49,8 +52,14 @@ export const CompactPlanSchema = v.object({
   start: v.pipe(v.string(), v.minLength(1, "Start date is required")),
   targetEnd: v.optional(v.nullable(v.string())),
   completedAt: v.optional(v.nullable(v.string())),
-  dailyTarget: v.pipe(v.number(), v.minValue(1, "Daily target must be at least 1")),
-  totalChapters: v.pipe(v.number(), v.minValue(1, "Total chapters must be at least 1")),
+  dailyTarget: v.pipe(
+    v.number(),
+    v.minValue(1, "Daily target must be at least 1")
+  ),
+  totalChapters: v.pipe(
+    v.number(),
+    v.minValue(1, "Total chapters must be at least 1")
+  ),
   daysMask: v.optional(v.string()),
   pacingSegments: v.optional(v.nullable(v.string())),
   created: v.optional(v.string()),
@@ -69,7 +78,10 @@ export const CompactReadingLogTupleSchema = v.tupleWithRest(
 export const UserDataExportSchema = v.object({
   v: v.literal(1),
   app: v.literal("Scripture Tracker"),
-  exportedAt: v.pipe(v.string(), v.minLength(1, "Export timestamp is required")),
+  exportedAt: v.pipe(
+    v.string(),
+    v.minLength(1, "Export timestamp is required")
+  ),
   trackers: v.array(CompactTrackerSchema),
   folders: v.optional(v.array(CompactFolderSchema)),
   notes: v.optional(v.array(CompactNoteSchema)),

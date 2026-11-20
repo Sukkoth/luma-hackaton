@@ -12,8 +12,7 @@ import {
 } from "@/lib/data-export-service";
 
 export type ExportUserDataActionResult =
-  | { success: true; data: UserDataExport }
-  | { success: false; error: string };
+  { success: true; data: UserDataExport } | { success: false; error: string };
 
 export async function exportUserDataAction(): Promise<ExportUserDataActionResult> {
   const session = await auth.api.getSession({
@@ -39,8 +38,7 @@ export type ImportUserDataActionParams = {
 };
 
 export type ImportUserDataActionResult =
-  | { success: true; counts: ImportCounts }
-  | { success: false; error: string };
+  { success: true; counts: ImportCounts } | { success: false; error: string };
 
 export async function importUserDataAction({
   jsonString,

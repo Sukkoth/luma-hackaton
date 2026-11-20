@@ -10,7 +10,10 @@ import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { getUserAchievementsData } from "@/actions/achievements";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
 import {
   InsightsContainer,
   type InsightsTab,
@@ -191,7 +194,8 @@ export default async function InsightsPage({
               Your Scripture journey, in numbers & rhythm.
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Welcome back, {userFirstName}. Analyze reading velocity, canon depth distribution, diurnal habits, and unlocked milestones.
+              Welcome back, {userFirstName}. Analyze reading velocity, canon
+              depth distribution, diurnal habits, and unlocked milestones.
             </p>
           </div>
 
@@ -239,19 +243,24 @@ export default async function InsightsPage({
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {totalReadChapters} of {totalChaptersAcrossCanon} chapters read in {activeTrackerName}.
+                  {totalReadChapters} of {totalChaptersAcrossCanon} chapters
+                  read in {activeTrackerName}.
                 </p>
               </div>
 
               <div className="space-y-1 pt-0.5">
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>Progress to Full Canon</span>
-                  <span className="text-primary font-medium">{canonPercentage}%</span>
+                  <span className="text-primary font-medium">
+                    {canonPercentage}%
+                  </span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(0, canonPercentage))}%` }}
+                    style={{
+                      width: `${Math.min(100, Math.max(0, canonPercentage))}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -277,11 +286,14 @@ export default async function InsightsPage({
                     {streak?.currentStreak ?? 0}
                   </span>
                   <span className="text-xs font-semibold text-muted-foreground">
-                    {streak?.currentStreak === 1 ? "Day Streak" : "Days Active Streak"}
+                    {streak?.currentStreak === 1
+                      ? "Day Streak"
+                      : "Days Active Streak"}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {streak?.availableFreezes ?? 0} streak freezes available • {achievementsData.stats.unlocked} milestones unlocked.
+                  {streak?.availableFreezes ?? 0} streak freezes available •{" "}
+                  {achievementsData.stats.unlocked} milestones unlocked.
                 </p>
               </div>
 
@@ -301,18 +313,18 @@ export default async function InsightsPage({
           </div>
         </section>
 
-          {/* Tabbed Insights & Achievements Container */}
-          <InsightsContainer
-            initialTab={initialTab}
-            canonName={canonName}
-            divisions={divisions}
-            streak={streak}
-            totalReadChapters={totalReadChapters}
-            totalChaptersAcrossCanon={totalChaptersAcrossCanon}
-            canonPercentage={canonPercentage}
-            activeTrackerName={activeTrackerName}
-            achievementsData={achievementsData}
-          />
+        {/* Tabbed Insights & Achievements Container */}
+        <InsightsContainer
+          initialTab={initialTab}
+          canonName={canonName}
+          divisions={divisions}
+          streak={streak}
+          totalReadChapters={totalReadChapters}
+          totalChaptersAcrossCanon={totalChaptersAcrossCanon}
+          canonPercentage={canonPercentage}
+          activeTrackerName={activeTrackerName}
+          achievementsData={achievementsData}
+        />
       </div>
     </AppShell>
   );

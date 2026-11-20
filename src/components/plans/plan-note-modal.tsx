@@ -195,7 +195,9 @@ export function PlanNoteModal({
             </div>
             <div>
               <div className="flex items-center gap-2 text-xs text-foreground-dim">
-                <span className="font-medium text-foreground-secondary">{planTitle}</span>
+                <span className="font-medium text-foreground-secondary">
+                  {planTitle}
+                </span>
                 <span>•</span>
                 <span>{sessionTitle}</span>
               </div>

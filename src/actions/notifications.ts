@@ -146,8 +146,7 @@ export async function getUserNotificationsAction({
 }
 
 export type GetUnreadCountActionResult =
-  | { success: true; count: number }
-  | { success: false; error: string };
+  { success: true; count: number } | { success: false; error: string };
 
 export async function getUnreadNotificationCountAction(): Promise<GetUnreadCountActionResult> {
   const session = await auth.api.getSession({
@@ -190,9 +189,7 @@ export async function getUnreadNotificationCountAction(): Promise<GetUnreadCount
     return { success: true, count: totalCount };
   } catch (error) {
     const msg =
-      error instanceof Error
-        ? error.message
-        : "Failed to fetch unread count.";
+      error instanceof Error ? error.message : "Failed to fetch unread count.";
     return { success: false, error: msg };
   }
 }
@@ -202,8 +199,7 @@ export type MarkNotificationAsReadActionParams = {
 };
 
 export type MarkNotificationAsReadActionResult =
-  | { success: true }
-  | { success: false; error: string };
+  { success: true } | { success: false; error: string };
 
 export async function markNotificationAsReadAction({
   notificationId,
@@ -264,8 +260,7 @@ export async function markNotificationAsReadAction({
 }
 
 export type MarkAllNotificationsAsReadActionResult =
-  | { success: true }
-  | { success: false; error: string };
+  { success: true } | { success: false; error: string };
 
 export async function markAllNotificationsAsReadAction(): Promise<MarkAllNotificationsAsReadActionResult> {
   const session = await auth.api.getSession({
@@ -308,8 +303,7 @@ export type DeleteNotificationActionParams = {
 };
 
 export type DeleteNotificationActionResult =
-  | { success: true }
-  | { success: false; error: string };
+  { success: true } | { success: false; error: string };
 
 export async function deleteNotificationAction({
   notificationId,

@@ -534,91 +534,91 @@ export function PlanBibleReaderModal({
                 aria-label="Font size controls"
                 className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-60 rounded-[16px] border border-border bg-surface p-3 shadow-lg flex flex-col gap-3"
               >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
-                      Text Size
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
+                    Text Size
+                  </span>
+                  {fontSize !== DEFAULT_FONT_SIZE && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleUpdateFontSize({ newSize: DEFAULT_FONT_SIZE })
+                      }
+                      aria-label="Reset font size to default"
+                      className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      <RotateCcw className="size-3" />
+                      <span>Reset</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Stepper with Minus / Size Indicator / Plus */}
+                <div className="flex items-center justify-between rounded-[12px] border border-border bg-background p-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdateFontSize({ newSize: fontSize - 2 })
+                    }
+                    disabled={fontSize <= MIN_FONT_SIZE}
+                    aria-label="Decrease font size"
+                    className="flex size-8 items-center justify-center rounded-[8px] text-foreground transition-colors hover:bg-surface-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <Minus className="size-3.5 stroke-[2.5]" />
+                  </button>
+
+                  <div className="flex flex-col items-center">
+                    <span className="text-[13px] font-bold text-foreground">
+                      {fontSize}px
                     </span>
-                    {fontSize !== DEFAULT_FONT_SIZE && (
+                    <span className="text-[10px] text-foreground-dim">
+                      {Math.round((fontSize / DEFAULT_FONT_SIZE) * 100)}%
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdateFontSize({ newSize: fontSize + 2 })
+                    }
+                    disabled={fontSize >= MAX_FONT_SIZE}
+                    aria-label="Increase font size"
+                    className="flex size-8 items-center justify-center rounded-[8px] text-foreground transition-colors hover:bg-surface-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <Plus className="size-3.5 stroke-[2.5]" />
+                  </button>
+                </div>
+
+                {/* Quick Size Preset Pills */}
+                <div className="grid grid-cols-4 gap-1 text-center">
+                  {[
+                    { label: "Sm", size: 20 },
+                    { label: "Def", size: 22 },
+                    { label: "Lg", size: 25 },
+                    { label: "XL", size: 28 },
+                  ].map((preset) => {
+                    const isActive = fontSize === preset.size;
+                    return (
                       <button
+                        key={preset.size}
                         type="button"
                         onClick={() =>
-                          handleUpdateFontSize({ newSize: DEFAULT_FONT_SIZE })
+                          handleUpdateFontSize({ newSize: preset.size })
                         }
-                        aria-label="Reset font size to default"
-                        className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                        className={`rounded-[8px] py-1 text-[11px] font-medium transition-colors cursor-pointer ${
+                          isActive
+                            ? "bg-primary text-primary-foreground font-semibold"
+                            : "bg-surface-elevated text-foreground-secondary hover:text-foreground hover:bg-border"
+                        }`}
                       >
-                        <RotateCcw className="size-3" />
-                        <span>Reset</span>
+                        {preset.label}
                       </button>
-                    )}
-                  </div>
-
-                  {/* Stepper with Minus / Size Indicator / Plus */}
-                  <div className="flex items-center justify-between rounded-[12px] border border-border bg-background p-1">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleUpdateFontSize({ newSize: fontSize - 2 })
-                      }
-                      disabled={fontSize <= MIN_FONT_SIZE}
-                      aria-label="Decrease font size"
-                      className="flex size-8 items-center justify-center rounded-[8px] text-foreground transition-colors hover:bg-surface-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      <Minus className="size-3.5 stroke-[2.5]" />
-                    </button>
-
-                    <div className="flex flex-col items-center">
-                      <span className="text-[13px] font-bold text-foreground">
-                        {fontSize}px
-                      </span>
-                      <span className="text-[10px] text-foreground-dim">
-                        {Math.round((fontSize / DEFAULT_FONT_SIZE) * 100)}%
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleUpdateFontSize({ newSize: fontSize + 2 })
-                      }
-                      disabled={fontSize >= MAX_FONT_SIZE}
-                      aria-label="Increase font size"
-                      className="flex size-8 items-center justify-center rounded-[8px] text-foreground transition-colors hover:bg-surface-elevated disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                    >
-                      <Plus className="size-3.5 stroke-[2.5]" />
-                    </button>
-                  </div>
-
-                  {/* Quick Size Preset Pills */}
-                  <div className="grid grid-cols-4 gap-1 text-center">
-                    {[
-                      { label: "Sm", size: 20 },
-                      { label: "Def", size: 22 },
-                      { label: "Lg", size: 25 },
-                      { label: "XL", size: 28 },
-                    ].map((preset) => {
-                      const isActive = fontSize === preset.size;
-                      return (
-                        <button
-                          key={preset.size}
-                          type="button"
-                          onClick={() =>
-                            handleUpdateFontSize({ newSize: preset.size })
-                          }
-                          className={`rounded-[8px] py-1 text-[11px] font-medium transition-colors cursor-pointer ${
-                            isActive
-                              ? "bg-primary text-primary-foreground font-semibold"
-                              : "bg-surface-elevated text-foreground-secondary hover:text-foreground hover:bg-border"
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
 
           {/* Theme Toggle: hidden on mobile toolbar to avoid crowding, accessible on larger screens */}
           <div className="hidden sm:flex">

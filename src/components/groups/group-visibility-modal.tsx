@@ -38,7 +38,9 @@ export function GroupVisibilityModal({
 
   // 24-hour rate limit computation
   const COOLDOWN_MS = 24 * 60 * 60 * 1000;
-  const lastUpdatedTime = privacyUpdatedAt ? new Date(privacyUpdatedAt).getTime() : 0;
+  const lastUpdatedTime = privacyUpdatedAt
+    ? new Date(privacyUpdatedAt).getTime()
+    : 0;
   const elapsed = mountTimestamp - lastUpdatedTime;
   const isCooldownActive = elapsed < COOLDOWN_MS;
   const remainingMs = COOLDOWN_MS - elapsed;
@@ -117,8 +119,8 @@ export function GroupVisibilityModal({
                 Visibility Cooldown Active
               </h3>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                To protect fellowship accountability and prevent gaming reading records,
-                visibility can only be changed once every 24 hours.
+                To protect fellowship accountability and prevent gaming reading
+                records, visibility can only be changed once every 24 hours.
               </p>
             </div>
 
@@ -126,11 +128,15 @@ export function GroupVisibilityModal({
               <div className="flex items-center justify-between text-foreground">
                 <span className="text-muted-foreground">Current status</span>
                 <span className="font-semibold">
-                  {currentHideProgress ? "Hidden (Anonymous)" : "Visible to Cohort"}
+                  {currentHideProgress
+                    ? "Hidden (Anonymous)"
+                    : "Visible to Cohort"}
                 </span>
               </div>
               <div className="flex items-center justify-between text-foreground">
-                <span className="text-muted-foreground">Next change allowed in</span>
+                <span className="text-muted-foreground">
+                  Next change allowed in
+                </span>
                 <span className="font-semibold tabular-nums text-primary">
                   {hoursLeft}h {minutesLeft}m
                 </span>
@@ -138,7 +144,12 @@ export function GroupVisibilityModal({
             </div>
 
             <div className="pt-2 flex justify-end">
-              <Button type="button" variant="outline" size="sm" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onClose}
+              >
                 Understood
               </Button>
             </div>
@@ -179,8 +190,8 @@ export function GroupVisibilityModal({
                     <span className="font-semibold text-foreground">
                       Reciprocal Anonymity:
                     </span>{" "}
-                    While your progress is hidden, other readers will also appear as
-                    anonymous to you.
+                    While your progress is hidden, other readers will also
+                    appear as anonymous to you.
                   </p>
                 </div>
               ) : (
@@ -190,8 +201,8 @@ export function GroupVisibilityModal({
                     <span className="font-semibold text-foreground">
                       Cohort Transparency:
                     </span>{" "}
-                    You and other readers will be able to see each other&apos;s reading
-                    milestones and progress.
+                    You and other readers will be able to see each other&apos;s
+                    reading milestones and progress.
                   </p>
                 </div>
               )}
@@ -202,7 +213,8 @@ export function GroupVisibilityModal({
                   <span className="font-medium text-foreground">
                     24-hour lock:
                   </span>{" "}
-                  Once updated, you cannot change this setting again for 24 hours.
+                  Once updated, you cannot change this setting again for 24
+                  hours.
                 </p>
               </div>
             </div>
@@ -234,8 +246,8 @@ export function GroupVisibilityModal({
                 {isSubmitting
                   ? "Saving..."
                   : currentHideProgress
-                  ? "Confirm & Make Visible"
-                  : "Confirm & Hide Progress"}
+                    ? "Confirm & Make Visible"
+                    : "Confirm & Hide Progress"}
               </Button>
             </div>
           </div>

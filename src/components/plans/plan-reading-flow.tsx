@@ -17,10 +17,7 @@ import type {
   PlanNoteDetail,
 } from "@/actions/plans";
 import { useTheme } from "@/components/theme/theme-provider";
-import {
-  buildBibleComPath,
-  detectDefaultVersion,
-} from "@/lib/bible-versions";
+import { buildBibleComPath, detectDefaultVersion } from "@/lib/bible-versions";
 import { PlanSessionNotes } from "./plan-session-notes";
 
 type PlanReadingFlowProps = {
@@ -150,8 +147,10 @@ export function PlanReadingFlow({
     const params = new URLSearchParams();
     params.set("plan", instanceId);
     params.set("readingId", reading.id);
-    if (reading.startVerse != null) params.set("startVerse", reading.startVerse.toString());
-    if (reading.endVerse != null) params.set("endVerse", reading.endVerse.toString());
+    if (reading.startVerse != null)
+      params.set("startVerse", reading.startVerse.toString());
+    if (reading.endVerse != null)
+      params.set("endVerse", reading.endVerse.toString());
     return `/bible/${reading.bookId.toLowerCase()}/${reading.chapter}?${params.toString()}`;
   };
 

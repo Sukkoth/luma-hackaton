@@ -9,7 +9,10 @@ export async function GET(request: NextRequest) {
   const readingId = searchParams.get("readingId");
 
   if (!planId || !readingId) {
-    return NextResponse.json({ error: "Missing planId or readingId" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing planId or readingId" },
+      { status: 400 }
+    );
   }
 
   const session = await auth.api.getSession({ headers: await headers() });
@@ -35,26 +38,31 @@ export async function GET(request: NextRequest) {
   }
 
   const reading = plan.sessions
-    .flatMap((s) => s.readings.map((r) => ({ ...r, sessionIndex: s.sessionIndex, sessionTitle: s.title })))
+    .flatMap((s) =>
+      s.readings.map((r) => ({
+        ...r,
+        sessionIndex: s.sessionIndex,
+        sessionTitle: s.title,
+      }))
+    )
     .find((r) => r.id === readingId);
 
   if (!reading) {
     return NextResponse.json({ error: "Reading not found" }, { status: 404 });
   }
 
-  const flattenedReadings = plan.sessions
-    .flatMap((s) =>
-      s.readings.map((r) => ({
-        id: r.id,
-        bookId: r.bookId,
-        chapter: r.chapter,
-        startVerse: r.startVerse,
-        endVerse: r.endVerse,
-        sessionIndex: s.sessionIndex,
-        sessionTitle: s.title,
-        isCompleted: r.isCompleted,
-      }))
-    );
+  const flattenedReadings = plan.sessions.flatMap((s) =>
+    s.readings.map((r) => ({
+      id: r.id,
+      bookId: r.bookId,
+      chapter: r.chapter,
+      startVerse: r.startVerse,
+      endVerse: r.endVerse,
+      sessionIndex: s.sessionIndex,
+      sessionTitle: s.title,
+      isCompleted: r.isCompleted,
+    }))
+  );
 
   return NextResponse.json(
     {

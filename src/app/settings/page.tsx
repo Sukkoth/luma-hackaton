@@ -4,7 +4,10 @@ import { eq, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
 import { userSettings, trackerChapterProgress } from "@/db/schema";
-import { SettingsView, type SettingsTab } from "@/components/settings/settings-view";
+import {
+  SettingsView,
+  type SettingsTab,
+} from "@/components/settings/settings-view";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { getCanonTestamentChapters, type BibleCanon } from "@/data/bibleData";
@@ -17,7 +20,9 @@ type SettingsPageProps = {
   }>;
 };
 
-export default async function SettingsPage({ searchParams }: SettingsPageProps) {
+export default async function SettingsPage({
+  searchParams,
+}: SettingsPageProps) {
   const [session, resolvedParams] = await Promise.all([
     auth.api.getSession({
       headers: await headers(),
@@ -53,13 +58,12 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         })
       : [];
 
-  const progressCountByTrackerId = chapterProgressRows.reduce<Record<string, number>>(
-    (acc, row) => {
-      acc[row.trackerId] = (acc[row.trackerId] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
+  const progressCountByTrackerId = chapterProgressRows.reduce<
+    Record<string, number>
+  >((acc, row) => {
+    acc[row.trackerId] = (acc[row.trackerId] || 0) + 1;
+    return acc;
+  }, {});
 
   const enrichedTrackers = trackersData.trackers.map((t) => {
     const canon = (t.canon as BibleCanon) || "protestant";

@@ -17,10 +17,7 @@ import {
   Search,
 } from "lucide-react";
 import * as v from "valibot";
-import {
-  READING_PLANS,
-  isPlanCanonCompatible,
-} from "@/data/readingPlans";
+import { READING_PLANS, isPlanCanonCompatible } from "@/data/readingPlans";
 import type { BibleCanon } from "@/data/bibleData";
 import { ScheduleGroupPlanSchema } from "@/lib/schemas/groups";
 import { scheduleGroupPlanAction } from "@/actions/groups";
@@ -200,7 +197,9 @@ export function GroupSchedulePlanModal({
   // Estimated days calculation
   const activeDaysPerWeek = activeWeekdays.filter(Boolean).length || 7;
   const chaptersPerWeek = activeDaysPerWeek * dailyTarget;
-  const estimatedWeeks = Math.ceil(selectedPlan.totalChapters / chaptersPerWeek);
+  const estimatedWeeks = Math.ceil(
+    selectedPlan.totalChapters / chaptersPerWeek
+  );
   const estimatedDays = Math.ceil(
     (selectedPlan.totalChapters / dailyTarget) * (7 / activeDaysPerWeek)
   );
@@ -263,7 +262,9 @@ export function GroupSchedulePlanModal({
                 >
                   <span
                     className={`text-[11px] font-bold ${
-                      isActive ? "text-primary-foreground" : "text-foreground-dim"
+                      isActive
+                        ? "text-primary-foreground"
+                        : "text-foreground-dim"
                     }`}
                   >
                     {s.num}
@@ -292,7 +293,8 @@ export function GroupSchedulePlanModal({
                   Select a Plan Template
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Showing {filteredPlans.length} of {READING_PLANS.length} curated biblical reading curricula.
+                  Showing {filteredPlans.length} of {READING_PLANS.length}{" "}
+                  curated biblical reading curricula.
                 </p>
               </div>
 
@@ -334,10 +336,16 @@ export function GroupSchedulePlanModal({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Canons</SelectItem>
-                      <SelectItem value="protestant">Protestant (66)</SelectItem>
+                      <SelectItem value="protestant">
+                        Protestant (66)
+                      </SelectItem>
                       <SelectItem value="catholic">Catholic (73)</SelectItem>
-                      <SelectItem value="eastern_orthodox">Eastern Orthodox</SelectItem>
-                      <SelectItem value="ethiopian_orthodox">Ethiopian Orthodox</SelectItem>
+                      <SelectItem value="eastern_orthodox">
+                        Eastern Orthodox
+                      </SelectItem>
+                      <SelectItem value="ethiopian_orthodox">
+                        Ethiopian Orthodox
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -358,11 +366,19 @@ export function GroupSchedulePlanModal({
                       <SelectItem value="all">All Sections</SelectItem>
                       <SelectItem value="Gospels">Gospels</SelectItem>
                       <SelectItem value="Epistles">Epistles</SelectItem>
-                      <SelectItem value="Wisdom & Poetry">Wisdom &amp; Poetry</SelectItem>
-                      <SelectItem value="Old Testament">Old Testament</SelectItem>
-                      <SelectItem value="New Testament">New Testament</SelectItem>
+                      <SelectItem value="Wisdom & Poetry">
+                        Wisdom &amp; Poetry
+                      </SelectItem>
+                      <SelectItem value="Old Testament">
+                        Old Testament
+                      </SelectItem>
+                      <SelectItem value="New Testament">
+                        New Testament
+                      </SelectItem>
                       <SelectItem value="Whole Bible">Whole Bible</SelectItem>
-                      <SelectItem value="Chronological">Chronological</SelectItem>
+                      <SelectItem value="Chronological">
+                        Chronological
+                      </SelectItem>
                       <SelectItem value="Multi-Track">Multi-Track</SelectItem>
                     </SelectContent>
                   </Select>
@@ -378,7 +394,8 @@ export function GroupSchedulePlanModal({
                       No matching plans found
                     </p>
                     <p className="text-xs text-foreground-dim mt-1 max-w-xs leading-relaxed">
-                      Try clearing or adjusting your search keywords, canon, or section filters.
+                      Try clearing or adjusting your search keywords, canon, or
+                      section filters.
                     </p>
                     <button
                       type="button"
@@ -430,7 +447,8 @@ export function GroupSchedulePlanModal({
                             <span>~{plan.recommendedDays} days standard</span>
                             {isSelected && (
                               <span className="flex items-center gap-1 font-semibold text-primary">
-                                <Check className="size-3.5 stroke-[3]" /> Selected
+                                <Check className="size-3.5 stroke-[3]" />{" "}
+                                Selected
                               </span>
                             )}
                           </div>
@@ -470,7 +488,8 @@ export function GroupSchedulePlanModal({
                   className="w-full h-11"
                 />
                 <p className="mt-1 text-[11.5px] text-foreground-dim">
-                  All members will see day-by-day readings synchronized from this start date.
+                  All members will see day-by-day readings synchronized from
+                  this start date.
                 </p>
               </div>
 
@@ -488,7 +507,9 @@ export function GroupSchedulePlanModal({
                 <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setDailyTarget((prev) => Math.max(1, prev - 1))}
+                    onClick={() =>
+                      setDailyTarget((prev) => Math.max(1, prev - 1))
+                    }
                     disabled={dailyTarget <= 1}
                     aria-label="Decrease daily chapter goal"
                     className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground hover:bg-surface transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
@@ -502,7 +523,9 @@ export function GroupSchedulePlanModal({
 
                   <button
                     type="button"
-                    onClick={() => setDailyTarget((prev) => Math.min(30, prev + 1))}
+                    onClick={() =>
+                      setDailyTarget((prev) => Math.min(30, prev + 1))
+                    }
                     disabled={dailyTarget >= 30}
                     aria-label="Increase daily chapter goal"
                     className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-elevated text-foreground hover:bg-surface transition-colors disabled:opacity-40 cursor-pointer shadow-2xs"
@@ -512,7 +535,8 @@ export function GroupSchedulePlanModal({
                 </div>
 
                 <p className="text-center text-xs text-foreground-dim">
-                  Estimated duration: ~{estimatedDays} days ({estimatedWeeks} {estimatedWeeks === 1 ? "week" : "weeks"})
+                  Estimated duration: ~{estimatedDays} days ({estimatedWeeks}{" "}
+                  {estimatedWeeks === 1 ? "week" : "weeks"})
                 </p>
               </div>
 
@@ -523,7 +547,9 @@ export function GroupSchedulePlanModal({
                     Active Reading Days
                   </label>
                   <p className="text-[11.5px] text-foreground-dim mt-0.5">
-                    {activeDaysPerWeek} active {activeDaysPerWeek === 1 ? "day" : "days"} / {7 - activeDaysPerWeek} rest
+                    {activeDaysPerWeek} active{" "}
+                    {activeDaysPerWeek === 1 ? "day" : "days"} /{" "}
+                    {7 - activeDaysPerWeek} rest
                   </p>
                 </div>
 
@@ -562,7 +588,8 @@ export function GroupSchedulePlanModal({
                   Late-Join Cohort Policy
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  How should the schedule handle members who join after the plan has already started?
+                  How should the schedule handle members who join after the plan
+                  has already started?
                 </p>
               </div>
 
@@ -584,7 +611,10 @@ export function GroupSchedulePlanModal({
                       Skip Ahead (Recommended)
                     </span>
                     <p className="text-xs text-foreground-secondary leading-relaxed mt-0.5">
-                      New members start directly on today&apos;s active session. Past readings are omitted from their plan instance so they read together with the fellowship without an overwhelming backlog.
+                      New members start directly on today&apos;s active session.
+                      Past readings are omitted from their plan instance so they
+                      read together with the fellowship without an overwhelming
+                      backlog.
                     </p>
                   </div>
                 </button>
@@ -606,7 +636,9 @@ export function GroupSchedulePlanModal({
                       Backfill from Day 1
                     </span>
                     <p className="text-xs text-foreground-secondary leading-relaxed mt-0.5">
-                      Members receive the complete plan from Day 1 and start in a &quot;behind&quot; status. They can use the catch-up rebalancer to read previous chapters at their own pace.
+                      Members receive the complete plan from Day 1 and start in
+                      a &quot;behind&quot; status. They can use the catch-up
+                      rebalancer to read previous chapters at their own pace.
                     </p>
                   </div>
                 </button>
@@ -628,7 +660,9 @@ export function GroupSchedulePlanModal({
                       Strict Locked
                     </span>
                     <p className="text-xs text-foreground-secondary leading-relaxed mt-0.5">
-                      Enrollment is permanently locked once the scheduled start date arrives. Members who didn&apos;t enroll in time must wait for the next scheduled plan.
+                      Enrollment is permanently locked once the scheduled start
+                      date arrives. Members who didn&apos;t enroll in time must
+                      wait for the next scheduled plan.
                     </p>
                   </div>
                 </button>
@@ -650,21 +684,27 @@ export function GroupSchedulePlanModal({
 
               <div className="ui-card p-5 space-y-4 rounded-2xl">
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-                  <span className="text-xs text-foreground-dim">Plan Template</span>
+                  <span className="text-xs text-foreground-dim">
+                    Plan Template
+                  </span>
                   <span className="text-sm font-semibold text-foreground">
                     {selectedPlan.title}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-                  <span className="text-xs text-foreground-dim">Total Chapters</span>
+                  <span className="text-xs text-foreground-dim">
+                    Total Chapters
+                  </span>
                   <span className="text-sm font-semibold text-foreground">
                     {selectedPlan.totalChapters} chapters
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-                  <span className="text-xs text-foreground-dim">Cohort Start Date</span>
+                  <span className="text-xs text-foreground-dim">
+                    Cohort Start Date
+                  </span>
                   <span className="text-sm font-semibold text-foreground">
                     {new Date(startDate).toLocaleDateString(undefined, {
                       month: "short",
@@ -675,14 +715,18 @@ export function GroupSchedulePlanModal({
                 </div>
 
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-                  <span className="text-xs text-foreground-dim">Pacing Goal</span>
+                  <span className="text-xs text-foreground-dim">
+                    Pacing Goal
+                  </span>
                   <span className="text-sm font-semibold text-foreground">
                     {dailyTarget} chapters / active day
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-                  <span className="text-xs text-foreground-dim">Active Reading Days</span>
+                  <span className="text-xs text-foreground-dim">
+                    Active Reading Days
+                  </span>
                   <span className="text-xs font-semibold text-foreground">
                     {activeWeekdays.filter(Boolean).length === 7
                       ? "Every day (7 days/week)"
@@ -691,7 +735,9 @@ export function GroupSchedulePlanModal({
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-foreground-dim">Late-Join Policy</span>
+                  <span className="text-xs text-foreground-dim">
+                    Late-Join Policy
+                  </span>
                   <span className="text-xs font-semibold text-foreground capitalize">
                     {lateJoinPolicy.replace("_", " ")}
                   </span>

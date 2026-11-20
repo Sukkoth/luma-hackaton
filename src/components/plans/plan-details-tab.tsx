@@ -108,9 +108,7 @@ export function PlanDetailsTab({ plan }: PlanDetailsTabProps) {
             <p className="mt-1 text-[16px] font-semibold text-foreground">
               {plan.totalChapters} Chapters
             </p>
-            <p className="text-[11px] text-foreground-dim">
-              100% finished
-            </p>
+            <p className="text-[11px] text-foreground-dim">100% finished</p>
           </div>
 
           <div className="rounded-2xl border border-border bg-surface-elevated/60 p-3.5">

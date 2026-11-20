@@ -4,7 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Users, Lock, Globe, ShieldAlert, ArrowLeft, CheckCircle2 } from "lucide-react";
+import {
+  Users,
+  Lock,
+  Globe,
+  ShieldAlert,
+  ArrowLeft,
+  CheckCircle2,
+} from "lucide-react";
 import { joinGroupAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
 
@@ -122,7 +129,8 @@ export function GroupJoinLandingClient({
               {name}
             </h1>
             <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-              {description || "You have been invited to join this Scripture reading fellowship on Luma."}
+              {description ||
+                "You have been invited to join this Scripture reading fellowship on Luma."}
             </p>
           </div>
 
@@ -131,7 +139,9 @@ export function GroupJoinLandingClient({
             <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-left">
               <ShieldAlert className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800 dark:text-amber-300 leading-snug">
-                This fellowship requires admin approval. Once requested, the owner or an admin will review your membership before granting access.
+                This fellowship requires admin approval. Once requested, the
+                owner or an admin will review your membership before granting
+                access.
               </p>
             </div>
           )}
@@ -157,7 +167,8 @@ export function GroupJoinLandingClient({
                 Request Submitted
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Your request is pending review by the fellowship admins. You will see this fellowship on your dashboard once approved.
+                Your request is pending review by the fellowship admins. You
+                will see this fellowship on your dashboard once approved.
               </p>
               <Link
                 href="/groups"
@@ -178,7 +189,9 @@ export function GroupJoinLandingClient({
               isLoading={isSubmitting}
               onClick={handleJoin}
             >
-              {requiresApproval ? "Request to Join Fellowship" : "Join Fellowship"}
+              {requiresApproval
+                ? "Request to Join Fellowship"
+                : "Join Fellowship"}
             </Button>
           )}
         </div>

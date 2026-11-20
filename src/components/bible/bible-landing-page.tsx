@@ -13,7 +13,10 @@ import {
 } from "lucide-react";
 import { detectDefaultVersion } from "@/lib/bible-versions";
 import { TabsBar } from "@/components/ui/tabs-bar";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
 
 const OLD_TESTAMENT_BOOKS = [
   { id: "gen", name: "Genesis", chapters: 50 },
@@ -135,7 +138,8 @@ export function BibleLandingPage() {
     );
   }, [searchQuery]);
 
-  const booksForTab = activeTab === "ot" ? OLD_TESTAMENT_BOOKS : NEW_TESTAMENT_BOOKS;
+  const booksForTab =
+    activeTab === "ot" ? OLD_TESTAMENT_BOOKS : NEW_TESTAMENT_BOOKS;
 
   const lastReadBookName =
     ALL_BOOKS.find((b) => b.id === lastRead?.bookId)?.name || lastRead?.bookId;
@@ -153,7 +157,8 @@ export function BibleLandingPage() {
             The Holy Scriptures, chapter by chapter.
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Read, study, and meditate on God&apos;s Word across canonical testaments, parallel translations, and original verses.
+            Read, study, and meditate on God&apos;s Word across canonical
+            testaments, parallel translations, and original verses.
           </p>
         </div>
 
@@ -196,7 +201,9 @@ export function BibleLandingPage() {
             <div className="space-y-1">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
-                  {lastRead ? `${lastReadBookName} ${lastRead.chapter}` : "Genesis 1"}
+                  {lastRead
+                    ? `${lastReadBookName} ${lastRead.chapter}`
+                    : "Genesis 1"}
                 </span>
                 <span className="text-xs font-semibold text-primary">
                   {lastRead ? "Resume Chapter" : "Creation"}
@@ -210,7 +217,11 @@ export function BibleLandingPage() {
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
-              <span>{lastRead ? `Version: ${selectedVersion.abbreviation}` : "66 books ready to explore"}</span>
+              <span>
+                {lastRead
+                  ? `Version: ${selectedVersion.abbreviation}`
+                  : "66 books ready to explore"}
+              </span>
               <Link
                 href={
                   lastRead
@@ -249,7 +260,8 @@ export function BibleLandingPage() {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                39 Old Testament books and 27 New Testament books with full verse coverage.
+                39 Old Testament books and 27 New Testament books with full
+                verse coverage.
               </p>
             </div>
 
@@ -277,7 +289,9 @@ export function BibleLandingPage() {
               <BookOpen className="size-5" />
             </div>
             <div>
-              <p className="text-[11px] font-medium text-foreground-dim">Translation</p>
+              <p className="text-[11px] font-medium text-foreground-dim">
+                Translation
+              </p>
               <p className="text-[14px] font-semibold text-foreground">
                 {selectedVersion.abbreviation} — {selectedVersion.name}
               </p>
@@ -302,8 +316,12 @@ export function BibleLandingPage() {
           <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-green-500/10 text-green-600 dark:text-green-400">
             <Zap className="size-5" />
           </div>
-          <span className="text-[13px] font-medium text-foreground">Psalm 23</span>
-          <span className="text-[11px] text-foreground-dim">The Lord is my Shepherd</span>
+          <span className="text-[13px] font-medium text-foreground">
+            Psalm 23
+          </span>
+          <span className="text-[11px] text-foreground-dim">
+            The Lord is my Shepherd
+          </span>
         </Link>
         <Link
           href={`/bible/jhn/3?v=${selectedVersion.id}`}
@@ -312,8 +330,12 @@ export function BibleLandingPage() {
           <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-blue-500/10 text-blue-600 dark:text-blue-400">
             <BookOpen className="size-5" />
           </div>
-          <span className="text-[13px] font-medium text-foreground">John 3:16</span>
-          <span className="text-[11px] text-foreground-dim">For God so loved the world</span>
+          <span className="text-[13px] font-medium text-foreground">
+            John 3:16
+          </span>
+          <span className="text-[11px] text-foreground-dim">
+            For God so loved the world
+          </span>
         </Link>
         <Link
           href={`/bible/rom/8?v=${selectedVersion.id}`}
@@ -322,8 +344,12 @@ export function BibleLandingPage() {
           <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <Clock className="size-5" />
           </div>
-          <span className="text-[13px] font-medium text-foreground">Romans 8</span>
-          <span className="text-[11px] text-foreground-dim">No condemnation</span>
+          <span className="text-[13px] font-medium text-foreground">
+            Romans 8
+          </span>
+          <span className="text-[11px] text-foreground-dim">
+            No condemnation
+          </span>
         </Link>
         <Link
           href={`/bible/phil/4?v=${selectedVersion.id}`}
@@ -332,8 +358,12 @@ export function BibleLandingPage() {
           <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-orange-500/10 text-orange-600 dark:text-orange-400">
             <Search className="size-5" />
           </div>
-          <span className="text-[13px] font-medium text-foreground">Philippians 4</span>
-          <span className="text-[11px] text-foreground-dim">Rejoice always</span>
+          <span className="text-[13px] font-medium text-foreground">
+            Philippians 4
+          </span>
+          <span className="text-[11px] text-foreground-dim">
+            Rejoice always
+          </span>
         </Link>
       </div>
 
@@ -355,7 +385,7 @@ export function BibleLandingPage() {
             {filteredBooks.length} result{filteredBooks.length !== 1 ? "s" : ""}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {filteredBooks.map((book: typeof ALL_BOOKS[0]) => (
+            {filteredBooks.map((book: (typeof ALL_BOOKS)[0]) => (
               <Link
                 key={book.id}
                 href={`/bible/${book.id}/1?v=${selectedVersion.id}`}

@@ -62,8 +62,13 @@ export function BibleReaderPageClient() {
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
 
-  const [planContext, setPlanContext] = useState<BibleReaderPlanContext | null>(null);
-  const [trackersData, setTrackersData] = useState<{ trackers: readonly UserTrackerSummary[]; activeTracker?: UserTrackerSummary | null }>({ trackers: [] });
+  const [planContext, setPlanContext] = useState<BibleReaderPlanContext | null>(
+    null
+  );
+  const [trackersData, setTrackersData] = useState<{
+    trackers: readonly UserTrackerSummary[];
+    activeTracker?: UserTrackerSummary | null;
+  }>({ trackers: [] });
   const [streak, setStreak] = useState<StreakData | undefined>(undefined);
   const [mounted] = useState(() => typeof window !== "undefined");
   const [loading, setLoading] = useState(true);
@@ -72,7 +77,9 @@ export function BibleReaderPageClient() {
     if (!mounted) return;
     if (sessionPending) return;
     if (!session) {
-      router.replace(`/login?redirect=${window.location.pathname}${window.location.search}`);
+      router.replace(
+        `/login?redirect=${window.location.pathname}${window.location.search}`
+      );
       return;
     }
     // Use a callback to avoid synchronous setState
@@ -131,10 +138,15 @@ export function BibleReaderPageClient() {
 
     async function fetchUserData() {
       try {
-        const response = await fetch("/api/bible/user-data", { cache: "no-store" });
+        const response = await fetch("/api/bible/user-data", {
+          cache: "no-store",
+        });
         if (!response.ok) return;
         const data: UserDataResponse = await response.json();
-        setTrackersData({ trackers: data.trackers, activeTracker: data.activeTracker });
+        setTrackersData({
+          trackers: data.trackers,
+          activeTracker: data.activeTracker,
+        });
         setStreak(data.streak);
       } catch {
         // Ignore errors
@@ -147,11 +159,15 @@ export function BibleReaderPageClient() {
   // Handle Mark as Read toggle directly in this component (since we're on a separate page)
   const handleToggleReading = async (readingId: string) => {
     if (!planContext || !session) return;
-    
-    const targetReading = planContext.flattenedReadings.find((r) => r.id === readingId);
-    const currentStatus = targetReading ? Boolean(targetReading.isCompleted) : Boolean(planContext.reading.isCompleted);
+
+    const targetReading = planContext.flattenedReadings.find(
+      (r) => r.id === readingId
+    );
+    const currentStatus = targetReading
+      ? Boolean(targetReading.isCompleted)
+      : Boolean(planContext.reading.isCompleted);
     const nextStatus = !currentStatus;
-    
+
     // Optimistic update
     setPlanContext((prev) => {
       if (!prev) return null;
@@ -172,7 +188,7 @@ export function BibleReaderPageClient() {
         instanceId: planContext.plan.id,
         readingItemId: readingId,
       });
-      
+
       if (!res.success) {
         // Rollback on failure
         setPlanContext((prev) => {
@@ -237,18 +253,30 @@ export function BibleReaderPageClient() {
     );
   }
 
-  const versionId = versionParam ? Number.parseInt(versionParam, 10) : undefined;
-  const startVerse = startVerseParam ? Number.parseInt(startVerseParam, 10) : undefined;
-  const endVerse = endVerseParam ? Number.parseInt(endVerseParam, 10) : undefined;
+  const versionId = versionParam
+    ? Number.parseInt(versionParam, 10)
+    : undefined;
+  const startVerse = startVerseParam
+    ? Number.parseInt(startVerseParam, 10)
+    : undefined;
+  const endVerse = endVerseParam
+    ? Number.parseInt(endVerseParam, 10)
+    : undefined;
 
   return (
     <AppShell
-      userName={planContext?.plan ? session.user.name || "Reader" : session.user.name || "Reader"}
+      userName={
+        planContext?.plan
+          ? session.user.name || "Reader"
+          : session.user.name || "Reader"
+      }
       userEmail={session.user.email}
       userImage={session.user.image ?? undefined}
       streak={planContext?.plan ? streak : undefined}
       trackers={planContext?.plan ? trackersData.trackers : undefined}
-      activeTrackerId={planContext?.plan ? trackersData.activeTracker?.id : undefined}
+      activeTrackerId={
+        planContext?.plan ? trackersData.activeTracker?.id : undefined
+      }
     >
       <div className="w-full h-full">
         <BibleReaderPage

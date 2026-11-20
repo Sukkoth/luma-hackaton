@@ -40,7 +40,10 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
     });
 
     if (!parsed.success) {
-      setError(parsed.issues[0]?.message || "Please fill all required fields correctly.");
+      setError(
+        parsed.issues[0]?.message ||
+          "Please fill all required fields correctly."
+      );
       return;
     }
 

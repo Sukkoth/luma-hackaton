@@ -11,7 +11,10 @@ import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import { getOverviewData } from "@/actions/overview";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
 import { ChartDefs } from "@/components/overview/chart-tokens";
 import { ActivityRingsCard } from "@/components/overview/activity-rings-card";
 import { ProgressOverTimeCard } from "@/components/overview/progress-over-time-card";
@@ -65,7 +68,9 @@ export default async function HomePage() {
   const firstName = session.user.name?.split(" ")[0] || "Reader";
   const nextReading = overviewData.activityRings.nextReading;
   const primaryPlan = overviewData.planGauge.plans[0] ?? null;
-  const primaryPlanUrl = primaryPlan ? `/plans/${primaryPlan.instanceId}` : "/plans";
+  const primaryPlanUrl = primaryPlan
+    ? `/plans/${primaryPlan.instanceId}`
+    : "/plans";
   const primaryPlanLabel = primaryPlan ? "Continue Reading" : "Explore Plans";
   const todayFormatted = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -201,7 +206,8 @@ export default async function HomePage() {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {overviewData.activityRings.thisWeekChapters} chapters read this week • On pace to finish{" "}
+                  {overviewData.activityRings.thisWeekChapters} chapters read
+                  this week • On pace to finish{" "}
                   {overviewData.activityRings.projectedFinishDate}.
                 </p>
               </div>

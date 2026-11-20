@@ -26,7 +26,10 @@ import { searchPublicGroupsAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { FilterPills } from "@/components/ui/filter-pills";
-import { HeaderActions, HeaderActionButton } from "@/components/ui/header-action-button";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
 import { CreateGroupModal } from "@/components/groups/create-group-modal";
 import { JoinCodeModal } from "@/components/groups/join-code-modal";
 import { cn } from "@/lib/utils";
@@ -77,7 +80,9 @@ export function GroupsHubView({
     "filter",
     parseAsStringLiteral(GROUP_FILTERS).withDefault("all")
   );
-  const [searchedGroups, setSearchedGroups] = useState<typeof initialPublicGroups | null>(null);
+  const [searchedGroups, setSearchedGroups] = useState<
+    typeof initialPublicGroups | null
+  >(null);
   const [isSearching, startSearchTransition] = useTransition();
 
   const publicGroups =
@@ -129,7 +134,8 @@ export function GroupsHubView({
         if (!matchesName && !matchesDesc) return false;
       }
       if (filter === "active_plans") return group.activePlansCount > 0;
-      if (filter === "leading") return group.role === "owner" || group.role === "admin";
+      if (filter === "leading")
+        return group.role === "owner" || group.role === "admin";
       if (filter === "pending") return group.status === "pending_approval";
       return true;
     });
@@ -181,7 +187,8 @@ export function GroupsHubView({
             Walk through Scripture, together.
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Synchronize daily reading cadences with your church, small group, or family. Share chapter reflections and keep pace together.
+            Synchronize daily reading cadences with your church, small group, or
+            family. Share chapter reflections and keep pace together.
           </p>
         </div>
 
@@ -227,7 +234,8 @@ export function GroupsHubView({
                   {totalActivePlans}
                 </span>
                 <span className="text-xs font-semibold text-primary">
-                  {totalActivePlans === 1 ? "Active Plan" : "Active Plans"} in lockstep
+                  {totalActivePlans === 1 ? "Active Plan" : "Active Plans"} in
+                  lockstep
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -242,7 +250,9 @@ export function GroupsHubView({
               <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                 <span>Cohort synchrony</span>
                 <span className="text-primary font-medium">
-                  {myGroups.length > 0 ? "Active in stride" : "Open for enrollment"}
+                  {myGroups.length > 0
+                    ? "Active in stride"
+                    : "Open for enrollment"}
                 </span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
@@ -288,7 +298,9 @@ export function GroupsHubView({
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {totalCohortMembers} {totalCohortMembers === 1 ? "reader" : "readers"} walking in community
+                {totalCohortMembers}{" "}
+                {totalCohortMembers === 1 ? "reader" : "readers"} walking in
+                community
               </p>
             </div>
 
@@ -500,7 +512,9 @@ export function GroupsHubView({
                       href={isPending ? "#" : `/groups/${group.id}`}
                       className={cn(
                         "ui-card group relative isolate flex flex-col justify-between p-5 transition-all duration-150 hover:border-border-strong",
-                        isPending ? "opacity-75 cursor-default" : "cursor-pointer"
+                        isPending
+                          ? "opacity-75 cursor-default"
+                          : "cursor-pointer"
                       )}
                     >
                       <div>
@@ -566,7 +580,8 @@ export function GroupsHubView({
                               {group.name}
                             </h3>
                             <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                              {group.description || "Community Bible reading fellowship and accountability circle."}
+                              {group.description ||
+                                "Community Bible reading fellowship and accountability circle."}
                             </p>
                           </div>
                         </div>
@@ -576,7 +591,10 @@ export function GroupsHubView({
                           {group.activePlansCount > 0 ? (
                             <span className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-xs text-primary font-medium">
                               <Calendar className="size-3" />
-                              <span>{group.activePlansCount} Active Plan{group.activePlansCount > 1 ? "s" : ""}</span>
+                              <span>
+                                {group.activePlansCount} Active Plan
+                                {group.activePlansCount > 1 ? "s" : ""}
+                              </span>
                             </span>
                           ) : (
                             <span className="flex items-center gap-1 rounded-lg bg-muted px-2 py-1 text-xs text-muted-foreground">
@@ -592,7 +610,10 @@ export function GroupsHubView({
 
                           <span className="flex items-center gap-1 rounded-lg bg-muted px-2 py-1 text-xs text-muted-foreground">
                             <Users className="size-3" />
-                            <span>{group.memberCount} {group.memberCount === 1 ? "reader" : "readers"}</span>
+                            <span>
+                              {group.memberCount}{" "}
+                              {group.memberCount === 1 ? "reader" : "readers"}
+                            </span>
                           </span>
                         </div>
                       </div>
@@ -607,10 +628,10 @@ export function GroupsHubView({
                             {isPending
                               ? "Pending Approval"
                               : isOwner
-                              ? "Owner"
-                              : isAdmin
-                              ? "Admin"
-                              : "Member"}
+                                ? "Owner"
+                                : isAdmin
+                                  ? "Admin"
+                                  : "Member"}
                           </span>
                         </div>
 
@@ -643,7 +664,8 @@ export function GroupsHubView({
                   No public fellowships found
                 </h3>
                 <p className="text-xs text-muted-foreground max-w-md mb-6 leading-relaxed">
-                  Try a different search term or create a public fellowship for your community to join.
+                  Try a different search term or create a public fellowship for
+                  your community to join.
                 </p>
                 <Button
                   type="button"
@@ -718,7 +740,8 @@ export function GroupsHubView({
                               {group.name}
                             </h3>
                             <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                              {group.description || "Public Bible reading fellowship open to community members."}
+                              {group.description ||
+                                "Public Bible reading fellowship open to community members."}
                             </p>
                           </div>
                         </div>
@@ -727,7 +750,11 @@ export function GroupsHubView({
                         <div className="mt-3 flex flex-wrap items-center gap-1.5">
                           <span className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-xs text-primary font-medium">
                             <Globe className="size-3" />
-                            <span>{group.requiresApproval ? "Approval Required" : "Open Access"}</span>
+                            <span>
+                              {group.requiresApproval
+                                ? "Approval Required"
+                                : "Open Access"}
+                            </span>
                           </span>
 
                           <span className="flex items-center gap-1 rounded-lg bg-muted px-2 py-1 text-xs text-foreground font-medium">
@@ -737,7 +764,10 @@ export function GroupsHubView({
 
                           <span className="flex items-center gap-1 rounded-lg bg-muted px-2 py-1 text-xs text-muted-foreground">
                             <Users className="size-3" />
-                            <span>{group.memberCount} {group.memberCount === 1 ? "reader" : "readers"}</span>
+                            <span>
+                              {group.memberCount}{" "}
+                              {group.memberCount === 1 ? "reader" : "readers"}
+                            </span>
                           </span>
                         </div>
                       </div>

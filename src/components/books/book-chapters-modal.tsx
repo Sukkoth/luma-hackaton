@@ -38,9 +38,13 @@ export function BookChaptersModal({
         <div className="flex items-start justify-between border-b border-border-subtle pb-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary">
-              <span className="text-primary font-semibold">{book.category}</span>
+              <span className="text-primary font-semibold">
+                {book.category}
+              </span>
               <span>•</span>
-              <span>{book.testament === "OT" ? "Old Testament" : "New Testament"}</span>
+              <span>
+                {book.testament === "OT" ? "Old Testament" : "New Testament"}
+              </span>
             </div>
             <h3
               id="chapter-dialog-title"

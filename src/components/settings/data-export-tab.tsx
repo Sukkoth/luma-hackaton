@@ -29,7 +29,9 @@ export function DataExportTab() {
   const [isImportPending, startImportTransition] = useTransition();
 
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-  const [selectedFileContent, setSelectedFileContent] = useState<string | null>(null);
+  const [selectedFileContent, setSelectedFileContent] = useState<string | null>(
+    null
+  );
 
   const handleDownload = async () => {
     setIsExporting(true);
@@ -134,7 +136,8 @@ export function DataExportTab() {
               </h2>
             </div>
             <p className="text-xs text-muted-foreground">
-              Download an offline JSON archive of your reading progress, notes, study plans, and reading history.
+              Download an offline JSON archive of your reading progress, notes,
+              study plans, and reading history.
             </p>
           </div>
 
@@ -158,7 +161,8 @@ export function DataExportTab() {
               <span>Trackers & Canon Progress</span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              All personal reading trackers, custom canons, and complete chapter/verse checkboxes.
+              All personal reading trackers, custom canons, and complete
+              chapter/verse checkboxes.
             </p>
           </div>
 
@@ -168,7 +172,8 @@ export function DataExportTab() {
               <span>Notes & Organized Folders</span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Full formatted note bodies, folder hierarchy, pinned markers, and plan session references.
+              Full formatted note bodies, folder hierarchy, pinned markers, and
+              plan session references.
             </p>
           </div>
 
@@ -178,7 +183,8 @@ export function DataExportTab() {
               <span>Plans, Logs & Milestones</span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Active plan schedules, historical reading log timestamps, and unlocked achievements.
+              Active plan schedules, historical reading log timestamps, and
+              unlocked achievements.
             </p>
           </div>
         </div>
@@ -187,7 +193,13 @@ export function DataExportTab() {
         <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/30 text-xs text-muted-foreground">
           <ShieldCheck className="size-4 text-primary shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            <span className="font-semibold text-foreground">Privacy Protection:</span> Authentication credentials, email addresses, passwords, and internal database identifiers are strictly stripped from the backup file, ensuring your export remains portable and safe to move across accounts.
+            <span className="font-semibold text-foreground">
+              Privacy Protection:
+            </span>{" "}
+            Authentication credentials, email addresses, passwords, and internal
+            database identifiers are strictly stripped from the backup file,
+            ensuring your export remains portable and safe to move across
+            accounts.
           </p>
         </div>
       </section>
@@ -202,7 +214,9 @@ export function DataExportTab() {
             </h2>
           </div>
           <p className="text-xs text-muted-foreground">
-            Upload a Scripture Tracker JSON backup to restore or merge your data. Existing trackers and notes with identical names are preserved without duplication.
+            Upload a Scripture Tracker JSON backup to restore or merge your
+            data. Existing trackers and notes with identical names are preserved
+            without duplication.
           </p>
         </div>
 
@@ -262,7 +276,9 @@ export function DataExportTab() {
               <div className="flex items-center justify-between pt-2 border-t border-border/60">
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                   <AlertCircle className="size-3.5 text-primary" />
-                  <span>Merging will retain existing data and recalibrate streaks.</span>
+                  <span>
+                    Merging will retain existing data and recalibrate streaks.
+                  </span>
                 </div>
 
                 <Button

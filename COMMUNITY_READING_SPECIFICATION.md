@@ -11,6 +11,7 @@
 The **Community & Cohort Reading** system turns solitary Bible reading into a collaborative, habit-forming group experience. Churches, small groups, campus fellowships, and friends can read identical schedules, compare real-time progress on a group leaderboard, and discuss daily scripture sessions together.
 
 ### The End-to-End User Journey:
+
 ```mermaid
 graph TD
     A["Admin creates Group"] -->|"Public or Private"| B["Group Hub (/groups)"]
@@ -26,17 +27,17 @@ graph TD
 
 ## 2. Key Design Decisions (from `/grill-me`)
 
-| Decision Area | Specification | Rationale & Mechanics |
-| :--- | :--- | :--- |
-| **Discovery & Access** | Public (Searchable) OR Private (Invite link only) | Public groups appear in the `/groups` explorer. Private groups require `https://luma.app/groups/join/[code]`. |
-| **Join Approval Gate** | Configurable per group: `requires_approval` (true/false) | Admins can allow instant join or route applicants to an Admin Approval Queue. |
-| **Roles & Permissions** | 1 Owner, Multiple Admins, Members | **Owner**: Full control, can delete group, transfer ownership. <br>**Admins**: Schedule plans, manage members, approve requests. Cannot delete group. <br>**Members**: Read, enroll, post reflections. |
-| **Multi-Plan Concurrency** | Groups can run multiple active plans simultaneously | Groups can host both a core study (e.g. NT in 90 Days) and a devotional (e.g. Proverbs) at the same time. |
-| **Late-Join Policy** | Configurable by Admin per plan: <br>1. `strict_locked`<br>2. `skip_ahead`<br>3. `backfill` | • `strict_locked`: Enrollment closed after start date.<br>• `skip_ahead`: Member starts on today's current reading (omits past chapters from instance).<br>• `backfill`: Member gets full plan from Day 1 and starts in "behind" status with catch-up warnings. |
-| **Tracker Binding** | User chooses personal tracker on plan enrollment | Prompt user when enrolling in each plan (with their active tracker pre-selected). Ensures their canon and matrix are respected. |
-| **Leaderboard Privacy** | Member toggle: "Hide my progress from leaderboard" | Anonymizes user on cohort leaderboard for readers who desire privacy while reading together. |
-| **Session Reflections** | Uses existing `notes` table with `is_shared_with_community: boolean` | Reflections are standard study notes created with our existing Markdown editor; clicking "Share with [Group]" sets `is_shared_with_community = true`, surfacing it on the cohort feed without duplicating data. |
-| **Group Hub Navigation** | 3 Tabs for Admins, 2 Tabs for regular Members | • **Tab 1: Group Plans** (All members)<br>• **Tab 2: Members** (All members)<br>• **Tab 3: Admin Settings** (Owner & Admins only) |
+| Decision Area              | Specification                                                                              | Rationale & Mechanics                                                                                                                                                                                                                                           |
+| :------------------------- | :----------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Discovery & Access**     | Public (Searchable) OR Private (Invite link only)                                          | Public groups appear in the `/groups` explorer. Private groups require `https://luma.app/groups/join/[code]`.                                                                                                                                                   |
+| **Join Approval Gate**     | Configurable per group: `requires_approval` (true/false)                                   | Admins can allow instant join or route applicants to an Admin Approval Queue.                                                                                                                                                                                   |
+| **Roles & Permissions**    | 1 Owner, Multiple Admins, Members                                                          | **Owner**: Full control, can delete group, transfer ownership. <br>**Admins**: Schedule plans, manage members, approve requests. Cannot delete group. <br>**Members**: Read, enroll, post reflections.                                                          |
+| **Multi-Plan Concurrency** | Groups can run multiple active plans simultaneously                                        | Groups can host both a core study (e.g. NT in 90 Days) and a devotional (e.g. Proverbs) at the same time.                                                                                                                                                       |
+| **Late-Join Policy**       | Configurable by Admin per plan: <br>1. `strict_locked`<br>2. `skip_ahead`<br>3. `backfill` | • `strict_locked`: Enrollment closed after start date.<br>• `skip_ahead`: Member starts on today's current reading (omits past chapters from instance).<br>• `backfill`: Member gets full plan from Day 1 and starts in "behind" status with catch-up warnings. |
+| **Tracker Binding**        | User chooses personal tracker on plan enrollment                                           | Prompt user when enrolling in each plan (with their active tracker pre-selected). Ensures their canon and matrix are respected.                                                                                                                                 |
+| **Leaderboard Privacy**    | Member toggle: "Hide my progress from leaderboard"                                         | Anonymizes user on cohort leaderboard for readers who desire privacy while reading together.                                                                                                                                                                    |
+| **Session Reflections**    | Uses existing `notes` table with `is_shared_with_community: boolean`                       | Reflections are standard study notes created with our existing Markdown editor; clicking "Share with [Group]" sets `is_shared_with_community = true`, surfacing it on the cohort feed without duplicating data.                                                 |
+| **Group Hub Navigation**   | 3 Tabs for Admins, 2 Tabs for regular Members                                              | • **Tab 1: Group Plans** (All members)<br>• **Tab 2: Members** (All members)<br>• **Tab 3: Admin Settings** (Owner & Admins only)                                                                                                                               |
 
 ---
 
@@ -44,17 +45,17 @@ graph TD
 
 We reviewed the current codebase to avoid duplicated work and maximize architectural reuse:
 
-| Subsystem | Existing Asset in Codebase | How Community Feature Will Reuse It |
-| :--- | :--- | :--- |
-| **Authentication & Sessions** | `src/lib/auth.ts`, `src/lib/auth-client.ts`, Better-Auth session cookies | Verify session and user ID for all server actions and group page loads. |
-| **Trackers & Multi-Canon** | `reading_trackers`, `src/actions/trackers.ts`, `src/components/trackers/tracker-switcher.tsx` | Use tracker switcher primitive when prompting users to bind their personal tracker during plan enrollment. |
-| **Plan Templates Catalog** | `plan_templates`, `plan_sections`, `src/actions/plans.ts` (`resolvePlanBlueprint`) | Admin plan scheduler directly selects from existing curated & custom plan templates. |
-| **Plan Instance Engine** | `src/actions/plans.ts` (`startPlanAction`), `plan_instances`, `plan_instance_readings` | `enrollInGroupPlanAction` will directly invoke `startPlanAction` logic, linking the resulting instance to `group_plans`. |
-| **Plan Pacing & Calendar** | `activeWeekdaysMask`, rest-day schedule generator, catch-up rebalancer | Group plans use the existing 7-character bitmask (`1111111`) and daily target pacing. |
-| **Reading Detail UI** | `src/components/plans/plan-detail-view.tsx`, `recharts-plan-gauge.tsx` | Enhanced with top Community Header Badge, session community reflections feed, and share button. |
-| **Chapter Reading & Reader** | `src/components/bible/bible-reader-core.tsx`, `/bible/[bookId]/[chapter]` | One-click reading links and chapter completion in group plans reuse existing scripture reader routes. |
-| **App Navigation** | `src/components/navigation/app-shell.tsx` | Add "Groups" (`/groups` with `Users` icon) directly to `MENU_ITEMS`. |
-| **Design Tokens & Theme** | `src/theme/`, HSL tokens (`bg-surface`, `bg-surface-elevated`, `border-border`) | Strict UI consistency across all new group cards, tables, and modals. |
+| Subsystem                     | Existing Asset in Codebase                                                                    | How Community Feature Will Reuse It                                                                                      |
+| :---------------------------- | :-------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| **Authentication & Sessions** | `src/lib/auth.ts`, `src/lib/auth-client.ts`, Better-Auth session cookies                      | Verify session and user ID for all server actions and group page loads.                                                  |
+| **Trackers & Multi-Canon**    | `reading_trackers`, `src/actions/trackers.ts`, `src/components/trackers/tracker-switcher.tsx` | Use tracker switcher primitive when prompting users to bind their personal tracker during plan enrollment.               |
+| **Plan Templates Catalog**    | `plan_templates`, `plan_sections`, `src/actions/plans.ts` (`resolvePlanBlueprint`)            | Admin plan scheduler directly selects from existing curated & custom plan templates.                                     |
+| **Plan Instance Engine**      | `src/actions/plans.ts` (`startPlanAction`), `plan_instances`, `plan_instance_readings`        | `enrollInGroupPlanAction` will directly invoke `startPlanAction` logic, linking the resulting instance to `group_plans`. |
+| **Plan Pacing & Calendar**    | `activeWeekdaysMask`, rest-day schedule generator, catch-up rebalancer                        | Group plans use the existing 7-character bitmask (`1111111`) and daily target pacing.                                    |
+| **Reading Detail UI**         | `src/components/plans/plan-detail-view.tsx`, `recharts-plan-gauge.tsx`                        | Enhanced with top Community Header Badge, session community reflections feed, and share button.                          |
+| **Chapter Reading & Reader**  | `src/components/bible/bible-reader-core.tsx`, `/bible/[bookId]/[chapter]`                     | One-click reading links and chapter completion in group plans reuse existing scripture reader routes.                    |
+| **App Navigation**            | `src/components/navigation/app-shell.tsx`                                                     | Add "Groups" (`/groups` with `Users` icon) directly to `MENU_ITEMS`.                                                     |
+| **Design Tokens & Theme**     | `src/theme/`, HSL tokens (`bg-surface`, `bg-surface-elevated`, `border-border`)               | Strict UI consistency across all new group cards, tables, and modals.                                                    |
 
 ---
 
@@ -155,6 +156,7 @@ CREATE TABLE group_shared_reflections (
 All functions follow the project's named object parameters standard (`export async function createGroupAction({ name, description, ... }: CreateGroupParams)`).
 
 ### Group Management
+
 - `createGroupAction({ name, description, avatarUrl, isPrivate, requiresApproval })`
   - Generates slugified invite code (e.g. `fellowship-9k21`).
   - Creates group and assigns creator as `role: 'owner'`.
@@ -172,6 +174,7 @@ All functions follow the project's named object parameters standard (`export asy
   - Owner & Admins only.
 
 ### Membership & Approvals
+
 - `joinGroupAction({ inviteCode })`
   - If group `requires_approval = true`, joins as `status: 'pending_approval'`.
   - If `requires_approval = false`, joins as `status: 'active'`.
@@ -187,6 +190,7 @@ All functions follow the project's named object parameters standard (`export asy
   - User can toggle their own leaderboard visibility.
 
 ### Plans & Enrollment
+
 - `scheduleGroupPlanAction({ groupId, planTemplateId, scheduledStartDate, dailyTarget, activeWeekdaysMask, lateJoinPolicy })`
   - Owner & Admins only. Creates plan in `'scheduled'` or `'active'` status.
 - `enrollInGroupPlanAction({ groupPlanId, trackerId })`
@@ -196,6 +200,7 @@ All functions follow the project's named object parameters standard (`export asy
   - Calculates completion percentage and "Read Today" status for all enrolled members (respecting `hide_progress`).
 
 ### Reflections & Discussions
+
 - `shareGroupReflectionAction({ groupPlanId, sessionIndex, sessionTitle, content })`
   - Posts reflection visible to cohort peers on that session.
 - `getGroupSessionReflectionsAction({ groupPlanId, sessionIndex })`
@@ -206,6 +211,7 @@ All functions follow the project's named object parameters standard (`export asy
 ## 6. UI & View Specifications
 
 ### 6.1 Group Hub (`/groups`)
+
 - **Header**: "Community Groups" with search bar and "Create Group" button.
 - **Tab 1: My Groups**: Cards displaying group name, avatar, member count, active plans badge, and role badge (Owner / Admin / Member).
 - **Tab 2: Explore Public Groups**: Discoverable public fellowships with "Join Group" action.
@@ -213,17 +219,19 @@ All functions follow the project's named object parameters standard (`export asy
 - **Create Group Modal**: Dialog with inputs for Name, Description, Avatar URL, Private/Public radio, and Require Approval toggle.
 
 ### 6.2 Invite Landing Page (`/groups/join/[code]`)
+
 - Preview card showing group avatar, name, description, member count, and active plan preview.
 - "Join Fellowship" button. Handles pending approval feedback if enabled.
 
 ### 6.3 Group Detail Hub (`/groups/[id]`)
+
 - **Header Banner**: Group Avatar, Title, Description, Privacy badge, Member count, and Tab navigation.
 - **Tab 1: Group Plans (Visible to All Members)**:
-  - *Active Plans Card*: Plan title, current day progress, days remaining.
+  - _Active Plans Card_: Plan title, current day progress, days remaining.
     - If user is enrolled: "Continue Reading" button (links to `/plans/[instanceId]`).
     - If user not enrolled: "Enroll in Plan" button (opens Tracker selection modal).
-  - *Upcoming Plans*: Countdown badge ("Starts in 4 days") + "Pre-enroll" action.
-  - *Cohort Leaderboard*: Real-time roster of enrolled members, completion bars, "Read Today" indicators, and "Hide my progress" toggle.
+  - _Upcoming Plans_: Countdown badge ("Starts in 4 days") + "Pre-enroll" action.
+  - _Cohort Leaderboard_: Real-time roster of enrolled members, completion bars, "Read Today" indicators, and "Hide my progress" toggle.
 - **Tab 2: Members (Visible to All Members)**:
   - Searchable member grid with avatars, names, join dates, and role badges.
 - **Tab 3: Admin Settings (Strictly Owner & Admins Only)**:
@@ -234,12 +242,13 @@ All functions follow the project's named object parameters standard (`export asy
   - `<GroupProfileSection>`: Edit details and Danger Zone (Delete Group - Owner only).
 
 ### 6.4 Community-Enhanced Plan Detail (`/plans/[instanceId]`)
+
 - **Community Header Badge**: Displays `Community: [Group Name]` with icon, linking back to `/groups/[id]`.
 - **Session Reflection Card**:
   - Existing private reflection textarea.
-  - New action: *"Share with [Group Name]"* button.
+  - New action: _"Share with [Group Name]"_ button.
 - **Community Reflections Feed**:
-  - Tab/Feed on active session: *"Reflections from [Group Name] (3)"*.
+  - Tab/Feed on active session: _"Reflections from [Group Name] (3)"_.
   - Displays avatar, name, and notes posted by cohort members for this specific session.
 
 ---

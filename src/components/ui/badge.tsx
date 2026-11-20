@@ -2,22 +2,15 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export type BadgeVariant =
-  | "default"
-  | "secondary"
-  | "outline"
-  | "destructive"
-  | "success"
-  | "accent";
+  "default" | "secondary" | "outline" | "destructive" | "success" | "accent";
 
 export type BadgeProps = React.HTMLAttributes<HTMLDivElement> & {
   variant?: BadgeVariant;
 };
 
 const BADGE_VARIANTS: Record<BadgeVariant, string> = {
-  default:
-    "border-transparent bg-primary text-primary-foreground shadow-2xs",
-  secondary:
-    "border-transparent bg-secondary text-secondary-foreground",
+  default: "border-transparent bg-primary text-primary-foreground shadow-2xs",
+  secondary: "border-transparent bg-secondary text-secondary-foreground",
   outline: "border-border text-foreground bg-transparent",
   destructive:
     "border-transparent bg-destructive text-destructive-foreground shadow-2xs",

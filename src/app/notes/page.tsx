@@ -77,9 +77,7 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
           initialFolders={initialFolders}
           defaultPlanId={resolvedParams.planId}
           defaultSessionId={
-            resolvedParams.session
-              ? Number(resolvedParams.session)
-              : undefined
+            resolvedParams.session ? Number(resolvedParams.session) : undefined
           }
           defaultFolderId={resolvedParams.folderId}
           defaultNoteId={resolvedParams.noteId}

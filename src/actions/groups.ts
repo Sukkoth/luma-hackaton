@@ -214,7 +214,8 @@ export async function createGroupAction({
     revalidatePath("/groups");
     return { success: true, groupId: newGroup.id };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create group.";
+    const message =
+      err instanceof Error ? err.message : "Failed to create group.";
     return { success: false, error: message };
   }
 }
@@ -499,7 +500,8 @@ export async function regenerateInviteCodeAction({
     if (!caller) {
       return {
         success: false,
-        error: "Only admins or owners can regenerate fellowship invitation links.",
+        error:
+          "Only admins or owners can regenerate fellowship invitation links.",
       };
     }
 
@@ -620,7 +622,9 @@ export async function getUserGroupsAction(): Promise<{
     });
 
     const list: UserGroupSummary[] = userMemberships.map((m) => {
-      const activeMembers = m.group.members.filter((gm) => gm.status === "active");
+      const activeMembers = m.group.members.filter(
+        (gm) => gm.status === "active"
+      );
       const activePlans = m.group.plans.filter((gp) => gp.status === "active");
 
       return {
@@ -638,7 +642,8 @@ export async function getUserGroupsAction(): Promise<{
 
     return { success: true, groups: list };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch user groups.";
+    const message =
+      err instanceof Error ? err.message : "Failed to fetch user groups.";
     return { success: false, error: message };
   }
 }
@@ -672,10 +677,7 @@ export async function searchPublicGroupsAction({
   try {
     const trimmed = query.trim();
     const condition = trimmed
-      ? and(
-          eq(groups.isPrivate, false),
-          ilike(groups.name, `%${trimmed}%`)
-        )
+      ? and(eq(groups.isPrivate, false), ilike(groups.name, `%${trimmed}%`))
       : eq(groups.isPrivate, false);
 
     const publicGroups = await db.query.groups.findMany({
@@ -712,7 +714,8 @@ export async function searchPublicGroupsAction({
 
     return { success: true, groups: result };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to search public groups.";
+    const message =
+      err instanceof Error ? err.message : "Failed to search public groups.";
     return { success: false, error: message };
   }
 }
@@ -849,7 +852,8 @@ export async function joinGroupAction({
 
     return { success: true, groupId: groupRecord.id, status };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to join group.";
+    const message =
+      err instanceof Error ? err.message : "Failed to join group.";
     return { success: false, error: message };
   }
 }
@@ -884,7 +888,10 @@ export async function getGroupMembersAction({
     });
 
     if (!callerMembership || callerMembership.status !== "active") {
-      return { success: false, error: "You are not an active member of this group." };
+      return {
+        success: false,
+        error: "You are not an active member of this group.",
+      };
     }
 
     const membersRecords = await db
@@ -926,7 +933,8 @@ export async function getGroupMembersAction({
 
     return { success: true, members, pendingMembers };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch members.";
+    const message =
+      err instanceof Error ? err.message : "Failed to fetch members.";
     return { success: false, error: message };
   }
 }
@@ -958,7 +966,10 @@ export async function approveMemberAction({
     });
 
     if (!caller) {
-      return { success: false, error: "Only admins or owners can approve members." };
+      return {
+        success: false,
+        error: "Only admins or owners can approve members.",
+      };
     }
 
     await db
@@ -999,7 +1010,8 @@ export async function approveMemberAction({
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to approve member.";
+    const message =
+      err instanceof Error ? err.message : "Failed to approve member.";
     return { success: false, error: message };
   }
 }
@@ -1031,7 +1043,10 @@ export async function rejectMemberAction({
     });
 
     if (!caller) {
-      return { success: false, error: "Only admins or owners can reject members." };
+      return {
+        success: false,
+        error: "Only admins or owners can reject members.",
+      };
     }
 
     const groupRecord = await db.query.groups.findFirst({
@@ -1060,7 +1075,8 @@ export async function rejectMemberAction({
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to reject member.";
+    const message =
+      err instanceof Error ? err.message : "Failed to reject member.";
     return { success: false, error: message };
   }
 }
@@ -1102,13 +1118,19 @@ export async function updateMemberRoleAction({
     });
 
     if (!caller || !["owner", "admin"].includes(caller.role)) {
-      return { success: false, error: "Only admins or the owner can update roles." };
+      return {
+        success: false,
+        error: "Only admins or the owner can update roles.",
+      };
     }
 
     // Only owner can promote someone to owner or transfer ownership
     if (newRole === "owner") {
       if (caller.role !== "owner") {
-        return { success: false, error: "Only the group owner can transfer ownership." };
+        return {
+          success: false,
+          error: "Only the group owner can transfer ownership.",
+        };
       }
       // Transfer ownership: promote target to owner, demote caller to admin
       await db
@@ -1148,10 +1170,14 @@ export async function updateMemberRoleAction({
       ),
     });
 
-    if (!targetMember) return { success: false, error: "Target member not found." };
+    if (!targetMember)
+      return { success: false, error: "Target member not found." };
 
     if (caller.role === "admin" && targetMember.role !== "member") {
-      return { success: false, error: "Admins can only promote or demote regular members." };
+      return {
+        success: false,
+        error: "Admins can only promote or demote regular members.",
+      };
     }
 
     await db
@@ -1167,7 +1193,8 @@ export async function updateMemberRoleAction({
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to update member role.";
+    const message =
+      err instanceof Error ? err.message : "Failed to update member role.";
     return { success: false, error: message };
   }
 }
@@ -1204,7 +1231,10 @@ export async function removeMemberAction({
     // A member can leave the group themselves
     if (!isSelf) {
       if (!["owner", "admin"].includes(caller.role)) {
-        return { success: false, error: "Only admins or owners can remove members." };
+        return {
+          success: false,
+          error: "Only admins or owners can remove members.",
+        };
       }
       // Target check
       const targetMember = await db.query.groupMembers.findFirst({
@@ -1285,7 +1315,8 @@ export async function removeMemberAction({
     revalidatePath("/groups");
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to remove member.";
+    const message =
+      err instanceof Error ? err.message : "Failed to remove member.";
     return { success: false, error: message };
   }
 }
@@ -1305,7 +1336,10 @@ export async function leaveGroupAction({
   const parsed = v.safeParse(LeaveGroupSchema, { groupId });
   if (!parsed.success) return { success: false, error: "Invalid group ID." };
 
-  return removeMemberAction({ groupId: parsed.output.groupId, targetUserId: session.user.id });
+  return removeMemberAction({
+    groupId: parsed.output.groupId,
+    targetUserId: session.user.id,
+  });
 }
 
 export type LeaveGroupPlanParams = {
@@ -1446,7 +1480,9 @@ export async function toggleLeaderboardPrivacyAction({
     return { success: true, privacyUpdatedAt: now.toISOString() };
   } catch (err) {
     const message =
-      err instanceof Error ? err.message : "Failed to update leaderboard privacy.";
+      err instanceof Error
+        ? err.message
+        : "Failed to update leaderboard privacy.";
     return { success: false, error: message };
   }
 }
@@ -1509,7 +1545,10 @@ export async function scheduleGroupPlanAction({
     });
 
     if (!caller) {
-      return { success: false, error: "Only admins or owners can schedule plans." };
+      return {
+        success: false,
+        error: "Only admins or owners can schedule plans.",
+      };
     }
 
     // Ensure template exists in database (auto-sync static curated template from READING_PLANS if not yet in DB)
@@ -1519,7 +1558,10 @@ export async function scheduleGroupPlanAction({
       where: eq(planTemplates.id, input.planTemplateId),
     });
     if (!template) {
-      return { success: false, error: "Selected plan template does not exist." };
+      return {
+        success: false,
+        error: "Selected plan template does not exist.",
+      };
     }
 
     const parts = input.scheduledStartDate.split("-").map(Number);
@@ -1576,7 +1618,8 @@ export async function scheduleGroupPlanAction({
     revalidatePath(`/groups/${groupId}`);
     return { success: true, groupPlanId: newPlan.id };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to schedule plan.";
+    const message =
+      err instanceof Error ? err.message : "Failed to schedule plan.";
     return { success: false, error: message };
   }
 }
@@ -1623,7 +1666,10 @@ export async function enrollInGroupPlanAction({
     }
 
     if (!["active", "scheduled"].includes(groupPlan.status)) {
-      return { success: false, error: "This group plan is no longer open for enrollment." };
+      return {
+        success: false,
+        error: "This group plan is no longer open for enrollment.",
+      };
     }
 
     // Verify caller is active group member
@@ -1636,7 +1682,10 @@ export async function enrollInGroupPlanAction({
     });
 
     if (!membership) {
-      return { success: false, error: "You must be an active group member to enroll." };
+      return {
+        success: false,
+        error: "You must be an active group member to enroll.",
+      };
     }
 
     // Verify if already enrolled
@@ -1663,7 +1712,10 @@ export async function enrollInGroupPlanAction({
     });
 
     if (!tracker) {
-      return { success: false, error: "Selected reading tracker was not found." };
+      return {
+        success: false,
+        error: "Selected reading tracker was not found.",
+      };
     }
 
     const now = new Date();
@@ -1713,7 +1765,8 @@ export async function enrollInGroupPlanAction({
 
     return { success: true, planInstanceId: startResult.instanceId };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to enroll in group plan.";
+    const message =
+      err instanceof Error ? err.message : "Failed to enroll in group plan.";
     return { success: false, error: message };
   }
 }
@@ -1789,7 +1842,8 @@ export async function getGroupLeaderboardAction({
     members.forEach((m) => hideProgressMap.set(m.userId, m.hideProgress));
 
     const callerMembership = members.find((m) => m.userId === session.user.id);
-    const isCallerMember = callerMembership && callerMembership.status === "active";
+    const isCallerMember =
+      callerMembership && callerMembership.status === "active";
 
     const currentUserHideProgress =
       hideProgressMap.get(session.user.id) ?? false;
@@ -1802,7 +1856,8 @@ export async function getGroupLeaderboardAction({
       // Non-members cannot see names of cohort members.
       // If a member hides their own visibility, reciprocal anonymity applies.
       const shouldAnonymize =
-        !isCallerMember || (!isCurrentUser && (isHidden || currentUserHideProgress));
+        !isCallerMember ||
+        (!isCurrentUser && (isHidden || currentUserHideProgress));
 
       const userReadings = readingsByInstance.get(e.planInstanceId) || [];
       const totalChapters = e.totalChapters || 1;
@@ -1846,7 +1901,8 @@ export async function getGroupLeaderboardAction({
 
     return { success: true, leaderboard: entries };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to calculate leaderboard.";
+    const message =
+      err instanceof Error ? err.message : "Failed to calculate leaderboard.";
     return { success: false, error: message };
   }
 }
@@ -1880,10 +1936,7 @@ export async function shareNoteWithCommunityAction({
 
   try {
     const noteRecord = await db.query.notes.findFirst({
-      where: and(
-        eq(notes.id, noteId),
-        eq(notes.userId, session.user.id)
-      ),
+      where: and(eq(notes.id, noteId), eq(notes.userId, session.user.id)),
     });
 
     if (!noteRecord) {
@@ -1904,7 +1957,8 @@ export async function shareNoteWithCommunityAction({
 
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to update note sharing.";
+    const message =
+      err instanceof Error ? err.message : "Failed to update note sharing.";
     return { success: false, error: message };
   }
 }
@@ -1977,7 +2031,9 @@ export async function getGroupSessionNotesAction({
     return { success: true, notes: result };
   } catch (err) {
     const message =
-      err instanceof Error ? err.message : "Failed to load group session notes.";
+      err instanceof Error
+        ? err.message
+        : "Failed to load group session notes.";
     return { success: false, error: message };
   }
 }
@@ -2057,7 +2113,9 @@ export async function setGroupPinnedNoticeAction({
     await db
       .update(groups)
       .set({
-        pinnedNoticeTitle: parsed.output.title ? parsed.output.title.trim() : null,
+        pinnedNoticeTitle: parsed.output.title
+          ? parsed.output.title.trim()
+          : null,
         pinnedNoticeContent: parsed.output.content.trim(),
         pinnedNoticeExpiresAt: expDate,
         pinnedNoticeAuthorId: session.user.id,
@@ -2094,7 +2152,10 @@ export type ClearGroupPinnedNoticeParams = {
 
 export async function clearGroupPinnedNoticeAction({
   groupId,
-}: ClearGroupPinnedNoticeParams): Promise<{ success: boolean; error?: string }> {
+}: ClearGroupPinnedNoticeParams): Promise<{
+  success: boolean;
+  error?: string;
+}> {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -2379,7 +2440,9 @@ export async function updateGroupPlanStatusAction({
     return { success: true };
   } catch (err) {
     const message =
-      err instanceof Error ? err.message : "Failed to update group plan status.";
+      err instanceof Error
+        ? err.message
+        : "Failed to update group plan status.";
     return { success: false, error: message };
   }
 }

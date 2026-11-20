@@ -122,7 +122,9 @@ export const LegacyVerboseBackupSchema = v.object({
   ),
 });
 
-export type LegacyVerboseBackup = v.InferOutput<typeof LegacyVerboseBackupSchema>;
+export type LegacyVerboseBackup = v.InferOutput<
+  typeof LegacyVerboseBackupSchema
+>;
 
 /**
  * Migrates a legacy verbose backup (version: 1) to the modern compact schema (v: 1)
@@ -209,9 +211,10 @@ export function migrateLegacyVerboseToV1({
 
   const logs = (legacy.readingLogs ?? []).map((l) => {
     const tRef = l.trackerRef || l.tracker || trackers[0]?.ref || "t_0";
-    const tuple: [string, string, number, string, ...(string | null)[]] = l.planInstanceRef
-      ? [tRef, l.bookId, l.chapter, l.loggedAt, l.planInstanceRef]
-      : [tRef, l.bookId, l.chapter, l.loggedAt];
+    const tuple: [string, string, number, string, ...(string | null)[]] =
+      l.planInstanceRef
+        ? [tRef, l.bookId, l.chapter, l.loggedAt, l.planInstanceRef]
+        : [tRef, l.bookId, l.chapter, l.loggedAt];
     return tuple;
   });
 
@@ -259,7 +262,8 @@ export function normalizeBackupToLatest({
       if (parsed.success) {
         return parsed.output;
       }
-      const firstIssue = parsed.issues[0]?.message ?? "Invalid schema structure.";
+      const firstIssue =
+        parsed.issues[0]?.message ?? "Invalid schema structure.";
       throw new Error(`Invalid v1 backup format: ${firstIssue}`);
     }
 
@@ -278,5 +282,7 @@ export function normalizeBackupToLatest({
     return migrateLegacyVerboseToV1({ legacy: parsedLegacy.output });
   }
 
-  throw new Error("Unrecognized backup file format. Missing valid 'v' or 'version' key.");
+  throw new Error(
+    "Unrecognized backup file format. Missing valid 'v' or 'version' key."
+  );
 }

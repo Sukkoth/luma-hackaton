@@ -195,12 +195,18 @@ export function GroupWorkspaceView({
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5 font-medium">
                   <Users className="size-3.5 text-primary" />
-                  <span>{group.memberCount} {group.memberCount === 1 ? "member" : "members"}</span>
+                  <span>
+                    {group.memberCount}{" "}
+                    {group.memberCount === 1 ? "member" : "members"}
+                  </span>
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1.5 font-medium">
                   <BookOpen className="size-3.5 text-primary" />
-                  <span>{group.activePlans.length} active {group.activePlans.length === 1 ? "plan" : "plans"}</span>
+                  <span>
+                    {group.activePlans.length} active{" "}
+                    {group.activePlans.length === 1 ? "plan" : "plans"}
+                  </span>
                 </span>
                 {group.scheduledPlans.length > 0 && (
                   <>
@@ -212,7 +218,9 @@ export function GroupWorkspaceView({
                   </>
                 )}
                 <span>•</span>
-                <span className="font-medium text-foreground/80">Synchronized Pace</span>
+                <span className="font-medium text-foreground/80">
+                  Synchronized Pace
+                </span>
               </div>
             </div>
           </div>
@@ -272,7 +280,9 @@ export function GroupWorkspaceView({
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsLeaveGroupModalOpen(true)}
-                    leftIcon={<LogOut className="size-3.5 text-muted-foreground" />}
+                    leftIcon={
+                      <LogOut className="size-3.5 text-muted-foreground" />
+                    }
                     className="rounded-xl h-9 text-muted-foreground hover:text-destructive"
                   >
                     Leave
@@ -286,7 +296,9 @@ export function GroupWorkspaceView({
                       variant="outline"
                       size="sm"
                       onClick={() => setIsNoticeModalOpen(true)}
-                      leftIcon={<Pin className="size-3.5 text-muted-foreground" />}
+                      leftIcon={
+                        <Pin className="size-3.5 text-muted-foreground" />
+                      }
                       className="rounded-xl h-9"
                     >
                       {group.pinnedNotice ? "Edit Bulletin" : "Pin Bulletin"}
@@ -379,7 +391,9 @@ export function GroupWorkspaceView({
             currentUserPrivacyUpdatedAt={group.currentUserPrivacyUpdatedAt}
             isMember={isMember}
             onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
-            onCopyInvite={canInvite ? () => setIsInviteModalOpen(true) : undefined}
+            onCopyInvite={
+              canInvite ? () => setIsInviteModalOpen(true) : undefined
+            }
             onSelectPlanForEnroll={(plan) => {
               setSelectedPlanForEnroll(plan);
               setActiveTab("plans");
@@ -451,7 +465,9 @@ export function GroupWorkspaceView({
               Leave Fellowship?
             </h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to leave &ldquo;{group.name}&rdquo;? You will be unenrolled from all cohort reading plans and will need an invite code to rejoin.
+              Are you sure you want to leave &ldquo;{group.name}&rdquo;? You
+              will be unenrolled from all cohort reading plans and will need an
+              invite code to rejoin.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <Button

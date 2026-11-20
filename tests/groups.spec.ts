@@ -609,7 +609,9 @@ test.describe("Groups & Community Fellowship E2E", () => {
     await successorPage.waitForURL(/\/groups\/[a-zA-Z0-9_-]+/, {
       timeout: 15000,
     });
-    await expect(successorPage.getByRole("button", { name: "Leave" })).toBeVisible();
+    await expect(
+      successorPage.getByRole("button", { name: "Leave" })
+    ).toBeVisible();
 
     // ── STEP 3: Owner navigates to Admin tab to transfer ownership ──
     await ownerPage.goto(`${groupUrl}?tab=admin`);

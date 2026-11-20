@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
-import { getUserGroupsAction, searchPublicGroupsAction } from "@/actions/groups";
+import {
+  getUserGroupsAction,
+  searchPublicGroupsAction,
+} from "@/actions/groups";
 import { syncUserStreak } from "@/lib/streak-service";
 import { GroupsHubView } from "@/components/groups/groups-hub-view";
 
@@ -33,9 +36,12 @@ export default async function GroupsPage() {
       searchPublicGroupsAction({ limit: 12 }),
     ]);
 
-  const myGroups = userGroupsRes.success && userGroupsRes.groups ? userGroupsRes.groups : [];
+  const myGroups =
+    userGroupsRes.success && userGroupsRes.groups ? userGroupsRes.groups : [];
   const publicGroups =
-    publicGroupsRes.success && publicGroupsRes.groups ? publicGroupsRes.groups : [];
+    publicGroupsRes.success && publicGroupsRes.groups
+      ? publicGroupsRes.groups
+      : [];
 
   return (
     <AppShell

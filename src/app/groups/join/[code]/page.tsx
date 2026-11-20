@@ -8,7 +8,8 @@ import { GroupJoinLandingClient } from "@/components/groups/group-join-landing-c
 
 export const metadata = {
   title: "Join Fellowship • Luma",
-  description: "Accept invitation to join a community Bible reading fellowship.",
+  description:
+    "Accept invitation to join a community Bible reading fellowship.",
 };
 
 export const instant = false;

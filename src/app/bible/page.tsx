@@ -26,7 +26,13 @@ export default async function BiblePage() {
   const displayName = session.user.name || "Reader";
 
   return (
-    <Suspense fallback={<div className="flex min-h-screen w-full items-center justify-center p-8"><div className="size-8 animate-spin rounded-full border-2 border-black/10 border-t-black dark:border-white/10 dark:border-t-white" /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen w-full items-center justify-center p-8">
+          <div className="size-8 animate-spin rounded-full border-2 border-black/10 border-t-black dark:border-white/10 dark:border-t-white" />
+        </div>
+      }
+    >
       <AppShell
         userName={displayName}
         userEmail={session.user.email}

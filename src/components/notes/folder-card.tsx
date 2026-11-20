@@ -1,6 +1,11 @@
 "use client";
 
-import { Folder as FolderIcon, Trash2, ArrowRight, FileText } from "lucide-react";
+import {
+  Folder as FolderIcon,
+  Trash2,
+  ArrowRight,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type FolderCardProps = {

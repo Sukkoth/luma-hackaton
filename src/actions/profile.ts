@@ -90,8 +90,7 @@ export async function updateProfileAction({
 }
 
 export type ChangePasswordActionResult =
-  | { success: true }
-  | { success: false; error: string };
+  { success: true } | { success: false; error: string };
 
 export type ChangePasswordActionParams = {
   formData: FormData;

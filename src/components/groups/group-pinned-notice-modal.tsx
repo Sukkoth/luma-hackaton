@@ -33,14 +33,18 @@ export function GroupPinnedNoticeModal({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState<DurationOption>("3d");
+  const [selectedDuration, setSelectedDuration] =
+    useState<DurationOption>("3d");
   const [minDateTime] = useState(() =>
     new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16)
   );
 
   if (!isOpen) return null;
 
-  function calculateExpirationDate(option: DurationOption, customValue?: string): Date {
+  function calculateExpirationDate(
+    option: DurationOption,
+    customValue?: string
+  ): Date {
     const now = new Date();
     if (option === "24h") {
       return new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -68,7 +72,9 @@ export function GroupPinnedNoticeModal({
     const formData = new FormData(e.currentTarget);
     const title = String(formData.get("title") || "").trim();
     const content = String(formData.get("content") || "").trim();
-    const customExpiresAt = String(formData.get("customExpiresAt") || "").trim();
+    const customExpiresAt = String(
+      formData.get("customExpiresAt") || ""
+    ).trim();
 
     const expDate = calculateExpirationDate(selectedDuration, customExpiresAt);
 
@@ -144,7 +150,9 @@ export function GroupPinnedNoticeModal({
             </div>
             <div>
               <h2 className="text-base font-bold text-foreground">
-                {initialNotice ? "Edit Pinned Bulletin" : "Pin Bulletin Announcement"}
+                {initialNotice
+                  ? "Edit Pinned Bulletin"
+                  : "Pin Bulletin Announcement"}
               </h2>
               <p className="text-xs text-muted-foreground">
                 Visible to all members until the automatic expiration time.
@@ -176,7 +184,9 @@ export function GroupPinnedNoticeModal({
               className="text-xs font-semibold text-foreground flex items-center justify-between"
             >
               <span>Title (Optional)</span>
-              <span className="text-xs text-muted-foreground">e.g. Next Meetup, Prayer Request</span>
+              <span className="text-xs text-muted-foreground">
+                e.g. Next Meetup, Prayer Request
+              </span>
             </label>
             <input
               id="notice-title"
@@ -196,7 +206,9 @@ export function GroupPinnedNoticeModal({
               className="text-xs font-semibold text-foreground flex items-center justify-between"
             >
               <span>Announcement Message *</span>
-              <span className="text-xs text-muted-foreground">Up to 2,000 chars</span>
+              <span className="text-xs text-muted-foreground">
+                Up to 2,000 chars
+              </span>
             </label>
             <textarea
               id="notice-content"
@@ -262,7 +274,8 @@ export function GroupPinnedNoticeModal({
             )}
 
             <p className="text-xs text-muted-foreground">
-              The announcement is automatically removed once the expiration timestamp passes.
+              The announcement is automatically removed once the expiration
+              timestamp passes.
             </p>
           </div>
 
@@ -306,8 +319,8 @@ export function GroupPinnedNoticeModal({
                 {isSubmitting
                   ? "Saving..."
                   : initialNotice
-                  ? "Update Notice"
-                  : "Post Bulletin"}
+                    ? "Update Notice"
+                    : "Post Bulletin"}
               </Button>
             </div>
           </div>
