@@ -360,10 +360,13 @@ test.describe("Groups & Community Fellowship E2E", () => {
     await adminOption.click();
 
     // ── STEP 6: Applicant Context - Verify Admin status ──
-    await applicantPage.reload();
-    await expect(
-      applicantPage.getByText("Admin", { exact: true })
-    ).toBeVisible();
+    await expect(async () => {
+      await applicantPage.reload();
+      await expect(
+        applicantPage.getByText("Admin", { exact: true })
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
     await expect(
       applicantPage.getByRole("button", { name: /Settings/i })
     ).toBeVisible();
