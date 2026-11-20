@@ -34,6 +34,7 @@ import { PlanCatchUpModal } from "./plan-catchup-modal";
 import { PlanPausedLockModal } from "./plan-paused-lock-modal";
 import { celebratePlanCompletion } from "@/lib/confetti";
 import { RechartsPlanGauge } from "./recharts-plan-gauge";
+import { parseLocalDate } from "@/lib/timezone";
 
 type PlanDetailViewProps = {
   plan: PlanInstanceDetail;
@@ -126,23 +127,18 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   const completedSessionsCount = sessions.filter((s) => s.isCompleted).length;
 
   // Upcoming future scheduled plan detection
-  // Parse date string (YYYY-MM-DD) as LOCAL midnight, not UTC.
-  // new Date("2026-11-21") parses as UTC per ES6 spec, causing timezone bugs.
-  const [year, month, day] = currentPlan.startDate.split("-").map(Number);
-  const planStartDateObj = new Date(year, month - 1, day);
+  const planStartDateObj = parseLocalDate({ date: currentPlan.startDate });
   const nowMidnight = new Date();
   nowMidnight.setHours(0, 0, 0, 0);
-  const isScheduledFuture =
-    currentPlan.mode === "scheduled" &&
-    planStartDateObj.getTime() > nowMidnight.getTime();
+  const diffDays = Math.round(
+    (planStartDateObj.getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const isScheduledFuture = currentPlan.mode === "scheduled" && diffDays > 0;
 
   let daysUntilStart = 0;
   let formattedPlanStartDate = "";
   if (isScheduledFuture) {
-    daysUntilStart = Math.ceil(
-      (planStartDateObj.getTime() - nowMidnight.getTime()) /
-        (1000 * 60 * 60 * 24)
-    );
+    daysUntilStart = diffDays;
     formattedPlanStartDate = planStartDateObj.toLocaleDateString(undefined, {
       weekday: "short",
       month: "short",
