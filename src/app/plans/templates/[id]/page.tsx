@@ -14,6 +14,7 @@ import {
 import { auth } from "@/lib/auth";
 import { AppShell } from "@/components/navigation/app-shell";
 import { resolvePlanBlueprint } from "@/actions/plans";
+import { isPlanFeatured } from "@/data/readingPlans";
 import { StartPlanAction } from "@/components/plans/start-plan-action";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
@@ -66,6 +67,12 @@ async function PlanTemplateDetailContent({
         {/* Hero Card */}
         <div className="ui-card p-6 sm:p-7">
           <div className="flex flex-wrap items-center gap-2">
+            {isPlanFeatured({ plan }) && (
+              <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1 shadow-2xs">
+                <Sparkles className="size-3 fill-amber-500/30 text-amber-600 dark:text-amber-400" />
+                <span>Featured Plan</span>
+              </span>
+            )}
             <span className="rounded-full bg-surface-elevated border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary">
               {plan.category}
             </span>
