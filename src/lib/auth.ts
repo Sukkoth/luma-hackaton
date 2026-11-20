@@ -14,6 +14,9 @@ const trustedOrigins = [
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins,
+  rateLimit: {
+    enabled: false,
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {

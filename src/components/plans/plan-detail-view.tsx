@@ -638,6 +638,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                         ? "Locked: complete previous sessions first"
                                         : `Toggle reading ${reading.displayText || reading.bookName}`
                                   }
+                                  aria-pressed={reading.isCompleted}
                                 >
                                   {isScheduledFuture ? (
                                     <Lock className="size-2.5 text-foreground-dim" />

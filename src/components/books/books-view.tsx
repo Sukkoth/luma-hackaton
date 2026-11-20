@@ -236,7 +236,10 @@ export function BooksView({
           <div className="flex flex-col gap-4 border-b border-border/60 pb-5 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                <h2
+                  className="text-xl font-bold tracking-tight text-foreground"
+                  aria-label="All Books"
+                >
                   Scripture Books
                 </h2>
                 <span className="text-xs text-muted-foreground font-semibold">
