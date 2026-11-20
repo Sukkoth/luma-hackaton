@@ -1,4 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
+import { db } from "../src/db";
+import {
+  user,
+  readingTrackers,
+  trackerChapterProgress,
+} from "../src/db/schema";
+import { and, eq } from "drizzle-orm";
 
 type CreateAndOnboardUserParams = {
   page: Page;
@@ -87,7 +94,7 @@ test.describe("Insights & Visualisations E2E", () => {
     // 5. Navigate to /books and mark Genesis Chapter 1 as read
     await page.goto("/books");
     await expect(
-      page.getByRole("heading", { name: "Scripture Books" })
+      page.getByRole("heading", { name: "All Books" })
     ).toBeVisible();
 
     const genesisCard = page.getByText("Genesis").first();
@@ -114,12 +121,43 @@ test.describe("Insights & Visualisations E2E", () => {
       .click();
     await expect(chaptersDialog).not.toBeVisible();
 
+    const [uRecord] = await db.select().from(user).where(eq(user.email, email));
+    const [userTracker] = await db
+      .select()
+      .from(readingTrackers)
+      .where(eq(readingTrackers.userId, uRecord!.id));
+
+    // Verify chapter was recorded in DB for this tracker before navigating
+    await expect
+      .poll(async () => {
+        const rows = await db
+          .select()
+          .from(trackerChapterProgress)
+          .where(
+            and(
+              eq(trackerChapterProgress.trackerId, userTracker!.id),
+              eq(trackerChapterProgress.bookId, "gen"),
+              eq(trackerChapterProgress.chapter, 1)
+            )
+          );
+        return rows.length;
+      })
+      .toBe(1);
+
     // 6. Return to /insights and verify updated counts
     await page.goto("/insights");
     await expect(page).toHaveURL(/\/insights/);
 
+    const freshCanonSection = page.locator("section").filter({
+      hasText: "Canon Coverage & Scripture Divisions",
+    });
+    const freshPentateuchCard = freshCanonSection
+      .locator("div")
+      .filter({ hasText: "Law & Pentateuch" })
+      .first();
+
     // Law / Pentateuch division now reflects 1 / 187
-    await expect(pentateuchCard.getByText("1 / 187")).toBeVisible();
+    await expect(freshPentateuchCard.getByText("1 / 187")).toBeVisible();
 
     // Reading streak now indicates active reading
     await expect(page.getByText("1 Day").first()).toBeVisible();

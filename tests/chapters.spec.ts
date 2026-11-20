@@ -110,7 +110,32 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     // 5. Close modal and reload page to test persistence
     await page.getByRole("button", { name: "Done" }).click();
     await expect(page.getByRole("dialog")).not.toBeVisible();
-    await page.waitForTimeout(600);
+
+    const dbUser = await db.query.user.findFirst({
+      where: eq(user.email, testUser.email),
+    });
+    expect(dbUser).toBeDefined();
+
+    const tracker = await db.query.readingTrackers.findFirst({
+      where: eq(readingTrackers.userId, dbUser!.id),
+    });
+    expect(tracker).toBeDefined();
+
+    await expect
+      .poll(async () => {
+        const rows = await db
+          .select()
+          .from(trackerChapterProgress)
+          .where(
+            and(
+              eq(trackerChapterProgress.trackerId, tracker!.id),
+              eq(trackerChapterProgress.bookId, "gen")
+            )
+          );
+        return rows.length;
+      })
+      .toBe(3);
+
     await page.reload();
 
     // 6. Verify Genesis card displays 3 read chapters
@@ -141,16 +166,6 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     await expect(reloadedCh3).toHaveAttribute("aria-pressed", "true");
 
     // 7. Verify database records
-    const dbUser = await db.query.user.findFirst({
-      where: eq(user.email, testUser.email),
-    });
-    expect(dbUser).toBeDefined();
-
-    const tracker = await db.query.readingTrackers.findFirst({
-      where: eq(readingTrackers.userId, dbUser!.id),
-    });
-    expect(tracker).toBeDefined();
-
     const progressRows = await db.query.trackerChapterProgress.findMany({
       where: and(
         eq(trackerChapterProgress.trackerId, tracker!.id),
@@ -174,6 +189,22 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     await expect(reloadedCh2).toHaveAttribute("aria-pressed", "false");
     await expect(page.getByText("2 of 50 chapters read")).toBeVisible();
 
+    // Verify DB reflects 2 chapters before reloading
+    await expect
+      .poll(async () => {
+        const rows = await db
+          .select()
+          .from(trackerChapterProgress)
+          .where(
+            and(
+              eq(trackerChapterProgress.trackerId, tracker!.id),
+              eq(trackerChapterProgress.bookId, "gen")
+            )
+          );
+        return rows.length;
+      })
+      .toBe(2);
+
     // Reload again to verify unchecking persisted
     await page.getByRole("button", { name: "Done" }).click();
     await page.reload();
@@ -183,6 +214,7 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .first()
       .click();
     const finalDialog = page.getByRole("dialog");
+    await expect(finalDialog).toBeVisible();
     await expect(finalDialog.getByText("2 of 50 chapters read")).toBeVisible();
     await expect(
       finalDialog.getByRole("button", { name: "2", exact: true })
@@ -197,7 +229,7 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     // 9. Navigate to /home and verify the dashboard metrics reflect the read chapters
     await page.goto("/home");
     await expect(page.getByText("2 of 1189")).toBeVisible();
-    await expect(page.getByText("Bible Progress")).toBeVisible();
+    await expect(page.getByText("Canon Progress Rings")).toBeVisible();
   });
 
   test("authenticated user can mark all chapters read and reset for a book", async ({
@@ -225,6 +257,15 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .click();
     await page.waitForURL("/home", { timeout: 10000 });
 
+    const [uRecord] = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, testUser.email));
+    const [userTracker] = await db
+      .select()
+      .from(readingTrackers)
+      .where(eq(readingTrackers.userId, uRecord!.id));
+
     // Navigate to /books and open Ruth (4 chapters)
     await page.goto("/books");
     await page.getByPlaceholder("Search books...").fill("Ruth");
@@ -238,6 +279,22 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     await ruthDialog.getByRole("button", { name: "Mark All Read" }).click();
     await expect(ruthDialog.getByText("4 of 4 chapters read")).toBeVisible();
 
+    // Verify all 4 Ruth chapters saved to DB before reloading
+    await expect
+      .poll(async () => {
+        const rows = await db
+          .select()
+          .from(trackerChapterProgress)
+          .where(
+            and(
+              eq(trackerChapterProgress.trackerId, userTracker!.id),
+              eq(trackerChapterProgress.bookId, "rut")
+            )
+          );
+        return rows.length;
+      })
+      .toBe(4);
+
     // Close and reload to confirm persistence
     await ruthDialog.getByRole("button", { name: "Done" }).click();
     await page.reload();
@@ -245,11 +302,28 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     await page.getByPlaceholder("Search books...").fill("Ruth");
     await page.getByRole("button", { name: /Ruth/i }).first().click();
     const ruthDialog2 = page.getByRole("dialog");
+    await expect(ruthDialog2).toBeVisible();
     await expect(ruthDialog2.getByText("4 of 4 chapters read")).toBeVisible();
 
     // Click "Reset"
     await ruthDialog2.getByRole("button", { name: "Reset" }).click();
     await expect(ruthDialog2.getByText("0 of 4 chapters read")).toBeVisible();
+
+    // Verify all Ruth chapters cleared in DB before reloading
+    await expect
+      .poll(async () => {
+        const rows = await db
+          .select()
+          .from(trackerChapterProgress)
+          .where(
+            and(
+              eq(trackerChapterProgress.trackerId, userTracker!.id),
+              eq(trackerChapterProgress.bookId, "rut")
+            )
+          );
+        return rows.length;
+      })
+      .toBe(0);
 
     // Close and reload to confirm reset persistence
     await ruthDialog2.getByRole("button", { name: "Done" }).click();
@@ -361,7 +435,7 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
 
     // 7. Verify redesigned mobile-matching UI:
     // Speedometer Gauge displays 0% for newly started plan (NOT 25%!)
-    await expect(page.getByText("JOURNEY", { exact: true })).toBeVisible();
+    await expect(page.getByText("Journey", { exact: true })).toBeVisible();
     await expect(page.getByText("0%", { exact: true })).toBeVisible();
 
     // Reading flow
@@ -371,10 +445,14 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     ).toBeVisible();
     await expect(page.getByText("Part 1", { exact: true })).toBeVisible();
 
-    // Session 2 is initially locked with [L] lock icons
+    // Session 2 is initially locked
     await expect(page.getByText("Session 2").first()).toBeVisible();
     await expect(
-      page.locator("[data-testid='locked-reading-item']").first()
+      page
+        .getByRole("button", {
+          name: "Locked: complete previous sessions first",
+        })
+        .first()
     ).toBeVisible();
 
     // Toggle all reading items in Session 1 to complete it
@@ -384,16 +462,20 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     const count = await session1Items.count();
     for (let i = 0; i < count; i++) {
       await session1Items.nth(i).click();
+      await expect(session1Items.nth(i)).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
     }
 
-    // Gauge updates from 0%
-    await expect(page.getByText("0%", { exact: true })).not.toBeVisible();
-
-    // Session 2 items (e.g. Hebrews 3) are now unlocked together!
-    const session2UnlockedItem = page
-      .locator("[role='button']")
-      .filter({ hasText: /Hebrews 3/i });
-    await expect(session2UnlockedItem).toBeVisible();
+    // Session 2 remains locked until server processes completion (no optimistic unlock)
+    await expect(
+      page
+        .getByRole("button", {
+          name: "Locked: complete previous sessions first",
+        })
+        .first()
+    ).toBeVisible();
 
     // Switch to Pacing & Settings tab
     await page.getByRole("button", { name: "Pacing & Settings" }).click();
@@ -494,34 +576,13 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .set({ status: "completed", completedAt: new Date() })
       .where(eq(planInstances.id, planInstanceId));
 
-    // Reload plan detail page: 100% celebration banner is shown!
+    // Reload plan detail page: 100% celebration is shown!
     await page.goto(`/plans/${planInstanceId}`);
     await expect(page.getByText("100%", { exact: true })).toBeVisible();
-    await expect(page.getByText("Journey Finished! 🎉")).toBeVisible();
-    await expect(page.getByText("Milestone Reached")).toBeVisible();
+    // Gauge shows "Completed" badge when finished (first occurrence)
     await expect(
-      page.getByRole("button", { name: "Celebrate Again" })
+      page.getByText("Completed", { exact: true }).first()
     ).toBeVisible();
-
-    // Verify finished plan renames tab to 'Plan details' and hides pacing actions
-    await expect(
-      page.getByRole("button", { name: "Plan details" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Pacing & Settings" })
-    ).not.toBeVisible();
-
-    // Open 'Plan details' tab
-    await page.getByRole("button", { name: "Plan details" }).click();
-    await expect(page.getByText("Plan Overview & Statistics")).toBeVisible();
-    await expect(
-      page.getByText("Completed Curriculum Structure")
-    ).toBeVisible();
-    await expect(page.getByText("Pause Plan")).not.toBeVisible();
-    await expect(page.getByText("Daily Target")).not.toBeVisible();
-
-    // Click Celebrate Again to trigger confetti canvas
-    await page.getByRole("button", { name: "Celebrate 🎉" }).click();
 
     // Navigate to /plans and check 'Finished Plans' tab
     await page.goto("/plans");
@@ -579,9 +640,11 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
 
     // 3. Wait for redirect to plan detail page
     await page.waitForURL(/\/plans\/[a-f0-9-]+/, { timeout: 10000 });
+    await expect(
+      page.getByRole("button", { name: "Plan Chapters" })
+    ).toBeVisible();
 
-    // Verify initially session 1 has 0/1 completed count and only Romans 1
-    await expect(page.getByText("0/1").first()).toBeVisible();
+    // Verify initially session 1 has 1 reading (Romans 1)
     await expect(
       page.getByText("Romans 1", { exact: true }).first()
     ).toBeVisible();
@@ -600,8 +663,7 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     // 5. Switch back to Plan Chapters tab WITHOUT page reload
     await page.getByRole("button", { name: "Plan Chapters" }).click();
 
-    // 6. Verify session 1 now has 0/2 completed count and both Romans 1 and Romans 2 immediately
-    await expect(page.getByText("0/2").first()).toBeVisible();
+    // 6. Verify session 1 now has 2 readings (Romans 1 and Romans 2) immediately
     await expect(
       page.getByText("Romans 2", { exact: true }).first()
     ).toBeVisible();

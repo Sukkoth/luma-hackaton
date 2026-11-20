@@ -1,5 +1,12 @@
 import fs from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
+import { db } from "../src/db";
+import {
+  user,
+  readingTrackers,
+  trackerChapterProgress,
+} from "../src/db/schema";
+import { and, eq } from "drizzle-orm";
 
 if (fs.existsSync(".env")) {
   process.loadEnvFile?.();
@@ -129,6 +136,33 @@ test.describe("Achievements & Milestones E2E", () => {
 
     // Close chapter dialog
     await chapterDialog.getByRole("button", { name: "Close" }).click();
+    await expect(chapterDialog).not.toBeVisible();
+
+    const [uRecord] = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, testUser.email));
+    const [userTracker] = await db
+      .select()
+      .from(readingTrackers)
+      .where(eq(readingTrackers.userId, uRecord!.id));
+
+    // Verify chapter was saved to DB for this tracker before navigating
+    await expect
+      .poll(async () => {
+        const rows = await db
+          .select()
+          .from(trackerChapterProgress)
+          .where(
+            and(
+              eq(trackerChapterProgress.trackerId, userTracker!.id),
+              eq(trackerChapterProgress.bookId, "gen"),
+              eq(trackerChapterProgress.chapter, 1)
+            )
+          );
+        return rows.length;
+      })
+      .toBe(1);
 
     // 3. Visit Achievements page
     await page.goto("/insights?tab=achievements");
