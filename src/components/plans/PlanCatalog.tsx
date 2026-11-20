@@ -96,6 +96,7 @@ export function PlanCatalog({
     "filter",
     parseAsStringLiteral([
       "All",
+      "Featured",
       "Custom",
       "Fixed",
       "Customizable",

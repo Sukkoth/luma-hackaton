@@ -9,8 +9,9 @@ import {
   Compass,
   Activity,
   Check,
+  Sparkles,
 } from "lucide-react";
-import type { ReadingPlanTemplate } from "@/data/readingPlans";
+import { type ReadingPlanTemplate, isPlanFeatured } from "@/data/readingPlans";
 
 type Props = {
   plan: ReadingPlanTemplate;
@@ -25,14 +26,33 @@ export function PlanCard({
 }: Props) {
   const isCustom =
     plan.id.startsWith("custom_") || plan.id.startsWith("imported_");
+  const isFeatured = isPlanFeatured({ plan });
 
   return (
-    <div className="ui-card group relative isolate flex flex-col justify-between p-5 transition-all duration-150 hover:border-border-strong">
+    <div
+      className={`ui-card group relative isolate flex flex-col justify-between p-5 transition-all duration-200 ${
+        isFeatured
+          ? "border-primary/50 ring-1 ring-primary/25 shadow-md bg-gradient-to-b from-primary/[0.04] via-card to-card hover:border-primary hover:shadow-lg dark:from-primary/[0.08]"
+          : "hover:border-border-strong"
+      }`}
+    >
       <div>
         {/* Top Header Row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded-lg bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
+            {isFeatured && (
+              <span className="flex items-center gap-1 rounded-lg bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400 shadow-2xs">
+                <Sparkles className="size-3 fill-amber-500/30 text-amber-600 dark:text-amber-400" />
+                <span>Featured</span>
+              </span>
+            )}
+            <span
+              className={`rounded-lg px-2 py-0.5 text-xs font-medium ${
+                isFeatured
+                  ? "bg-primary/10 text-primary border border-primary/20 font-semibold"
+                  : "bg-muted text-foreground"
+              }`}
+            >
               {plan.category}
             </span>
             {plan.canonCompatibility &&
@@ -69,7 +89,13 @@ export function PlanCard({
         </div>
 
         {/* Title & Subtitle */}
-        <h3 className="mt-3 text-base font-semibold tracking-tight text-foreground">
+        <h3
+          className={`mt-3 text-base font-semibold tracking-tight transition-colors ${
+            isFeatured
+              ? "text-foreground font-bold group-hover:text-primary"
+              : "text-foreground"
+          }`}
+        >
           {plan.title}
         </h3>
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
@@ -112,8 +138,11 @@ export function PlanCard({
       {/* Bottom Action Row */}
       <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-3">
         <div className="flex flex-col">
-          <span className="text-[11px] text-muted-foreground">
-            Pacing Target
+          <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+            <span>Pacing Target</span>
+            {isFeatured && (
+              <span className="inline-block size-1.5 rounded-full bg-primary" />
+            )}
           </span>
           <span className="text-xs font-semibold text-foreground">
             {plan.recommendedDays} days ({plan.defaultDailyTarget} ch/d)
@@ -123,7 +152,11 @@ export function PlanCard({
         <div className="flex items-center gap-2">
           <Link
             href={`/plans/templates/${plan.id}`}
-            className="rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+            className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${
+              isFeatured
+                ? "border-primary/30 bg-card text-foreground hover:bg-primary/10 hover:border-primary"
+                : "border-border bg-card text-foreground hover:bg-muted"
+            }`}
           >
             Details
           </Link>
@@ -131,7 +164,11 @@ export function PlanCard({
             <button
               type="button"
               onClick={() => onStartPlanAction(plan)}
-              className="flex items-center gap-1 rounded-xl bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-2xs hover:opacity-90 transition-opacity cursor-pointer"
+              className={`flex items-center gap-1 rounded-xl px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition-all cursor-pointer ${
+                isFeatured
+                  ? "bg-primary text-primary-foreground hover:opacity-90 shadow-xs ring-1 ring-primary/30"
+                  : "bg-primary text-primary-foreground hover:opacity-90"
+              }`}
             >
               <span>Start</span>
               <ArrowRight className="size-3.5" />

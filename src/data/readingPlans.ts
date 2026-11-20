@@ -43,6 +43,7 @@ export type PlanCategory =
 
 export type PlanFilterType =
   | "All"
+  | "Featured"
   | "Custom"
   | "Fixed"
   | "Customizable"
@@ -61,6 +62,7 @@ export interface PlanFilterOption {
 
 export const PLAN_FILTERS: PlanFilterOption[] = [
   { id: "All", label: "All" },
+  { id: "Featured", label: "Featured" },
   { id: "Custom", label: "My Custom" },
   { id: "Fixed", label: "Fixed" },
   { id: "Customizable", label: "Customizable" },
@@ -72,6 +74,47 @@ export const PLAN_FILTERS: PlanFilterOption[] = [
   { id: "Long", label: "Long" },
   { id: "Whole", label: "Whole Bible" },
 ];
+
+/**
+ * Featured Reading Plans list.
+ * Modifying this array updates which plans are featured across the application
+ * without having to edit the UI components.
+ */
+export const FEATURED_PLANS: string[] = [
+  "blended_1_year", // 1-Year Blended Plan
+  "chronological_1_year", // 1-Year Chronological Plan
+  "new_testament_90", // New Testament in 90 Days
+];
+
+export const FEATURED_PLAN_IDS = FEATURED_PLANS;
+
+export type IsPlanFeaturedParams = {
+  plan?: { id?: string; title?: string; isFeatured?: boolean } | null;
+  planId?: string | null;
+  planTitle?: string | null;
+};
+
+export function isPlanFeatured({
+  plan,
+  planId,
+  planTitle,
+}: IsPlanFeaturedParams): boolean {
+  if (plan?.isFeatured) return true;
+  const targetId = plan?.id ?? planId;
+  const targetTitle = plan?.title ?? planTitle;
+
+  return FEATURED_PLANS.some((item) => {
+    if (!item) return false;
+    const normalizedItem = item.trim().toLowerCase();
+    if (targetId && targetId.trim().toLowerCase() === normalizedItem) {
+      return true;
+    }
+    if (targetTitle && targetTitle.trim().toLowerCase() === normalizedItem) {
+      return true;
+    }
+    return false;
+  });
+}
 
 /**
  * Automatically deduces the canonical reading plan category based on book IDs.
@@ -136,6 +179,10 @@ export const isPlanMatchingFilter = (
   filter: PlanFilterType
 ): boolean => {
   if (filter === "All") return true;
+
+  if (filter === "Featured") {
+    return isPlanFeatured({ plan });
+  }
 
   if (filter === "Custom") {
     return plan.id.startsWith("custom_") || plan.id.startsWith("imported_");
@@ -251,6 +298,7 @@ export interface ReadingPlanTemplate {
   allowCustomPace?: boolean; // If false, pace is locked to recommended schedule (steppers hidden/disabled)
   allowSelfPaced?: boolean; // If false, self-paced option is completely hidden
   canonCompatibility?: BibleCanon | null;
+  isFeatured?: boolean;
   sections: PlanSection[];
   readings: PlanReadingItem[];
 }
