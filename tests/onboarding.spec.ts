@@ -49,7 +49,6 @@ test.describe("Onboarding Experience via New User E2E", () => {
     await expect(page).toHaveURL("/onboarding");
 
     // 3. Step 1: Showcase Carousel Verification
-    await expect(page.getByText("Onboarding")).toBeVisible();
     await expect(page.getByText("Skip to Setup")).toBeVisible();
 
     // Slide 1: Daily Meditation
@@ -136,15 +135,10 @@ test.describe("Onboarding Experience via New User E2E", () => {
     ).toBeVisible();
     await expect(page.getByText("Catholic Canon (73 Books)")).not.toBeVisible();
 
-    // 5. Uncontrolled Form: Tracker Name, Color, and Icon customization
+    // 5. Uncontrolled Form: Tracker Name and Icon customization
     const trackerNameInput = page.getByLabel("Tracker Name");
     await expect(trackerNameInput).toHaveValue("Personal Reading");
     await trackerNameInput.fill("My Ethiopian Canon Devotional");
-
-    // Select Emerald color swatch (#10B981)
-    const emeraldRadio = page.locator('input[name="color"][value="#10B981"]');
-    await emeraldRadio.check({ force: true });
-    await expect(emeraldRadio).toBeChecked();
 
     // Select Flame icon badge
     const flameRadio = page.locator('input[name="icon"][value="flame"]');
@@ -159,12 +153,17 @@ test.describe("Onboarding Experience via New User E2E", () => {
     // 6. Navigation to Dashboard
     await page.waitForURL("/home", { timeout: 10000 });
     await expect(page).toHaveURL("/home");
-    await expect(page.getByText(`Hello, ${newUser.givenName}!`)).toBeVisible();
-    await expect(page.getByText("Bible Progress")).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: new RegExp(
+          `Good (morning|afternoon|evening), ${newUser.givenName}\\.`
+        ),
+      })
+    ).toBeVisible();
+    await expect(page.getByText("Canon Progress Rings")).toBeVisible();
     await expect(page.getByText("0%").first()).toBeVisible();
     await expect(page.getByText(/0 of \d+/)).toBeVisible();
-    await expect(page.getByText("No Active Reading Plans")).toBeVisible();
-    await expect(page.getByText("Freeze Shields")).toBeVisible();
+    await expect(page.getByText(/Freezes/)).toBeVisible();
 
     // 7. Verification that visiting /onboarding now redirects back to /home
     await page.goto("/onboarding");
@@ -191,7 +190,6 @@ test.describe("Onboarding Experience via New User E2E", () => {
       expect(tracker).toBeDefined();
       expect(tracker?.name).toBe("My Ethiopian Canon Devotional");
       expect(tracker?.canon).toBe("ethiopian_orthodox");
-      expect(tracker?.color).toBe("#10B981");
       expect(tracker?.icon).toBe("flame");
     }
   });

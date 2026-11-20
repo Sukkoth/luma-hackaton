@@ -165,9 +165,8 @@ function SignUpContent() {
               <div className="inline-flex items-center gap-2">
                 <span className="text-[20px] font-bold tracking-tight text-foreground">
                   Luma
-                  <span className="text-foreground-dim">.</span>
+                  <span className="text-primary">.</span>
                 </span>
-                <span className="ui-pill-primary text-[10px]">Register</span>
               </div>
               <h1 className="mt-3 text-[26px] font-bold tracking-tight text-foreground sm:text-[28px]">
                 Create an account
@@ -409,7 +408,7 @@ export default function SignUpPage() {
     <Suspense
       fallback={
         <div className="flex min-h-dvh items-center justify-center">
-          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-zinc-100" />
+          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-white" />
         </div>
       }
     >

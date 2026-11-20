@@ -29,11 +29,6 @@ export const CreateTrackerSchema = v.object({
     ),
     ""
   ),
-  color: v.pipe(
-    v.string("Color selection is required"),
-    v.trim(),
-    v.nonEmpty("Color selection is required")
-  ),
   icon: v.pipe(
     v.string("Icon selection is required"),
     v.trim(),
@@ -63,11 +58,6 @@ export const UpdateTrackerSchema = v.object({
       v.maxLength(200, "Description cannot exceed 200 characters")
     ),
     ""
-  ),
-  color: v.pipe(
-    v.string("Color selection is required"),
-    v.trim(),
-    v.nonEmpty("Color selection is required")
   ),
   icon: v.pipe(
     v.string("Icon selection is required"),

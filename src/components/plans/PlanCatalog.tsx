@@ -3,6 +3,7 @@
 import { useState, useTransition, useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
 import {
   Calendar,
   Compass,
@@ -17,8 +18,6 @@ import {
   Trophy,
   Sparkles,
   Coffee,
-  Plus,
-  Upload,
 } from "lucide-react";
 import {
   READING_PLANS,
@@ -30,6 +29,7 @@ import type { BibleCanon } from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
 import { PlanCard } from "./plan-card";
 import { PlanFilterPills } from "./plan-filter-pills";
+import { TabsBar } from "@/components/ui/tabs-bar";
 import {
   PlanActiveBanner,
   type ActivePlanInstance,
@@ -37,6 +37,7 @@ import {
 import { PlanSetupModal } from "./plan-setup-modal";
 import { CustomPlanWizardModal } from "./custom-plan-wizard-modal";
 import { ImportPlanModal } from "./import-plan-modal";
+import { Button } from "@/components/ui/button";
 import type { ReadingPlanTemplate } from "@/data/readingPlans";
 import { celebratePlanCompletion } from "@/lib/confetti";
 import { updatePlanSettingsAction } from "@/actions/plans";
@@ -74,14 +75,43 @@ export function PlanCatalog({
   );
   const [isCustomWizardOpen, setIsCustomWizardOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<CatalogTab>(() => {
-    if (initialTab === "my_plans" || initialTab === "active") return "active";
-    if (initialTab === "paused") return "paused";
-    if (initialTab === "finished") return "finished";
-    return "catalog";
-  });
-  const [selectedFilter, setSelectedFilter] = useState<PlanFilterType>("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral([
+      "catalog",
+      "active",
+      "paused",
+      "finished",
+    ] as const).withDefault(
+      initialTab === "my_plans" || initialTab === "active"
+        ? "active"
+        : initialTab === "paused"
+          ? "paused"
+          : initialTab === "finished"
+            ? "finished"
+            : "catalog"
+    )
+  );
+  const [selectedFilter, setSelectedFilter] = useQueryState<PlanFilterType>(
+    "filter",
+    parseAsStringLiteral([
+      "All",
+      "Custom",
+      "Fixed",
+      "Customizable",
+      "Old",
+      "New",
+      "Gospels",
+      "Epistles",
+      "Short",
+      "Long",
+      "Whole",
+    ] as const).withDefault("All")
+  );
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("")
+  );
   const [selectedPlanForEnrollment, setSelectedPlanForEnrollment] =
     useState<ReadingPlanTemplate | null>(null);
   const mounted = useSyncExternalStore(
@@ -140,76 +170,46 @@ export function PlanCatalog({
       <PlanActiveBanner
         session={session}
         activePlanInstances={activePlanInstances}
+        onCreateCustom={() => setIsCustomWizardOpen(true)}
+        onImportPlan={() => setIsImportModalOpen(true)}
       />
 
       {/* Main Catalog & My Plans Section */}
-      <section className="ui-card rounded-[22px] p-5 sm:p-6">
+      <section className="ui-card p-5 sm:p-6">
         {/* Navigation Tabs and Search Bar */}
         <div className="flex flex-col gap-4 border-b border-border-subtle pb-5 md:flex-row md:items-center md:justify-between">
           {/* Tab Switcher - Segmented control */}
-          <div
-            data-testid="plan-catalog-tabs"
-            className="flex items-center gap-1 rounded-[16px] border border-border bg-surface-elevated p-1 overflow-x-auto scrollbar-none"
-          >
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("catalog")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "catalog"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Compass className="size-3.5" />
-              <span>Plan Catalog ({availablePlans.length})</span>
-            </button>
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("active")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "active"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Calendar className="size-3.5" />
-              <span>
-                Active Plans ({session ? activePlanInstances.length : 0})
-              </span>
-            </button>
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("paused")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "paused"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Pause className="size-3.5" />
-              <span>
-                Paused Plans ({session ? pausedPlanInstances.length : 0})
-              </span>
-            </button>
-            <button
-              type="button"
-              disabled={!mounted}
-              onClick={() => setActiveTab("finished")}
-              className={`shrink-0 flex items-center gap-1.5 rounded-[12px] px-3.5 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                activeTab === "finished"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-transparent text-foreground-secondary hover:text-foreground"
-              }`}
-            >
-              <Trophy className="size-3.5" />
-              <span>
-                Finished Plans ({session ? finishedPlanInstances.length : 0})
-              </span>
-            </button>
-          </div>
+          <TabsBar
+            containerTestId="plan-catalog-tabs"
+            tabs={[
+              {
+                id: "catalog",
+                label: `Plan Catalog (${availablePlans.length})`,
+                icon: <Compass className="size-3.5" />,
+                disabled: !mounted,
+              },
+              {
+                id: "active",
+                label: `Active Plans (${session ? activePlanInstances.length : 0})`,
+                icon: <Calendar className="size-3.5" />,
+                disabled: !mounted,
+              },
+              {
+                id: "paused",
+                label: `Paused Plans (${session ? pausedPlanInstances.length : 0})`,
+                icon: <Pause className="size-3.5" />,
+                disabled: !mounted,
+              },
+              {
+                id: "finished",
+                label: `Finished Plans (${session ? finishedPlanInstances.length : 0})`,
+                icon: <Trophy className="size-3.5" />,
+                disabled: !mounted,
+              },
+            ]}
+            activeTab={activeTab}
+            onTabChange={({ tab }) => void setActiveTab(tab)}
+          />
 
           {/* Search Input */}
           {activeTab === "catalog" && (
@@ -220,7 +220,7 @@ export function PlanCatalog({
                 placeholder="Search plans..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full rounded-[12px] border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
+                className="h-9 w-full rounded-xl border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
               />
               {searchQuery && (
                 <button
@@ -238,33 +238,11 @@ export function PlanCatalog({
         {/* Tab Content */}
         {activeTab === "catalog" ? (
           <div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
               <PlanFilterPills
                 selectedFilter={selectedFilter}
                 onSelectFilter={({ filter }) => setSelectedFilter(filter)}
               />
-              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                <button
-                  type="button"
-                  disabled={!mounted}
-                  onClick={() => setIsCustomWizardOpen(true)}
-                  data-testid="open-custom-plan-wizard-btn"
-                  className="ui-btn-primary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
-                >
-                  <Plus className="size-3.5" />
-                  <span>Create Custom</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={!mounted}
-                  onClick={() => setIsImportModalOpen(true)}
-                  data-testid="open-import-plan-modal-btn"
-                  className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:pointer-events-none"
-                >
-                  <Upload className="size-3.5" />
-                  <span>Import</span>
-                </button>
-              </div>
             </div>
 
             {/* Catalog Grid */}
@@ -341,8 +319,8 @@ export function PlanCatalog({
               </button>
             </div>
           ) : (
-            <div className="mt-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 w-full">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {activePlanInstances.map((instance) => (
                   <div
                     key={instance.id}
@@ -390,17 +368,21 @@ export function PlanCatalog({
                       </div>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
-                      <span className="flex items-center gap-1 text-[12px] text-foreground-secondary">
-                        <CheckCircle2 className="size-3.5 text-foreground-dim" />
+                    <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+                      <span className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                        <CheckCircle2 className="size-3.5 text-primary" />
                         <span>Active Tracker</span>
                       </span>
-                      <Link
-                        href={`/plans/${instance.id}`}
-                        className="ui-btn-secondary px-3.5 py-1.5 text-[12px] gap-1.5"
-                      >
-                        <span>View Plan</span>
-                        <ArrowRight className="size-3.5" />
+                      <Link href={`/plans/${instance.id}`}>
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          rightIcon={<ArrowRight className="size-3.5" />}
+                          className="font-semibold shadow-xs"
+                        >
+                          View Plan
+                        </Button>
                       </Link>
                     </div>
                   </div>
@@ -445,8 +427,8 @@ export function PlanCatalog({
               </p>
             </div>
           ) : (
-            <div className="mt-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 w-full">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {pausedPlanInstances.map((instance) => (
                   <div
                     key={instance.id}
@@ -494,22 +476,28 @@ export function PlanCatalog({
                       </div>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
-                      <button
+                    <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+                      <Button
                         type="button"
+                        variant="secondary"
+                        size="sm"
                         disabled={isPending}
                         onClick={() => handleResumePlan(instance.id)}
-                        className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer disabled:opacity-50"
+                        leftIcon={<Play className="size-3 fill-current" />}
+                        className="cursor-pointer font-medium"
                       >
-                        <Play className="size-3 fill-current" />
-                        <span>Resume Plan</span>
-                      </button>
-                      <Link
-                        href={`/plans/${instance.id}`}
-                        className="ui-btn-secondary ui-btn-sm gap-1.5"
-                      >
-                        <span>View Plan</span>
-                        <ArrowRight className="size-3.5" />
+                        Resume Plan
+                      </Button>
+                      <Link href={`/plans/${instance.id}`}>
+                        <Button
+                          type="button"
+                          variant="default"
+                          size="sm"
+                          rightIcon={<ArrowRight className="size-3.5" />}
+                          className="font-semibold shadow-xs"
+                        >
+                          View Plan
+                        </Button>
                       </Link>
                     </div>
                   </div>
@@ -552,8 +540,8 @@ export function PlanCatalog({
             </p>
           </div>
         ) : (
-          <div className="mt-6">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="mt-6 w-full">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {finishedPlanInstances.map((instance) => (
                 <div
                   key={instance.id}
@@ -561,7 +549,7 @@ export function PlanCatalog({
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="ui-pill text-[11px] gap-1">
+                      <span className="rounded-full bg-surface-elevated px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary border border-border inline-flex items-center gap-1">
                         <Trophy className="size-3" />
                         <span>Finished</span>
                       </span>
@@ -597,21 +585,27 @@ export function PlanCatalog({
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-border-subtle pt-4">
-                    <button
+                  <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="sm"
                       onClick={() => celebratePlanCompletion()}
-                      className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
+                      leftIcon={<Sparkles className="size-3.5" />}
+                      className="cursor-pointer font-medium"
                     >
-                      <Sparkles className="size-3.5" />
-                      <span>Celebrate 🎉</span>
-                    </button>
-                    <Link
-                      href={`/plans/${instance.id}`}
-                      className="ui-btn-secondary ui-btn-sm gap-1.5"
-                    >
-                      <span>Review Plan</span>
-                      <ArrowRight className="size-3.5" />
+                      Celebrate
+                    </Button>
+                    <Link href={`/plans/${instance.id}`}>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        rightIcon={<ArrowRight className="size-3.5" />}
+                        className="font-medium"
+                      >
+                        Review Plan
+                      </Button>
                     </Link>
                   </div>
                 </div>

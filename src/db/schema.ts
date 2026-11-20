@@ -25,7 +25,6 @@ export const readingTrackers = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     description: text("description").default("").notNull(),
-    color: text("color").default("#3B82F6").notNull(),
     icon: text("icon").default("book").notNull(),
     canon: varchar("canon", { length: 50 }).default("protestant").notNull(),
     isArchived: boolean("is_archived").default(false).notNull(),
@@ -281,6 +280,7 @@ export const planInstances = pgTable(
     pacingSegmentsJson: text("pacing_segments_json"),
     reminderEnabled: boolean("reminder_enabled").default(false).notNull(),
     reminderTime: text("reminder_time"),
+    groupPlanId: text("group_plan_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -293,6 +293,7 @@ export const planInstances = pgTable(
     index("idx_plan_instances_user").on(table.userId),
     index("idx_plan_instances_tracker").on(table.trackerId),
     index("idx_plan_instances_status").on(table.status),
+    index("idx_plan_instances_group_plan").on(table.groupPlanId),
   ]
 );
 
@@ -495,6 +496,9 @@ export const notes = pgTable(
     plainTextSnippet: text("plain_text_snippet").default("").notNull(),
     isPinned: boolean("is_pinned").default(false).notNull(),
     isArchived: boolean("is_archived").default(false).notNull(),
+    isSharedWithCommunity: boolean("is_shared_with_community")
+      .default(false)
+      .notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -507,6 +511,11 @@ export const notes = pgTable(
     index("idx_notes_user").on(table.userId),
     index("idx_notes_folder").on(table.folderId),
     index("idx_notes_plan_instance").on(table.planInstanceId),
+    index("idx_notes_community_shared").on(
+      table.planInstanceId,
+      table.planDayNumber,
+      table.isSharedWithCommunity
+    ),
   ]
 );
 
@@ -560,6 +569,12 @@ export const userSettings = pgTable(
     timezone: varchar("timezone", { length: 100 }).default("UTC").notNull(),
     streakFreezesAvailable: integer("streak_freezes_available")
       .default(0)
+      .notNull(),
+    dailyReminderEnabled: boolean("daily_reminder_enabled")
+      .default(false)
+      .notNull(),
+    dailyReminderTime: varchar("daily_reminder_time", { length: 10 })
+      .default("20:00")
       .notNull(),
     frozenDatesJson: text("frozen_dates_json"),
     freezeRestorationDaysCount: integer("freeze_restoration_days_count")
@@ -617,3 +632,294 @@ export const unlockedAchievementsRelations = relations(
     }),
   })
 );
+
+// --- Community & Cohort Reading ---
+
+export type GroupRole = "owner" | "admin" | "member";
+export type GroupPlanStatus =
+  "scheduled" | "active" | "completed" | "cancelled";
+export type GroupLateJoinPolicy = "strict_locked" | "skip_ahead" | "backfill";
+export type GroupMembershipStatus = "active" | "pending_approval";
+
+export const groups = pgTable(
+  "groups",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name", { length: 150 }).notNull(),
+    description: text("description").default("").notNull(),
+    avatarUrl: text("avatar_url"),
+    inviteCode: varchar("invite_code", { length: 32 }).notNull().unique(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    isPrivate: boolean("is_private").default(true).notNull(),
+    requiresApproval: boolean("requires_approval").default(false).notNull(),
+    pinnedNoticeTitle: varchar("pinned_notice_title", { length: 150 }),
+    pinnedNoticeContent: text("pinned_notice_content"),
+    pinnedNoticeExpiresAt: timestamp("pinned_notice_expires_at", {
+      withTimezone: true,
+    }),
+    pinnedNoticeAuthorId: text("pinned_notice_author_id").references(
+      () => user.id,
+      { onDelete: "set null" }
+    ),
+    pinnedNoticeUpdatedAt: timestamp("pinned_notice_updated_at", {
+      withTimezone: true,
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("idx_groups_owner").on(table.ownerId),
+    uniqueIndex("idx_groups_invite_code").on(table.inviteCode),
+    index("idx_groups_is_private").on(table.isPrivate),
+  ]
+);
+
+export const groupsRelations = relations(groups, ({ one, many }) => ({
+  owner: one(user, {
+    fields: [groups.ownerId],
+    references: [user.id],
+  }),
+  pinnedNoticeAuthor: one(user, {
+    fields: [groups.pinnedNoticeAuthorId],
+    references: [user.id],
+  }),
+  members: many(groupMembers),
+  plans: many(groupPlans),
+  activities: many(groupActivities),
+}));
+
+export const groupMembers = pgTable(
+  "group_members",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    groupId: text("group_id")
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 20 }).default("member").notNull(), // 'owner' | 'admin' | 'member'
+    status: varchar("status", { length: 20 }).default("active").notNull(), // 'active' | 'pending_approval'
+    hideProgress: boolean("hide_progress").default(false).notNull(),
+    lastViewedAt: timestamp("last_viewed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    privacyUpdatedAt: timestamp("privacy_updated_at", { withTimezone: true }),
+    joinedAt: timestamp("joined_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("idx_group_members_unique").on(table.groupId, table.userId),
+    index("idx_group_members_group").on(table.groupId),
+    index("idx_group_members_user").on(table.userId),
+    index("idx_group_members_status").on(table.status),
+  ]
+);
+
+export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupMembers.groupId],
+    references: [groups.id],
+  }),
+  user: one(user, {
+    fields: [groupMembers.userId],
+    references: [user.id],
+  }),
+}));
+
+export const groupActivities = pgTable(
+  "group_activities",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    groupId: text("group_id")
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    actorId: text("actor_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: varchar("type", { length: 50 }).notNull(), // 'member_joined' | 'notice_pinned' | 'plan_scheduled'
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    actionUrl: text("action_url"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_group_activities_group").on(table.groupId),
+    index("idx_group_activities_actor").on(table.actorId),
+    index("idx_group_activities_created").on(table.createdAt),
+  ]
+);
+
+export const groupActivitiesRelations = relations(
+  groupActivities,
+  ({ one }) => ({
+    group: one(groups, {
+      fields: [groupActivities.groupId],
+      references: [groups.id],
+    }),
+    actor: one(user, {
+      fields: [groupActivities.actorId],
+      references: [user.id],
+    }),
+  })
+);
+
+export const groupPlans = pgTable(
+  "group_plans",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    groupId: text("group_id")
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    planTemplateId: text("plan_template_id")
+      .notNull()
+      .references(() => planTemplates.id, { onDelete: "restrict" }),
+    scheduledStartDate: timestamp("scheduled_start_date", {
+      withTimezone: true,
+    }).notNull(),
+    status: varchar("status", { length: 30 }).default("scheduled").notNull(), // 'scheduled' | 'active' | 'completed' | 'cancelled'
+    lateJoinPolicy: varchar("late_join_policy", { length: 30 })
+      .default("skip_ahead")
+      .notNull(), // 'strict_locked' | 'skip_ahead' | 'backfill'
+    dailyChapterTarget: integer("daily_chapter_target").default(3).notNull(),
+    activeWeekdaysMask: text("active_weekdays_mask")
+      .default("1111111")
+      .notNull(),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    activatedAt: timestamp("activated_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("idx_group_plans_group").on(table.groupId),
+    index("idx_group_plans_status").on(table.status),
+    index("idx_group_plans_template").on(table.planTemplateId),
+  ]
+);
+
+export const groupPlansRelations = relations(groupPlans, ({ one, many }) => ({
+  group: one(groups, {
+    fields: [groupPlans.groupId],
+    references: [groups.id],
+  }),
+  template: one(planTemplates, {
+    fields: [groupPlans.planTemplateId],
+    references: [planTemplates.id],
+  }),
+  creator: one(user, {
+    fields: [groupPlans.createdBy],
+    references: [user.id],
+  }),
+  enrollments: many(groupMemberEnrollments),
+}));
+
+export const groupMemberEnrollments = pgTable(
+  "group_member_enrollments",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    groupPlanId: text("group_plan_id")
+      .notNull()
+      .references(() => groupPlans.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    planInstanceId: text("plan_instance_id")
+      .notNull()
+      .references(() => planInstances.id, { onDelete: "cascade" }),
+    enrolledAt: timestamp("enrolled_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("idx_group_enrollments_unique").on(
+      table.groupPlanId,
+      table.userId
+    ),
+    index("idx_group_enrollments_plan").on(table.groupPlanId),
+    index("idx_group_enrollments_user").on(table.userId),
+    index("idx_group_enrollments_instance").on(table.planInstanceId),
+  ]
+);
+
+export const groupMemberEnrollmentsRelations = relations(
+  groupMemberEnrollments,
+  ({ one }) => ({
+    groupPlan: one(groupPlans, {
+      fields: [groupMemberEnrollments.groupPlanId],
+      references: [groupPlans.id],
+    }),
+    user: one(user, {
+      fields: [groupMemberEnrollments.userId],
+      references: [user.id],
+    }),
+    planInstance: one(planInstances, {
+      fields: [groupMemberEnrollments.planInstanceId],
+      references: [planInstances.id],
+    }),
+  })
+);
+
+// --- Notifications ---
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: varchar("type", { length: 50 }).notNull(), // 'streak_alert' | 'freeze_used' | 'plan_reminder' | 'group_activity' | 'achievement' | 'system'
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    actionUrl: text("action_url"),
+    isRead: boolean("is_read").default(false).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_notifications_user").on(table.userId),
+    index("idx_notifications_user_unread").on(table.userId, table.isRead),
+    index("idx_notifications_created").on(table.createdAt),
+  ]
+);
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(user, {
+    fields: [notifications.userId],
+    references: [user.id],
+  }),
+}));

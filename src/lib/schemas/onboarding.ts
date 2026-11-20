@@ -43,10 +43,6 @@ export const OnboardingTrackerSchema = v.object({
       "Invalid canon selection"
     )
   ),
-  color: v.pipe(
-    v.string("Color selection is required"),
-    v.nonEmpty("Color selection is required")
-  ),
   icon: v.pipe(
     v.string("Icon selection is required"),
     v.nonEmpty("Icon selection is required")

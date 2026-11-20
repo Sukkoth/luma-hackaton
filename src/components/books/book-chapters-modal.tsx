@@ -37,11 +37,12 @@ export function BookChaptersModal({
         {/* Modal Header */}
         <div className="flex items-start justify-between border-b border-border-subtle pb-4">
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="ui-pill-primary text-[10px] font-medium uppercase">
+            <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary">
+              <span className="text-primary font-semibold">
                 {book.category}
               </span>
-              <span className="ui-pill text-[10px] font-medium uppercase">
+              <span>•</span>
+              <span>
                 {book.testament === "OT" ? "Old Testament" : "New Testament"}
               </span>
             </div>

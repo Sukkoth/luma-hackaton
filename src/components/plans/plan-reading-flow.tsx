@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,12 +9,15 @@ import {
   Check,
   CheckCircle2,
   Lock,
+  BookOpen,
 } from "lucide-react";
 import type {
   PlanSessionDetail,
   PlanPartDetail,
   PlanNoteDetail,
 } from "@/actions/plans";
+import { useTheme } from "@/components/theme/theme-provider";
+import { buildBibleComPath, detectDefaultVersion } from "@/lib/bible-versions";
 import { PlanSessionNotes } from "./plan-session-notes";
 
 type PlanReadingFlowProps = {
@@ -73,6 +77,7 @@ export function PlanReadingFlow({
   onNoteDeletedAction,
   mode,
 }: PlanReadingFlowProps) {
+  const { resolvedTheme } = useTheme();
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const currentPart =
@@ -89,6 +94,31 @@ export function PlanReadingFlow({
     sessions.find((s) => s.sessionIndex === activeSessionIndex) ||
     partSessions[0] ||
     sessions[0];
+
+  // Quietly pre-warm active session readings into the server disk cache
+  useEffect(() => {
+    if (!activeSession || typeof window === "undefined") return;
+
+    const timer = setTimeout(() => {
+      const defaultVersion = detectDefaultVersion({});
+      for (const reading of activeSession.readings) {
+        const path = buildBibleComPath({
+          versionId: defaultVersion.id,
+          bookId: reading.bookId,
+          chapter: reading.chapter,
+          startVerse: reading.startVerse,
+          endVerse: reading.endVerse,
+        });
+        void fetch(
+          `/api/bible-proxy?path=${encodeURIComponent(
+            path
+          )}&theme=${resolvedTheme}`
+        ).catch(() => {});
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [activeSession, resolvedTheme]);
 
   const handlePrevPart = () => {
     if (activePartIndex > 1) {
@@ -112,15 +142,27 @@ export function PlanReadingFlow({
     }
   };
 
+  // Build Bible reader URL for a reading
+  const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
+    const params = new URLSearchParams();
+    params.set("plan", instanceId);
+    params.set("readingId", reading.id);
+    if (reading.startVerse != null)
+      params.set("startVerse", reading.startVerse.toString());
+    if (reading.endVerse != null)
+      params.set("endVerse", reading.endVerse.toString());
+    return `/bible/${reading.bookId.toLowerCase()}/${reading.chapter}?${params.toString()}`;
+  };
+
   return (
     <div className="space-y-4">
       {/* Section Header */}
       <div>
-        <h2 className="text-[17px] sm:text-[19px] font-semibold tracking-tight text-black dark:text-white">
+        <h2 className="text-[17px] sm:text-[19px] font-semibold tracking-tight text-foreground">
           Reading Flow
         </h2>
-        <p className="mt-0.5 text-[12px] text-[#777777] dark:text-[#9CA3AF]">
-          Swipe horizontally to browse each session
+        <p className="mt-0.5 text-[12px] text-foreground-secondary">
+          Select a session to view and track chapters
         </p>
       </div>
 
@@ -139,10 +181,10 @@ export function PlanReadingFlow({
 
           <div className="text-center">
             <div className="inline-flex items-center gap-2">
-              <span className="text-[13.5px] font-bold text-foreground">
+              <span className="text-[13.5px] font-semibold text-foreground">
                 {currentPart.title}
               </span>
-              <span className="ui-pill text-[10px]">
+              <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[11px] font-medium text-foreground-secondary">
                 {currentPart.completedSessions}/{currentPart.totalSessions} Done
               </span>
             </div>
@@ -180,9 +222,9 @@ export function PlanReadingFlow({
             <div
               key={session.sessionIndex}
               onClick={() => onSelectSessionAction(session.sessionIndex)}
-              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-[16px] border bg-surface p-3 sm:p-3.5 transition-all ${
+              className={`w-[195px] sm:w-[220px] shrink-0 cursor-pointer snap-start rounded-xl border bg-surface p-3 sm:p-3.5 transition-all ${
                 isSelected
-                  ? "border-primary shadow-xs"
+                  ? "border-primary shadow-xs ring-1 ring-primary/40"
                   : "border-border hover:border-border-strong"
               }`}
             >
@@ -206,12 +248,12 @@ export function PlanReadingFlow({
                         {session.dateLabel}
                       </span>
                       {session.isPastDue && (
-                        <span className="rounded bg-destructive/15 px-1 py-0.2 text-[9px] font-bold uppercase tracking-wider text-destructive">
+                        <span className="rounded-md bg-destructive/15 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
                           Overdue
                         </span>
                       )}
                       {session.isToday && (
-                        <span className="ui-pill text-[9px] uppercase tracking-wider">
+                        <span className="rounded-md bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                           Today
                         </span>
                       )}
@@ -244,63 +286,90 @@ export function PlanReadingFlow({
                       <div
                         key={reading.id}
                         data-testid="locked-reading-item"
-                        className="flex items-center gap-2 rounded-lg px-1 py-1 select-none opacity-50 cursor-not-allowed"
+                        className="flex items-center justify-between gap-2 rounded-lg px-1 py-1 select-none opacity-50 cursor-not-allowed"
                         title="Complete previous sessions to unlock"
                       >
-                        {/* Lock Icon replacing checkbox */}
-                        <div
-                          className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-surface text-foreground-dim"
-                          aria-label="Locked"
-                        >
-                          <Lock className="size-2.5" />
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {/* Lock Icon replacing checkbox */}
+                          <div
+                            className="flex size-4.5 shrink-0 items-center justify-center rounded-full bg-surface text-foreground-dim"
+                            aria-label="Locked"
+                          >
+                            <Lock className="size-2.5" />
+                          </div>
+
+                          {/* Reading Title */}
+                          <span className="truncate text-[12px] font-medium text-foreground-dim">
+                            {reading.displayText ||
+                              `${reading.bookName} ${reading.chapter}`}
+                          </span>
                         </div>
 
-                        {/* Reading Title */}
-                        <span className="truncate text-[12px] font-medium text-foreground-dim">
-                          {reading.displayText ||
-                            `${reading.bookName} ${reading.chapter}`}
-                        </span>
+                        {/* Locked Book Icon */}
+                        <div
+                          className="flex size-6 shrink-0 items-center justify-center rounded-md text-foreground-dim/40 cursor-not-allowed"
+                          title="Locked"
+                          aria-label="Locked"
+                        >
+                          <BookOpen className="size-3" />
+                        </div>
                       </div>
                     );
                   }
 
+                  const readerUrl = buildReaderUrl(reading);
+
                   return (
                     <div
                       key={reading.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleReadingAction(reading.id);
-                      }}
-                      role="button"
-                      aria-label={`Toggle reading ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
-                      aria-pressed={reading.isCompleted}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          onToggleReadingAction(reading.id);
-                        }
-                      }}
-                      className="group flex items-center gap-2 rounded-lg px-1 py-1 text-left transition-colors hover:bg-surface-elevated/70 cursor-pointer"
+                      className="group flex items-center justify-between gap-1.5 rounded-lg px-1 py-1 transition-colors hover:bg-surface-elevated/70"
                     >
-                      {/* Circular Checkbox */}
                       <div
-                        className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-all ${
-                          reading.isCompleted
-                            ? "bg-primary text-primary-foreground shadow-xs"
-                            : "border border-border bg-transparent group-hover:border-border-strong"
-                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleReadingAction(reading.id);
+                        }}
+                        role="button"
+                        aria-label={`Toggle reading ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                        aria-pressed={reading.isCompleted}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onToggleReadingAction(reading.id);
+                          }
+                        }}
+                        className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                       >
-                        {reading.isCompleted && (
-                          <Check className="size-2.5" strokeWidth={3} />
-                        )}
+                        {/* Circular Checkbox */}
+                        <div
+                          className={`flex size-4.5 shrink-0 items-center justify-center rounded-full transition-all ${
+                            reading.isCompleted
+                              ? "bg-primary text-primary-foreground shadow-xs"
+                              : "border border-border bg-transparent group-hover:border-border-strong"
+                          }`}
+                        >
+                          {reading.isCompleted && (
+                            <Check className="size-2.5" strokeWidth={3} />
+                          )}
+                        </div>
+
+                        {/* Reading Title */}
+                        <span className="truncate text-[12px] font-medium text-foreground transition-colors">
+                          {reading.displayText ||
+                            `${reading.bookName} ${reading.chapter}`}
+                        </span>
                       </div>
 
-                      {/* Reading Title */}
-                      <span className="truncate text-[12px] font-medium text-foreground transition-colors">
-                        {reading.displayText ||
-                          `${reading.bookName} ${reading.chapter}`}
-                      </span>
+                      {/* Read Passage Book Button - now a Link */}
+                      <Link
+                        href={readerUrl}
+                        aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                        title="Read passage"
+                        className="flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent text-foreground-dim transition-all hover:border-border hover:bg-surface hover:text-foreground active:scale-95 cursor-pointer"
+                      >
+                        <BookOpen className="size-3.5" />
+                      </Link>
                     </div>
                   );
                 })}

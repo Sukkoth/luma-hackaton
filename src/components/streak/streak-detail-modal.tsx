@@ -1,7 +1,16 @@
 "use client";
 
-import { X, Flame, Shield, Lock, CheckCircle2 } from "lucide-react";
+import { Flame, Shield, Lock, Trophy } from "lucide-react";
 import { shiftDateString } from "@/lib/timezone";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 export type StreakData = {
   currentStreak: number;
@@ -22,27 +31,22 @@ type Props = {
   streak: StreakData;
 };
 
-const NUM_WEEKS = 28; // ~7 months of continuous weekly activity columns
+const NUM_WEEKS = 28;
 
 export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
-  if (!isOpen) return null;
-
   const readingDatesSet = new Set(streak.readingDates ?? []);
   const frozenDatesSet = new Set(streak.frozenDates);
 
-  // Compute total chapters read recorded in daily counts
   const totalChaptersRead = Object.values(
     streak.dailyChapterCounts ?? {}
   ).reduce((acc, curr) => acc + curr, 0);
 
-  // Parse today's UTC day of week: 0 = Sun, 1 = Mon, ..., 6 = Sat
   const parts = streak.todayStr.split("-").map(Number);
   const todayDate = new Date(
     Date.UTC(parts[0] ?? 2026, (parts[1] ?? 1) - 1, parts[2] ?? 1, 12)
   );
   const todayDayOfWeek = todayDate.getUTCDay();
 
-  // Find the Sunday of the current week, then step back (NUM_WEEKS - 1) full weeks
   const currentWeekSunday = shiftDateString({
     dateStr: streak.todayStr,
     daysOffset: -todayDayOfWeek,
@@ -52,7 +56,6 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
     daysOffset: -(NUM_WEEKS - 1) * 7,
   });
 
-  // Build the 28 week columns (each column contains 7 days: Sun = 0 to Sat = 6)
   type GridDay = {
     dateStr: string;
     dayOfWeek: number;
@@ -78,57 +81,57 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
       dateStr: gridStartDate,
       daysOffset: w * 7,
     });
-    const sParts = weekSundayDateStr.split("-").map(Number);
-    const sObj = new Date(
-      Date.UTC(sParts[0] ?? 2026, (sParts[1] ?? 1) - 1, sParts[2] ?? 1, 12)
+
+    const colParts = weekSundayDateStr.split("-").map(Number);
+    const colDate = new Date(
+      Date.UTC(
+        colParts[0] ?? 2026,
+        (colParts[1] ?? 1) - 1,
+        colParts[2] ?? 1,
+        12
+      )
     );
-    const currentMonth = sObj.toLocaleDateString("en-US", { month: "short" });
+    const dayOfMonth = colDate.getUTCDate();
 
     let monthLabel: string | undefined = undefined;
-    if (w % 4 === 0) {
-      monthLabel = currentMonth;
+    if (dayOfMonth <= 7) {
+      monthLabel = colDate.toLocaleString("en-US", {
+        month: "short",
+        timeZone: "UTC",
+      });
     }
 
     for (let d = 0; d < 7; d++) {
-      const dateStr = shiftDateString({
+      const cellDateStr = shiftDateString({
         dateStr: weekSundayDateStr,
         daysOffset: d,
       });
-      const isFuture = dateStr > streak.todayStr;
-      const isToday = dateStr === streak.todayStr;
-      const isFrozen = frozenDatesSet.has(dateStr);
-      const chaptersCount =
-        streak.dailyChapterCounts?.[dateStr] ??
-        (readingDatesSet.has(dateStr) ? 1 : 0);
 
-      const dParts = dateStr.split("-").map(Number);
-      const dObj = new Date(
-        Date.UTC(dParts[0] ?? 2026, (dParts[1] ?? 1) - 1, dParts[2] ?? 1, 12)
-      );
-      const formattedDate = dObj.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+      const isFuture = cellDateStr > streak.todayStr;
+      const isToday = cellDateStr === streak.todayStr;
+      const isFrozen = frozenDatesSet.has(cellDateStr);
+      const hasRead = readingDatesSet.has(cellDateStr);
+      const chaptersCount = streak.dailyChapterCounts?.[cellDateStr] ?? 0;
 
-      let tooltip = `No chapters on ${formattedDate}`;
       let intensityLevel: 0 | 1 | 2 | 3 | 4 = 0;
+      if (chaptersCount >= 7) intensityLevel = 4;
+      else if (chaptersCount >= 4) intensityLevel = 3;
+      else if (chaptersCount >= 2) intensityLevel = 2;
+      else if (chaptersCount >= 1 || hasRead) intensityLevel = 1;
 
-      if (chaptersCount > 0) {
-        tooltip = `${chaptersCount} ${
-          chaptersCount === 1 ? "chapter" : "chapters"
-        } on ${formattedDate}`;
-        if (chaptersCount === 1) intensityLevel = 1;
-        else if (chaptersCount <= 3) intensityLevel = 2;
-        else if (chaptersCount <= 6) intensityLevel = 3;
-        else intensityLevel = 4;
+      let tooltip = `${cellDateStr}: No reading`;
+      if (isToday && !hasRead) {
+        tooltip = `${cellDateStr} (Today): Keep your rhythm!`;
       } else if (isFrozen) {
-        tooltip = `Shielded by Streak Freeze on ${formattedDate}`;
+        tooltip = `${cellDateStr}: Streak freeze shield used`;
+      } else if (chaptersCount > 0) {
+        tooltip = `${cellDateStr}: ${chaptersCount} ${
+          chaptersCount === 1 ? "chapter" : "chapters"
+        } read`;
       }
 
       days.push({
-        dateStr,
+        dateStr: cellDateStr,
         dayOfWeek: d,
         chaptersCount,
         isFrozen,
@@ -146,7 +149,6 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
     });
   }
 
-  // Row labels for weekdays (Mon = 1, Wed = 3, Fri = 5)
   const WEEKDAY_ROW_LABELS = [
     { dayIndex: 1, label: "Mon" },
     { dayIndex: 3, label: "Wed" },
@@ -154,135 +156,122 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
   ] as const;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="streak-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-sm sm:p-4"
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onCloseAction();
+      }}
     >
-      <div className="ui-card relative flex w-full max-w-xl flex-col p-4.5 shadow-2xl sm:p-5">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-8 items-center justify-center rounded-[10px] border border-border bg-primary-muted text-primary">
-              <Flame className="size-4.5 fill-current" />
+      <SheetContent
+        side="bottom"
+        showHandle={true}
+        showCloseButton={true}
+        className="max-h-[88dvh] max-w-2xl sm:mx-auto rounded-t-[28px] border-border/80 bg-card p-0 shadow-2xl flex flex-col overflow-hidden"
+      >
+        {/* Sheet Top Header */}
+        <div className="px-5 pt-1 pb-3 border-b border-border/60 shrink-0">
+          <SheetHeader className="flex flex-row items-center gap-3 space-y-0 pr-8">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary shrink-0">
+              <Flame className="size-5 fill-primary" />
             </div>
-            <div>
-              <h3
+            <div className="space-y-0.5">
+              <SheetTitle
                 id="streak-dialog-title"
-                className="text-[16px] font-bold tracking-tight text-foreground"
+                className="text-base font-bold tracking-tight text-foreground"
               >
                 Reading Habit Streak
-              </h3>
-              <p className="text-[11px] font-medium text-foreground-dim">
-                Consecutive daily reading rhythm
-              </p>
+              </SheetTitle>
+              <SheetDescription className="text-xs text-muted-foreground">
+                Consecutive daily reading rhythm & momentum
+              </SheetDescription>
             </div>
-          </div>
-
-          <button
-            type="button"
-            aria-label="Close streak dialog"
-            onClick={onCloseAction}
-            className="rounded-xl p-1.5 text-foreground-dim hover:bg-surface-elevated hover:text-foreground cursor-pointer transition-colors"
-          >
-            <X className="size-4" />
-          </button>
+          </SheetHeader>
         </div>
 
-        {/* Content Section - Compact, strictly non-scrollable */}
-        <div className="my-3 space-y-2.5">
+        {/* Scrollable Body - Optimized for Mobile Thumb Reach and Responsiveness */}
+        <div className="overflow-y-auto px-4 sm:px-6 py-4 space-y-4 overscroll-contain pb-8 sm:pb-6">
           {/* Top Row: Side-by-side Streak Counter & Freeze Shields */}
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            {/* Current Streak Tile */}
-            <div className="ui-card-elevated flex flex-col justify-between p-3 text-center">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {/* Current Streak Card */}
+            <div className="rounded-2xl border border-amber-500/20 bg-linear-to-br from-amber-500/12 via-amber-500/[0.03] to-surface-elevated p-4 flex flex-col justify-between shadow-2xs">
               <div>
-                <span className="text-[10px] font-medium tracking-wider text-foreground-dim uppercase">
-                  Current Streak
-                </span>
-                <div className="mt-0.5 flex items-baseline justify-center gap-1.5">
-                  <span className="text-[32px] font-medium tracking-tight text-foreground">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                    <Flame className="size-3.5 text-primary" />
+                    Current Streak
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground border border-border/60">
+                    <Trophy className="size-3 text-muted-foreground" />
+                    Best:{" "}
+                    <strong className="font-semibold text-foreground">
+                      {streak.longestStreak}d
+                    </strong>
+                  </span>
+                </div>
+
+                <div className="my-3 flex items-baseline gap-2">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground tabular-nums">
                     {streak.currentStreak}
                   </span>
-                  <span className="text-[13px] font-normal text-foreground-secondary">
+                  <span className="text-sm font-medium text-muted-foreground">
                     {streak.currentStreak === 1 ? "day" : "days"}
                   </span>
                 </div>
-
-                <div className="mt-1 flex items-center justify-center">
-                  {streak.isTodayCompleted ? (
-                    <span className="ui-pill-primary text-[10px]">
-                      <CheckCircle2 className="size-3" />
-                      Read completed today
-                    </span>
-                  ) : (
-                    <span className="ui-pill text-[10px]">
-                      Read a chapter today to keep streak active
-                    </span>
-                  )}
-                </div>
               </div>
 
-              <div className="mt-2 border-t border-border-subtle pt-1.5 text-[10px] text-foreground-dim">
-                Record:{" "}
-                <strong className="font-semibold text-foreground">
-                  {streak.longestStreak} days
-                </strong>
+              <div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Personal best:{" "}
+                  <strong className="font-semibold text-foreground">
+                    {streak.longestStreak} days
+                  </strong>
+                </p>
               </div>
             </div>
 
-            {/* Streak Freeze Shields Tile */}
-            <div className="ui-card-elevated flex flex-col justify-between p-3">
+            {/* Streak Freeze Shields Card */}
+            <div className="rounded-2xl border border-primary/20 bg-linear-to-br from-primary/12 via-primary/[0.03] to-surface-elevated p-4 flex flex-col justify-between shadow-2xs">
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Shield className="size-3.5 text-foreground" />
-                    <h4 className="text-[12px] font-medium text-foreground">
-                      Freeze Shields
-                    </h4>
-                  </div>
-                  <span className="text-[10px] font-medium text-foreground-dim">
-                    {streak.isFreezeUnlocked
-                      ? `${streak.availableFreezes}/3 Available`
-                      : "Locked"}
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                    <Shield className="size-3.5 text-primary" />
+                    Freeze Shields
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground border border-border/60">
+                    {streak.isFreezeUnlocked ? "Active" : "Locked"}
                   </span>
                 </div>
 
+                <div className="my-3 flex items-baseline gap-2">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground tabular-nums">
+                    {streak.isFreezeUnlocked ? streak.availableFreezes : 0}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {streak.isFreezeUnlocked ? "of 3 available" : "available"}
+                  </span>
+                </div>
+              </div>
+
+              <div>
                 {streak.isFreezeUnlocked ? (
-                  <div className="mt-2">
-                    <div className="flex items-center gap-1">
-                      {[0, 1, 2].map((idx) => {
-                        const isAvailable = idx < streak.availableFreezes;
-                        return (
-                          <div
-                            key={idx}
-                            className={`flex flex-1 items-center justify-center gap-1 rounded-lg border py-1 text-[10px] font-medium transition-all ${
-                              isAvailable
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-surface text-foreground-dim"
-                            }`}
-                          >
-                            <Shield className="size-2.5" />
-                            <span>{isAvailable ? "Active" : "Used"}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <p className="mt-1.5 text-[10px] text-foreground-dim">
-                      {streak.availableFreezes < 3
-                        ? `3 consecutive days restore 1 shield (${streak.freezeRestorationDaysCount}/3d).`
-                        : "Shields automatically protect up to 3 missed days."}
-                    </p>
+                  <div className="rounded-xl bg-muted/40 border border-border/60 px-3 py-2 text-xs text-muted-foreground">
+                    {streak.availableFreezes < 3
+                      ? `3 consecutive days restore 1 shield (${streak.freezeRestorationDaysCount}/3d).`
+                      : "Shields automatically protect up to 3 missed days."}
                   </div>
                 ) : (
-                  <div className="mt-1.5 rounded-lg border border-border bg-surface p-2 text-[11px] text-foreground-secondary">
-                    <div className="flex items-center gap-1 font-medium text-foreground">
-                      <Lock className="size-3 text-warning" />
-                      <span>Unlocks at 7-day streak</span>
+                  <div className="rounded-xl bg-muted/40 border border-border/60 px-3 py-2 text-xs text-muted-foreground space-y-1">
+                    <div className="flex items-center justify-between font-semibold text-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <Lock className="size-3.5 text-primary" />
+                        Unlocks at 7-day streak
+                      </span>
+                      <span className="text-primary tabular-nums">
+                        {Math.min(streak.currentStreak, 7)}/7
+                      </span>
                     </div>
-                    <p className="mt-0.5 text-[10px] text-foreground-dim">
-                      Build 7 consecutive days to unlock (Currently:{" "}
-                      {streak.currentStreak}/7 days).
+                    <p className="text-[11px] text-muted-foreground">
+                      Build 7 consecutive days to unlock 3 shields.
                     </p>
                   </div>
                 )}
@@ -290,161 +279,147 @@ export function StreakDetailModal({ isOpen, onCloseAction, streak }: Props) {
             </div>
           </div>
 
-          {/* Activity Heatmap Card */}
-          <div className="ui-card-elevated p-3.5">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+          {/* Activity Heatmap Card - With smooth horizontal scroll on mobile */}
+          <div className="rounded-2xl border border-border/70 bg-surface-elevated p-4 shadow-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border/60 pb-3">
               <div>
-                <h4 className="text-[12px] font-medium text-black dark:text-white">
+                <h4 className="text-xs font-semibold text-foreground">
                   Reading Activity History
                 </h4>
-                <p className="text-[10px] text-[#777777] dark:text-[#9CA3AF]">
-                  {totalChaptersRead}{" "}
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  <span className="font-semibold text-foreground">
+                    {totalChaptersRead}
+                  </span>{" "}
                   {totalChaptersRead === 1 ? "chapter" : "chapters"} read across
                   the last {NUM_WEEKS} weeks
                 </p>
               </div>
 
               {/* Heatmap Legend */}
-              <div className="flex items-center gap-1 text-[10px] text-foreground-dim">
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground self-start sm:self-center">
                 <span>Less</span>
                 <span
                   title="0 chapters"
-                  className="size-2.5 rounded-xs bg-border-subtle"
+                  className="size-2.5 rounded-xs bg-muted border border-border/80"
                 />
                 <span
                   title="1 chapter"
-                  className="size-2.5 rounded-xs bg-border-strong opacity-40"
+                  className="size-2.5 rounded-xs bg-primary/25"
                 />
                 <span
                   title="2-3 chapters"
-                  className="size-2.5 rounded-xs bg-border-strong opacity-70"
+                  className="size-2.5 rounded-xs bg-primary/50"
                 />
                 <span
                   title="4-6 chapters"
-                  className="size-2.5 rounded-xs bg-border-strong"
+                  className="size-2.5 rounded-xs bg-primary/80"
                 />
                 <span
                   title="7+ chapters"
                   className="size-2.5 rounded-xs bg-primary"
                 />
                 <span>More</span>
-                <span className="mx-1 opacity-40">•</span>
-                <span
-                  title="Shielded with Freeze"
-                  className="size-2.5 rounded-xs border border-border-strong bg-surface-elevated"
-                />
-                <span>Shield</span>
               </div>
             </div>
 
-            {/* Matrix Container - 100% full width unified grid */}
-            <div
-              className="mt-2.5 grid w-full items-center gap-0.5 py-1 sm:gap-0.75"
-              style={{
-                gridTemplateColumns: `auto repeat(${NUM_WEEKS}, minmax(0, 1fr))`,
-                gridTemplateRows: `14px repeat(7, minmax(0, 1fr))`,
-              }}
-            >
-              {/* Row 1: Month labels */}
-              {columns.map((col) => {
-                if (!col.monthLabel) return null;
-                return (
-                  <span
-                    key={`month-${col.weekIndex}`}
+            {/* Matrix Container: Horizontal scrolling on mobile prevents crushed cells */}
+            <div className="overflow-x-auto pb-1 -mx-2 px-2 scrollbar-none">
+              <div
+                className="grid min-w-[540px] w-full items-center gap-0.5 py-1"
+                style={{
+                  gridTemplateColumns: `auto repeat(${NUM_WEEKS}, minmax(0, 1fr))`,
+                  gridTemplateRows: `14px repeat(7, minmax(0, 1fr))`,
+                }}
+              >
+                {/* Row 1: Month labels */}
+                {columns.map((col) => {
+                  if (!col.monthLabel) return null;
+                  return (
+                    <div
+                      key={`header-${col.weekIndex}`}
+                      className="text-[9px] font-medium text-muted-foreground leading-none overflow-visible whitespace-nowrap"
+                      style={{
+                        gridColumnStart: col.weekIndex + 2,
+                        gridRowStart: 1,
+                      }}
+                    >
+                      {col.monthLabel}
+                    </div>
+                  );
+                })}
+
+                {/* Col 1: Day of Week labels */}
+                {WEEKDAY_ROW_LABELS.map((row) => (
+                  <div
+                    key={`day-label-${row.dayIndex}`}
+                    className="pr-1.5 text-right text-[9px] font-medium text-muted-foreground leading-none"
                     style={{
-                      gridColumnStart: col.weekIndex + 2,
-                      gridRowStart: 1,
+                      gridColumnStart: 1,
+                      gridRowStart: row.dayIndex + 2,
                     }}
-                    className="overflow-visible text-[9px] font-medium leading-none whitespace-nowrap text-[#888888] select-none dark:text-[#777777]"
                   >
-                    {col.monthLabel}
-                  </span>
-                );
-              })}
+                    {row.label}
+                  </div>
+                ))}
 
-              {/* Column 1: Weekday Labels (Mon = row 3, Wed = row 5, Fri = row 7) */}
-              {WEEKDAY_ROW_LABELS.map(({ dayIndex, label }) => (
-                <span
-                  key={label}
-                  style={{
-                    gridColumnStart: 1,
-                    gridRowStart: dayIndex + 2,
-                  }}
-                  className="pr-1 text-[9px] font-medium leading-none text-[#888888] select-none dark:text-[#777777]"
-                  aria-hidden="true"
-                >
-                  {label}
-                </span>
-              ))}
+                {/* Days Grid Cells */}
+                {columns.map((col) =>
+                  col.days.map((day) => {
+                    let cellBg = "bg-muted border border-border/60";
+                    if (day.isFuture) {
+                      cellBg = "bg-transparent border border-transparent";
+                    } else if (day.isFrozen) {
+                      cellBg =
+                        "border border-dashed border-primary/60 bg-primary/20";
+                    } else if (day.intensityLevel === 4) {
+                      cellBg = "bg-primary border border-primary";
+                    } else if (day.intensityLevel === 3) {
+                      cellBg = "bg-primary/80 border border-transparent";
+                    } else if (day.intensityLevel === 2) {
+                      cellBg = "bg-primary/50 border border-transparent";
+                    } else if (day.intensityLevel === 1) {
+                      cellBg = "bg-primary/25 border border-transparent";
+                    }
 
-              {/* Columns 2..29, Rows 2..8: The 28x7 Cells */}
-              {columns.flatMap((col) =>
-                col.days.map((day) => {
-                  if (day.isFuture) {
+                    const todayRing = day.isToday
+                      ? "ring-1.5 ring-primary ring-offset-1 ring-offset-card"
+                      : "";
+
                     return (
-                      <span
+                      <div
                         key={day.dateStr}
+                        title={day.tooltip}
+                        className={cn(
+                          "aspect-square w-full rounded-[2px] transition-transform hover:scale-125 cursor-default",
+                          cellBg,
+                          todayRing
+                        )}
                         style={{
                           gridColumnStart: col.weekIndex + 2,
                           gridRowStart: day.dayOfWeek + 2,
                         }}
-                        className="aspect-square w-full rounded-xs opacity-0"
-                        aria-hidden="true"
                       />
                     );
-                  }
-
-                  let cellClass =
-                    "bg-border-subtle hover:ring-1 hover:ring-border-strong";
-
-                  if (day.isFrozen) {
-                    cellClass =
-                      "border border-border-strong bg-surface-elevated";
-                  } else if (day.chaptersCount > 0) {
-                    if (day.intensityLevel === 1) {
-                      cellClass =
-                        "bg-border-strong opacity-40 hover:opacity-90";
-                    } else if (day.intensityLevel === 2) {
-                      cellClass =
-                        "bg-border-strong opacity-70 hover:opacity-90";
-                    } else if (day.intensityLevel === 3) {
-                      cellClass = "bg-border-strong hover:opacity-90";
-                    } else {
-                      // Level 4 (7+ chapters)
-                      cellClass = "bg-primary hover:opacity-90";
-                    }
-                  }
-
-                  return (
-                    <div
-                      key={day.dateStr}
-                      title={day.tooltip}
-                      style={{
-                        gridColumnStart: col.weekIndex + 2,
-                        gridRowStart: day.dayOfWeek + 2,
-                      }}
-                      className={`aspect-square w-full rounded-xs transition-all hover:scale-125 sm:rounded-[2.5px] ${cellClass} ${
-                        day.isToday ? "ring-1 ring-inset ring-primary" : ""
-                      }`}
-                    />
-                  );
-                })
-              )}
+                  })
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Modal Footer */}
-        <div className="border-t border-border-subtle pt-3 text-right">
-          <button
+        {/* Bottom Action Footer for Mobile & Desktop */}
+        <div className="px-5 py-3 border-t border-border/60 bg-card shrink-0 flex items-center justify-end">
+          <Button
             type="button"
+            variant="default"
+            size="sm"
             onClick={onCloseAction}
-            className="ui-btn-primary ui-btn-sm"
+            className="w-full sm:w-auto rounded-xl font-semibold px-6"
           >
             Done
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

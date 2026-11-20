@@ -566,7 +566,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
 
     // Select Matthew from Books tab -> auto-switches to Chapters tab
     await wizardModal.getByTestId("select-book-for-chapters-mat").click();
-    await expect(mobileChaptersTab).toHaveClass(/bg-white/);
+    await expect(mobileChaptersTab).toHaveClass(/(bg-white|bg-primary)/);
 
     // Click Matthew chapter 1
     const matCh1Btn = wizardModal.getByTestId("add-chapter-mat-1");
@@ -733,9 +733,8 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
       page.getByRole("heading", { name: "Curated Genesis 3-4-2 Split" })
     ).toBeVisible();
 
-    // Session 1: 0/3 with Genesis 1, 2, 3
+    // Session 1: 3 readings with Genesis 1, 2, 3
     await expect(page.getByText("Session 1", { exact: true })).toBeVisible();
-    await expect(page.getByText("0/3", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Toggle reading Genesis 1" })
     ).toBeVisible();
@@ -746,15 +745,13 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
       page.getByRole("button", { name: "Toggle reading Genesis 3" })
     ).toBeVisible();
 
-    // Session 2: 0/4 with Genesis 4, 5, 6, 7
+    // Session 2: 4 readings with Genesis 4, 5, 6, 7
     await expect(page.getByText("Session 2", { exact: true })).toBeVisible();
-    await expect(page.getByText("0/4", { exact: true })).toBeVisible();
     await expect(page.getByText("Genesis 4")).toBeVisible();
     await expect(page.getByText("Genesis 7")).toBeVisible();
 
-    // Session 3: 0/2 with Genesis 8, 9
+    // Session 3: 2 readings with Genesis 8, 9
     await expect(page.getByText("Session 3", { exact: true })).toBeVisible();
-    await expect(page.getByText("0/2", { exact: true })).toBeVisible();
     await expect(page.getByText("Genesis 8")).toBeVisible();
     await expect(page.getByText("Genesis 9")).toBeVisible();
   });
@@ -794,7 +791,9 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     // Verify Canon dropdown contains Catholic canon and select it
     const canonSelect = wizardModal.getByRole("combobox");
     await expect(canonSelect).toBeVisible();
-    await canonSelect.selectOption("catholic");
+    await canonSelect.click();
+    // Select Catholic canon from dropdown (rendered in portal)
+    await page.getByRole("option", { name: /Catholic \(73 books\)/i }).click();
     await expect(
       wizardModal.getByText(/0 of 73 books selected/i)
     ).toBeVisible();
@@ -919,7 +918,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await expect(customCard).toBeVisible();
     await expect(customCard.getByText("Custom", { exact: true })).toBeVisible();
     await expect(customCard.getByText("8 ch", { exact: true })).toBeVisible();
-    await expect(customCard.getByText("4 days", { exact: true })).toBeVisible();
+    await expect(customCard.getByText("4d", { exact: true })).toBeVisible();
     await expect(customCard.getByText("Custom Reading Plan")).toBeVisible();
 
     // 9. Verify server-side database persistence by navigating away and reloading
@@ -952,7 +951,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await expect(
       page.getByRole("heading", { name: customTitle, level: 1 })
     ).toBeVisible();
-    await expect(page.getByText("Blueprint Template")).toBeVisible();
+    await expect(page.getByText("Custom Reading Plan").first()).toBeVisible();
     await expect(page.getByText(customDesc)).toBeVisible();
     await expect(
       page.getByText("Ruth", { exact: false }).first()

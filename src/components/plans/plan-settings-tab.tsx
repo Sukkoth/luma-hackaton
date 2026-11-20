@@ -27,6 +27,7 @@ import {
   resumePlanAction,
   type PlanInstanceDetail,
 } from "@/actions/plans";
+import { TabsBar } from "@/components/ui/tabs-bar";
 
 type PlanSettingsTabProps = {
   plan: PlanInstanceDetail;
@@ -311,7 +312,7 @@ export function PlanSettingsTab({
       )}
 
       {successMessage && (
-        <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 text-[13px] text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+        <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 p-3.5 text-[13px] text-primary font-medium">
           <Check className="size-4 shrink-0" />
           <span>{successMessage}</span>
         </div>
@@ -331,57 +332,53 @@ export function PlanSettingsTab({
         <input type="hidden" name="reminderTime" value={reminderTime} />
 
         {/* 1. Pacing Mode Selector Card */}
-        <div className="glass-panel rounded-[26px] p-5 sm:p-6 space-y-5">
+        <div className="ui-card p-5 sm:p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-[16px] font-semibold text-black dark:text-white">
+              <h3 className="text-[16px] font-semibold text-foreground">
                 Pacing Mode
               </h3>
-              <p className="text-[12px] text-[#777777] dark:text-[#9CA3AF]">
+              <p className="text-[12px] text-foreground-secondary">
                 Choose how you want to progress through this reading plan
               </p>
             </div>
             {isPending && (
-              <Loader2 className="size-4 animate-spin text-zinc-900 dark:text-zinc-100" />
+              <Loader2 className="size-4 animate-spin text-primary" />
             )}
           </div>
 
           {/* Mode Tabs */}
-          <div className="grid grid-cols-2 gap-2 rounded-2xl bg-black/5 p-1.5 dark:bg-white/6">
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() => handleSwitchMode("scheduled")}
-              className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] font-medium transition-all ${
-                mode === "scheduled"
-                  ? "bg-white text-black shadow-xs dark:bg-white/15 dark:text-white"
-                  : "text-[#777777] hover:text-black dark:text-[#A1A1AA] dark:hover:text-white"
-              }`}
-            >
-              <Calendar className="size-4" />
-              <span>Calendar Schedule</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isPending || !plan.allowSelfPaced}
-              onClick={() => handleSwitchMode("flexible")}
-              className={`relative flex items-center justify-center gap-2 rounded-xl py-2.5 text-[13px] font-medium transition-all ${
-                mode === "flexible"
-                  ? "bg-white text-black shadow-xs dark:bg-white/15 dark:text-white"
-                  : "text-[#777777] hover:text-black dark:text-[#A1A1AA] dark:hover:text-white"
-              } ${!plan.allowSelfPaced ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-              <Compass className="size-4" />
-              <span>Self-Paced / Flexible</span>
-              {!plan.allowSelfPaced && (
-                <Lock className="size-3 text-[#9CA3AF]" />
-              )}
-            </button>
-          </div>
+          <TabsBar
+            className="w-full grid grid-cols-2"
+            tabs={[
+              {
+                id: "scheduled",
+                label: "Calendar Schedule",
+                icon: <Calendar className="size-4" />,
+                disabled: isPending,
+              },
+              {
+                id: "flexible",
+                label: (
+                  <span className="flex items-center gap-1.5">
+                    <span>Self-Paced / Flexible</span>
+                    {!plan.allowSelfPaced && (
+                      <Lock className="size-3 text-muted-foreground" />
+                    )}
+                  </span>
+                ),
+                icon: <Compass className="size-4" />,
+                disabled: isPending || !plan.allowSelfPaced,
+              },
+            ]}
+            activeTab={mode}
+            onTabChange={({ tab }) =>
+              handleSwitchMode(tab as "scheduled" | "flexible")
+            }
+          />
 
           {!plan.allowSelfPaced && (
-            <p className="flex items-center gap-1.5 text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+            <p className="flex items-center gap-1.5 text-[11.5px] text-foreground-secondary">
               <Info className="size-3.5" />
               <span>
                 This reading plan requires scheduled calendar pacing to preserve
@@ -392,13 +389,13 @@ export function PlanSettingsTab({
         </div>
 
         {/* 2. Pacing Configuration Card */}
-        <div className="glass-panel rounded-[26px] p-5 sm:p-6 space-y-5">
-          <div className="flex items-center justify-between border-b border-black/6 pb-4 dark:border-white/6">
+        <div className="ui-card p-5 sm:p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-border pb-4">
             <div>
-              <h3 className="text-[16px] font-semibold text-black dark:text-white">
+              <h3 className="text-[16px] font-semibold text-foreground">
                 {mode === "scheduled" ? "Pacing Schedule" : "Reading Target"}
               </h3>
-              <p className="text-[12px] text-[#777777] dark:text-[#9CA3AF]">
+              <p className="text-[12px] text-foreground-secondary">
                 {mode === "scheduled"
                   ? "Configure your reading pace, completion goal, and rest days"
                   : "Set an optional daily reading goal for guidance"}
@@ -406,7 +403,7 @@ export function PlanSettingsTab({
             </div>
 
             {!plan.allowCustomPace && (
-              <span className="flex items-center gap-1.5 rounded-full border border-black/8 bg-black/4 px-2.5 py-1 text-[11.5px] font-medium text-[#666666] dark:border-white/10 dark:bg-white/6 dark:text-[#A1A1AA]">
+              <span className="flex items-center gap-1.5 rounded-full border border-border bg-surface-elevated px-2.5 py-1 text-[11.5px] font-medium text-foreground-secondary">
                 <Lock className="size-3" />
                 Fixed Author Pace
               </span>
@@ -415,46 +412,27 @@ export function PlanSettingsTab({
 
           {/* Pacing Style Sub-Tabs (Only in Scheduled mode) */}
           {mode === "scheduled" && plan.allowCustomPace && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setSuccessMessage(null);
-                  setPaceType("by_daily_target");
-                }}
-                className={`rounded-xl px-3 py-1.5 text-[12px] transition-all cursor-pointer ${
-                  paceType === "by_daily_target"
-                    ? "bg-primary font-bold text-primary-foreground shadow-xs"
-                    : "border border-border bg-surface font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
-                }`}
-              >
-                By Chapters Per Day
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSuccessMessage(null);
-                  setPaceType("by_end_date");
-                }}
-                className={`rounded-xl px-3 py-1.5 text-[12px] transition-all cursor-pointer ${
-                  paceType === "by_end_date"
-                    ? "bg-primary font-bold text-primary-foreground shadow-xs"
-                    : "border border-border bg-surface font-medium text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
-                }`}
-              >
-                By Target Duration (Days)
-              </button>
-            </div>
+            <TabsBar
+              tabs={[
+                { id: "by_daily_target", label: "By Chapters Per Day" },
+                { id: "by_end_date", label: "By Target Duration (Days)" },
+              ]}
+              activeTab={paceType}
+              onTabChange={({ tab }) => {
+                setSuccessMessage(null);
+                setPaceType(tab as "by_daily_target" | "by_end_date");
+              }}
+            />
           )}
 
           {/* Option A: By Daily Target */}
           {(mode === "flexible" || paceType === "by_daily_target") && (
             <div className="flex items-center justify-between py-2">
               <div>
-                <span className="text-[13.5px] font-medium text-black dark:text-white">
+                <span className="text-[13.5px] font-medium text-foreground">
                   Daily Target
                 </span>
-                <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+                <p className="text-[11.5px] text-foreground-secondary">
                   {mode === "scheduled"
                     ? "Chapters assigned per active reading session"
                     : "Target chapters you aim to complete daily"}
@@ -594,7 +572,7 @@ export function PlanSettingsTab({
               </div>
 
               {activeDays.length < 7 && (
-                <p className="flex items-center gap-1.5 text-[11.5px] text-zinc-500 dark:text-zinc-400">
+                <p className="flex items-center gap-1.5 text-[11.5px] text-foreground-dim">
                   <Coffee className="size-3.5" />
                   <span>
                     Rest days allow you to reflect or catch up without breaking
@@ -694,32 +672,32 @@ export function PlanSettingsTab({
       </form>
 
       {/* 4. Curriculum Overview Accordion */}
-      <div className="glass-panel rounded-[26px] p-5 sm:p-6">
+      <div className="ui-card p-5 sm:p-6">
         <button
           type="button"
           onClick={() => setShowCurriculum((prev) => !prev)}
-          className="flex w-full items-center justify-between text-left"
+          className="flex w-full items-center justify-between text-left cursor-pointer"
         >
           <div className="flex items-center gap-2.5">
-            <BookOpen className="size-4.5 text-zinc-900 dark:text-zinc-100" />
+            <BookOpen className="size-4.5 text-primary" />
             <div>
-              <h3 className="text-[15px] font-semibold text-black dark:text-white">
+              <h3 className="text-[15px] font-semibold text-foreground">
                 Curriculum Breakdown
               </h3>
-              <p className="text-[11.5px] text-[#777777] dark:text-[#9CA3AF]">
+              <p className="text-[11.5px] text-foreground-secondary">
                 {plan.parts.length} parts • {plan.totalChapters} total chapters
               </p>
             </div>
           </div>
           {showCurriculum ? (
-            <ChevronUp className="size-4 text-[#777777]" />
+            <ChevronUp className="size-4 text-foreground-dim" />
           ) : (
-            <ChevronDown className="size-4 text-[#777777]" />
+            <ChevronDown className="size-4 text-foreground-dim" />
           )}
         </button>
 
         {showCurriculum && (
-          <div className="mt-4 space-y-3 border-t border-black/6 pt-4 dark:border-white/6">
+          <div className="mt-4 space-y-3 border-t border-border pt-4">
             {plan.parts.map((part) => {
               const partSessions = plan.sessions.slice(
                 part.startSessionIndex,
@@ -738,7 +716,7 @@ export function PlanSettingsTab({
                         </p>
                       )}
                     </div>
-                    <span className="ui-pill text-[11px]">
+                    <span className="rounded-full bg-surface-elevated border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary">
                       {part.completedSessions}/{part.totalSessions} sessions
                     </span>
                   </div>
@@ -786,7 +764,7 @@ export function PlanSettingsTab({
               type="checkbox"
               checked={shiftOnResume}
               onChange={(e) => setShiftOnResume(e.target.checked)}
-              className="size-4.5 rounded accent-black dark:accent-white"
+              className="size-4.5 rounded accent-primary"
             />
           </div>
         )}

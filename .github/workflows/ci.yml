@@ -83,6 +83,9 @@ jobs:
       - name: Push database schema
         run: bun run db:push
 
+      - name: Build Next.js application
+        run: bun run build
+
       - name: Install Playwright Chromium with dependencies
         run: bun x playwright install --with-deps chromium
 

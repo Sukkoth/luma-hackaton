@@ -17,6 +17,7 @@ import {
   noteFolders,
   notes,
   readingTrackers,
+  groupPlans,
 } from "@/db/schema";
 import {
   StartPlanSchema,
@@ -39,9 +40,17 @@ import {
 } from "@/data/readingPlans";
 import { type BibleCanon, getBibleBookById } from "@/data/bibleData";
 import { syncUserStreak } from "@/lib/streak-service";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
+import { createNotificationAction } from "@/actions/notifications";
+import type { SerializableAchievement } from "@/data/achievements";
 
 export type StartPlanResult =
-  { success: true; instanceId: string } | { success: false; error: string };
+  | {
+      success: true;
+      instanceId: string;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
+    }
+  | { success: false; error: string };
 
 export type StartPlanActionParams = {
   templateId: string;
@@ -54,6 +63,7 @@ export type StartPlanActionParams = {
   startDate: string;
   dailyTarget: number;
   targetEndDate?: string;
+  groupPlanId?: string;
   activeDaysMask: string;
   autoCompletePastDays?: boolean;
   reminderEnabled?: boolean;
@@ -121,11 +131,11 @@ export async function resolvePlanBlueprint({
   };
 }
 
-type EnsurePlanTemplateInDbParams = {
+export type EnsurePlanTemplateInDbParams = {
   templateId: string;
 };
 
-async function ensurePlanTemplateInDb({
+export async function ensurePlanTemplateInDb({
   templateId,
 }: EnsurePlanTemplateInDbParams): Promise<void> {
   const existing = await db.query.planTemplates.findFirst({
@@ -283,6 +293,7 @@ export async function startPlanAction({
   startDate,
   dailyTarget,
   targetEndDate,
+  groupPlanId,
   activeDaysMask,
   autoCompletePastDays = true,
   reminderEnabled = false,
@@ -305,6 +316,7 @@ export async function startPlanAction({
     startDate,
     dailyTarget,
     targetEndDate,
+    groupPlanId,
     activeDaysMask,
     autoCompletePastDays,
     reminderEnabled,
@@ -492,6 +504,7 @@ export async function startPlanAction({
       dailyTarget: input.dailyTarget,
       totalChapters: blueprint.totalChapters,
       activeDaysMask: input.activeDaysMask,
+      groupPlanId: input.groupPlanId ?? null,
       pacingSegmentsJson: JSON.stringify(segments),
       reminderEnabled: input.reminderEnabled ?? false,
       reminderTime: input.reminderTime ?? "08:00",
@@ -587,9 +600,23 @@ export async function startPlanAction({
       await syncUserStreak({ userId: session.user.id });
     }
 
+    const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
+    });
+
+    await createNotificationAction({
+      userId: session.user.id,
+      input: {
+        type: "plan_reminder",
+        title: `Plan Started: ${blueprint.title}`,
+        body: `Your reading plan "${blueprint.title}" is active. Daily reading target: ${input.dailyTarget} chapters.`,
+        actionUrl: `/plans/${instanceId}`,
+      },
+    });
+
     revalidatePath("/plans");
     revalidatePath(`/plans/${instanceId}`);
-    return { success: true, instanceId };
+    return { success: true, instanceId, newlyUnlocked };
   } catch (err) {
     console.error("Failed to start reading plan:", err);
     return {
@@ -701,6 +728,8 @@ export type PlanReadingSessionItem = {
   bookId: string;
   bookName: string;
   chapter: number;
+  startVerse?: number;
+  endVerse?: number;
   displayText?: string;
   order: number;
   isCompleted: boolean;
@@ -750,6 +779,7 @@ export type PlanNoteDetail = {
   title: string;
   plainTextSnippet: string;
   bodyHtml: string;
+  isSharedWithCommunity: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -779,11 +809,15 @@ export type PlanInstanceDetail = {
   activeDaysMask: string;
   reminderEnabled: boolean;
   reminderTime: string | null;
+  communityInfo?: {
+    groupId: string;
+    groupName: string;
+    groupPlanId: string;
+  } | null;
   tracker: {
     id: string;
     name: string;
     canon: string;
-    color: string;
     icon: string;
   };
   sessions: ReadonlyArray<PlanSessionDetail>;
@@ -913,6 +947,8 @@ export async function getPlanInstanceDetailAction({
       bookId: r.bookId,
       bookName: r.bookName,
       chapter: r.chapter,
+      startVerse: r.startVerse,
+      endVerse: r.endVerse,
       displayText: r.displayText,
       order: r.order,
       isCompleted: completedSet.has(r.id),
@@ -1058,9 +1094,27 @@ export async function getPlanInstanceDetailAction({
     title: n.title,
     plainTextSnippet: n.plainTextSnippet,
     bodyHtml: n.bodyHtml,
+    isSharedWithCommunity: n.isSharedWithCommunity ?? false,
     createdAt: n.createdAt.toISOString(),
     updatedAt: n.updatedAt.toISOString(),
   }));
+
+  let communityInfo: PlanInstanceDetail["communityInfo"] = null;
+  if (instance.groupPlanId) {
+    const gp = await db.query.groupPlans.findFirst({
+      where: eq(groupPlans.id, instance.groupPlanId),
+      with: {
+        group: true,
+      },
+    });
+    if (gp?.group) {
+      communityInfo = {
+        groupId: gp.group.id,
+        groupName: gp.group.name,
+        groupPlanId: gp.id,
+      };
+    }
+  }
 
   return {
     id: instance.id,
@@ -1092,11 +1146,11 @@ export async function getPlanInstanceDetailAction({
     activeDaysMask: instance.activeDaysMask,
     reminderEnabled: instance.reminderEnabled,
     reminderTime: instance.reminderTime,
+    communityInfo,
     tracker: {
       id: instance.tracker.id,
       name: instance.tracker.name,
       canon: instance.tracker.canon,
-      color: instance.tracker.color,
       icon: instance.tracker.icon,
     },
     sessions,
@@ -1119,6 +1173,7 @@ export type TogglePlanReadingResult =
       readingItemId: string;
       completedChapters: number;
       progressPercent: number;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
     }
   | { success: false; error: string };
 
@@ -1163,7 +1218,26 @@ export async function togglePlanReadingItemAction({
     };
   }
 
-  const blueprint = getReadingPlanById(instance.templateId);
+  // In scheduled pacing, prevent completing readings in upcoming plans whose start date hasn't arrived
+  const nowMidnight = new Date();
+  nowMidnight.setHours(0, 0, 0, 0);
+  const planStartMidnight = new Date(instance.startDate);
+  planStartMidnight.setHours(0, 0, 0, 0);
+
+  if (
+    instance.mode === "scheduled" &&
+    planStartMidnight.getTime() > nowMidnight.getTime()
+  ) {
+    return {
+      success: false,
+      error:
+        "This cohort plan is scheduled for a future start date. Readings will unlock when the start date arrives.",
+    };
+  }
+
+  const blueprint = await resolvePlanBlueprint({
+    templateId: instance.templateId,
+  });
   const readingItem = blueprint?.readings.find(
     (r) => r.id === parsed.output.readingItemId
   );
@@ -1303,9 +1377,23 @@ export async function togglePlanReadingItemAction({
       .update(planInstances)
       .set({ status: "completed", completedAt: now })
       .where(eq(planInstances.id, instance.id));
+
+    await createNotificationAction({
+      userId: session.user.id,
+      input: {
+        type: "plan_reminder",
+        title: "Plan Completed!",
+        body: `Congratulations! You finished all chapters in "${instance.title || "your reading plan"}".`,
+        actionUrl: `/plans/${instance.id}`,
+      },
+    });
   }
 
   await syncUserStreak({ userId: session.user.id });
+
+  const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
+    userId: session.user.id,
+  });
 
   const newProgressPercent = Math.min(
     100,
@@ -1322,6 +1410,7 @@ export async function togglePlanReadingItemAction({
     readingItemId: parsed.output.readingItemId,
     completedChapters: newCompletedCount,
     progressPercent: newProgressPercent,
+    newlyUnlocked,
   };
 }
 
@@ -1656,7 +1745,9 @@ export async function resumePlanAction({
   });
   if (!instance) return { success: false, error: "Plan not found" };
 
-  const blueprint = getReadingPlanById(instance.templateId);
+  const blueprint = await resolvePlanBlueprint({
+    templateId: instance.templateId,
+  });
   const readings = blueprint?.readings || [];
   const dailyTarget = Math.max(1, instance.dailyTarget || 2);
   const totalSessions = Math.max(1, Math.ceil(readings.length / dailyTarget));
@@ -1730,7 +1821,9 @@ export async function catchUpShiftAction({
   });
   if (!instance) return { success: false, error: "Plan not found" };
 
-  const blueprint = getReadingPlanById(instance.templateId);
+  const blueprint = await resolvePlanBlueprint({
+    templateId: instance.templateId,
+  });
   const readings = blueprint?.readings || [];
   const dailyTarget = Math.max(1, instance.dailyTarget || 2);
   const totalSessions = Math.max(1, Math.ceil(readings.length / dailyTarget));

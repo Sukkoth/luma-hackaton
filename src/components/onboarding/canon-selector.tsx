@@ -67,7 +67,9 @@ export function CanonSelector({ selectedCanonId, onSelectCanon }: Props) {
                         {canon.name}
                       </span>
                       {canon.id === "protestant" && (
-                        <span className="ui-pill text-[9px]">Default</span>
+                        <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-[10px] font-medium text-foreground-secondary border border-border">
+                          Default
+                        </span>
                       )}
                     </div>
                     <p className="mt-0.5 text-[11px] text-foreground-secondary">

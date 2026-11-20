@@ -5,6 +5,8 @@ import {
   getBibleBooks,
   getBibleBookById,
 } from "./bibleData";
+import { blendedPlanTemplate } from "./plans/blendedPlan";
+import { chronologicalPlanTemplate } from "./plans/chronologicalPlan";
 
 export interface PlanReadingItem {
   id: string; // e.g. "gen_1" or "orig_1" or "gvv_1"
@@ -901,6 +903,8 @@ export const READING_PLANS: ReadingPlanTemplate[] = [
     ],
     readings: wholeBibleReadings,
   },
+  blendedPlanTemplate,
+  chronologicalPlanTemplate,
   {
     id: "catholic_bible_365",
     title: "Catholic Bible in a Year",
@@ -2433,3 +2437,6 @@ export const calculatePaceByEndDate = (
     endDate,
   };
 };
+
+export { blendedPlanTemplate } from "./plans/blendedPlan";
+export { chronologicalPlanTemplate } from "./plans/chronologicalPlan";

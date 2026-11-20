@@ -21,6 +21,7 @@ import {
   type StreakData,
 } from "@/components/streak/streak-detail-modal";
 import { TrackerSwitcher } from "@/components/trackers/tracker-switcher";
+import { LumaIcon } from "@/components/ui/luma-icon";
 import type { UserTrackerSummary } from "@/actions/trackers";
 
 type TopNavbarProps = {
@@ -48,8 +49,8 @@ export function TopNavbar({
         { label: "Overview", href: "/home", icon: Home },
         { label: "Books", href: "/books", icon: BookOpen },
         { label: "Plans", href: "/plans", icon: Calendar },
-        { label: "Insights", href: "/insights", icon: TrendingUp },
         { label: "Notes", href: "/notes", icon: FileText },
+        { label: "Insights", href: "/insights", icon: TrendingUp },
       ]
     : [
         { label: "Books", href: "/books", icon: BookOpen },
@@ -67,7 +68,10 @@ export function TopNavbar({
               activeTrackerId={activeTrackerId}
             />
           ) : (
-            <Link href="/" className="group flex items-center">
+            <Link href="/" className="group flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] text-primary border border-border/80 shadow-2xs">
+                <LumaIcon className="size-4.5 text-primary" />
+              </span>
               <span className="text-[22px] lg:text-[24px] font-semibold tracking-tight text-foreground">
                 Luma<span className="text-foreground-dim">.</span>
               </span>
@@ -120,7 +124,7 @@ export function TopNavbar({
                       : "border border-border bg-surface-elevated text-foreground-dim hover:text-foreground"
                   }`}
                 >
-                  <Zap className="size-3.5 lg:size-4 fill-current" />
+                  <Zap className="size-3.5 lg:size-4 fill-foreground text-foreground" />
                   <span>{streak.currentStreak}</span>
                 </button>
               )}

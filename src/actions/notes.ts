@@ -265,19 +265,35 @@ export async function createNoteAction({
       .slice(0, 150);
 
   let resolvedFolderId = parsed.output.folderId || null;
-  if (!resolvedFolderId && parsed.output.planInstanceId) {
+  if (parsed.output.planInstanceId) {
     const inst = await db.query.planInstances.findFirst({
       where: eq(planInstances.id, parsed.output.planInstanceId),
     });
     if (inst) {
-      const folder = await db.query.noteFolders.findFirst({
-        where: and(
-          eq(noteFolders.userId, session.user.id),
-          eq(noteFolders.name, inst.title)
-        ),
-      });
-      if (folder) {
-        resolvedFolderId = folder.id;
+      const nowMidnight = new Date();
+      nowMidnight.setHours(0, 0, 0, 0);
+      const planStart = new Date(inst.startDate);
+      planStart.setHours(0, 0, 0, 0);
+      if (
+        inst.mode === "scheduled" &&
+        planStart.getTime() > nowMidnight.getTime()
+      ) {
+        return {
+          success: false,
+          error: "Notes are locked until the cohort plan start date.",
+        };
+      }
+
+      if (!resolvedFolderId) {
+        const folder = await db.query.noteFolders.findFirst({
+          where: and(
+            eq(noteFolders.userId, session.user.id),
+            eq(noteFolders.name, inst.title)
+          ),
+        });
+        if (folder) {
+          resolvedFolderId = folder.id;
+        }
       }
     }
   }

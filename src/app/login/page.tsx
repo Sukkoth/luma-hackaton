@@ -108,6 +108,7 @@ function LoginContent() {
         return;
       }
 
+      setIsLoading(false);
       router.push(redirectTarget);
       router.refresh();
     } catch {
@@ -153,9 +154,8 @@ function LoginContent() {
           <div className="text-left">
             <div className="inline-flex items-center gap-2">
               <span className="text-[20px] font-bold tracking-tight text-foreground">
-                Luma<span className="text-foreground-dim">.</span>
+                Luma<span className="text-primary">.</span>
               </span>
-              <span className="ui-pill-primary text-[10px]">Sign In</span>
             </div>
             <h1 className="mt-4 text-[26px] font-bold tracking-tight text-foreground sm:text-[28px]">
               Welcome back
@@ -374,7 +374,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="flex min-h-dvh items-center justify-center">
-          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-zinc-100" />
+          <Loader2 className="size-6 animate-spin text-zinc-900 dark:text-white" />
         </div>
       }
     >

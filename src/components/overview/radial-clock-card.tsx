@@ -14,6 +14,7 @@ import type {
   OverviewRadialClockData,
   PolarClockWedge,
 } from "@/actions/overview";
+import { cn } from "@/lib/utils";
 
 type RadialClockCardProps = {
   data: OverviewRadialClockData;
@@ -103,46 +104,42 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
 
   const cx = 100;
   const cy = 100;
-  const hubRadius = 26;
-  const maxOuterRadius = 80;
-
-  const takeawayText =
-    viewMode === "time"
-      ? takeaway
-      : weekdayItems.some((w) => w.chapters > 0)
-        ? `Most active on ${data.peakWeekdayLabel}`
-        : "Log readings to see reading rhythm";
+  const hubRadius = 38;
+  const maxOuterRadius = 88;
 
   return (
     <div className="ui-card flex h-full flex-col justify-between p-4.5 sm:p-5 shadow-xs">
-      {/* Header with Time of Day | Weekday Toggle */}
-      <div className="flex items-center justify-between pb-2 border-b border-border-subtle shrink-0">
-        <h3 className="text-[13.5px] font-medium tracking-tight text-foreground truncate">
-          {viewMode === "time" ? "When You Read" : "Reading by Weekday"}
+      {/* Header with Mode Toggle */}
+      <div className="flex items-center justify-between pb-2 border-b border-border/60 shrink-0">
+        <h3 className="text-sm font-semibold tracking-tight text-foreground">
+          Reading Rhythm
         </h3>
 
-        <div className="flex items-center rounded-full border border-border bg-surface-elevated p-0.5">
-          <button
-            type="button"
-            onClick={() => handleModeChange({ mode: "weekday" })}
-            className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-all cursor-pointer ${
-              viewMode === "weekday"
-                ? "bg-primary text-primary-foreground shadow-2xs"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
-          >
-            Weekday
-          </button>
+        {/* 24h | 7d Toggle */}
+        <div className="flex items-center rounded-xl border border-border bg-muted p-0.5">
           <button
             type="button"
             onClick={() => handleModeChange({ mode: "time" })}
-            className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-all cursor-pointer ${
+            className={cn(
+              "rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-all cursor-pointer",
               viewMode === "time"
-                ? "bg-primary text-primary-foreground shadow-2xs"
-                : "text-foreground-secondary hover:text-foreground"
-            }`}
+                ? "bg-card text-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            Time of day
+            24h Clock
+          </button>
+          <button
+            type="button"
+            onClick={() => handleModeChange({ mode: "weekday" })}
+            className={cn(
+              "rounded-lg px-2.5 py-0.5 text-xs font-semibold transition-all cursor-pointer",
+              viewMode === "weekday"
+                ? "bg-card text-foreground shadow-2xs"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            7-Day Radar
           </button>
         </div>
       </div>
@@ -152,14 +149,14 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
         {viewMode === "time" && (
           <div className="relative flex items-center justify-center w-full max-h-[205px] aspect-square">
             <svg className="size-full overflow-visible" viewBox="0 0 200 200">
-              {/* Concentric Quiet Grid Rings */}
+              {/* Concentric Grid Rings */}
               <circle
                 cx={cx}
                 cy={cy}
                 r={hubRadius}
                 fill="none"
                 stroke="var(--border)"
-                strokeOpacity={0.5}
+                strokeOpacity={0.6}
                 strokeWidth={0.75}
               />
               <circle
@@ -168,7 +165,7 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
                 r={hubRadius + (maxOuterRadius - hubRadius) * 0.5}
                 fill="none"
                 stroke="var(--border)"
-                strokeOpacity={0.3}
+                strokeOpacity={0.4}
                 strokeDasharray="2 2"
                 strokeWidth={0.5}
               />
@@ -178,7 +175,7 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
                 r={maxOuterRadius}
                 fill="none"
                 stroke="var(--border)"
-                strokeOpacity={0.4}
+                strokeOpacity={0.5}
                 strokeWidth={0.75}
               />
 
@@ -187,7 +184,6 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
                 const startAngle = w.hour * 15;
                 const endAngle = startAngle + 14;
 
-                // Wedge track (hatched background)
                 const trackPath = describeWedge({
                   cx,
                   cy,
@@ -197,7 +193,6 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
                   endAngle,
                 });
 
-                // Wedge fill (length proportional to chapters)
                 const effectiveR =
                   w.chapters > 0
                     ? hubRadius +
@@ -236,13 +231,13 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
                       className="opacity-40"
                     />
 
-                    {/* Active Fill */}
+                    {/* Active Fill with Amber Primary */}
                     {fillPath && (
                       <path
                         d={fillPath}
-                        fill="var(--foreground)"
-                        fillOpacity={isHovered ? 1 : 0.8}
-                        stroke="var(--surface)"
+                        fill="var(--primary)"
+                        fillOpacity={isHovered ? 1 : 0.85}
+                        stroke="var(--card)"
                         strokeWidth={0.75}
                         className="transition-all duration-300"
                       />
@@ -251,66 +246,66 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
                 );
               })}
 
-              {/* Quiet Labels at 12am, 6am, 12pm, 6pm */}
+              {/* Cardinal Labels: 12 AM / 6 AM / 12 PM / 6 PM */}
               <text
                 x={cx}
-                y={cy - maxOuterRadius - 6}
+                y={cy - maxOuterRadius - 3}
                 textAnchor="middle"
-                fontSize={9}
+                fontSize={8.5}
                 fill="var(--foreground-dim)"
-                fontWeight="500"
+                fontWeight={500}
               >
-                12a
+                12A
               </text>
               <text
-                x={cx + maxOuterRadius + 8}
+                x={cx + maxOuterRadius + 4}
                 y={cy + 3}
                 textAnchor="start"
-                fontSize={9}
+                fontSize={8.5}
                 fill="var(--foreground-dim)"
-                fontWeight="500"
+                fontWeight={500}
               >
-                6a
+                6A
               </text>
               <text
                 x={cx}
-                y={cy + maxOuterRadius + 13}
+                y={cy + maxOuterRadius + 10}
                 textAnchor="middle"
-                fontSize={9}
+                fontSize={8.5}
                 fill="var(--foreground-dim)"
-                fontWeight="500"
+                fontWeight={500}
               >
-                12p
+                12P
               </text>
               <text
-                x={cx - maxOuterRadius - 8}
+                x={cx - maxOuterRadius - 4}
                 y={cy + 3}
                 textAnchor="end"
-                fontSize={9}
+                fontSize={8.5}
                 fill="var(--foreground-dim)"
-                fontWeight="500"
+                fontWeight={500}
               >
-                6p
+                6P
               </text>
             </svg>
 
-            {/* Center Info / Hover Info */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+            {/* Center Info Hub */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
               {hoveredWedge ? (
                 <>
-                  <span className="text-[11px] font-bold text-foreground">
+                  <span className="text-xs font-bold text-foreground tabular-nums">
                     {hoveredWedge.label}
                   </span>
-                  <span className="text-[9.5px] text-foreground-secondary tabular-nums">
+                  <span className="text-[10px] text-primary font-semibold tabular-nums">
                     {hoveredWedge.chapters} ch
                   </span>
                 </>
               ) : (
                 <>
-                  <span className="text-[12px] font-bold text-foreground tabular-nums">
+                  <span className="text-xs font-bold text-foreground tabular-nums">
                     {peakHourLabel}
                   </span>
-                  <span className="text-[9px] text-foreground-dim uppercase tracking-wider">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                     Peak
                   </span>
                 </>
@@ -325,26 +320,26 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
               data={weekdayItems}
               margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
             >
-              <PolarGrid stroke="var(--border)" strokeOpacity={0.5} />
+              <PolarGrid stroke="var(--border)" strokeOpacity={0.6} />
               <PolarAngleAxis
                 dataKey="day"
                 stroke="var(--foreground)"
-                fontSize={10}
+                fontSize={10.5}
                 tickLine={false}
               />
               <PolarRadiusAxis
                 angle={30}
                 stroke="var(--foreground-dim)"
-                fontSize={9}
+                fontSize={9.5}
                 tickLine={false}
               />
               <Radar
                 name="Chapters"
                 dataKey="chapters"
-                stroke="var(--foreground)"
+                stroke="var(--primary)"
                 strokeWidth={2}
-                fill="var(--foreground)"
-                fillOpacity={0.35}
+                fill="var(--primary)"
+                fillOpacity={0.25}
                 isAnimationActive={true}
                 animationDuration={600}
               />
@@ -353,12 +348,15 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
                   if (!active || !payload?.length) return null;
                   const item = payload[0]?.payload;
                   return (
-                    <div className="rounded-lg border border-border bg-surface p-2 shadow-md text-[11px]">
+                    <div className="rounded-xl border border-border bg-card p-2.5 shadow-lg text-xs">
                       <p className="font-semibold text-foreground">
                         {item.fullName}
                       </p>
-                      <p className="text-foreground-secondary">
-                        {item.chapters} chapters logged
+                      <p className="text-muted-foreground">
+                        Chapters read:{" "}
+                        <span className="font-semibold text-primary">
+                          {item.chapters}
+                        </span>
                       </p>
                     </div>
                   );
@@ -370,10 +368,8 @@ export function RadialClockCard({ data }: RadialClockCardProps) {
       </div>
 
       {/* Takeaway line */}
-      <div className="short-laptop-hide max-h-[759px]:hidden mt-2 border-t border-border-subtle pt-2 shrink-0">
-        <p className="text-[12px] font-normal text-foreground-secondary truncate">
-          {takeawayText}
-        </p>
+      <div className="mt-2 border-t border-border/60 pt-2 shrink-0">
+        <p className="text-xs text-muted-foreground truncate">{takeaway}</p>
       </div>
     </div>
   );

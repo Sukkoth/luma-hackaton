@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { readingTrackers, userSettings } from "@/db/schema";
 import { OnboardingTrackerSchema } from "@/lib/schemas/onboarding";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 
 export type CompleteOnboardingResult =
   { success: true; trackerId: string } | { success: false; error: string };
@@ -28,7 +29,6 @@ export async function completeOnboardingAction({
   const parsed = v.safeParse(OnboardingTrackerSchema, {
     name: formData.get("name"),
     canon: formData.get("canon"),
-    color: formData.get("color"),
     icon: formData.get("icon"),
   });
 
@@ -49,7 +49,6 @@ export async function completeOnboardingAction({
         userId: session.user.id,
         name: parsed.output.name,
         canon: parsed.output.canon,
-        color: parsed.output.color,
         icon: parsed.output.icon,
         description: `Primary ${parsed.output.canon.replace("_", " ")} reading tracker`,
       });
@@ -74,6 +73,10 @@ export async function completeOnboardingAction({
             updatedAt: new Date(),
           },
         });
+    });
+
+    await evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
     });
 
     return { success: true, trackerId };

@@ -61,7 +61,7 @@ export function StartPlanAction({
           <span>Extract to PDF</span>
         </button>
         <Link
-          href={`/auth/sign-in?callbackUrl=/plans/templates/${plan.id}`}
+          href={`/login?redirect=/plans/templates/${plan.id}`}
           className="ui-btn-primary ui-btn-sm gap-1.5"
         >
           <LogIn className="size-3.5" />

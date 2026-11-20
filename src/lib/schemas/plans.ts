@@ -18,6 +18,7 @@ export const StartPlanSchema = v.object({
     v.maxValue(50, "Daily target cannot exceed 50")
   ),
   targetEndDate: v.optional(v.string()),
+  groupPlanId: v.optional(v.string()),
   activeDaysMask: v.pipe(
     v.string(),
     v.regex(/^[01]{7}$/, "Active days mask must be 7 binary digits (Sun-Sat)")

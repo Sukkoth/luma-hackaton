@@ -14,6 +14,7 @@ import {
 import { auth } from "@/lib/auth";
 import { eq, inArray } from "drizzle-orm";
 import { shiftDateString, getLocalDateString } from "@/lib/timezone";
+import { ensurePlanTemplateInDb } from "@/actions/plans";
 
 type SeedDayPlan = {
   daysAgo: number;
@@ -108,7 +109,6 @@ export async function seedDemoData(): Promise<void> {
     userId,
     name: "Personal Reading",
     canon: "protestant",
-    color: "#10B981",
     icon: "book",
     description: "Daily personal walk through Scripture (Standard 66 Books)",
   });
@@ -121,13 +121,14 @@ export async function seedDemoData(): Promise<void> {
     userId,
     name: "Gospels & Study",
     canon: "protestant",
-    color: "#6366F1",
     icon: "bookmark",
     description: "Deep dive into the Gospels and Epistles",
   });
 
   // 4. Enroll in Plans
   console.log("Setting up active reading plans...");
+  await ensurePlanTemplateInDb({ templateId: "romans_grace_16" });
+  await ensurePlanTemplateInDb({ templateId: "the_four_gospels_30" });
 
   // Plan 1 in Tracker 1: Romans - The Gospel of Grace (16 chapters)
   const plan1InstanceId = crypto.randomUUID();

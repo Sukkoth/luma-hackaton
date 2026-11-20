@@ -119,7 +119,7 @@ export function CanonShowcaseSection({
       {/* Selected Canon Detailed Showcase Card */}
       <div className="ui-card-elevated mt-6 grid grid-cols-1 gap-6 p-6 sm:grid-cols-3">
         <div className="sm:col-span-1">
-          <span className="ui-pill-primary text-[10px]">
+          <span className="text-xs font-semibold text-primary">
             {selectedCanon.tradition}
           </span>
           <h3 className="mt-2 text-[22px] font-medium text-foreground">

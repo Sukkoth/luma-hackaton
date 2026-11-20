@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  experimental: {
+    agentUpgrade: "security",
+  },
+  allowedDevOrigins: ["2f.taileb1574.ts.net"],
   images: {
     remotePatterns: [
       {
@@ -22,6 +26,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cdn.youversion.com",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
       },
     ],
   },

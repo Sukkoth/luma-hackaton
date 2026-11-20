@@ -8,7 +8,8 @@ import {
   useCallback,
   useDeferredValue,
 } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
 import {
   FileText,
   Plus,
@@ -26,7 +27,7 @@ import {
   ArchiveRestore,
   ArrowUpDown,
   FolderPlus,
-  LayoutGrid,
+  BookOpen,
 } from "lucide-react";
 import {
   type NoteDetail,
@@ -42,12 +43,29 @@ import { TiptapEditor } from "./tiptap-editor";
 import { NotesConfirmModal } from "./notes-confirm-modal";
 import { DeleteFolderModal } from "./delete-folder-modal";
 import { CreateFolderModal } from "./create-folder-modal";
+import { FolderCard } from "./folder-card";
+import { Button } from "@/components/ui/button";
+import { TabsBar } from "@/components/ui/tabs-bar";
+import { FilterPills } from "@/components/ui/filter-pills";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export type NotesManagerProps = {
   initialNotes: NoteDetail[];
   initialFolders: NoteFolderDetail[];
   defaultPlanId?: string;
   defaultSessionId?: number;
+  defaultFolderId?: string;
   defaultNoteId?: string;
 };
 
@@ -82,11 +100,31 @@ export function NotesManager({
   initialFolders,
   defaultPlanId,
   defaultSessionId,
+  defaultFolderId,
   defaultNoteId,
 }: NotesManagerProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  // 1. nuqs URL Query States for Active Folder, Active Note, and Active Tab
+  const [activeFolderId, setActiveFolderId] = useQueryState(
+    "folderId",
+    parseAsString.withDefault(defaultFolderId || "all")
+  );
+
+  const [activeNoteId, setActiveNoteId] = useQueryState(
+    "noteId",
+    parseAsString.withDefault(defaultNoteId || "")
+  );
+
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral([
+      "active",
+      "folders",
+      "archived",
+    ] as const).withDefault("active")
+  );
 
   const [notesList, setNotesList] = useState<NoteDetail[]>(initialNotes);
   const [folders, setFolders] = useState<NoteFolderDetail[]>(initialFolders);
@@ -104,33 +142,13 @@ export function NotesManager({
     setFolders(initialFolders);
   }
 
-  // Active view tab: "active" (standard notes), "folders" (folder view grid), "archived" (archived notes)
-  const [activeTab, setActiveTab] = useState<"active" | "folders" | "archived">(
-    "active"
-  );
-  const [activeFolderId, setActiveFolderId] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [sortBy, setSortBy] = useState<NoteSortOption>("updated_desc");
 
-  // Target note parameter from props or URL
-  const targetNoteId = defaultNoteId || searchParams.get("noteId");
-
-  // Mobile navigation state
-  const [mobileView, setMobileView] = useState<"list" | "editor">(() => {
-    const planId = defaultPlanId || searchParams.get("planId");
-    const sessionParam = defaultSessionId || searchParams.get("session");
-    if (targetNoteId || (planId && sessionParam)) return "editor";
-    return "list";
-  });
-
-  // Selected note state
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(() => {
-    if (targetNoteId) {
-      const match = initialNotes.find((n) => n.id === targetNoteId);
-      if (match) return match.id;
-    }
-
+  // Determine initial fallback note ID if URL noteId is not yet set
+  const [fallbackNoteId, setFallbackNoteId] = useState<string | null>(() => {
+    if (defaultNoteId) return defaultNoteId;
     const planId = defaultPlanId || searchParams.get("planId");
     const sessionParam = defaultSessionId || searchParams.get("session");
     const sessionId = sessionParam ? Number(sessionParam) : undefined;
@@ -148,37 +166,31 @@ export function NotesManager({
     return firstActive?.id ?? initialNotes[0]?.id ?? null;
   });
 
+  // Mobile navigation state
+  const [mobileView, setMobileView] = useState<"list" | "editor">(() => {
+    const planId = defaultPlanId || searchParams.get("planId");
+    const sessionParam = defaultSessionId || searchParams.get("session");
+    if (activeNoteId || defaultNoteId || (planId && sessionParam))
+      return "editor";
+    return "list";
+  });
+
+  // Target note identifier (prioritizing nuqs query state)
+  const targetNoteId = activeNoteId || fallbackNoteId;
+
+  // Active note reference
+  const activeNote =
+    notesList.find((n) => n.id === targetNoteId) ??
+    notesList.find((n) => !n.isArchived) ??
+    notesList[0] ??
+    null;
+
   // Dirty state tracking & explicit save
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync selected note during render when targetNoteId changes
-  const [prevTargetNoteId, setPrevTargetNoteId] = useState(targetNoteId);
-  if (targetNoteId !== prevTargetNoteId) {
-    setPrevTargetNoteId(targetNoteId);
-    if (targetNoteId) {
-      const match = notesList.find((n) => n.id === targetNoteId);
-      if (match) {
-        setSelectedNoteId(match.id);
-        setIsDirty(false);
-        setMobileView("editor");
-        if (match.isArchived) {
-          setActiveTab("archived");
-        } else {
-          setActiveTab("active");
-        }
-      }
-    }
-  }
-
-  // Current active note
-  const activeNote = notesList.find((n) => n.id === selectedNoteId) ?? null;
-
-  const currentDraftRef = useRef<{
-    title: string;
-    bodyHtml: string;
-    plainText: string;
-  }>({
+  // Draft content ref
+  const currentDraftRef = useRef({
     title: activeNote?.title ?? "",
     bodyHtml: activeNote?.bodyHtml ?? "",
     plainText: activeNote?.plainTextSnippet ?? "",
@@ -196,13 +208,14 @@ export function NotesManager({
             if (prev.some((n) => n.id === res.note.id)) return prev;
             return [res.note, ...prev];
           });
-          setSelectedNoteId(res.note.id);
+          void setActiveNoteId(res.note.id);
+          setFallbackNoteId(res.note.id);
           setIsDirty(false);
           setMobileView("editor");
           if (res.note.isArchived) {
-            setActiveTab("archived");
+            void setActiveTab("archived");
           } else {
-            setActiveTab("active");
+            void setActiveTab("active");
           }
           currentDraftRef.current = {
             title: res.note.title,
@@ -212,7 +225,7 @@ export function NotesManager({
         }
       });
     }
-  }, [targetNoteId, notesList]);
+  }, [targetNoteId, notesList, setActiveNoteId, setActiveTab]);
 
   // Keep draft in sync with active note when not actively dirty
   useEffect(() => {
@@ -225,24 +238,22 @@ export function NotesManager({
     }
   }, [activeNote, isDirty]);
 
-  // New folder dialog
+  // Modals state
   const [showFolderModal, setShowFolderModal] = useState(false);
-
-  // Custom Confirmation Modal state
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
   });
-
-  // Dedicated Delete Folder Modal state (with keep vs delete notes options)
   const [folderToDelete, setFolderToDelete] = useState<{
     id: string;
     name: string;
     notesCount: number;
   } | null>(null);
+  const [isDeletingFolder, setIsDeletingFolder] = useState(false);
 
-  // Switch active note implementation
+  // Switch active note implementation via nuqs
   const performSelectNote = ({ noteId }: SelectNoteParams) => {
-    setSelectedNoteId(noteId);
+    void setActiveNoteId(noteId);
+    setFallbackNoteId(noteId);
     setIsDirty(false);
     setMobileView("editor");
     const target = notesList.find((n) => n.id === noteId);
@@ -255,7 +266,7 @@ export function NotesManager({
     }
   };
 
-  // Switch active note (guards against accidental loss if dirty with custom modal)
+  // Switch active note (guards against accidental loss if dirty)
   const selectNote = ({ noteId }: SelectNoteParams) => {
     if (isDirty) {
       setConfirmDialog({
@@ -276,7 +287,7 @@ export function NotesManager({
     performSelectNote({ noteId });
   };
 
-  // Explicit Save Handler: ONLY triggers network call when "Save" is clicked (or Cmd/Ctrl+S)
+  // Explicit Save Handler
   const handleSaveNote = useCallback(() => {
     if (!activeNote || !isDirty) return;
     setIsSaving(true);
@@ -312,13 +323,12 @@ export function NotesManager({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isDirty, isSaving, activeNote, handleSaveNote]);
 
-  // Handler for title change (marks dirty, NO network call)
+  // Handlers for title & editor changes
   const handleTitleChange = ({ newTitle }: TitleChangeParams) => {
     currentDraftRef.current.title = newTitle;
     if (!isDirty) setIsDirty(true);
   };
 
-  // Handler for Tiptap editor update (marks dirty, NO network call)
   const handleEditorChange = ({ html, plainText }: EditorChangeParams) => {
     currentDraftRef.current.bodyHtml = html;
     currentDraftRef.current.plainText = plainText;
@@ -353,21 +363,20 @@ export function NotesManager({
 
       if (res.success && res.note) {
         setNotesList((prev) => [res.note, ...prev]);
-        setSelectedNoteId(res.note.id);
+        void setActiveNoteId(res.note.id);
+        setFallbackNoteId(res.note.id);
         currentDraftRef.current = {
           title: res.note.title,
           bodyHtml: res.note.bodyHtml,
           plainText: res.note.plainTextSnippet,
         };
         setIsDirty(false);
-        setActiveTab("active");
+        void setActiveTab("active");
         setMobileView("editor");
-        router.refresh();
       }
     });
   };
 
-  // Create new note with dirty-state confirmation
   const handleCreateNewNote = () => {
     if (isDirty) {
       setConfirmDialog({
@@ -390,23 +399,23 @@ export function NotesManager({
 
   // Delete note implementation
   const performDeleteNote = ({ noteId }: DeleteNoteParams) => {
+    setNotesList((prev) => {
+      const nextList = prev.filter((n) => n.id !== noteId);
+      const nextActive = nextList.find((n) =>
+        activeTab === "archived" ? n.isArchived : !n.isArchived
+      );
+      void setActiveNoteId(nextActive?.id ?? "");
+      setFallbackNoteId(nextActive?.id ?? null);
+      return nextList;
+    });
+    setIsDirty(false);
+    setMobileView("list");
+
     startTransition(async () => {
-      const res = await deleteNoteAction({ noteId });
-      if (res.success) {
-        const nextList = notesList.filter((n) => n.id !== noteId);
-        setNotesList(nextList);
-        const nextActive = nextList.find((n) =>
-          activeTab === "archived" ? n.isArchived : !n.isArchived
-        );
-        setSelectedNoteId(nextActive?.id ?? null);
-        setIsDirty(false);
-        setMobileView("list");
-        router.refresh();
-      }
+      await deleteNoteAction({ noteId });
     });
   };
 
-  // Delete note with custom confirmation modal
   const handleDeleteNote = ({ noteId }: DeleteNoteParams) => {
     setConfirmDialog({
       isOpen: true,
@@ -426,6 +435,9 @@ export function NotesManager({
   // Toggle pin
   const handleTogglePin = ({ note }: TogglePinParams) => {
     const nextPin = !note.isPinned;
+    setNotesList((prev) =>
+      prev.map((n) => (n.id === note.id ? { ...n, isPinned: nextPin } : n))
+    );
     startTransition(async () => {
       const res = await updateNoteAction({
         noteId: note.id,
@@ -442,6 +454,12 @@ export function NotesManager({
   // Toggle archive / unarchive
   const handleToggleArchive = ({ note }: ToggleArchiveParams) => {
     const nextArchived = !note.isArchived;
+    setNotesList((prev) =>
+      prev.map((n) =>
+        n.id === note.id ? { ...n, isArchived: nextArchived } : n
+      )
+    );
+    setIsDirty(false);
     startTransition(async () => {
       const res = await updateNoteAction({
         noteId: note.id,
@@ -451,8 +469,8 @@ export function NotesManager({
         setNotesList((prev) =>
           prev.map((n) => (n.id === res.note.id ? res.note : n))
         );
-        setSelectedNoteId(res.note.id);
-        setIsDirty(false);
+        void setActiveNoteId(res.note.id);
+        setFallbackNoteId(res.note.id);
       }
     });
   };
@@ -505,7 +523,8 @@ export function NotesManager({
             );
           });
           const first = sorted[0] ?? null;
-          setSelectedNoteId(first?.id ?? null);
+          void setActiveNoteId(first?.id ?? "");
+          setFallbackNoteId(first?.id ?? null);
           if (first) {
             currentDraftRef.current = {
               title: first.title,
@@ -518,10 +537,10 @@ export function NotesManager({
     });
   };
 
-  // Switch folder filter implementation
+  // Switch folder filter via nuqs
   const performSwitchFolder = ({ folderId }: SwitchFolderParams) => {
-    setActiveTab("active");
-    setActiveFolderId(folderId);
+    void setActiveTab("active");
+    void setActiveFolderId(folderId);
     setIsDirty(false);
 
     const notesInFolder = notesList.filter((note) => {
@@ -551,18 +570,24 @@ export function NotesManager({
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
 
-    const first = sorted[0] ?? null;
-    setSelectedNoteId(first?.id ?? null);
-    if (first) {
+    const currentStillInFolder =
+      activeNote && notesInFolder.some((n) => n.id === activeNote.id);
+
+    const noteToSelect = currentStillInFolder
+      ? (notesInFolder.find((n) => n.id === activeNote?.id) ?? null)
+      : (sorted[0] ?? null);
+
+    void setActiveNoteId(noteToSelect?.id ?? "");
+    setFallbackNoteId(noteToSelect?.id ?? null);
+    if (noteToSelect) {
       currentDraftRef.current = {
-        title: first.title,
-        bodyHtml: first.bodyHtml,
-        plainText: first.plainTextSnippet,
+        title: noteToSelect.title,
+        bodyHtml: noteToSelect.bodyHtml,
+        plainText: noteToSelect.plainTextSnippet,
       };
     }
   };
 
-  // Switch folder filter with dirty-state confirmation
   const handleSwitchFolder = ({ folderId }: SwitchFolderParams) => {
     if (isDirty) {
       setConfirmDialog({
@@ -583,11 +608,84 @@ export function NotesManager({
     performSwitchFolder({ folderId });
   };
 
-  // Create folder form handler (uncontrolled form via FormData)
-  const handleCreateFolderSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleOpenFolder = ({ folderId }: OpenFolderParams) => {
+    void setActiveFolderId(folderId);
+    void setActiveTab("active");
+  };
+
+  const handleDeleteFolder = ({ folderId }: DeleteFolderItemParams) => {
+    const target = folders.find((f) => f.id === folderId);
+    if (!target) return;
+    const realNotesCount = notesList.filter(
+      (n) => !n.isArchived && n.folderId === target.id
+    ).length;
+    setFolderToDelete({
+      id: target.id,
+      name: target.name,
+      notesCount: realNotesCount,
+    });
+  };
+
+  const handleConfirmDeleteFolderOnly = () => {
+    if (!folderToDelete) return;
+    setIsDeletingFolder(true);
+    startTransition(async () => {
+      try {
+        const res = await deleteFolderAction({
+          folderId: folderToDelete.id,
+          deleteNotes: false,
+        });
+        if (res.success) {
+          setFolders((prev) => prev.filter((f) => f.id !== folderToDelete.id));
+          setNotesList((prev) =>
+            prev.map((n) =>
+              n.folderId === folderToDelete.id ? { ...n, folderId: null } : n
+            )
+          );
+          if (activeFolderId === folderToDelete.id) {
+            void setActiveFolderId("all");
+          }
+          setFolderToDelete(null);
+        }
+      } finally {
+        setIsDeletingFolder(false);
+      }
+    });
+  };
+
+  const handleConfirmDeleteFolderAndNotes = () => {
+    if (!folderToDelete) return;
+    setIsDeletingFolder(true);
+    startTransition(async () => {
+      try {
+        const res = await deleteFolderAction({
+          folderId: folderToDelete.id,
+          deleteNotes: true,
+        });
+        if (res.success) {
+          setFolders((prev) => prev.filter((f) => f.id !== folderToDelete.id));
+          const remaining = notesList.filter(
+            (n) => n.folderId !== folderToDelete.id
+          );
+          setNotesList(remaining);
+          if (activeFolderId === folderToDelete.id) {
+            void setActiveFolderId("all");
+          }
+          const nextActive = remaining.find((n) => !n.isArchived);
+          void setActiveNoteId(nextActive?.id ?? "");
+          setFallbackNoteId(nextActive?.id ?? null);
+          setFolderToDelete(null);
+        }
+      } finally {
+        setIsDeletingFolder(false);
+      }
+    });
+  };
+
+  const handleCreateNewFolder = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const name = String(formData.get("name") || "").trim();
+    const name = (formData.get("name") as string)?.trim();
     if (!name) return;
 
     startTransition(async () => {
@@ -599,113 +697,52 @@ export function NotesManager({
     });
   };
 
-  // Delete folder implementation
-  const performDeleteFolder = ({
-    folderId,
-    deleteNotes,
-  }: {
-    folderId: string;
-    deleteNotes: boolean;
-  }) => {
-    startTransition(async () => {
-      const res = await deleteFolderAction({ folderId, deleteNotes });
-      if (res.success) {
-        setFolders((prev) => prev.filter((f) => f.id !== folderId));
-        if (deleteNotes) {
-          setNotesList((prev) => prev.filter((n) => n.folderId !== folderId));
-        } else {
-          setNotesList((prev) =>
-            prev.map((n) =>
-              n.folderId === folderId
-                ? { ...n, folderId: null, folderName: null }
-                : n
-            )
-          );
-        }
-        if (activeFolderId === folderId) {
-          performSwitchFolder({ folderId: "all" });
-        }
-        setFolderToDelete(null);
-      }
-    });
-  };
+  // Filter and sort calculations
+  const activeNotesCount = notesList.filter((n) => !n.isArchived).length;
+  const archivedNotesCount = notesList.filter((n) => n.isArchived).length;
+  const uncategorizedNotesCount = notesList.filter(
+    (n) => !n.isArchived && !n.folderId
+  ).length;
+  const pinnedNotesCount = notesList.filter(
+    (n) => !n.isArchived && n.isPinned
+  ).length;
+  const linkedScriptureCount = notesList.filter(
+    (n) => !n.isArchived && (n.planTitle || n.planInstanceId || n.planSessionId)
+  ).length;
 
-  // Delete folder handler: opens dedicated custom modal with keep vs delete notes options
-  const handleDeleteFolder = ({ folderId }: DeleteFolderItemParams) => {
-    const targetFolder = folders.find((f) => f.id === folderId);
-    if (!targetFolder) return;
-    const realCount = notesList.filter(
-      (n) => !n.isArchived && n.folderId === folderId
-    ).length;
-    setFolderToDelete({
-      id: targetFolder.id,
-      name: targetFolder.name,
-      notesCount: realCount,
-    });
-  };
+  const currentFolder =
+    activeFolderId === "all" || activeFolderId === "uncategorized"
+      ? null
+      : folders.find((f) => f.id === activeFolderId);
 
-  // Open folder from Folder View
-  const handleOpenFolder = ({ folderId }: OpenFolderParams) => {
-    handleSwitchFolder({ folderId });
-  };
-
-  // Counts (single pass)
-  let activeNotesCount = 0;
-  let archivedNotesCount = 0;
-  let uncategorizedNotesCount = 0;
-
-  for (const n of notesList) {
-    if (n.isArchived) {
-      archivedNotesCount++;
-    } else {
-      activeNotesCount++;
-      if (n.folderId === null) {
-        uncategorizedNotesCount++;
-      }
-    }
-  }
-
-  const currentFolder = folders.find((f) => f.id === activeFolderId) ?? null;
-
-  // Filter notes by active tab, folder, and search query
   const filteredNotes = notesList.filter((note) => {
     if (activeTab === "archived") {
       if (!note.isArchived) return false;
     } else {
       if (note.isArchived) return false;
-    }
-
-    if (activeTab === "active") {
-      if (activeFolderId === "uncategorized" && note.folderId !== null) {
-        return false;
-      }
-      if (
-        activeFolderId !== "all" &&
-        activeFolderId !== "uncategorized" &&
-        note.folderId !== activeFolderId
-      ) {
-        return false;
+      if (activeFolderId !== "all") {
+        if (activeFolderId === "uncategorized") {
+          if (note.folderId !== null) return false;
+        } else if (note.folderId !== activeFolderId) {
+          return false;
+        }
       }
     }
 
-    if (deferredSearchQuery.trim().length > 0) {
+    if (deferredSearchQuery.trim()) {
       const q = deferredSearchQuery.toLowerCase();
       const matchTitle = note.title.toLowerCase().includes(q);
-      const matchBody = note.plainTextSnippet.toLowerCase().includes(q);
-      const matchPlan = note.planTitle?.toLowerCase().includes(q);
-      const matchFolder = note.folderName?.toLowerCase().includes(q);
-      return matchTitle || matchBody || matchPlan || matchFolder;
+      const matchSnippet = note.plainTextSnippet.toLowerCase().includes(q);
+      const matchFolder = note.folderName?.toLowerCase().includes(q) ?? false;
+      const matchPlan = note.planTitle?.toLowerCase().includes(q) ?? false;
+      return matchTitle || matchSnippet || matchFolder || matchPlan;
     }
 
     return true;
   });
 
-  // Sort notes by chosen option, preserving pinned notes at top
   const sortedNotes = [...filteredNotes].sort((a, b) => {
-    if (a.isPinned !== b.isPinned) {
-      return a.isPinned ? -1 : 1;
-    }
-
+    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
     if (sortBy === "created_desc") {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
@@ -719,777 +756,701 @@ export function NotesManager({
   });
 
   return (
-    <>
-      <div className="ui-card h-[calc(100dvh-10rem)] md:h-[calc(100dvh-5.5rem)] max-h-[1150px] overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-border-subtle">
-        {/* ================= LEFT PANE: NOTEBOOK SHELF & EXPLORER ================= */}
-        <aside
-          className={`w-full md:w-[360px] lg:w-[380px] xl:w-[410px] shrink-0 flex flex-col min-h-0 bg-surface ${
-            mobileView === "editor" ? "hidden md:flex" : "flex"
-          }`}
-        >
-          {/* Shelf Header */}
-          <div className="px-4 py-3.5 border-b border-border-subtle flex items-center justify-between gap-2 shrink-0">
-            <div className="min-w-0">
-              <h1 className="text-[17px] font-bold tracking-tight text-foreground truncate">
-                Notes
-              </h1>
-              <p className="text-[12px] font-normal text-foreground-dim truncate">
-                Sermon notes & reflections
-              </p>
-            </div>
+    <div className="w-full space-y-4 sm:space-y-6">
+      {/* ── 1. Unboxed Editorial Masthead ── */}
+      <section
+        className={cn(
+          "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1",
+          mobileView === "editor" ? "hidden lg:flex" : "flex"
+        )}
+      >
+        <div className="space-y-1.5 max-w-xl">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+            <span className="size-1.5 rounded-full bg-primary" />
+            <span>
+              Theological Reflections • Scripture Marginalia &amp; Study Journal
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+            Scripture Journal &amp; Study Notes
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            Record spiritual insights, theological thoughts, and devotional
+            reflections anchored to your canonical reading.
+          </p>
+        </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowFolderModal(true)}
-                disabled={isPending}
-                data-testid="create-new-folder-button"
-                aria-label="New Folder"
-                title="New Folder"
-                className="inline-flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground transition-all cursor-pointer shrink-0"
-              >
-                <FolderPlus className="size-4" />
-                <span className="sr-only">New Folder</span>
-              </button>
+        <HeaderActions className="w-full sm:w-auto flex-wrap sm:flex-nowrap gap-2 sm:gap-2.5">
+          <HeaderActionButton
+            type="secondary"
+            onClick={() => setShowFolderModal(true)}
+            disabled={isPending}
+            testId="create-new-folder-button"
+            icon={<FolderPlus className="size-4" />}
+            label="New Collection"
+            className="flex-1 sm:flex-initial justify-center"
+          />
+          <HeaderActionButton
+            type="primary"
+            onClick={handleCreateNewNote}
+            disabled={isPending}
+            testId="create-new-note-button"
+            icon={<Plus className="size-4" />}
+            label="Create Note"
+            className="flex-1 sm:flex-initial justify-center"
+          />
+        </HeaderActions>
+      </section>
 
-              <button
-                type="button"
-                onClick={handleCreateNewNote}
-                disabled={isPending}
-                data-testid="create-new-note-button"
-                aria-label="New Note"
-                title="New Note"
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] bg-primary px-3.5 text-[12.5px] font-medium text-primary-foreground shadow-xs transition-all hover:opacity-90 active:scale-95 cursor-pointer shrink-0"
-              >
-                <Plus className="size-4" />
-                <span>New Note</span>
-              </button>
+      {/* ── 2. Signature Horizon Ribbon (Hidden on mobile <768px to preserve note space) ── */}
+      <section className="hidden md:block rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
+          {/* Column 1: Active Reflections */}
+          <div className="pr-0 md:pr-8 space-y-1.5">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                <FileText className="size-3.5 text-primary" />
+                <span>Active Reflections</span>
+              </span>
+              <span className="text-xs font-medium text-primary">
+                {activeNotesCount} notes
+              </span>
             </div>
+            <div className="flex items-baseline gap-2 pt-0.5">
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                {activeNotesCount}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                recorded entries
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {pinnedNotesCount > 0
+                ? `${pinnedNotesCount} prioritized note${pinnedNotesCount === 1 ? "" : "s"} pinned to the top of your journal.`
+                : "Capture verse insights, prayers, and study observations."}
+            </p>
           </div>
 
-          {/* Search & Filter Strip */}
-          <div
-            data-testid="notes-folders-filter"
-            className="px-3.5 pt-3 pb-2.5 border-b border-border-subtle space-y-2 shrink-0"
-          >
-            {/* Full-width Search Input */}
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-foreground-dim" />
-              <input
-                type="text"
-                placeholder={
-                  activeTab === "archived"
+          {/* Column 2: Thematic Collections */}
+          <div className="px-0 md:px-8 pt-5 md:pt-0 space-y-1.5">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                <FolderIcon className="size-3.5 text-primary" />
+                <span>Thematic Collections</span>
+              </span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {folders.length} collections
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2 pt-0.5">
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                {folders.length}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                curated folders
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Group notes by sermon series, theological doctrines, or topical
+              studies.
+            </p>
+          </div>
+
+          {/* Column 3: Scripture Isolation */}
+          <div className="pl-0 md:pl-8 pt-5 md:pt-0 space-y-1.5">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                <BookOpen className="size-3.5 text-primary" />
+                <span>Scripture Isolation</span>
+              </span>
+              <span className="text-xs font-semibold text-primary">Active</span>
+            </div>
+            <div className="flex items-baseline gap-2 pt-0.5">
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                {linkedScriptureCount}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                plan sessions linked
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Reflections synchronized with your active reading tracker
+              schedule.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3. Unified Filter & Search Bar with shadcn Select ── */}
+      <section
+        className={cn(
+          "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1",
+          mobileView === "editor" ? "hidden lg:flex" : "flex"
+        )}
+      >
+        {/* Left: View Tabs */}
+        <TabsBar
+          tabs={[
+            {
+              id: "active" as const,
+              label: "All Notes",
+              icon: <FileText className="size-3.5" />,
+              count: activeNotesCount,
+              testId: "tab-all-notes",
+            },
+            {
+              id: "folders" as const,
+              label: "Collections",
+              icon: <FolderIcon className="size-3.5" />,
+              count: folders.length,
+              testId: "tab-folders-view",
+            },
+            {
+              id: "archived" as const,
+              label: "Archive",
+              icon: <Archive className="size-3.5" />,
+              count: archivedNotesCount,
+              testId: "tab-archived-notes",
+            },
+          ]}
+          activeTab={activeTab}
+          onTabChange={({ tab }) => {
+            if (tab === "active") {
+              handleSwitchFolder({ folderId: "all" });
+            } else if (tab === "folders") {
+              void setActiveTab("folders");
+            } else if (tab === "archived") {
+              void setActiveTab("archived");
+              const firstArchived = notesList.find((n) => n.isArchived);
+              if (firstArchived) {
+                void setActiveNoteId(firstArchived.id);
+                setFallbackNoteId(firstArchived.id);
+                currentDraftRef.current = {
+                  title: firstArchived.title,
+                  bodyHtml: firstArchived.bodyHtml,
+                  plainText: firstArchived.plainTextSnippet,
+                };
+              }
+            }
+          }}
+          className="self-start sm:self-auto"
+        />
+
+        {/* Right: Search & shadcn Sort Dropdown */}
+        <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto sm:max-w-md justify-end">
+          {/* Search Box */}
+          <div className="relative flex-1 min-w-0 sm:max-w-xs">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={
+                activeTab === "folders"
+                  ? "Search collections..."
+                  : activeTab === "archived"
                     ? "Search archived..."
-                    : "Search reflections..."
-                }
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                data-testid="notes-search-input"
-                className="h-9 w-full rounded-[12px] border border-border bg-surface-elevated pr-8 pl-8.5 text-[12.5px] text-foreground placeholder:text-foreground-dim transition-all focus:border-border-strong focus:outline-hidden"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-dim hover:text-foreground p-1 cursor-pointer"
-                >
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Filter Tabs (share space evenly) + Fixed Sort Button at End */}
-            <div className="flex items-center gap-1.5 pt-0.5 w-full">
-              <div className="grid flex-1 grid-cols-3 gap-1.5 min-w-0">
-                <button
-                  type="button"
-                  onClick={() => handleSwitchFolder({ folderId: "all" })}
-                  data-testid="tab-all-notes"
-                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center rounded-[12px] px-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                    activeTab === "active" && activeFolderId === "all"
-                      ? "bg-primary text-primary-foreground shadow-xs"
-                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                  }`}
-                >
-                  <span className="truncate">All ({activeNotesCount})</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("folders")}
-                  data-testid="tab-folders-view"
-                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center gap-1 rounded-[12px] px-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                    activeTab === "folders"
-                      ? "bg-primary text-primary-foreground shadow-xs"
-                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                  }`}
-                >
-                  <LayoutGrid className="size-3.5 shrink-0" />
-                  <span className="truncate">Folders ({folders.length})</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("archived");
-                    const firstArchived = notesList.find((n) => n.isArchived);
-                    setSelectedNoteId(firstArchived?.id ?? null);
-                    if (firstArchived) {
-                      currentDraftRef.current = {
-                        title: firstArchived.title,
-                        bodyHtml: firstArchived.bodyHtml,
-                        plainText: firstArchived.plainTextSnippet,
-                      };
-                    }
-                  }}
-                  data-testid="tab-archived-notes"
-                  className={`inline-flex h-9 w-full min-w-0 items-center justify-center gap-1 rounded-[12px] px-1.5 text-[12px] font-medium transition-all cursor-pointer ${
-                    activeTab === "archived"
-                      ? "border border-warning bg-warning/20 text-warning shadow-xs"
-                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                  }`}
-                >
-                  <Archive className="size-3.5 shrink-0" />
-                  <span className="truncate">
-                    Archive ({archivedNotesCount})
-                  </span>
-                </button>
-              </div>
-
-              {/* Icon-Only Sort Button */}
-              <div
-                title={`Sort notes: ${
-                  sortBy === "updated_desc"
-                    ? "Newest first"
-                    : sortBy === "updated_asc"
-                      ? "Oldest first"
-                      : sortBy === "created_desc"
-                        ? "Created date (newest)"
-                        : "Created date (oldest)"
-                }`}
-                className="group relative flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-foreground-secondary transition-all hover:border-border-strong hover:text-foreground cursor-pointer shrink-0"
+                    : "Search study notes..."
+              }
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              data-testid="notes-search-input"
+              className="h-9.5 w-full rounded-xl border border-border bg-card pr-8 pl-8.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all shadow-xs"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 cursor-pointer"
               >
-                <ArrowUpDown className="pointer-events-none size-3.5 text-foreground-secondary group-hover:text-foreground transition-colors" />
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as NoteSortOption)}
-                  data-testid="notes-sort-select"
-                  aria-label="Sort notes"
-                  className="absolute inset-0 size-full opacity-0 cursor-pointer"
-                  title="Sort order"
-                >
-                  <option
-                    value="updated_desc"
-                    className="bg-surface text-foreground"
-                  >
-                    Newest
-                  </option>
-                  <option
-                    value="updated_asc"
-                    className="bg-surface text-foreground"
-                  >
-                    Oldest
-                  </option>
-                  <option
-                    value="created_desc"
-                    className="bg-surface text-foreground"
-                  >
-                    Created (New)
-                  </option>
-                  <option
-                    value="created_asc"
-                    className="bg-surface text-foreground"
-                  >
-                    Created (Old)
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            {/* Folder Chips Quick Filter Track */}
-            {activeTab === "active" && folders.length > 0 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 scrollbar-none">
-                <button
-                  type="button"
-                  onClick={() => handleSwitchFolder({ folderId: "all" })}
-                  className={`shrink-0 inline-flex h-8.5 items-center rounded-[10px] px-3 text-[12px] font-medium transition-all cursor-pointer ${
-                    activeFolderId === "all"
-                      ? "bg-primary text-primary-foreground shadow-xs"
-                      : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                  }`}
-                >
-                  All
-                </button>
-                {folders.map((folder) => (
-                  <button
-                    key={folder.id}
-                    type="button"
-                    onClick={() => handleSwitchFolder({ folderId: folder.id })}
-                    className={`shrink-0 inline-flex h-8.5 items-center gap-1.5 rounded-[10px] px-3 text-[12px] font-medium transition-all cursor-pointer ${
-                      activeFolderId === folder.id
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                    }`}
-                  >
-                    <FolderIcon className="size-3 text-primary" />
-                    <span className="truncate max-w-[120px]">
-                      {folder.name}
-                    </span>
-                    <span className="text-[10px] opacity-75">
-                      {folder.notesCount}
-                    </span>
-                  </button>
-                ))}
-              </div>
+                <X className="size-3" />
+              </button>
             )}
           </div>
 
-          {/* Shelf Body (Cards) */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-2.5 sm:p-3 space-y-2">
-            {activeTab === "folders" ? (
-              /* FOLDERS GRID VIEW */
-              <div data-testid="folders-view-grid" className="space-y-2">
-                <div className="flex items-center justify-between px-1 py-0.5 text-[11px] font-semibold text-foreground-dim uppercase tracking-wider">
-                  <span>Collections</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowFolderModal(true)}
-                    className="text-primary hover:underline normal-case text-[11px] font-medium"
-                  >
-                    + New
-                  </button>
+          {/* Actual shadcn Select Dropdown */}
+          <div className="relative shrink-0">
+            <Select
+              value={sortBy}
+              onValueChange={(val) => setSortBy(val as NoteSortOption)}
+            >
+              <SelectTrigger
+                data-testid="notes-sort-select"
+                className="h-9.5 w-[130px] sm:w-[175px]"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <ArrowUpDown className="size-3.5 text-primary shrink-0" />
+                  <SelectValue placeholder="Sort" />
                 </div>
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="updated_desc">Recently Updated</SelectItem>
+                <SelectItem value="created_desc">Newest First</SelectItem>
+                <SelectItem value="created_asc">Oldest First</SelectItem>
+                <SelectItem value="updated_asc">Oldest Updated</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </section>
 
-                {/* All Notes Folder Card */}
-                <div
-                  onClick={() => handleOpenFolder({ folderId: "all" })}
-                  className="group flex items-center justify-between p-3.5 rounded-[16px] border border-border bg-surface hover:bg-surface-elevated hover:border-border-strong transition-all cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-primary shrink-0">
-                      <FileText className="size-4" />
+      {/* ── 4. Quick Collection Filter Pills (when in active tab) ── */}
+      {activeTab === "active" && (
+        <div
+          className={cn(mobileView === "editor" ? "hidden lg:block" : "block")}
+        >
+          <FilterPills
+            containerTestId="notes-folders-filter"
+            className="py-1"
+            items={[
+              { id: "all", label: "All Collections" },
+              ...folders.map((folder) => ({
+                id: folder.id,
+                label: (
+                  <span className="inline-flex items-center gap-1.5">
+                    <FolderIcon className="size-3 shrink-0" />
+                    <span>{folder.name}</span>
+                    <span className="opacity-75 text-[10px]">
+                      ({folder.notesCount})
                     </span>
-                    <div className="min-w-0">
-                      <h4 className="text-[13px] font-semibold text-foreground truncate">
-                        All Notes
-                      </h4>
-                      <p className="text-[11px] text-foreground-dim">
-                        {activeNotesCount} active notes
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  </span>
+                ),
+              })),
+              ...(uncategorizedNotesCount > 0
+                ? [
+                    {
+                      id: "uncategorized",
+                      label: `Uncategorized (${uncategorizedNotesCount})`,
+                    },
+                  ]
+                : []),
+            ]}
+            activeFilter={activeFolderId}
+            onFilterChange={({ filter }) =>
+              handleSwitchFolder({ folderId: filter })
+            }
+          />
+        </div>
+      )}
 
-                {/* Uncategorized Folder Card */}
-                <div
-                  onClick={() =>
-                    handleOpenFolder({ folderId: "uncategorized" })
-                  }
-                  className="group flex items-center justify-between p-3.5 rounded-[16px] border border-border bg-surface hover:bg-surface-elevated hover:border-border-strong transition-all cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-primary shrink-0">
-                      <FolderIcon className="size-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <h4 className="text-[13px] font-semibold text-foreground truncate">
-                        Uncategorized
-                      </h4>
-                      <p className="text-[11px] text-foreground-dim">
-                        {uncategorizedNotesCount} notes
-                      </p>
-                    </div>
-                  </div>
+      {/* ── 5. Main Studio Area: Physical Folders Grid vs 2-Pane Journal Desk ── */}
+      {activeTab === "folders" ? (
+        /* Real Physical Folder Cards Grid */
+        <section data-testid="folders-view-grid" className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 pt-2">
+            {/* Create Collection Physical Card */}
+            <button
+              type="button"
+              onClick={() => setShowFolderModal(true)}
+              className="group relative flex flex-col justify-between rounded-2xl border-2 border-dashed border-border/80 hover:border-primary/50 bg-card/40 hover:bg-primary/5 p-6 text-center transition-all min-h-[195px] cursor-pointer"
+            >
+              <div className="flex flex-col items-center justify-center my-auto">
+                <div className="size-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-xs">
+                  <FolderPlus className="size-6" />
                 </div>
+                <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                  Create New Collection
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[200px] leading-relaxed">
+                  Organize reflections by sermon series, doctrines, or devotions
+                </p>
+              </div>
+            </button>
 
-                {/* Custom Folders */}
-                {folders.map((folder) => (
-                  <div
-                    key={folder.id}
-                    onClick={() => handleOpenFolder({ folderId: folder.id })}
-                    data-testid={`folder-card-${folder.id}`}
-                    className="group flex items-center justify-between p-3.5 rounded-[16px] border border-border bg-surface hover:bg-surface-elevated hover:border-border-strong transition-all cursor-pointer shadow-2xs"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="flex size-9 items-center justify-center rounded-[12px] border border-border bg-surface-elevated text-primary shrink-0">
-                        <FolderIcon className="size-4" />
-                      </span>
-                      <div className="min-w-0">
-                        <h4 className="text-[13px] font-semibold text-foreground truncate">
-                          {folder.name}
+            {/* Collection Cards */}
+            {folders.map((folder) => (
+              <FolderCard
+                key={folder.id}
+                id={folder.id}
+                name={folder.name}
+                notesCount={folder.notesCount}
+                onOpen={() => handleOpenFolder({ folderId: folder.id })}
+                onDelete={() => handleDeleteFolder({ folderId: folder.id })}
+              />
+            ))}
+          </div>
+        </section>
+      ) : (
+        /* Dual-Pane Journal Studio Desk */
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[660px]">
+          {/* ── Left Pane: Note Stream List (lg:col-span-5 xl:col-span-4) ── */}
+          <div
+            className={cn(
+              "lg:col-span-5 xl:col-span-4 rounded-2xl border border-border/80 bg-card shadow-xs flex flex-col overflow-hidden",
+              mobileView === "editor" ? "hidden lg:flex" : "flex"
+            )}
+          >
+            {/* Stream Header */}
+            <div className="px-4 py-3.5 border-b border-border/60 flex items-center justify-between bg-surface-elevated">
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <FileText className="size-3.5 text-primary" />
+                <span>
+                  {activeTab === "archived"
+                    ? "Archived Notes"
+                    : currentFolder
+                      ? currentFolder.name
+                      : "All Study Notes"}
+                </span>
+              </span>
+              <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
+                {sortedNotes.length} note{sortedNotes.length === 1 ? "" : "s"}
+              </span>
+            </div>
+
+            {/* Note Cards List */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-2.5 max-h-[720px] scrollbar-thin">
+              {sortedNotes.length === 0 ? (
+                <div className="py-16 px-4 text-center">
+                  <div className="size-12 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center mx-auto mb-3">
+                    <FileText className="size-6" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {searchQuery ? "No matching reflections" : "No notes found"}
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+                    {searchQuery
+                      ? "Try searching with different keywords."
+                      : activeTab === "archived"
+                        ? "Archived reflections will appear here."
+                        : "Create your first study reflection to begin your spiritual journal."}
+                  </p>
+                  {activeTab === "active" && !searchQuery && (
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      onClick={handleCreateNewNote}
+                      leftIcon={<Plus className="size-3.5" />}
+                      className="mt-4 font-semibold shadow-xs"
+                    >
+                      New Note
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                sortedNotes.map((note) => {
+                  const isSelected = activeNote?.id === note.id;
+                  const dateToDisplay = new Date(
+                    note.updatedAt
+                  ).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+
+                  return (
+                    <div
+                      key={note.id}
+                      data-testid={`note-card-${note.id}`}
+                      onClick={() => selectNote({ noteId: note.id })}
+                      className={cn(
+                        "rounded-xl border p-3.5 transition-all cursor-pointer relative text-left",
+                        isSelected
+                          ? "border-primary bg-primary/5 shadow-2xs"
+                          : "border-border/70 bg-card hover:border-border hover:bg-muted/30"
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <h4
+                          className={cn(
+                            "text-sm font-bold tracking-tight line-clamp-1",
+                            isSelected ? "text-primary" : "text-foreground"
+                          )}
+                        >
+                          {note.title || "Untitled Note"}
                         </h4>
-                        <p className="text-[11px] text-foreground-dim">
-                          {
-                            notesList.filter(
-                              (n) => !n.isArchived && n.folderId === folder.id
-                            ).length
-                          }{" "}
-                          {notesList.filter(
-                            (n) => !n.isArchived && n.folderId === folder.id
-                          ).length === 1
-                            ? "note"
-                            : "notes"}
-                        </p>
+                        {note.isPinned && (
+                          <Pin className="size-3.5 text-primary fill-primary shrink-0 mt-0.5" />
+                        )}
+                      </div>
+
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                        {note.plainTextSnippet || "No additional text..."}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <span className="tabular-nums font-medium">
+                          {dateToDisplay}
+                        </span>
+
+                        {note.folderName && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-muted/80 px-1.5 py-0.5 text-[10px] font-medium text-foreground/80 truncate max-w-[120px]">
+                            <FolderIcon className="size-2.5 text-primary shrink-0" />
+                            <span className="truncate">{note.folderName}</span>
+                          </span>
+                        )}
+
+                        {note.planTitle && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-[10px] font-semibold text-primary truncate max-w-[130px]">
+                            <Sparkles className="size-2.5 text-primary shrink-0" />
+                            <span className="truncate">{note.planTitle}</span>
+                          </span>
+                        )}
                       </div>
                     </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
 
+          {/* ── Right Pane: Sanctuary Writing Desk (lg:col-span-7 xl:col-span-8) ── */}
+          <div
+            className={cn(
+              "lg:col-span-7 xl:col-span-8 rounded-2xl border border-border/80 bg-card shadow-xs flex flex-col overflow-hidden",
+              mobileView === "list" ? "hidden lg:flex" : "flex"
+            )}
+          >
+            {activeNote ? (
+              <div className="flex-1 flex flex-col min-h-[660px]">
+                {/* Desk Control Bar */}
+                <div className="px-3 sm:px-6 py-2 sm:py-3 border-b border-border/60 flex items-center justify-between gap-1.5 sm:gap-3 bg-surface-elevated overflow-x-hidden">
+                  {/* Left: Mobile Back & Context Tags */}
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteFolder({ folderId: folder.id });
-                      }}
-                      title="Delete folder"
-                      data-testid={`delete-folder-button-${folder.id}`}
-                      aria-label={`Delete folder ${folder.name}`}
-                      className="size-9 rounded-[12px] text-foreground-dim hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+                      onClick={() => setMobileView("list")}
+                      data-testid="back-to-notes-list"
+                      className="inline-flex lg:hidden h-8 sm:h-8.5 items-center gap-1 rounded-lg sm:rounded-xl border border-border bg-card px-2 sm:px-2.5 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer shrink-0"
                     >
-                      <Trash2 className="size-4" />
+                      <ChevronLeft className="size-4" />
+                      <span className="hidden sm:inline">Back</span>
+                    </button>
+
+                    {/* Collection Selector via shadcn Select */}
+                    <div className="min-w-0 max-w-[125px] sm:max-w-[180px] shrink-0">
+                      <Select
+                        value={activeNote.folderId || "none"}
+                        onValueChange={(val) =>
+                          handleFolderChange({
+                            folderId: val === "none" ? null : val,
+                          })
+                        }
+                      >
+                        <SelectTrigger
+                          data-testid="note-folder-select"
+                          className="h-8 sm:h-8.5 w-full text-xs px-2 sm:px-3"
+                        >
+                          <div className="flex items-center gap-1.5 truncate">
+                            <FolderIcon className="size-3 text-primary shrink-0" />
+                            <SelectValue placeholder="No Collection" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No Collection</SelectItem>
+                          {folders.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Linked Plan / Scripture Badge */}
+                    {activeNote.planTitle && (
+                      <span className="hidden md:inline-flex h-8 sm:h-8.5 items-center gap-1.5 rounded-lg sm:rounded-xl border border-primary/20 bg-primary/10 px-2.5 text-xs font-semibold text-primary truncate max-w-[180px]">
+                        <Sparkles className="size-3 text-primary shrink-0" />
+                        <span className="truncate">{activeNote.planTitle}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Right: Actions (Autosave, Pin, Archive, Delete) */}
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    {/* Save button / indicator */}
+                    <button
+                      type="button"
+                      onClick={handleSaveNote}
+                      disabled={!isDirty || isSaving}
+                      data-testid="save-note-button"
+                      className={cn(
+                        "inline-flex h-8 sm:h-8.5 items-center gap-1.5 rounded-lg sm:rounded-xl px-2 sm:px-3 text-xs font-semibold transition-all shrink-0",
+                        isDirty
+                          ? "bg-primary text-primary-foreground hover:opacity-90 active:scale-95 shadow-xs cursor-pointer"
+                          : "border border-border/80 bg-card text-muted-foreground cursor-default"
+                      )}
+                      title={
+                        isDirty
+                          ? "Save changes (Cmd/Ctrl + S)"
+                          : "All changes saved"
+                      }
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="size-3.5 animate-spin" />
+                          <span className="hidden sm:inline">Saving...</span>
+                        </>
+                      ) : isDirty ? (
+                        <>
+                          <Save className="size-3.5" />
+                          <span className="hidden sm:inline">Save</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="size-3.5 text-primary" />
+                          <span className="hidden sm:inline">Saved</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Pin Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePin({ note: activeNote })}
+                      className={cn(
+                        "size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border transition-all cursor-pointer shrink-0",
+                        activeNote.isPinned
+                          ? "border-primary/30 bg-primary/10 text-primary shadow-2xs"
+                          : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong"
+                      )}
+                      title={
+                        activeNote.isPinned ? "Unpin note" : "Pin note to top"
+                      }
+                    >
+                      <Pin
+                        className={cn(
+                          "size-3.5",
+                          activeNote.isPinned && "fill-primary"
+                        )}
+                      />
+                    </button>
+
+                    {/* Archive Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleArchive({ note: activeNote })}
+                      data-testid="archive-toggle-button"
+                      className="size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong transition-all cursor-pointer shrink-0"
+                      title={
+                        activeNote.isArchived
+                          ? "Unarchive note"
+                          : "Archive note"
+                      }
+                    >
+                      {activeNote.isArchived ? (
+                        <ArchiveRestore className="size-3.5" />
+                      ) : (
+                        <Archive className="size-3.5" />
+                      )}
+                    </button>
+
+                    {/* Delete Note */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDeleteNote({ noteId: activeNote.id })
+                      }
+                      className="size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border border-border bg-card text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/10 transition-all cursor-pointer shrink-0"
+                      title="Delete note"
+                    >
+                      <Trash2 className="size-3.5" />
                     </button>
                   </div>
-                ))}
+                </div>
+
+                {/* Archived Banner Notice */}
+                {activeNote.isArchived && (
+                  <div
+                    data-testid="archived-note-banner"
+                    className="flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-amber-800 dark:text-amber-200 text-xs font-medium"
+                  >
+                    <span>This reflection is currently archived.</span>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleArchive({ note: activeNote })}
+                      data-testid="restore-note-button"
+                      className="text-primary hover:underline font-semibold cursor-pointer"
+                    >
+                      Restore to Active
+                    </button>
+                  </div>
+                )}
+
+                {/* Note Editor Surface */}
+                <div className="flex-1 p-4 sm:p-7 overflow-y-auto">
+                  <div className="max-w-3xl mx-auto space-y-4">
+                    {/* Title Input */}
+                    <input
+                      key={`title-${activeNote.id}`}
+                      type="text"
+                      placeholder="Note Title..."
+                      data-testid="note-title-input"
+                      defaultValue={activeNote.title}
+                      onChange={(e) =>
+                        handleTitleChange({ newTitle: e.target.value })
+                      }
+                      className="w-full text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground placeholder:text-muted-foreground/60 border-b border-border/40 pb-3 focus:outline-none focus:border-primary/50 transition-colors bg-transparent"
+                    />
+
+                    {/* Tiptap Rich Text Editor */}
+                    <TiptapEditor
+                      key={activeNote.id}
+                      content={activeNote.bodyHtml}
+                      onChangeAction={handleEditorChange}
+                      placeholder="Write your reflections, theological insights, or sermon notes here..."
+                      minHeightClass="min-h-[460px]"
+                    />
+                  </div>
+                </div>
               </div>
             ) : (
-              /* NOTES LIST CARDS */
-              <>
-                {/* Active Folder Filter Bar Banner */}
-                {activeFolderId !== "all" && activeTab === "active" && (
-                  <div className="flex items-center justify-between px-3.5 py-2 rounded-[12px] bg-surface-elevated border border-border text-[12px] text-foreground">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <FolderIcon className="size-3 text-primary shrink-0" />
-                      <span className="font-semibold text-foreground truncate">
-                        {currentFolder?.name ?? "Uncategorized"}
-                      </span>
-                      <span className="text-foreground-dim">
-                        ({filteredNotes.length})
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      {currentFolder && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleDeleteFolder({ folderId: currentFolder.id })
-                          }
-                          className="text-destructive hover:underline font-medium text-[12px] cursor-pointer"
-                          title="Delete this folder"
-                        >
-                          Delete Folder
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => handleSwitchFolder({ folderId: "all" })}
-                        className="text-foreground font-medium underline shrink-0 hover:opacity-80 cursor-pointer text-[12px]"
-                      >
-                        View All
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {sortedNotes.length === 0 ? (
-                  <div className="py-14 px-4 text-center">
-                    <FileText className="mx-auto size-7 text-foreground-dim opacity-60" />
-                    <p className="mt-2.5 text-[13px] font-medium text-foreground">
-                      {activeTab === "archived"
-                        ? "No archived notes"
-                        : "No notes found"}
-                    </p>
-                    <p className="mt-1 text-[11.5px] text-foreground-dim">
-                      {searchQuery
-                        ? "Try different keywords"
-                        : activeTab === "archived"
-                          ? "Archived notes will appear here"
-                          : "Create a note to start your journal"}
-                    </p>
-                  </div>
-                ) : (
-                  sortedNotes.map((note) => {
-                    const isSelected = note.id === selectedNoteId;
-                    const dateToDisplay = sortBy.startsWith("created")
-                      ? new Date(note.createdAt).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      : new Date(note.updatedAt).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        });
-
-                    return (
-                      <div
-                        key={note.id}
-                        onClick={() => selectNote({ noteId: note.id })}
-                        data-testid={`note-card-${note.id}`}
-                        className={`group relative cursor-pointer rounded-[16px] p-3.5 border transition-all ${
-                          isSelected
-                            ? "border-primary bg-surface-elevated shadow-xs"
-                            : "border-border bg-surface hover:border-border-strong hover:bg-surface-elevated/50"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-1.5">
-                          <h3 className="line-clamp-1 text-[13.5px] font-semibold text-foreground">
-                            {note.title || "Untitled Note"}
-                          </h3>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {note.isArchived && (
-                              <span className="ui-pill text-[9.5px] font-medium text-warning">
-                                Archived
-                              </span>
-                            )}
-                            {note.isPinned && (
-                              <span className="inline-flex items-center gap-1 rounded-[6px] border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                                <Pin className="size-2.5 fill-current" />
-                                <span>Pinned</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-foreground-secondary">
-                          {note.plainTextSnippet || "No additional text"}
-                        </p>
-
-                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                          <span className="text-[11px] text-foreground-dim font-normal">
-                            {dateToDisplay}
-                          </span>
-
-                          {note.folderName && (
-                            <span className="inline-flex items-center gap-1 rounded-[8px] border border-border bg-surface-elevated px-2 py-0.5 text-[10.5px] font-medium text-foreground-dim truncate max-w-[120px]">
-                              <FolderIcon className="size-2.5 text-primary shrink-0" />
-                              <span className="truncate">
-                                {note.folderName}
-                              </span>
-                            </span>
-                          )}
-
-                          {note.planTitle && (
-                            <span className="inline-flex items-center gap-1 rounded-[8px] border border-border bg-surface-elevated px-2 py-0.5 text-[10.5px] font-medium text-foreground-dim truncate max-w-[130px]">
-                              <Sparkles className="size-2.5 text-primary shrink-0" />
-                              <span className="truncate">{note.planTitle}</span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </>
+              /* Sanctuary Empty Desk */
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[660px]">
+                <div className="size-16 rounded-3xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-4 shadow-xs">
+                  <BookOpen className="size-8" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">
+                  Theological Sanctuary &amp; Journal
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mt-1 leading-relaxed">
+                  Select a reflection from the shelf to continue reading and
+                  editing, or create a new journal entry.
+                </p>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="default"
+                  onClick={handleCreateNewNote}
+                  leftIcon={<Plus className="size-4" />}
+                  className="mt-6 font-semibold shadow-xs"
+                >
+                  Create New Reflection
+                </Button>
+              </div>
             )}
           </div>
-        </aside>
+        </section>
+      )}
 
-        {/* ================= RIGHT PANE: PHYSICAL JOURNAL DESK ================= */}
-        <main
-          className={`flex-1 min-w-0 flex flex-col min-h-0 bg-surface/50 backdrop-blur-xs ${
-            mobileView === "list" ? "hidden md:flex" : "flex"
-          }`}
-        >
-          {activeNote ? (
-            <div className="flex-1 min-h-0 flex flex-col">
-              {/* Top Bar: Navigation & Action Buttons */}
-              <div className="h-14 px-4 sm:px-6 border-b border-border-subtle flex items-center justify-between gap-2.5 shrink-0 bg-surface">
-                {/* Left Group: Mobile Back Button */}
-                <div className="flex items-center gap-2 min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => setMobileView("list")}
-                    data-testid="back-to-notes-list"
-                    className="inline-flex md:!hidden h-9 items-center gap-1.5 rounded-[12px] border border-border bg-surface-elevated px-3 text-[12.5px] font-medium text-foreground transition-colors hover:border-border-strong shrink-0 cursor-pointer"
-                  >
-                    <ChevronLeft className="size-4" />
-                    <span>Notes</span>
-                  </button>
-                </div>
-
-                {/* Right Group: Save, Pin, Archive, Delete */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {/* Save button */}
-                  <button
-                    type="button"
-                    onClick={handleSaveNote}
-                    disabled={!isDirty || isSaving || isPending}
-                    data-testid="save-note-button"
-                    className={`inline-flex h-9 items-center gap-1.5 rounded-[12px] px-3.5 text-[12.5px] font-medium transition-all ${
-                      isDirty
-                        ? "bg-primary text-primary-foreground hover:opacity-90 active:scale-95 shadow-xs cursor-pointer"
-                        : "border border-border bg-surface-elevated text-foreground-dim cursor-not-allowed opacity-60"
-                    }`}
-                    title={
-                      isDirty
-                        ? "Save changes (Cmd/Ctrl + S)"
-                        : "All changes saved"
-                    }
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="size-3.5 animate-spin" />
-                        <span className="hidden sm:inline">Saving...</span>
-                      </>
-                    ) : isDirty ? (
-                      <>
-                        <Save className="size-3.5" />
-                        <span>Save</span>
-                      </>
-                    ) : (
-                      <>
-                        <Check className="size-3.5" />
-                        <span>Saved</span>
-                      </>
-                    )}
-                  </button>
-
-                  {/* Pin button */}
-                  <button
-                    type="button"
-                    onClick={() => handleTogglePin({ note: activeNote })}
-                    title={
-                      activeNote.isPinned ? "Unpin note" : "Pin to top of list"
-                    }
-                    aria-label={
-                      activeNote.isPinned ? "Unpin note" : "Pin to top of list"
-                    }
-                    className={`flex size-9 items-center justify-center rounded-[12px] border transition-all cursor-pointer ${
-                      activeNote.isPinned
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                    }`}
-                  >
-                    <Pin className="size-4" />
-                  </button>
-
-                  {/* Archive button */}
-                  <button
-                    type="button"
-                    onClick={() => handleToggleArchive({ note: activeNote })}
-                    data-testid="archive-toggle-button"
-                    title={
-                      activeNote.isArchived ? "Restore note" : "Archive note"
-                    }
-                    aria-label={
-                      activeNote.isArchived ? "Restore note" : "Archive note"
-                    }
-                    className={`flex size-9 items-center justify-center rounded-[12px] border transition-all cursor-pointer ${
-                      activeNote.isArchived
-                        ? "border border-warning bg-warning/20 text-warning"
-                        : "border border-border bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
-                    }`}
-                  >
-                    {activeNote.isArchived ? (
-                      <ArchiveRestore className="size-4" />
-                    ) : (
-                      <Archive className="size-4" />
-                    )}
-                  </button>
-
-                  {/* Delete button */}
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteNote({ noteId: activeNote.id })}
-                    title="Delete note"
-                    aria-label="Delete note"
-                    className="flex size-9 items-center justify-center rounded-[12px] border border-destructive/30 bg-destructive/10 text-destructive transition-all hover:bg-destructive/20 cursor-pointer"
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Archived Alert Banner */}
-              {activeNote.isArchived && (
-                <div
-                  data-testid="archived-note-banner"
-                  className="mx-4 mt-3 sm:mx-6 rounded-[14px] border border-amber-500/25 bg-amber-500/10 px-4 py-2.5 flex items-center justify-between gap-2 text-[12.5px] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-200 shrink-0"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <Archive className="size-4 shrink-0 text-amber-600" />
-                    <span className="truncate">This note is archived.</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleToggleArchive({ note: activeNote })}
-                    data-testid="restore-note-button"
-                    className="ui-btn-primary ui-btn-sm h-9 gap-1.5 shrink-0 cursor-pointer"
-                  >
-                    <ArchiveRestore className="size-3.5" />
-                    <span>Restore Note</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Scrollable Journal Canvas */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-10 pb-16 flex flex-col items-center">
-                {/* Physical Journal Page Sheet */}
-                <div className="ui-card w-full max-w-3xl shrink-0 p-6 sm:p-10 lg:p-12 space-y-5 min-h-[560px]">
-                  {/* Journal Document Metadata Strip: Folder Selector + Plan Link + Timestamp */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-border">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {/* Folder Selector Dropdown Tag */}
-                      <div className="inline-flex h-9 items-center gap-1.5 rounded-[12px] border border-border bg-surface-elevated px-3 text-[12px] font-medium text-foreground transition-colors">
-                        <FolderIcon className="size-3.5 text-primary shrink-0" />
-                        <select
-                          value={activeNote.folderId || ""}
-                          data-testid="note-folder-select"
-                          onChange={(e) =>
-                            handleFolderChange({
-                              folderId: e.target.value || null,
-                            })
-                          }
-                          className="bg-transparent focus:outline-hidden font-medium text-foreground cursor-pointer"
-                        >
-                          <option
-                            value=""
-                            className="bg-surface text-foreground"
-                          >
-                            No Folder
-                          </option>
-                          {folders.map((f) => (
-                            <option
-                              key={f.id}
-                              value={f.id}
-                              className="bg-surface text-foreground"
-                            >
-                              {f.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Linked Plan Chip */}
-                      {activeNote.planTitle && (
-                        <div className="inline-flex h-9 items-center gap-1.5 rounded-[12px] border border-border bg-surface-elevated px-3 text-[11.5px] font-medium text-foreground">
-                          <Sparkles className="size-3.5 text-primary shrink-0" />
-                          <span className="truncate max-w-[200px]">
-                            {activeNote.planTitle}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Updated Timestamp */}
-                    <span className="text-[12px] text-foreground-dim font-normal">
-                      Updated{" "}
-                      {new Date(activeNote.updatedAt).toLocaleDateString(
-                        undefined,
-                        {
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </span>
-                  </div>
-
-                  {/* Tiptap Rich-Text Editor with Docked Toolbar and Title */}
-                  <TiptapEditor
-                    key={`editor-${activeNote.id}`}
-                    content={activeNote.bodyHtml}
-                    onChangeAction={handleEditorChange}
-                    placeholder="Write your study reflections, cross-references, or devotions..."
-                    titleSlot={({ focusEditor }) => (
-                      <input
-                        type="text"
-                        placeholder="Note Title..."
-                        defaultValue={activeNote.title}
-                        key={activeNote.id}
-                        onChange={(e) =>
-                          handleTitleChange({ newTitle: e.target.value })
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            focusEditor();
-                          }
-                        }}
-                        data-testid="note-title-input"
-                        className="w-full bg-transparent text-[20px] sm:text-[22px] font-bold tracking-tight text-foreground placeholder:text-foreground-dim leading-snug border-none p-0 focus:outline-hidden"
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* Empty State Canvas */
-            <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-8 text-center">
-              <span className="flex size-14 items-center justify-center rounded-full bg-surface-elevated border border-border text-primary shadow-2xs">
-                <FileText className="size-7" />
-              </span>
-              <h2 className="mt-4 text-[17px] font-semibold text-foreground">
-                {activeTab === "archived"
-                  ? "No note selected"
-                  : "Select a note to read or edit"}
-              </h2>
-              <p className="mt-1.5 max-w-xs text-[12.5px] text-foreground-secondary leading-relaxed">
-                {activeTab === "archived"
-                  ? "Pick an archived note from the left to read or restore it."
-                  : "Choose a reflection from the explorer or create a new journal entry to begin."}
-              </p>
-              {activeTab !== "archived" && (
-                <button
-                  type="button"
-                  onClick={handleCreateNewNote}
-                  disabled={isPending}
-                  className="ui-btn-primary ui-btn-sm h-9 mt-5 gap-2 cursor-pointer"
-                >
-                  <Plus className="size-4" />
-                  <span>Create New Note</span>
-                </button>
-              )}
-            </div>
-          )}
-        </main>
-      </div>
-
-      {/* Modal: New Folder Dialog */}
+      {/* ── Modals & Dialogs ── */}
       <CreateFolderModal
         isOpen={showFolderModal}
         onClose={() => setShowFolderModal(false)}
-        onSubmit={handleCreateFolderSubmit}
+        onSubmit={handleCreateNewFolder}
         isPending={isPending}
       />
 
-      {/* Reusable Custom Confirmation Modal */}
+      <DeleteFolderModal
+        isOpen={Boolean(folderToDelete)}
+        folder={folderToDelete}
+        onClose={() => setFolderToDelete(null)}
+        onDeleteFolderOnly={handleConfirmDeleteFolderOnly}
+        onDeleteFolderAndNotes={handleConfirmDeleteFolderAndNotes}
+        isPending={isDeletingFolder}
+      />
+
       <NotesConfirmModal
         isOpen={confirmDialog.isOpen}
         title={confirmDialog.isOpen ? confirmDialog.title : ""}
         description={confirmDialog.isOpen ? confirmDialog.description : ""}
-        confirmLabel={confirmDialog.isOpen ? confirmDialog.confirmLabel : ""}
+        confirmLabel={
+          confirmDialog.isOpen ? confirmDialog.confirmLabel : "Confirm"
+        }
         cancelLabel={
           confirmDialog.isOpen ? confirmDialog.cancelLabel : "Cancel"
         }
-        variant={confirmDialog.isOpen ? confirmDialog.variant : "default"}
+        variant={confirmDialog.isOpen ? confirmDialog.variant : "warning"}
         onConfirm={confirmDialog.isOpen ? confirmDialog.onConfirm : () => {}}
         onCancel={() => setConfirmDialog({ isOpen: false })}
-        isPending={isPending}
       />
-
-      {/* Dedicated Delete Folder Modal (with Keep Notes vs Delete All Notes option) */}
-      <DeleteFolderModal
-        isOpen={folderToDelete !== null}
-        folder={folderToDelete}
-        onClose={() => setFolderToDelete(null)}
-        onDeleteFolderOnly={() => {
-          if (folderToDelete) {
-            performDeleteFolder({
-              folderId: folderToDelete.id,
-              deleteNotes: false,
-            });
-          }
-        }}
-        onDeleteFolderAndNotes={() => {
-          if (folderToDelete) {
-            performDeleteFolder({
-              folderId: folderToDelete.id,
-              deleteNotes: true,
-            });
-          }
-        }}
-        isPending={isPending}
-      />
-    </>
+    </div>
   );
 }

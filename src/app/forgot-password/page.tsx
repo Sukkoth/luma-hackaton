@@ -78,10 +78,9 @@ export default function ForgotPasswordPage() {
             <div>
               <div className="inline-flex items-center gap-2">
                 <span className="text-[20px] font-bold tracking-tight text-foreground">
-                  Scripture
-                  <span className="text-foreground-dim">.</span>
+                  Luma
+                  <span className="text-primary">.</span>
                 </span>
-                <span className="ui-pill-primary text-[10px]">Recovery</span>
               </div>
               <h1 className="mt-3 text-[26px] font-bold tracking-tight text-foreground sm:text-[28px]">
                 Forgot password?

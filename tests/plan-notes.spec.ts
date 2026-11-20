@@ -62,7 +62,9 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     await expect(
       notesSection.getByText("Study Journal & Reflections")
     ).toBeVisible();
-    await expect(notesSection.getByText("0 reflections")).toBeVisible();
+    await expect(
+      notesSection.getByText("No reflections recorded for Session 1")
+    ).toBeVisible();
     await expect(
       notesSection.getByRole("button", { name: /all plan/i })
     ).toHaveCount(0);
@@ -109,7 +111,9 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     await expect(
       notesSection.getByText("Day 1 - Genesis 1 Creation Insights")
     ).toBeVisible();
-    await expect(notesSection.getByText("1 reflection")).toBeVisible();
+    await expect(
+      notesSection.getByText("Reflections for Session 1")
+    ).toBeVisible();
     await expect(
       notesSection.getByText("In the beginning, God created")
     ).toBeVisible();
@@ -134,7 +138,7 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     // 6. Verify modal saved note and navigated to notes studio with note loaded
     await page.waitForURL(/\/notes\?noteId=/, { timeout: 10000 });
     await expect(
-      page.getByRole("heading", { name: "Notes", exact: true })
+      page.getByRole("heading", { name: "Scripture Journal & Study Notes" })
     ).toBeVisible();
     await expect(page.getByTestId("note-title-input")).toHaveValue(
       "Day 1 - Genesis 1 Creation Studio Ready"
@@ -162,7 +166,7 @@ test.describe("Plan Detail Real Notes Feature E2E", () => {
     // Verify it navigates to notes studio and loads THIS EXACT newly drafted reflection
     await page.waitForURL(/\/notes\?noteId=/, { timeout: 10000 });
     await expect(
-      page.getByRole("heading", { name: "Notes", exact: true })
+      page.getByRole("heading", { name: "Scripture Journal & Study Notes" })
     ).toBeVisible();
     await expect(page.getByTestId("note-title-input")).toHaveValue(
       "Day 1 - Unsaved Reflection Straight To Studio"

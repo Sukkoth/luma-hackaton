@@ -60,10 +60,10 @@ export function DistributionCards({
                 <span>Pentateuch & Law</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-medium text-foreground">
                   {distribution.law}
                 </span>
-                <span className="ui-pill text-[10px]">
+                <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[10px] font-medium text-foreground-secondary">
                   {getPercent(distribution.law)}
                 </span>
               </div>
@@ -75,10 +75,10 @@ export function DistributionCards({
                 <span>Historical Books</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-medium text-foreground">
                   {distribution.history}
                 </span>
-                <span className="ui-pill text-[10px]">
+                <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[10px] font-medium text-foreground-secondary">
                   {getPercent(distribution.history)}
                 </span>
               </div>
@@ -90,10 +90,10 @@ export function DistributionCards({
                 <span>Poetry & Wisdom</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-medium text-foreground">
                   {distribution.poetry}
                 </span>
-                <span className="ui-pill text-[10px]">
+                <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[10px] font-medium text-foreground-secondary">
                   {getPercent(distribution.poetry)}
                 </span>
               </div>
@@ -105,10 +105,10 @@ export function DistributionCards({
                 <span>Gospels & Epistles</span>
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[15px] font-light text-foreground">
+                <span className="text-[15px] font-medium text-foreground">
                   {distribution.gospelsEpistles}
                 </span>
-                <span className="ui-pill-primary text-[10px]">
+                <span className="rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
                   {getPercent(distribution.gospelsEpistles)}
                 </span>
               </div>
@@ -121,10 +121,10 @@ export function DistributionCards({
       <div className="ui-card flex flex-col justify-between p-6">
         <div>
           <div className="flex items-center justify-between">
-            <h4 className="text-[16px] font-normal tracking-tight text-foreground">
+            <h4 className="text-[16px] font-medium tracking-tight text-foreground">
               Active Plans Status
             </h4>
-            <span className="ui-pill text-[10px]">
+            <span className="rounded-full bg-surface-elevated border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary">
               {activePlans.length}{" "}
               {activePlans.length === 1 ? "Active" : "Active"}
             </span>
@@ -151,7 +151,7 @@ export function DistributionCards({
                       </p>
                     </div>
                   </div>
-                  <span className="ui-pill text-[10px]">
+                  <span className="rounded-full bg-surface-elevated border border-border px-2 py-0.5 text-[10px] font-semibold text-foreground">
                     {plan.progressPercent}%
                   </span>
                 </div>

@@ -1,19 +1,24 @@
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
+import { Flame, Layers, Globe } from "lucide-react";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { trackerChapterProgress } from "@/db/schema";
-import { TopNavbar } from "@/components/luma/top-navbar";
-import { InsightsKpiCards } from "@/components/insights/insights-kpi-cards";
-import {
-  CanonCoverageSection,
-  type DivisionProgress,
-} from "@/components/insights/canon-coverage-section";
-import { MilestonesSection } from "@/components/insights/milestones-section";
+import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
+import { getUserAchievementsData } from "@/actions/achievements";
+import {
+  HeaderActions,
+  HeaderActionButton,
+} from "@/components/ui/header-action-button";
+import {
+  InsightsContainer,
+  type InsightsTab,
+} from "@/components/insights/insights-container";
+import type { DivisionProgress } from "@/components/insights/canon-coverage-section";
 import {
   type BibleCanon,
   getBibleBooks,
@@ -74,8 +79,18 @@ function formatCanonTitle({ canon }: { canon: string }): string {
   }
 }
 
-export default async function InsightsPage() {
+type InsightsPageProps = {
+  searchParams?: Promise<{ tab?: string }>;
+};
+
+export default async function InsightsPage({
+  searchParams,
+}: InsightsPageProps) {
   await connection();
+
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const initialTab: InsightsTab =
+    resolvedSearchParams?.tab === "achievements" ? "achievements" : "coverage";
 
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -85,9 +100,10 @@ export default async function InsightsPage() {
     redirect("/login?redirect=/insights");
   }
 
-  const [trackersData, streak] = await Promise.all([
+  const [trackersData, streak, achievementsData] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
+    getUserAchievementsData({ userId: session.user.id }),
   ]);
 
   const activeTracker = trackersData.activeTracker;
@@ -158,50 +174,158 @@ export default async function InsightsPage() {
   const canonName = formatCanonTitle({ canon });
 
   return (
-    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navigation */}
-      <TopNavbar
-        userName={session.user.name}
-        streak={streak}
-        trackers={trackersData.trackers}
-        activeTrackerId={activeTracker?.id}
-      />
-
-      {/* Main Insights Content Layout */}
-      <main className="mt-4 space-y-6">
-        {/* Header Greeting & Tracker Status */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-[26px] font-normal tracking-tight text-foreground sm:text-[30px]">
-              Spiritual Metrics & Insights
+    <AppShell
+      userName={session.user.name}
+      userEmail={session.user.email}
+      userImage={session.user.image ?? undefined}
+      streak={streak}
+      trackers={trackersData.trackers}
+      activeTrackerId={activeTracker?.id}
+    >
+      <div className="w-full max-w-[1440px] mx-auto space-y-6">
+        {/* ── Unboxed Editorial Masthead ── */}
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-1">
+          <div className="space-y-1.5 max-w-xl">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
+              <span className="size-1.5 rounded-full bg-primary" />
+              <span>Scriptural Analytics & Spiritual Metrics</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+              Your Scripture journey, in numbers & rhythm.
             </h1>
-            <p className="text-[13px] text-foreground-secondary">
-              Welcome back, {userFirstName}. Here is your reading trajectory and
-              scriptural milestones.
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Welcome back, {userFirstName}. Analyze reading velocity, canon
+              depth distribution, diurnal habits, and unlocked milestones.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="ui-pill text-[12px] font-normal">
-              Active: {activeTrackerName}
-            </span>
-          </div>
-        </div>
 
-        {/* Highlight Stats Row (Real Metrics) */}
-        <InsightsKpiCards
+          <HeaderActions>
+            <HeaderActionButton
+              type="primary"
+              icon={<Layers className="size-4" />}
+              label="Current Tracker"
+            />
+            <HeaderActionButton
+              type="secondary"
+              icon={<Globe className="size-4" />}
+              label="All Canons"
+            />
+          </HeaderActions>
+        </section>
+
+        {/* ── Signature Horizon Ribbon ── */}
+        <section className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
+            {/* Column 1: Canon Trajectory */}
+            <div className="pr-0 md:pr-8 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                  </span>
+                  <span className="text-xs font-semibold text-foreground">
+                    Canon Trajectory
+                  </span>
+                </div>
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  {canonName}
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                    {canonPercentage}%
+                  </span>
+                  <span className="text-xs font-semibold text-primary">
+                    Canon Completed
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {totalReadChapters} of {totalChaptersAcrossCanon} chapters
+                  read in {activeTrackerName}.
+                </p>
+              </div>
+
+              <div className="space-y-1 pt-0.5">
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Progress to Full Canon</span>
+                  <span className="text-primary font-medium">
+                    {canonPercentage}%
+                  </span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, canonPercentage))}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Column 2: Reading Momentum & Streak */}
+            <div className="pl-0 md:pl-8 pt-5 md:pt-0 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Flame className="size-3.5 text-primary" />
+                  <span className="text-xs font-semibold text-foreground">
+                    Reading Momentum
+                  </span>
+                </div>
+                <span className="text-[11px] font-medium text-primary">
+                  Best: {streak?.longestStreak ?? 0} days
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
+                    {streak?.currentStreak ?? 0}
+                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    {streak?.currentStreak === 1
+                      ? "Day Streak"
+                      : "Days Active Streak"}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {streak?.availableFreezes ?? 0} streak freezes available •{" "}
+                  {achievementsData.stats.unlocked} milestones unlocked.
+                </p>
+              </div>
+
+              {/* Progress Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  Active Tracker: {activeTrackerName}
+                </span>
+                <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                  {totalReadChapters} Chapters Read
+                </span>
+                <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                  {achievementsData.stats.unlocked} Milestones
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tabbed Insights & Achievements Container */}
+        <InsightsContainer
+          initialTab={initialTab}
+          canonName={canonName}
+          divisions={divisions}
           streak={streak}
           totalReadChapters={totalReadChapters}
           totalChaptersAcrossCanon={totalChaptersAcrossCanon}
           canonPercentage={canonPercentage}
           activeTrackerName={activeTrackerName}
+          achievementsData={achievementsData}
         />
-
-        {/* Section 1: Canonical Distribution & Velocity (Real Progress) */}
-        <CanonCoverageSection canonName={canonName} divisions={divisions} />
-
-        {/* Section 2: Milestones & Badges Grid (Coming Soon) */}
-        <MilestonesSection />
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

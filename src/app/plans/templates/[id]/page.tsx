@@ -12,7 +12,7 @@ import {
   Bookmark,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { TopNavbar } from "@/components/luma/top-navbar";
+import { AppShell } from "@/components/navigation/app-shell";
 import { resolvePlanBlueprint } from "@/actions/plans";
 import { StartPlanAction } from "@/components/plans/start-plan-action";
 import { getUserTrackersData } from "@/actions/trackers";
@@ -46,16 +46,15 @@ async function PlanTemplateDetailContent({
   const displayName = session?.user?.name || "Reader";
 
   return (
-    <div className="mx-auto min-h-screen max-w-350 px-4 py-3 sm:px-6 md:px-8 md:py-4">
-      {/* Top Navbar */}
-      <TopNavbar
-        userName={displayName}
-        streak={streak}
-        trackers={trackersData.trackers}
-        activeTrackerId={trackersData.activeTracker?.id}
-      />
-
-      <main className="mt-4 space-y-4">
+    <AppShell
+      userName={displayName}
+      userEmail={session?.user?.email}
+      userImage={session?.user?.image ?? undefined}
+      streak={streak}
+      trackers={trackersData.trackers}
+      activeTrackerId={trackersData.activeTracker?.id}
+    >
+      <div className="w-full max-w-[1440px] mx-auto space-y-4">
         {/* Breadcrumb / Back button */}
         <div>
           <Link href="/plans" className="ui-btn-secondary ui-btn-sm gap-1.5">
@@ -67,17 +66,16 @@ async function PlanTemplateDetailContent({
         {/* Hero Card */}
         <div className="ui-card p-6 sm:p-7">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="ui-pill text-[11px]">{plan.category}</span>
+            <span className="rounded-full bg-surface-elevated border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary">
+              {plan.category}
+            </span>
             {plan.canonCompatibility &&
               plan.canonCompatibility !== "protestant" && (
-                <span className="ui-pill text-[10px]">
+                <span className="rounded-full bg-surface-elevated border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary flex items-center gap-1">
                   <Bookmark className="size-3" />
                   <span>{plan.canonCompatibility.replace("_", " ")}</span>
                 </span>
               )}
-            <span className="ui-pill-primary text-[10px]">
-              Blueprint Template
-            </span>
           </div>
 
           <h1 className="mt-3 text-[26px] font-bold tracking-tight text-foreground sm:text-[30px]">
@@ -220,7 +218,7 @@ async function PlanTemplateDetailContent({
                       </p>
                     )}
                   </div>
-                  <span className="ui-pill text-[11px]">
+                  <span className="rounded-full bg-surface-elevated border border-border px-2.5 py-0.5 text-[11px] font-medium text-foreground-secondary">
                     {section.chaptersCount} chapters
                   </span>
                 </div>
@@ -250,8 +248,8 @@ async function PlanTemplateDetailContent({
             )}
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }
 
@@ -265,7 +263,7 @@ export default function PlanTemplateDetailPage({
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-350 p-8 text-center text-[13px] text-[#777777]">
+        <div className="mx-auto max-w-350 p-8 text-center text-[13px] text-foreground-dim">
           Loading plan blueprint...
         </div>
       }

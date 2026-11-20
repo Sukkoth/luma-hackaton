@@ -12,12 +12,13 @@ import {
   UpdateTrackerSchema,
   SwitchTrackerSchema,
 } from "@/lib/schemas/trackers";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
+import type { SerializableAchievement } from "@/data/achievements";
 
 export type UserTrackerSummary = {
   id: string;
   name: string;
   description: string;
-  color: string;
   icon: string;
   canon: string;
   isArchived: boolean;
@@ -26,7 +27,12 @@ export type UserTrackerSummary = {
 };
 
 export type CreateTrackerActionResult =
-  { success: true; trackerId: string } | { success: false; error: string };
+  | {
+      success: true;
+      trackerId: string;
+      newlyUnlocked?: ReadonlyArray<SerializableAchievement>;
+    }
+  | { success: false; error: string };
 
 export type CreateTrackerActionParams = {
   formData: FormData;
@@ -47,7 +53,6 @@ export async function createTrackerAction({
     name: formData.get("name"),
     canon: formData.get("canon"),
     description: formData.get("description") ?? "",
-    color: formData.get("color"),
     icon: formData.get("icon"),
   });
 
@@ -68,7 +73,6 @@ export async function createTrackerAction({
         userId: session.user.id,
         name: parsed.output.name,
         canon: parsed.output.canon,
-        color: parsed.output.color,
         icon: parsed.output.icon,
         description: parsed.output.description ?? "",
       });
@@ -83,6 +87,10 @@ export async function createTrackerAction({
         .where(eq(userSettings.userId, session.user.id));
     });
 
+    const { newlyUnlocked } = await evaluateAndUnlockAchievementsAction({
+      userId: session.user.id,
+    });
+
     revalidatePath("/home");
     revalidatePath("/books");
     revalidatePath("/insights");
@@ -90,7 +98,7 @@ export async function createTrackerAction({
     revalidatePath("/plans");
     revalidatePath("/settings");
 
-    return { success: true, trackerId };
+    return { success: true, trackerId, newlyUnlocked };
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : "Failed to create tracker.";
@@ -124,7 +132,6 @@ export async function updateTrackerAction({
     trackerId: formData.get("trackerId"),
     name: formData.get("name"),
     description: formData.get("description") ?? "",
-    color: formData.get("color"),
     icon: formData.get("icon"),
   });
 
@@ -147,13 +154,12 @@ export async function updateTrackerAction({
       return { success: false, error: "Tracker not found or unauthorized." };
     }
 
-    // Invariant: Canon cannot be updated. Only update name, description, color, and icon.
+    // Invariant: Canon cannot be updated. Only update name, description, and icon.
     await db
       .update(readingTrackers)
       .set({
         name: parsed.output.name,
         description: parsed.output.description ?? "",
-        color: parsed.output.color,
         icon: parsed.output.icon,
         updatedAt: new Date(),
       })
@@ -278,7 +284,6 @@ export async function getUserTrackersData({
           userId,
           name: "Personal Reading",
           canon: "protestant",
-          color: "#18181B",
           icon: "book-open",
         })
         .returning();

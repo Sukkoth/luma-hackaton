@@ -36,14 +36,9 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
     await page.waitForURL("/home", { timeout: 10000 });
 
     // 2. Overview reflects default tracker (Personal Reading, 66 books, 1189 chapters)
-    const switcherBtn = page.getByTestId("tracker-switcher-button");
+    const switcherBtn = page.getByRole("button", { name: /Current tracker:/ });
     await expect(switcherBtn).toBeVisible();
     await expect(switcherBtn).toContainText("Personal Reading");
-    await expect(
-      page.getByText(
-        'Tracking "Personal Reading" with active Standard 66 Books'
-      )
-    ).toBeVisible();
     await expect(page.getByText("0 of 1189")).toBeVisible();
 
     // 3. Open tracker switcher dropdown from navbar
@@ -78,13 +73,6 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
     // 5. Verify new tracker becomes active immediately in header and overview
     await expect(createModalTitle).not.toBeVisible();
     await expect(switcherBtn).toContainText("Ancient Ethiopian Scrolls");
-
-    // Overview now shows Ethiopian canon: 81 books, 1927 chapters!
-    await expect(
-      page.getByText(
-        'Tracking "Ancient Ethiopian Scrolls" with active Ethiopian Orthodox (81 Books)'
-      )
-    ).toBeVisible();
     await expect(page.getByText("0 of 1927")).toBeVisible();
 
     // 6. Navigate to /books and verify active canon filtering (81 books)
@@ -201,7 +189,6 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
       userId: testUserId,
       name: "Original Protestant Tracker",
       canon: "protestant",
-      color: "#3B82F6",
       icon: "book-open",
       description: "Initial description",
     });

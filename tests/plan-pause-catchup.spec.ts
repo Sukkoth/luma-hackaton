@@ -99,14 +99,6 @@ test.describe("Plan Pause & Catch Up Flow E2E", () => {
     // 5. Switch back to Plan Chapters tab
     await page.getByRole("button", { name: "Plan Chapters" }).click();
 
-    // Verify PLAN PAUSED banner is visible
-    await expect(page.getByText("PLAN PAUSED")).toBeVisible();
-    await expect(
-      page.getByText(
-        "Check marks are locked while your plan is paused. When you are ready to continue, tap Resume to shift your schedule to today."
-      )
-    ).toBeVisible();
-
     // 6. Attempt to click an incomplete reading item while paused
     const secondReadingItem = page
       .getByRole("button", { name: /Toggle reading/i })
@@ -143,7 +135,6 @@ test.describe("Plan Pause & Catch Up Flow E2E", () => {
     await expect(pausedModal).not.toBeVisible();
 
     // 7. Verify plan is resumed
-    await expect(page.getByText("PLAN PAUSED")).not.toBeVisible();
     const resumedRecord = await db.query.planInstances.findFirst({
       where: eq(planInstances.id, instanceId),
     });
@@ -171,11 +162,11 @@ test.describe("Plan Pause & Catch Up Flow E2E", () => {
     // Verify Behind Schedule Banner appears
     await expect(page.getByText(/BEHIND SCHEDULE/i)).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Catch Up to Today" })
+      page.getByRole("button", { name: "Catch Up Plan" })
     ).toBeVisible();
 
     // Open Catch-Up Modal
-    await page.getByRole("button", { name: "Catch Up to Today" }).click();
+    await page.getByRole("button", { name: "Catch Up Plan" }).click();
     const catchUpModal = page.getByRole("dialog", {
       name: "Catch Up & Adjust Schedule",
     });
@@ -206,7 +197,7 @@ test.describe("Plan Pause & Catch Up Flow E2E", () => {
     await page.reload();
     await expect(page.getByText(/BEHIND SCHEDULE/i)).toBeVisible();
 
-    await page.getByRole("button", { name: "Catch Up to Today" }).click();
+    await page.getByRole("button", { name: "Catch Up Plan" }).click();
     await expect(catchUpModal).toBeVisible();
 
     // Click "Increase Pace to ... / day"

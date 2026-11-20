@@ -36,6 +36,13 @@ import {
 } from "@/data/readingPlans";
 import { createCustomPlanTemplateAction } from "@/actions/plans";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   buildPlanSessions,
   exportPlanToPdf,
 } from "@/lib/plans/export-plan-pdf";
@@ -797,14 +804,13 @@ export function CustomPlanWizardModal({
         <div className="shrink-0 flex items-center justify-between border-b border-border px-6 py-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-dim">
-                Custom Reading Plan
+              <span className="text-xs font-semibold text-primary">
+                Custom Reading Plan Builder
               </span>
-              <span className="ui-pill-primary text-[10px]">Builder</span>
             </div>
             <h2
               id="custom-plan-title"
-              className="mt-1 text-[18px] font-medium tracking-tight text-black dark:text-white"
+              className="mt-1 text-[18px] font-medium tracking-tight text-foreground"
             >
               Step{" "}
               {currentStep === "scope"
@@ -825,7 +831,7 @@ export function CustomPlanWizardModal({
             type="button"
             onClick={onCloseAction}
             disabled={isPending}
-            className="flex size-9 items-center justify-center rounded-full border border-black/8 bg-white/80 text-[#666666] transition-colors hover:bg-black/5 hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-[#A1A1AA] dark:hover:bg-white/10 dark:hover:text-white cursor-pointer"
+            className="flex size-9 items-center justify-center rounded-full border border-border bg-surface text-foreground-secondary transition-colors hover:bg-surface-elevated hover:text-foreground cursor-pointer"
             aria-label="Close modal"
           >
             <X className="size-4.5" />
@@ -910,28 +916,28 @@ export function CustomPlanWizardModal({
               {/* Canon Selection and Search */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[12.5px] font-medium text-black dark:text-white">
+                  <span className="text-[12.5px] font-medium text-foreground">
                     Canon:
                   </span>
-                  <select
+                  <Select
                     value={selectedCanon}
-                    onChange={(e) =>
-                      handleSelectCanonChange(e.target.value as BibleCanon)
+                    onValueChange={(val) =>
+                      handleSelectCanonChange(val as BibleCanon)
                     }
-                    className="ui-input py-1.5 text-[12.5px]"
                   >
-                    {Object.entries(BIBLE_CANONS_CONFIG).map(
-                      ([key, config]) => (
-                        <option
-                          key={key}
-                          value={key}
-                          className="bg-surface text-foreground"
-                        >
-                          {config.name} ({config.totalBooks} books)
-                        </option>
-                      )
-                    )}
-                  </select>
+                    <SelectTrigger className="h-9 w-[220px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(BIBLE_CANONS_CONFIG).map(
+                        ([key, config]) => (
+                          <SelectItem key={key} value={key}>
+                            {config.name} ({config.totalBooks} books)
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="relative flex-1 sm:max-w-xs">
@@ -956,7 +962,7 @@ export function CustomPlanWizardModal({
                   <button
                     type="button"
                     onClick={selectAll}
-                    className="text-[11.5px] font-medium text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white cursor-pointer"
+                    className="text-[11.5px] font-medium text-foreground-secondary hover:text-foreground cursor-pointer"
                   >
                     Select All
                   </button>
@@ -966,7 +972,7 @@ export function CustomPlanWizardModal({
                   <button
                     type="button"
                     onClick={clearAll}
-                    className="text-[11.5px] font-medium text-neutral-400 hover:text-black dark:hover:text-white cursor-pointer"
+                    className="text-[11.5px] font-medium text-neutral-400 hover:text-foreground cursor-pointer"
                   >
                     Clear All
                   </button>
@@ -985,13 +991,13 @@ export function CustomPlanWizardModal({
                       className="rounded-2xl border border-black/6 bg-white/60 p-3.5 dark:border-white/8 dark:bg-white/3"
                     >
                       <div className="mb-2.5 flex items-center justify-between">
-                        <span className="text-[13px] font-semibold text-black dark:text-white">
+                        <span className="text-[13px] font-semibold text-foreground">
                           {sec.title} ({sec.books.length})
                         </span>
                         <button
                           type="button"
                           onClick={() => toggleSection(sec.books)}
-                          className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white cursor-pointer"
+                          className="text-[11px] font-medium text-foreground-secondary hover:text-foreground cursor-pointer"
                         >
                           {allSectionSelected
                             ? "Deselect section"
@@ -1035,7 +1041,7 @@ export function CustomPlanWizardModal({
               {/* Mode Switcher */}
               <div className="shrink-0 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between border-b border-black/6 pb-2.5 dark:border-white/8">
                 <div>
-                  <span className="text-[13px] font-semibold text-black dark:text-white">
+                  <span className="text-[13px] font-semibold text-foreground">
                     Choose Sequencing Mode
                   </span>
                   <p className="text-[11.5px] text-neutral-500 dark:text-neutral-400">
@@ -1051,8 +1057,8 @@ export function CustomPlanWizardModal({
                     data-testid="order-mode-book-btn"
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                       sequenceMode === "book"
-                        ? "bg-white text-black shadow-2xs dark:bg-black/40 dark:text-white font-semibold"
-                        : "text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                        ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                        : "text-foreground-secondary hover:text-foreground"
                     }`}
                   >
                     <Layers className="size-3.5" />
@@ -1069,8 +1075,8 @@ export function CustomPlanWizardModal({
                     data-testid="order-mode-chapter-btn"
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all cursor-pointer ${
                       sequenceMode === "chapter"
-                        ? "bg-white text-black shadow-2xs dark:bg-black/40 dark:text-white font-semibold"
-                        : "text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                        ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                        : "text-foreground-secondary hover:text-foreground"
                     }`}
                   >
                     <ListOrdered className="size-3.5" />
@@ -1083,10 +1089,10 @@ export function CustomPlanWizardModal({
               {sequenceMode === "book" && (
                 <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-3.5">
                   {/* Left Column: Book Sequence (7 cols) */}
-                  <div className="md:col-span-7 flex flex-col h-full min-h-0 rounded-2xl border border-black/8 bg-white/60 p-4 dark:border-white/8 dark:bg-white/3">
+                  <div className="md:col-span-7 flex flex-col h-full min-h-0 rounded-2xl border border-border bg-surface/60 p-4 dark:border-white/8 dark:bg-white/3">
                     <div className="shrink-0 mb-2.5 flex items-center justify-between">
                       <div>
-                        <span className="text-[12.5px] font-semibold text-black dark:text-white">
+                        <span className="text-[12.5px] font-semibold text-foreground">
                           1. Book Sequence ({orderedBookIds.length} Books)
                         </span>
                         <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
@@ -1096,7 +1102,7 @@ export function CustomPlanWizardModal({
                       <button
                         type="button"
                         onClick={() => setOrderedBookIds([...selectedBookIds])}
-                        className="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[11px] text-foreground-secondary hover:text-foreground cursor-pointer"
                       >
                         <RotateCcw className="size-3" />
                         <span>Reset Order</span>
@@ -1115,7 +1121,7 @@ export function CustomPlanWizardModal({
                               <span className="size-5 rounded-full bg-black/5 text-center text-[10px] font-semibold leading-5 text-neutral-600 dark:bg-white/10 dark:text-neutral-300 shrink-0">
                                 {index + 1}
                               </span>
-                              <span className="font-medium text-black dark:text-white truncate">
+                              <span className="font-medium text-foreground truncate">
                                 {b?.name || id}
                               </span>
                               <span className="text-[11px] text-neutral-400 shrink-0">
@@ -1130,7 +1136,7 @@ export function CustomPlanWizardModal({
                                   moveBook({ index, direction: "up" })
                                 }
                                 disabled={index === 0}
-                                className="rounded-lg p-1.5 text-neutral-400 hover:bg-black/5 hover:text-black disabled:opacity-30 dark:hover:bg-white/10 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
+                                className="rounded-lg p-1.5 text-neutral-400 hover:bg-surface-elevated hover:text-foreground disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
                                 title="Move up"
                               >
                                 <MoveUp className="size-3.5" />
@@ -1141,7 +1147,7 @@ export function CustomPlanWizardModal({
                                   moveBook({ index, direction: "down" })
                                 }
                                 disabled={index === orderedBookIds.length - 1}
-                                className="rounded-lg p-1.5 text-neutral-400 hover:bg-black/5 hover:text-black disabled:opacity-30 dark:hover:bg-white/10 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
+                                className="rounded-lg p-1.5 text-neutral-400 hover:bg-surface-elevated hover:text-foreground disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
                                 title="Move down"
                               >
                                 <MoveDown className="size-3.5" />
@@ -1154,10 +1160,10 @@ export function CustomPlanWizardModal({
                   </div>
 
                   {/* Right Column: Daily Target & Pacing Settings (5 cols) */}
-                  <div className="md:col-span-5 flex flex-col h-full min-h-0 rounded-2xl border border-black/8 bg-white/60 p-4 dark:border-white/8 dark:bg-white/3 overflow-y-auto space-y-4">
+                  <div className="md:col-span-5 flex flex-col h-full min-h-0 rounded-2xl border border-border bg-surface/60 p-4 dark:border-white/8 dark:bg-white/3 overflow-y-auto space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-[12.5px] font-semibold text-black dark:text-white">
+                        <span className="text-[12.5px] font-semibold text-foreground">
                           2. Daily Reading Target
                         </span>
                         <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
@@ -1169,7 +1175,7 @@ export function CustomPlanWizardModal({
                           type="button"
                           onClick={() => setIsPreviewOpen(true)}
                           data-testid="preview-book-schedule-btn"
-                          className="inline-flex items-center gap-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-[11px] font-medium text-black shadow-2xs hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-lg border border-black/10 bg-white px-2 py-1 text-[11px] font-medium text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
                           title="Preview uneditable curriculum list"
                         >
                           <Eye className="size-3 text-zinc-500 dark:text-zinc-400" />
@@ -1232,7 +1238,7 @@ export function CustomPlanWizardModal({
                       <div className="flex items-center gap-2">
                         <Calendar className="size-4 text-zinc-500 dark:text-zinc-400" />
                         <div>
-                          <span className="block text-[11px] font-medium text-black dark:text-white">
+                          <span className="block text-[11px] font-medium text-foreground">
                             Estimated Duration
                           </span>
                           <span className="text-[10px] text-neutral-400">
@@ -1240,7 +1246,7 @@ export function CustomPlanWizardModal({
                           </span>
                         </div>
                       </div>
-                      <span className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[13px] font-bold text-foreground">
                         ~
                         {Math.max(
                           1,
@@ -1253,9 +1259,9 @@ export function CustomPlanWizardModal({
                     </div>
 
                     {/* Schedule Enforcement Mode */}
-                    <div className="space-y-2 pt-2 border-t border-black/6 dark:border-white/8">
+                    <div className="space-y-2 pt-2 border-t border-border">
                       <div>
-                        <span className="text-[12.5px] font-semibold text-black dark:text-white">
+                        <span className="text-[12.5px] font-semibold text-foreground">
                           3. Schedule Enforcement
                         </span>
                         <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
@@ -1279,7 +1285,7 @@ export function CustomPlanWizardModal({
                           <Lock className="size-4 shrink-0 mt-0.5 text-zinc-700 dark:text-zinc-300" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <span className="text-[12px] font-semibold text-black dark:text-white">
+                              <span className="text-[12px] font-semibold text-foreground">
                                 Fixed Daily Pace (Locked)
                               </span>
                               <span className="rounded bg-black/5 px-1.5 py-0.2 text-[9.5px] font-medium text-neutral-600 dark:bg-white/8 dark:text-neutral-300">
@@ -1306,7 +1312,7 @@ export function CustomPlanWizardModal({
                         >
                           <Unlock className="size-4 shrink-0 mt-0.5 text-zinc-700 dark:text-zinc-300" />
                           <div className="flex-1 min-w-0">
-                            <span className="text-[12px] font-semibold text-black dark:text-white">
+                            <span className="text-[12px] font-semibold text-foreground">
                               Flexible Pace
                             </span>
                             <p className="mt-0.5 text-[10.5px] leading-relaxed text-neutral-500 dark:text-neutral-400">
@@ -1332,8 +1338,8 @@ export function CustomPlanWizardModal({
                       data-testid="mobile-tab-books"
                       className={`flex-1 flex items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium transition-all cursor-pointer ${
                         mobileChapterTab === "books"
-                          ? "bg-white text-black shadow-2xs dark:bg-black/40 dark:text-white font-semibold"
-                          : "text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                          ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                          : "text-foreground-secondary hover:text-foreground"
                       }`}
                     >
                       <span>1. Books ({orderedBookIds.length})</span>
@@ -1344,8 +1350,8 @@ export function CustomPlanWizardModal({
                       data-testid="mobile-tab-chapters"
                       className={`flex-1 flex items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium transition-all cursor-pointer ${
                         mobileChapterTab === "chapters"
-                          ? "bg-white text-black shadow-2xs dark:bg-black/40 dark:text-white font-semibold"
-                          : "text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                          ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                          : "text-foreground-secondary hover:text-foreground"
                       }`}
                     >
                       <span className="truncate">
@@ -1358,8 +1364,8 @@ export function CustomPlanWizardModal({
                       data-testid="mobile-tab-order"
                       className={`flex-1 flex items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium transition-all cursor-pointer ${
                         mobileChapterTab === "order"
-                          ? "bg-white text-black shadow-2xs dark:bg-black/40 dark:text-white font-semibold"
-                          : "text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                          ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                          : "text-foreground-secondary hover:text-foreground"
                       }`}
                     >
                       <span>3. Sessions ({curatedSessionsView.length})</span>
@@ -1372,10 +1378,10 @@ export function CustomPlanWizardModal({
                     <div
                       className={`${
                         mobileChapterTab === "books" ? "flex" : "hidden"
-                      } md:flex md:col-span-3 flex-col h-full min-h-0 rounded-2xl border border-black/8 bg-white/60 p-3.5 dark:border-white/8 dark:bg-white/3`}
+                      } md:flex md:col-span-3 flex-col h-full min-h-0 rounded-2xl border border-border bg-surface/60 p-3.5 dark:border-white/8 dark:bg-white/3`}
                     >
                       <div className="shrink-0 mb-2 flex items-center justify-between border-b border-black/5 pb-2 dark:border-white/6">
-                        <span className="text-[12px] font-semibold text-black dark:text-white">
+                        <span className="text-[12px] font-semibold text-foreground">
                           1. Books ({orderedBookIds.length})
                         </span>
                       </div>
@@ -1435,10 +1441,10 @@ export function CustomPlanWizardModal({
                     <div
                       className={`${
                         mobileChapterTab === "chapters" ? "flex" : "hidden"
-                      } md:flex md:col-span-4 flex-col h-full min-h-0 rounded-2xl border border-black/8 bg-white/60 p-3.5 dark:border-white/8 dark:bg-white/3`}
+                      } md:flex md:col-span-4 flex-col h-full min-h-0 rounded-2xl border border-border bg-surface/60 p-3.5 dark:border-white/8 dark:bg-white/3`}
                     >
                       <div className="shrink-0 mb-2 flex items-center justify-between border-b border-black/5 pb-2 dark:border-white/6">
-                        <span className="text-[12px] font-semibold text-black dark:text-white truncate">
+                        <span className="text-[12px] font-semibold text-foreground truncate">
                           2. {activeBookForChapters?.name || "Chapters"} (
                           {activeBookForChapters?.chapters || 0})
                         </span>
@@ -1450,7 +1456,7 @@ export function CustomPlanWizardModal({
                                 bookId: activeBookForChapters.id,
                               })
                             }
-                            className="text-[10.5px] font-medium text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white cursor-pointer shrink-0"
+                            className="text-[10.5px] font-medium text-foreground-secondary hover:text-foreground cursor-pointer shrink-0"
                           >
                             + Add All
                           </button>
@@ -1482,7 +1488,7 @@ export function CustomPlanWizardModal({
                                   data-testid={`add-chapter-${activeBookForChapters.id}-${ch}`}
                                   className={`relative flex h-11 flex-col items-center justify-center rounded-xl p-1 text-[11.5px] font-medium transition-all cursor-pointer ${
                                     occurrences > 0
-                                      ? "border border-black/30 bg-black/6 text-black dark:border-white/30 dark:bg-white/10 dark:text-white"
+                                      ? "border border-black/30 bg-black/6 text-foreground"
                                       : "border border-black/6 bg-white text-neutral-700 hover:border-black/15 hover:bg-neutral-100 dark:border-white/8 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
                                   }`}
                                   title={`Click to add ${activeBookForChapters.name} ${ch} to active session`}
@@ -1491,7 +1497,7 @@ export function CustomPlanWizardModal({
                                   <span
                                     className={`text-[9px] leading-tight ${
                                       occurrences > 0
-                                        ? "text-zinc-900 dark:text-zinc-100 font-semibold"
+                                        ? "text-foreground font-semibold"
                                         : "invisible select-none"
                                     }`}
                                   >
@@ -1513,11 +1519,11 @@ export function CustomPlanWizardModal({
                     <div
                       className={`${
                         mobileChapterTab === "order" ? "flex" : "hidden"
-                      } md:flex md:col-span-5 flex-col h-full min-h-0 rounded-2xl border border-black/8 bg-white/60 p-3.5 dark:border-white/8 dark:bg-white/3`}
+                      } md:flex md:col-span-5 flex-col h-full min-h-0 rounded-2xl border border-border bg-surface/60 p-3.5 dark:border-white/8 dark:bg-white/3`}
                     >
                       <div className="shrink-0 mb-2.5 flex items-center justify-between gap-2 border-b border-black/5 pb-2 dark:border-white/6 min-h-[34px]">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="text-[12px] font-semibold text-black dark:text-white whitespace-nowrap">
+                          <span className="text-[12px] font-semibold text-foreground whitespace-nowrap">
                             3. Sessions
                           </span>
                           <span className="rounded-md bg-black/5 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500 dark:bg-white/8 dark:text-neutral-400 whitespace-nowrap">
@@ -1532,7 +1538,7 @@ export function CustomPlanWizardModal({
                               <button
                                 type="button"
                                 onClick={addAllChaptersOfAllSelectedBooks}
-                                className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white cursor-pointer whitespace-nowrap"
+                                className="text-[11px] font-medium text-foreground-secondary hover:text-foreground cursor-pointer whitespace-nowrap"
                                 title="Populate all chapters from selected books into Session 1"
                               >
                                 Load All
@@ -1545,7 +1551,7 @@ export function CustomPlanWizardModal({
                               type="button"
                               onClick={() => setIsPreviewOpen(true)}
                               data-testid="preview-sessions-btn"
-                              className="inline-flex h-7 items-center gap-1 rounded-lg border border-black/10 bg-white px-2 text-[11px] font-medium text-black shadow-2xs hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 cursor-pointer whitespace-nowrap"
+                              className="inline-flex h-7 items-center gap-1 rounded-lg border border-black/10 bg-white px-2 text-[11px] font-medium text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer whitespace-nowrap"
                               title="Preview uneditable curriculum list"
                             >
                               <Eye className="size-3 text-zinc-500 dark:text-zinc-400" />
@@ -1598,7 +1604,7 @@ export function CustomPlanWizardModal({
                               <div className="flex items-center justify-between border-b border-black/4 pb-1.5 text-[11.5px] dark:border-white/6">
                                 <div className="flex items-center gap-2">
                                   <Calendar className="size-3.5 text-zinc-500 dark:text-zinc-400" />
-                                  <span className="font-semibold text-black dark:text-white">
+                                  <span className="font-semibold text-foreground">
                                     Session {session.sessionIndex}
                                   </span>
                                   <span className="text-[10.5px] text-neutral-400">
@@ -1619,7 +1625,7 @@ export function CustomPlanWizardModal({
                                         session.sessionIndex
                                       );
                                     }}
-                                    className="text-[10.5px] text-neutral-500 hover:text-black dark:hover:text-white cursor-pointer px-1 py-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10"
+                                    className="text-[10.5px] text-neutral-500 hover:text-foreground cursor-pointer px-1 py-0.5 rounded hover:bg-surface-elevated"
                                     title="Merge chapters into previous session"
                                   >
                                     Merge ↑
@@ -1656,7 +1662,7 @@ export function CustomPlanWizardModal({
                                               <span className="size-4.5 rounded-full bg-black/5 text-center text-[10px] font-semibold leading-4.5 text-neutral-600 dark:bg-white/10 dark:text-neutral-300 shrink-0">
                                                 {gIdx + 1}
                                               </span>
-                                              <span className="font-medium text-black dark:text-white truncate">
+                                              <span className="font-medium text-foreground truncate">
                                                 {b?.name || item.bookId}{" "}
                                                 {item.chapter}
                                               </span>
@@ -1673,7 +1679,7 @@ export function CustomPlanWizardModal({
                                                   });
                                                 }}
                                                 disabled={gIdx === 0}
-                                                className="rounded p-1 text-neutral-400 hover:text-black disabled:opacity-20 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
+                                                className="rounded p-1 text-foreground-dim hover:text-foreground disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
                                                 title="Move up"
                                               >
                                                 <MoveUp className="size-3" />
@@ -1691,7 +1697,7 @@ export function CustomPlanWizardModal({
                                                   gIdx ===
                                                   chapterSequence.length - 1
                                                 }
-                                                className="rounded p-1 text-neutral-400 hover:text-black disabled:opacity-20 dark:hover:text-white cursor-pointer disabled:cursor-not-allowed"
+                                                className="rounded p-1 text-foreground-dim hover:text-foreground disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
                                                 title="Move down"
                                               >
                                                 <MoveDown className="size-3" />
@@ -1726,7 +1732,7 @@ export function CustomPlanWizardModal({
                                                     idxInSession
                                                   );
                                                 }}
-                                                className="group flex items-center gap-1 rounded px-2 py-0.5 text-[9.5px] text-neutral-400 hover:bg-black/5 hover:text-black dark:hover:text-white dark:hover:bg-white/8 cursor-pointer transition-all"
+                                                className="group flex items-center gap-1 rounded px-2 py-0.5 text-[9.5px] text-neutral-400 hover:bg-black/5 hover:text-foreground dark:hover:bg-white/8 cursor-pointer transition-all"
                                                 title="Split into new session starting next chapter"
                                               >
                                                 <Split className="size-2.5 opacity-60 group-hover:opacity-100" />
@@ -1759,7 +1765,7 @@ export function CustomPlanWizardModal({
               {/* Title & Description */}
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[12.5px] font-medium text-black dark:text-white mb-1">
+                  <label className="block text-[12.5px] font-medium text-foreground mb-1">
                     Plan Title *
                   </label>
                   <input
@@ -1789,10 +1795,10 @@ export function CustomPlanWizardModal({
 
               {/* For Book Mode: Read-Only Pacing Summary (Chosen in Step 2) */}
               {sequenceMode === "book" && (
-                <div className="rounded-2xl border border-black/8 bg-white/60 p-5 dark:border-white/8 dark:bg-white/3 space-y-4">
+                <div className="rounded-2xl border border-border bg-surface/60 p-5 dark:border-white/8 dark:bg-white/3 space-y-4">
                   <div className="flex items-center justify-between border-b border-black/6 pb-3 dark:border-white/8">
                     <div>
-                      <h4 className="text-[13.5px] font-semibold text-black dark:text-white">
+                      <h4 className="text-[13.5px] font-semibold text-foreground">
                         Plan Pacing Summary
                       </h4>
                       <p className="text-[11.5px] text-neutral-500 dark:text-neutral-400">
@@ -1802,7 +1808,7 @@ export function CustomPlanWizardModal({
                     <button
                       type="button"
                       onClick={() => setCurrentStep("order")}
-                      className="text-[11.5px] font-medium text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white cursor-pointer"
+                      className="text-[11.5px] font-medium text-foreground-secondary hover:text-foreground cursor-pointer"
                     >
                       Edit Pacing in Step 2
                     </button>
@@ -1813,7 +1819,7 @@ export function CustomPlanWizardModal({
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
                         Total Scope
                       </span>
-                      <span className="text-[14px] font-bold text-black dark:text-white">
+                      <span className="text-[14px] font-bold text-foreground">
                         {orderedBookIds.length} Books ({totalPlanChapters} ch)
                       </span>
                     </div>
@@ -1822,7 +1828,7 @@ export function CustomPlanWizardModal({
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
                         Daily Reading Target
                       </span>
-                      <span className="text-[14px] font-bold text-black dark:text-white">
+                      <span className="text-[14px] font-bold text-foreground">
                         {dailyTarget} ch / day
                       </span>
                     </div>
@@ -1831,7 +1837,7 @@ export function CustomPlanWizardModal({
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
                         Schedule Mode
                       </span>
-                      <span className="text-[12.5px] font-semibold text-black dark:text-white">
+                      <span className="text-[12.5px] font-semibold text-foreground">
                         {pacingStyle === "locked_curated"
                           ? `Fixed Daily Pace (${dailyTarget} ch/day)`
                           : "Flexible Pace"}
@@ -1842,7 +1848,7 @@ export function CustomPlanWizardModal({
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
                         Projected Duration
                       </span>
-                      <span className="text-[14px] font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[14px] font-bold text-foreground">
                         ~
                         {Math.max(
                           1,
@@ -1859,9 +1865,9 @@ export function CustomPlanWizardModal({
 
               {/* For Build Sessions Mode: Choose Fixed vs Flexible */}
               {sequenceMode === "chapter" && (
-                <div className="rounded-2xl border border-black/8 bg-white/60 p-5 dark:border-white/8 dark:bg-white/3 space-y-4">
+                <div className="rounded-2xl border border-border bg-surface/60 p-5 dark:border-white/8 dark:bg-white/3 space-y-4">
                   <div>
-                    <h4 className="text-[14px] font-semibold text-black dark:text-white">
+                    <h4 className="text-[14px] font-semibold text-foreground">
                       Session Schedule Enforcement
                     </h4>
                     <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
@@ -1896,7 +1902,7 @@ export function CustomPlanWizardModal({
                           Fixed Sessions ({populatedSessions.length} Sessions
                           Built)
                         </span>
-                        <span className="ui-pill text-[10.5px]">
+                        <span className="rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
                           Recommended
                         </span>
                       </div>
@@ -1930,7 +1936,7 @@ export function CustomPlanWizardModal({
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[13.5px] font-semibold text-black dark:text-white">
+                        <span className="text-[13.5px] font-semibold text-foreground">
                           Flexible Pace
                         </span>
                       </div>
@@ -1947,9 +1953,9 @@ export function CustomPlanWizardModal({
                       data-testid="flexible-session-warning"
                       className="rounded-xl border border-zinc-300 bg-zinc-100 p-3.5 text-[12px] text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 flex items-start gap-2.5"
                     >
-                      <AlertTriangle className="size-4 shrink-0 mt-0.5 text-zinc-600 dark:text-zinc-400" />
+                      <AlertTriangle className="size-4 shrink-0 mt-0.5 text-foreground-secondary" />
                       <div className="space-y-1">
-                        <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        <p className="font-semibold text-foreground">
                           Session Distribution Warning
                         </p>
                         <p className="leading-relaxed opacity-95">
@@ -1970,7 +1976,7 @@ export function CustomPlanWizardModal({
                   {pacingStyle === "flexible" && (
                     <div className="flex items-center justify-between border-t border-black/6 pt-3 dark:border-white/6">
                       <div>
-                        <span className="text-[12.5px] font-medium text-black dark:text-white">
+                        <span className="text-[12.5px] font-medium text-foreground">
                           Suggested Daily Target
                         </span>
                         <p className="text-[11px] text-neutral-500">
@@ -2024,7 +2030,7 @@ export function CustomPlanWizardModal({
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
                         Total Chapters
                       </span>
-                      <span className="text-[16px] font-bold text-black dark:text-white">
+                      <span className="text-[16px] font-bold text-foreground">
                         {totalPlanChapters}
                       </span>
                     </div>
@@ -2034,7 +2040,7 @@ export function CustomPlanWizardModal({
                           ? "Curated Sessions"
                           : "Projected Duration"}
                       </span>
-                      <span className="text-[16px] font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[16px] font-bold text-foreground">
                         {pacingStyle === "locked_curated"
                           ? `${populatedSessions.length} Sessions`
                           : `~${Math.max(1, Math.ceil(totalPlanChapters / Math.max(1, dailyTarget)))} Days`}
@@ -2044,7 +2050,7 @@ export function CustomPlanWizardModal({
                       <span className="block text-[11px] text-neutral-500 dark:text-neutral-400">
                         Pacing Mode
                       </span>
-                      <span className="text-[13px] font-semibold text-black dark:text-white">
+                      <span className="text-[13px] font-semibold text-foreground">
                         {pacingStyle === "locked_curated"
                           ? "🔒 Locked Curated"
                           : "⚡ Flexible"}
@@ -2055,12 +2061,12 @@ export function CustomPlanWizardModal({
               )}
 
               {/* Curriculum & Reading Breakdown Preview (Uneditable) */}
-              <div className="rounded-2xl border border-black/8 bg-white/60 p-5 dark:border-white/8 dark:bg-white/3 space-y-3">
+              <div className="rounded-2xl border border-border bg-surface/60 p-5 dark:border-white/8 dark:bg-white/3 space-y-3">
                 <div className="flex items-center justify-between border-b border-black/6 pb-2.5 dark:border-white/8">
                   <div className="flex items-center gap-2">
                     <BookOpen className="size-4 text-zinc-500 dark:text-zinc-400" />
                     <div>
-                      <h4 className="text-[13.5px] font-semibold text-black dark:text-white">
+                      <h4 className="text-[13.5px] font-semibold text-foreground">
                         Curriculum & Reading Schedule Preview
                       </h4>
                       <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
@@ -2092,7 +2098,7 @@ export function CustomPlanWizardModal({
                         <div className="flex items-center justify-between border-b border-black/4 pb-1.5 dark:border-white/6 text-[11.5px]">
                           <div className="flex items-center gap-1.5">
                             <Calendar className="size-3 text-zinc-500 dark:text-zinc-400" />
-                            <span className="font-semibold text-black dark:text-white">
+                            <span className="font-semibold text-foreground">
                               {session.title}
                             </span>
                           </div>
@@ -2113,7 +2119,7 @@ export function CustomPlanWizardModal({
                               <span className="flex size-4 items-center justify-center rounded-full bg-black/5 text-[9px] text-neutral-500 dark:bg-white/10 dark:text-neutral-400">
                                 {idx + 1}
                               </span>
-                              <span className="font-medium text-black dark:text-white">
+                              <span className="font-medium text-foreground">
                                 {BIBLE_BOOK_MAP[ch.bookId]?.name || ch.bookId}{" "}
                                 {ch.chapter}
                               </span>
@@ -2250,7 +2256,7 @@ export function CustomPlanWizardModal({
                 <div>
                   <h3
                     id="preview-curriculum-title"
-                    className="text-[15px] font-semibold text-black dark:text-white"
+                    className="text-[15px] font-semibold text-foreground"
                   >
                     Curriculum & Schedule Preview
                   </h3>
@@ -2266,7 +2272,7 @@ export function CustomPlanWizardModal({
               <button
                 type="button"
                 onClick={() => setIsPreviewOpen(false)}
-                className="flex size-8 items-center justify-center rounded-full border border-black/8 bg-white text-neutral-500 hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
+                className="flex size-8 items-center justify-center rounded-full border border-border bg-surface text-foreground-secondary hover:text-foreground hover:bg-surface-elevated transition-colors cursor-pointer"
                 aria-label="Close preview"
               >
                 <X className="size-4" />
@@ -2288,7 +2294,7 @@ export function CustomPlanWizardModal({
                     <div className="flex items-center justify-between border-b border-black/4 pb-2 dark:border-white/6 text-[12px]">
                       <div className="flex items-center gap-2">
                         <Calendar className="size-3.5 text-zinc-500 dark:text-zinc-400" />
-                        <span className="font-semibold text-black dark:text-white">
+                        <span className="font-semibold text-foreground">
                           {session.title}
                         </span>
                       </div>
@@ -2307,7 +2313,7 @@ export function CustomPlanWizardModal({
                           <span className="flex size-4.5 items-center justify-center rounded-full bg-black/5 text-[9.5px] text-neutral-500 dark:bg-white/10 dark:text-neutral-400">
                             {idx + 1}
                           </span>
-                          <span className="font-medium text-black dark:text-white">
+                          <span className="font-medium text-foreground">
                             {BIBLE_BOOK_MAP[ch.bookId]?.name || ch.bookId}{" "}
                             {ch.chapter}
                           </span>
@@ -2324,7 +2330,7 @@ export function CustomPlanWizardModal({
               <button
                 type="button"
                 onClick={() => setIsPreviewOpen(false)}
-                className="rounded-xl border border-black/10 bg-white px-4 py-1.5 text-[12px] font-medium text-black shadow-2xs hover:bg-neutral-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 cursor-pointer"
+                className="rounded-xl border border-black/10 bg-white px-4 py-1.5 text-[12px] font-medium text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
               >
                 Close Preview
               </button>

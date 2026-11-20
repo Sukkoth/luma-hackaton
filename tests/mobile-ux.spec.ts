@@ -47,7 +47,7 @@ test.describe("Mobile Navigation & Filter UX", () => {
 
     // Verify links inside mobile bottom nav
     await expect(
-      mobileNav.getByRole("link", { name: "Overview" })
+      mobileNav.getByRole("link", { name: /home|overview/i })
     ).toBeVisible();
     await expect(mobileNav.getByRole("link", { name: "Books" })).toBeVisible();
     await expect(mobileNav.getByRole("link", { name: "Plans" })).toBeVisible();
