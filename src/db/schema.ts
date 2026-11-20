@@ -686,6 +686,7 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   }),
   members: many(groupMembers),
   plans: many(groupPlans),
+  activities: many(groupActivities),
 }));
 
 export const groupMembers = pgTable(
@@ -703,6 +704,9 @@ export const groupMembers = pgTable(
     role: varchar("role", { length: 20 }).default("member").notNull(), // 'owner' | 'admin' | 'member'
     status: varchar("status", { length: 20 }).default("active").notNull(), // 'active' | 'pending_approval'
     hideProgress: boolean("hide_progress").default(false).notNull(),
+    lastViewedAt: timestamp("last_viewed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     privacyUpdatedAt: timestamp("privacy_updated_at", { withTimezone: true }),
     joinedAt: timestamp("joined_at", { withTimezone: true })
       .defaultNow()
@@ -727,6 +731,44 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
   }),
   user: one(user, {
     fields: [groupMembers.userId],
+    references: [user.id],
+  }),
+}));
+
+export const groupActivities = pgTable(
+  "group_activities",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    groupId: text("group_id")
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    actorId: text("actor_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: varchar("type", { length: 50 }).notNull(), // 'member_joined' | 'notice_pinned' | 'plan_scheduled'
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    actionUrl: text("action_url"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_group_activities_group").on(table.groupId),
+    index("idx_group_activities_actor").on(table.actorId),
+    index("idx_group_activities_created").on(table.createdAt),
+  ]
+);
+
+export const groupActivitiesRelations = relations(groupActivities, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupActivities.groupId],
+    references: [groups.id],
+  }),
+  actor: one(user, {
+    fields: [groupActivities.actorId],
     references: [user.id],
   }),
 }));

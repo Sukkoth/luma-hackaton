@@ -243,14 +243,11 @@ export function SettingsView({
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            router.push("/login");
-            router.refresh();
-          },
-        },
-      });
+      await authClient.signOut();
+      setIsLogoutModalOpen(false);
+      setIsSigningOut(false);
+      router.push("/login");
+      router.refresh();
     } catch {
       setIsSigningOut(false);
     }

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   getUserNotificationsAction,
+  getUnreadNotificationCountAction,
   markNotificationAsReadAction,
   markAllNotificationsAsReadAction,
   deleteNotificationAction,
@@ -79,37 +80,55 @@ export function NotificationCenter({ isMobile = false }: Props) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const hasLoadedListRef = useRef(false);
+  const fetchSeqRef = useRef(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const fetchUnreadCountOnly = useCallback(async () => {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+      return;
+    }
+    const seq = ++fetchSeqRef.current;
+    try {
+      const res = await getUnreadNotificationCountAction();
+      if (res.success && seq === fetchSeqRef.current) {
+        setUnreadCount(res.count);
+      }
+    } catch {
+      // Ignore background network errors
+    }
+  }, []);
+
   const fetchNotifications = useCallback(
     async ({ showLoading = false }: { showLoading?: boolean } = {}) => {
+      const seq = ++fetchSeqRef.current;
       if (showLoading) setIsLoading(true);
       try {
         const res = await getUserNotificationsAction({ limit: 40 });
-        if (res.success) {
+        if (res.success && seq === fetchSeqRef.current) {
           setNotifications(res.notifications);
           setUnreadCount(res.unreadCount);
+          hasLoadedListRef.current = true;
         }
       } catch {
         // Ignore network errors on background poll
       } finally {
-        if (showLoading) setIsLoading(false);
+        if (showLoading && seq === fetchSeqRef.current) setIsLoading(false);
       }
     },
     []
   );
 
-  // Initial load and refetch on pathname navigation
+  // Initial load: lightweight unread count on mount or pathname change
   useEffect(() => {
     let isCancelled = false;
 
     async function load() {
       try {
-        const res = await getUserNotificationsAction({ limit: 40 });
+        const res = await getUnreadNotificationCountAction();
         if (!isCancelled && res.success) {
-          setNotifications(res.notifications);
-          setUnreadCount(res.unreadCount);
+          setUnreadCount(res.count);
         }
       } catch {
         // Ignore network errors
@@ -123,28 +142,47 @@ export function NotificationCenter({ isMobile = false }: Props) {
     };
   }, [pathname]);
 
-  // Periodic polling (every 15s) and window focus refetch
+  // When panel opens: fetch full list immediately if not yet loaded or if open
   useEffect(() => {
-    const interval = setInterval(() => {
-      void fetchNotifications();
-    }, 15000);
+    if (isOpen) {
+      void fetchNotifications({ showLoading: !hasLoadedListRef.current });
+    }
+  }, [isOpen, fetchNotifications]);
 
-    const handleFocus = () => {
-      void fetchNotifications();
+  // Smart polling:
+  // - 60s when closed (unread count only: 1 fast query)
+  // - 30s when open (full list)
+  // - 0s when tab is in background (saves database connections and mobile battery)
+  useEffect(() => {
+    const intervalMs = isOpen ? 30000 : 60000;
+    const interval = setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      if (isOpen) {
+        void fetchNotifications();
+      } else {
+        void fetchUnreadCountOnly();
+      }
+    }, intervalMs);
+
+    const handleSync = () => {
+      if (document.visibilityState === "visible") {
+        if (isOpen) {
+          void fetchNotifications();
+        } else {
+          void fetchUnreadCountOnly();
+        }
+      }
     };
 
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        void fetchNotifications();
-      }
-    });
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("visibilitychange", handleSync);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("visibilitychange", handleSync);
     };
-  }, [fetchNotifications]);
+  }, [isOpen, fetchNotifications, fetchUnreadCountOnly]);
 
   // Close desktop popover on outside click
   useEffect(() => {
@@ -170,6 +208,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
   }: {
     notificationId: string;
   }) => {
+    fetchSeqRef.current++;
     // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
@@ -180,6 +219,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
   };
 
   const handleMarkAllAsRead = async () => {
+    fetchSeqRef.current++;
     // Optimistic update
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     setUnreadCount(0);
@@ -192,6 +232,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
   }: {
     notificationId: string;
   }) => {
+    fetchSeqRef.current++;
     const target = notifications.find((n) => n.id === notificationId);
     setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     if (target && !target.isRead) {
@@ -411,10 +452,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
       {/* Bell Trigger Button */}
       <button
         type="button"
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) fetchNotifications();
-        }}
+        onClick={() => setIsOpen(!isOpen)}
         aria-label="Notifications"
         data-testid={
           isMobile ? "mobile-notifications-button" : "desktop-notifications-button"

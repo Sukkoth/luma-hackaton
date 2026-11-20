@@ -108,6 +108,7 @@ function LoginContent() {
         return;
       }
 
+      setIsLoading(false);
       router.push(redirectTarget);
       router.refresh();
     } catch {

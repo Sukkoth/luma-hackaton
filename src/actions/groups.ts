@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { and, eq, desc, ilike, inArray, ne, sql } from "drizzle-orm";
+import { and, eq, desc, ilike, inArray, gte, sql } from "drizzle-orm";
 import * as v from "valibot";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
@@ -12,6 +12,7 @@ import {
   groupMembers,
   groupPlans,
   groupMemberEnrollments,
+  groupActivities,
   notes,
   planInstances,
   planInstanceReadings,
@@ -783,7 +784,30 @@ export async function joinGroupAction({
     });
 
     if (status === "active") {
-      // 1. Notify joining user
+      // 1. Post to fellowship notice board (Fan-out on Read: 1 single write for all 1000+ members, including owner)
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const existingRecentActivity = await db.query.groupActivities.findFirst({
+        where: and(
+          eq(groupActivities.groupId, groupRecord.id),
+          eq(groupActivities.actorId, session.user.id),
+          eq(groupActivities.type, "member_joined"),
+          gte(groupActivities.createdAt, tenMinutesAgo)
+        ),
+        columns: { id: true },
+      });
+
+      if (!existingRecentActivity) {
+        await db.insert(groupActivities).values({
+          groupId: groupRecord.id,
+          actorId: session.user.id,
+          type: "member_joined",
+          title: "New Group Member",
+          body: `${session.user.name || "A new member"} joined "${groupRecord.name}".`,
+          actionUrl: `/groups/${groupRecord.id}`,
+        });
+      }
+
+      // 2. Personal welcome notification for joining user
       await createNotificationAction({
         userId: session.user.id,
         input: {
@@ -793,20 +817,6 @@ export async function joinGroupAction({
           actionUrl: `/groups/${groupRecord.id}`,
         },
       });
-
-      // 2. Notify group owner
-      if (groupRecord.ownerId !== session.user.id) {
-        const joinerName = session.user.name || "A new member";
-        await createNotificationAction({
-          userId: groupRecord.ownerId,
-          input: {
-            type: "group_activity",
-            title: "New Group Member",
-            body: `${joinerName} joined your group "${groupRecord.name}".`,
-            actionUrl: `/groups/${groupRecord.id}`,
-          },
-        });
-      }
     } else {
       // 1. Notify applicant
       await createNotificationAction({
@@ -974,6 +984,16 @@ export async function approveMemberAction({
         body: `Your request to join "${groupRecord?.name || "the group"}" was approved!`,
         actionUrl: `/groups/${groupId}`,
       },
+    });
+
+    // Post to fellowship notice board (Fan-out on Read)
+    await db.insert(groupActivities).values({
+      groupId,
+      actorId: targetUserId,
+      type: "member_joined",
+      title: "New Fellowship Member",
+      body: `A new member was approved to join "${groupRecord?.name || "the group"}".`,
+      actionUrl: `/groups/${groupId}`,
     });
 
     revalidatePath(`/groups/${groupId}`);
@@ -1543,27 +1563,15 @@ export async function scheduleGroupPlanAction({
       columns: { name: true },
     });
 
-    // Notify all other active group members of the new group plan
-    const otherMembers = await db.query.groupMembers.findMany({
-      where: and(
-        eq(groupMembers.groupId, groupId),
-        eq(groupMembers.status, "active"),
-        ne(groupMembers.userId, session.user.id)
-      ),
-      columns: { userId: true },
+    // Post to fellowship notice board (Fan-out on Read: 1 single write for all 1000+ members)
+    await db.insert(groupActivities).values({
+      groupId,
+      actorId: session.user.id,
+      type: "plan_scheduled",
+      title: "New Fellowship Plan",
+      body: `"${template.title}" was scheduled in "${groupRecord?.name || "your group"}". Tap to join.`,
+      actionUrl: `/groups/${groupId}`,
     });
-
-    for (const m of otherMembers) {
-      await createNotificationAction({
-        userId: m.userId,
-        input: {
-          type: "group_activity",
-          title: "New Fellowship Plan",
-          body: `"${template.title}" was scheduled in "${groupRecord?.name || "your group"}". Tap to join.`,
-          actionUrl: `/groups/${groupId}`,
-        },
-      });
-    }
 
     revalidatePath(`/groups/${groupId}`);
     return { success: true, groupPlanId: newPlan.id };
@@ -2057,30 +2065,19 @@ export async function setGroupPinnedNoticeAction({
       })
       .where(eq(groups.id, groupId));
 
-    // Notify all active group members of the announcement
-    const otherMembers = await db.query.groupMembers.findMany({
-      where: and(
-        eq(groupMembers.groupId, groupId),
-        eq(groupMembers.status, "active"),
-        ne(groupMembers.userId, session.user.id)
-      ),
-      columns: { userId: true },
-    });
-
     const noticeTitle = parsed.output.title
       ? parsed.output.title.trim()
       : "Announcement";
-    for (const m of otherMembers) {
-      await createNotificationAction({
-        userId: m.userId,
-        input: {
-          type: "group_activity",
-          title: `Announcement: "${groupRecord.name}"`,
-          body: `${noticeTitle}: ${parsed.output.content.trim().slice(0, 100)}`,
-          actionUrl: `/groups/${groupId}`,
-        },
-      });
-    }
+
+    // Post to fellowship notice board (Fan-out on Read: 1 single write for all 1000+ members)
+    await db.insert(groupActivities).values({
+      groupId,
+      actorId: session.user.id,
+      type: "notice_pinned",
+      title: `Announcement: "${groupRecord.name}"`,
+      body: `${noticeTitle}: ${parsed.output.content.trim().slice(0, 100)}`,
+      actionUrl: `/groups/${groupId}`,
+    });
 
     revalidatePath(`/groups/${groupId}`);
     return { success: true };
