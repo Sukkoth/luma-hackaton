@@ -49,28 +49,54 @@ export function GroupPlanEnrollModal({
     if (!scheduledStartDate) {
       return { isFuture: false, relativeDaysStr: "", formattedStartDate: "" };
     }
-    const startObj =
-      scheduledStartDate instanceof Date
-        ? scheduledStartDate
-        : new Date(scheduledStartDate);
-    const todayMidnight = new Date();
-    todayMidnight.setHours(0, 0, 0, 0);
+    let sYear: number;
+    let sMonth: number;
+    let sDate: number;
 
-    const isFut = startObj.getTime() > todayMidnight.getTime();
-    const diffDays = Math.ceil(
-      (startObj.getTime() - todayMidnight.getTime()) / (1000 * 60 * 60 * 24)
+    if (
+      typeof scheduledStartDate === "string" &&
+      /^\d{4}-\d{2}-\d{2}/.test(scheduledStartDate)
+    ) {
+      const parts = scheduledStartDate.slice(0, 10).split("-").map(Number);
+      sYear = parts[0]!;
+      sMonth = parts[1]! - 1;
+      sDate = parts[2]!;
+    } else {
+      const startObj =
+        scheduledStartDate instanceof Date
+          ? scheduledStartDate
+          : new Date(scheduledStartDate);
+      sYear = startObj.getFullYear();
+      sMonth = startObj.getMonth();
+      sDate = startObj.getDate();
+    }
+
+    const today = new Date();
+    const startLocalMidnight = new Date(sYear, sMonth, sDate).getTime();
+    const todayLocalMidnight = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    ).getTime();
+
+    const diffDays = Math.round(
+      (startLocalMidnight - todayLocalMidnight) / (1000 * 60 * 60 * 24)
     );
+    const isFut = diffDays > 0;
     const relStr =
-      diffDays === 0
+      diffDays <= 0
         ? "Starts Today"
         : diffDays === 1
           ? "Starts Tomorrow"
           : `Starts in ${diffDays} days`;
-    const fmtStr = startObj.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const fmtStr = new Date(sYear, sMonth, sDate).toLocaleDateString(
+      undefined,
+      {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }
+    );
 
     return {
       isFuture: isFut,

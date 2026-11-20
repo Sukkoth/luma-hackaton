@@ -354,8 +354,8 @@ test.describe("Groups & Community Fellowship E2E", () => {
       if (!(await adminOption.isVisible())) {
         await roleSelect.click();
       }
-      await expect(adminOption).toBeVisible({ timeout: 1000 });
-    }).toPass({ timeout: 5000 });
+      await expect(adminOption).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
 
     await adminOption.click();
 

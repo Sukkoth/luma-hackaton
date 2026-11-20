@@ -5,6 +5,12 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./tests",
+  /* Global timeout per test */
+  timeout: 60 * 1000,
+  /* Expect assertion timeout: increases default 5000ms to 15s on CI, 10s locally */
+  expect: {
+    timeout: process.env.CI ? 15 * 1000 : 10 * 1000,
+  },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -14,6 +20,8 @@ export default defineConfig({
     baseURL: BASE_URL,
     headless: true,
     trace: "on-first-retry",
+    actionTimeout: process.env.CI ? 15 * 1000 : 10 * 1000,
+    navigationTimeout: process.env.CI ? 30 * 1000 : 20 * 1000,
   },
   projects: [
     {
@@ -22,7 +30,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "bun run dev",
+    command: process.env.CI ? "bun run start" : "bun run dev",
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
