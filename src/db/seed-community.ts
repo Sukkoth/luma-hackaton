@@ -12,10 +12,14 @@ import {
   planInstances,
   planInstanceReadings,
   notes,
+  unlockedAchievements,
+  notifications,
 } from "@/db/schema";
-import { eq, inArray, and } from "drizzle-orm";
+import { eq, inArray, and, sql, isNull } from "drizzle-orm";
 import { ensurePlanTemplateInDb } from "@/actions/plans";
 import { getReadingPlanById } from "@/data/readingPlans";
+import { ACHIEVEMENTS } from "@/data/achievements";
+import { syncUserStreak } from "@/lib/streak-service";
 
 // Shared password hash for "Password123!" from Better-Auth credential provider
 const PASSWORD_HASH =
@@ -244,6 +248,133 @@ const SEED_GROUPS: ReadonlyArray<SeedGroupDef> = [
     activePlanTemplateId: "hebrews_short_7",
   },
 ];
+
+type SeedUserAchievementsParams = {
+  readonly userMap: ReadonlyMap<
+    string,
+    { id: string; name: string; email: string; trackerId: string }
+  >;
+};
+
+async function seedUserAchievements({
+  userMap,
+}: SeedUserAchievementsParams): Promise<void> {
+  console.log(
+    "6. Seeding and pre-celebrating unlocked achievements for all seed users..."
+  );
+
+  const pastDate = new Date(Date.now() - 7 * 86400000);
+  const userIds = Array.from(userMap.values()).map((u) => u.id);
+
+  if (userIds.length === 0) return;
+
+  for (const uData of userMap.values()) {
+    const userTrackers = await db.query.readingTrackers.findMany({
+      where: eq(readingTrackers.userId, uData.id),
+      columns: { id: true },
+    });
+    const trackerIds = userTrackers.map((t) => t.id);
+
+    const progressRows =
+      trackerIds.length > 0
+        ? await db.query.trackerChapterProgress.findMany({
+            where: inArray(trackerChapterProgress.trackerId, trackerIds),
+          })
+        : [];
+
+    const completedPlans = await db.query.planInstances.findMany({
+      where: and(
+        eq(planInstances.userId, uData.id),
+        inArray(planInstances.status, ["completed", "finished"])
+      ),
+      columns: { id: true },
+    });
+
+    const streak = await syncUserStreak({ userId: uData.id });
+
+    const globalProgress: Record<string, number[]> = {};
+    for (const row of progressRows) {
+      if (!globalProgress[row.bookId]) {
+        globalProgress[row.bookId] = [];
+      }
+      globalProgress[row.bookId]!.push(row.chapter);
+    }
+
+    let totalChaptersRead = 0;
+    for (const bookId in globalProgress) {
+      const chapters = globalProgress[bookId];
+      if (chapters) {
+        totalChaptersRead += new Set(chapters).size;
+      }
+    }
+
+    const achievementsToInsert: Array<{
+      userId: string;
+      achievementId: string;
+      unlockedAt: Date;
+      celebratedAt: Date;
+    }> = [];
+
+    for (const ach of ACHIEVEMENTS) {
+      const evalResult = ach.checkUnlocked(
+        globalProgress,
+        userTrackers.length,
+        totalChaptersRead,
+        streak.currentStreak,
+        completedPlans.length
+      );
+
+      if (evalResult.unlocked) {
+        achievementsToInsert.push({
+          userId: uData.id,
+          achievementId: ach.id,
+          unlockedAt: pastDate,
+          celebratedAt: pastDate,
+        });
+      }
+    }
+
+    if (achievementsToInsert.length > 0) {
+      await db
+        .insert(unlockedAchievements)
+        .values(achievementsToInsert)
+        .onConflictDoUpdate({
+          target: [
+            unlockedAchievements.userId,
+            unlockedAchievements.achievementId,
+          ],
+          set: {
+            celebratedAt: sql`COALESCE(${unlockedAchievements.celebratedAt}, EXCLUDED.celebrated_at)`,
+          },
+        });
+    }
+  }
+
+  // Ensure any existing uncelebrated achievements for seed users are marked as celebrated
+  await db
+    .update(unlockedAchievements)
+    .set({
+      celebratedAt: pastDate,
+    })
+    .where(
+      and(
+        inArray(unlockedAchievements.userId, userIds),
+        isNull(unlockedAchievements.celebratedAt)
+      )
+    );
+
+  // Clean up any stale achievement notifications created during previous logins
+  await db
+    .delete(notifications)
+    .where(
+      and(
+        inArray(notifications.userId, userIds),
+        eq(notifications.type, "achievement")
+      )
+    );
+
+  console.log("Pre-celebrated achievements seeded cleanly.");
+}
 
 export async function seedCommunityData(): Promise<void> {
   console.log("==========================================");
@@ -750,6 +881,9 @@ export async function seedCommunityData(): Promise<void> {
       }
     }
   }
+
+  // 6. Seed and pre-celebrate unlocked achievements for all seed users
+  await seedUserAchievements({ userMap });
 
   console.log("==========================================");
   console.log("   COMMUNITY SEEDING COMPLETED SUCCESS    ");
