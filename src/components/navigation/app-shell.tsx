@@ -106,7 +106,7 @@ export function AppShell({
       await authClient.signOut();
       setIsLogoutModalOpen(false);
       setIsSigningOut(false);
-      router.push("/login");
+      router.push("/");
       router.refresh();
     } catch {
       setIsSigningOut(false);
@@ -129,40 +129,13 @@ export function AppShell({
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur-md px-4 py-3 sm:px-6 md:px-8">
           <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
             <Link href="/" className="group flex items-center gap-2.5">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] text-primary border border-border/80 shadow-2xs">
-                <LumaIcon className="size-4.5 text-primary" />
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] border border-border/80 shadow-2xs overflow-hidden">
+                <LumaIcon className="size-full rounded-lg" size={28} />
               </span>
               <span className="text-xl font-bold tracking-tight text-foreground">
                 Luma
               </span>
             </Link>
-
-            <nav className="flex items-center gap-1 rounded-xl border border-border bg-card p-1">
-              <Link
-                href="/books"
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
-                  pathname.startsWith("/books")
-                    ? "bg-primary text-primary-foreground shadow-2xs"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <BookOpen className="size-3.5" />
-                <span>Books</span>
-              </Link>
-              <Link
-                href="/plans"
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
-                  pathname.startsWith("/plans")
-                    ? "bg-primary text-primary-foreground shadow-2xs"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <Calendar className="size-3.5" />
-                <span>Plans</span>
-              </Link>
-            </nav>
 
             <div className="flex items-center gap-2">
               <ThemeToggle />
@@ -202,8 +175,8 @@ export function AppShell({
           {/* Brand */}
           <div className="flex items-center justify-between px-2 pt-1">
             <Link href="/home" className="flex items-center gap-2.5 group">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-[#0c0a09] text-primary border border-border/80 transition-transform group-hover:scale-105 shadow-2xs">
-                <LumaIcon className="size-5.5 text-primary" />
+              <span className="flex size-8 items-center justify-center rounded-xl bg-[#0c0a09] border border-border/80 transition-transform group-hover:scale-105 shadow-2xs overflow-hidden">
+                <LumaIcon className="size-full rounded-xl" size={32} />
               </span>
               <div className="flex flex-col">
                 <span className="text-lg font-bold tracking-tight text-foreground leading-none">
@@ -331,8 +304,8 @@ export function AppShell({
               href="/home"
               className="flex items-center gap-2 text-lg font-bold text-foreground"
             >
-              <span className="flex size-6 items-center justify-center rounded-md bg-[#0c0a09] text-primary border border-border/80 shadow-2xs">
-                <LumaIcon className="size-4 text-primary" />
+              <span className="flex size-6 items-center justify-center rounded-md bg-[#0c0a09] border border-border/80 shadow-2xs overflow-hidden">
+                <LumaIcon className="size-full rounded-md" size={24} />
               </span>
               <span>Luma</span>
             </Link>

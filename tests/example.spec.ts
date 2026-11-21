@@ -324,15 +324,16 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(page.getByText("1 of 16 chapters read")).toBeVisible();
     await page.getByRole("button", { name: "Done" }).click();
 
-    // 5. Verify Sign Out
+    // 5. Verify Sign Out redirects to landing page
     await page.goto("/settings");
     await page.getByRole("button", { name: "Log out" }).click();
     // Confirm logout in modal
     await page.getByRole("button", { name: "Log Out", exact: true }).click();
-    await page.waitForURL("/login", { timeout: 10000 });
-    await expect(page).toHaveURL("/login");
+    await page.waitForURL("/", { timeout: 10000 });
+    await expect(page).toHaveURL("/");
 
     // 6. Verify logging back in with email and password
+    await page.goto("/login");
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#login-password").fill(testUser.password);
     await page.getByRole("button", { name: "Sign In" }).click();
@@ -344,8 +345,8 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
   test("dark theme toggle switches classes and persists in storage", async ({
     page,
   }) => {
-    // Public books page
-    await page.goto("/books");
+    // Landing page
+    await page.goto("/");
 
     const themeToggle = page.getByRole("button", { name: "Toggle theme" });
     await expect(themeToggle).toBeVisible();
