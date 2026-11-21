@@ -104,26 +104,28 @@ export function NotesManager({
   defaultNoteId,
 }: NotesManagerProps) {
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
-  // 1. nuqs URL Query States for Active Folder, Active Note, and Active Tab
+  // 1. nuqs URL Query States for Active Folder, Active Note, and Active Tab (shallow to avoid server re-renders)
   const [activeFolderId, setActiveFolderId] = useQueryState(
     "folderId",
-    parseAsString.withDefault(defaultFolderId || "all")
+    parseAsString
+      .withDefault(defaultFolderId || "all")
+      .withOptions({ shallow: true })
   );
 
   const [activeNoteId, setActiveNoteId] = useQueryState(
     "noteId",
-    parseAsString.withDefault(defaultNoteId || "")
+    parseAsString
+      .withDefault(defaultNoteId || "")
+      .withOptions({ shallow: true })
   );
 
   const [activeTab, setActiveTab] = useQueryState(
     "tab",
-    parseAsStringLiteral([
-      "active",
-      "folders",
-      "archived",
-    ] as const).withDefault("active")
+    parseAsStringLiteral(["active", "folders", "archived"] as const)
+      .withDefault("active")
+      .withOptions({ shallow: true })
   );
 
   const [notesList, setNotesList] = useState<NoteDetail[]>(initialNotes);
@@ -249,6 +251,9 @@ export function NotesManager({
     notesCount: number;
   } | null>(null);
   const [isDeletingFolder, setIsDeletingFolder] = useState(false);
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
 
   // Switch active note implementation via nuqs
   const performSelectNote = ({ noteId }: SelectNoteParams) => {
@@ -351,28 +356,33 @@ export function NotesManager({
         ? `Session ${sessionId} Reflection`
         : "Untitled Note";
 
+    setIsCreatingNote(true);
     startTransition(async () => {
-      const res = await createNoteAction({
-        title: defaultTitle,
-        bodyHtml: "",
-        plainTextSnippet: "",
-        folderId: folderIdToUse,
-        planInstanceId: planId,
-        planSessionId: sessionId,
-      });
+      try {
+        const res = await createNoteAction({
+          title: defaultTitle,
+          bodyHtml: "",
+          plainTextSnippet: "",
+          folderId: folderIdToUse,
+          planInstanceId: planId,
+          planSessionId: sessionId,
+        });
 
-      if (res.success && res.note) {
-        setNotesList((prev) => [res.note, ...prev]);
-        void setActiveNoteId(res.note.id);
-        setFallbackNoteId(res.note.id);
-        currentDraftRef.current = {
-          title: res.note.title,
-          bodyHtml: res.note.bodyHtml,
-          plainText: res.note.plainTextSnippet,
-        };
-        setIsDirty(false);
-        void setActiveTab("active");
-        setMobileView("editor");
+        if (res.success && res.note) {
+          setNotesList((prev) => [res.note, ...prev]);
+          void setActiveNoteId(res.note.id);
+          setFallbackNoteId(res.note.id);
+          currentDraftRef.current = {
+            title: res.note.title,
+            bodyHtml: res.note.bodyHtml,
+            plainText: res.note.plainTextSnippet,
+          };
+          setIsDirty(false);
+          void setActiveTab("active");
+          setMobileView("editor");
+        }
+      } finally {
+        setIsCreatingNote(false);
       }
     });
   };
@@ -453,7 +463,9 @@ export function NotesManager({
 
   // Toggle archive / unarchive
   const handleToggleArchive = ({ note }: ToggleArchiveParams) => {
+    if (isArchiving) return;
     const nextArchived = !note.isArchived;
+    setIsArchiving(true);
     setNotesList((prev) =>
       prev.map((n) =>
         n.id === note.id ? { ...n, isArchived: nextArchived } : n
@@ -461,16 +473,20 @@ export function NotesManager({
     );
     setIsDirty(false);
     startTransition(async () => {
-      const res = await updateNoteAction({
-        noteId: note.id,
-        isArchived: nextArchived,
-      });
-      if (res.success && res.note) {
-        setNotesList((prev) =>
-          prev.map((n) => (n.id === res.note.id ? res.note : n))
-        );
-        void setActiveNoteId(res.note.id);
-        setFallbackNoteId(res.note.id);
+      try {
+        const res = await updateNoteAction({
+          noteId: note.id,
+          isArchived: nextArchived,
+        });
+        if (res.success && res.note) {
+          setNotesList((prev) =>
+            prev.map((n) => (n.id === res.note.id ? res.note : n))
+          );
+          void setActiveNoteId(res.note.id);
+          setFallbackNoteId(res.note.id);
+        }
+      } finally {
+        setIsArchiving(false);
       }
     });
   };
@@ -539,8 +555,12 @@ export function NotesManager({
 
   // Switch folder filter via nuqs
   const performSwitchFolder = ({ folderId }: SwitchFolderParams) => {
-    void setActiveTab("active");
-    void setActiveFolderId(folderId);
+    if (activeTab !== "active") {
+      void setActiveTab("active");
+    }
+    if (activeFolderId !== folderId) {
+      void setActiveFolderId(folderId);
+    }
     setIsDirty(false);
 
     const notesInFolder = notesList.filter((note) => {
@@ -577,8 +597,10 @@ export function NotesManager({
       ? (notesInFolder.find((n) => n.id === activeNote?.id) ?? null)
       : (sorted[0] ?? null);
 
-    void setActiveNoteId(noteToSelect?.id ?? "");
-    setFallbackNoteId(noteToSelect?.id ?? null);
+    if (noteToSelect?.id && noteToSelect.id !== targetNoteId) {
+      void setActiveNoteId(noteToSelect.id);
+      setFallbackNoteId(noteToSelect.id);
+    }
     if (noteToSelect) {
       currentDraftRef.current = {
         title: noteToSelect.title,
@@ -688,11 +710,16 @@ export function NotesManager({
     const name = (formData.get("name") as string)?.trim();
     if (!name) return;
 
+    setIsCreatingFolder(true);
     startTransition(async () => {
-      const res = await createFolderAction({ name });
-      if (res.success && res.folder) {
-        setFolders((prev) => [...prev, res.folder]);
-        setShowFolderModal(false);
+      try {
+        const res = await createFolderAction({ name });
+        if (res.success && res.folder) {
+          setFolders((prev) => [...prev, res.folder]);
+          setShowFolderModal(false);
+        }
+      } finally {
+        setIsCreatingFolder(false);
       }
     });
   };
@@ -784,7 +811,6 @@ export function NotesManager({
           <HeaderActionButton
             type="secondary"
             onClick={() => setShowFolderModal(true)}
-            disabled={isPending}
             testId="create-new-folder-button"
             icon={<FolderPlus className="size-4" />}
             label="New Collection"
@@ -793,7 +819,7 @@ export function NotesManager({
           <HeaderActionButton
             type="primary"
             onClick={handleCreateNewNote}
-            disabled={isPending}
+            disabled={isCreatingNote}
             testId="create-new-note-button"
             icon={<Plus className="size-4" />}
             label="Create Note"
@@ -1316,9 +1342,10 @@ export function NotesManager({
                     {/* Archive Toggle */}
                     <button
                       type="button"
+                      disabled={isArchiving}
                       onClick={() => handleToggleArchive({ note: activeNote })}
                       data-testid="archive-toggle-button"
-                      className="size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong transition-all cursor-pointer shrink-0"
+                      className="size-8 sm:size-8.5 inline-flex items-center justify-center rounded-lg sm:rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-border-strong transition-all cursor-pointer shrink-0 disabled:opacity-50"
                       title={
                         activeNote.isArchived
                           ? "Unarchive note"
@@ -1355,9 +1382,10 @@ export function NotesManager({
                     <span>This reflection is currently archived.</span>
                     <button
                       type="button"
+                      disabled={isArchiving}
                       onClick={() => handleToggleArchive({ note: activeNote })}
                       data-testid="restore-note-button"
-                      className="text-primary hover:underline font-semibold cursor-pointer"
+                      className="text-primary hover:underline font-semibold cursor-pointer disabled:opacity-50"
                     >
                       Restore to Active
                     </button>
@@ -1425,7 +1453,7 @@ export function NotesManager({
         isOpen={showFolderModal}
         onClose={() => setShowFolderModal(false)}
         onSubmit={handleCreateNewFolder}
-        isPending={isPending}
+        isPending={isCreatingFolder}
       />
 
       <DeleteFolderModal
