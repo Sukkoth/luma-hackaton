@@ -48,28 +48,27 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       page.getByRole("heading", { name: /Read Deeply\. Track Faithfully\./i })
     ).toBeVisible();
     await expect(page.getByText("Start Reading for Free")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Browse Reading Plans" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Sign In" }).first()
+    ).toBeVisible();
 
-    // Verify unauthenticated top nav does NOT show Overview, Insights, Notes, or Settings
-    const guestNav = page.getByRole("navigation", { name: "Main Navigation" });
+    // Verify unauthenticated landing page does NOT show protected app navigation
     await expect(
-      guestNav.getByRole("link", { name: "Overview" })
+      page.getByRole("navigation", { name: "Main Navigation" })
     ).not.toBeVisible();
     await expect(
-      guestNav.getByRole("link", { name: "Insights" })
+      page.getByRole("link", { name: "Overview" })
     ).not.toBeVisible();
     await expect(
-      guestNav.getByRole("link", { name: "Notes" })
+      page.getByRole("link", { name: "Insights" })
     ).not.toBeVisible();
+    await expect(page.getByRole("link", { name: "Notes" })).not.toBeVisible();
     await expect(
       page.getByRole("link", { name: /Settings/i })
     ).not.toBeVisible();
-
-    // But DOES show Books and Plans
-    await expect(guestNav.getByRole("link", { name: "Books" })).toBeVisible();
-    await expect(guestNav.getByRole("link", { name: "Plans" })).toBeVisible();
-    await expect(
-      page.locator("header").getByRole("link", { name: "Sign In" })
-    ).toBeVisible();
 
     // 2. Plans Catalog is public
     await page.goto("/plans");
@@ -324,15 +323,16 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(page.getByText("1 of 16 chapters read")).toBeVisible();
     await page.getByRole("button", { name: "Done" }).click();
 
-    // 5. Verify Sign Out
+    // 5. Verify Sign Out redirects to landing page
     await page.goto("/settings");
     await page.getByRole("button", { name: "Log out" }).click();
     // Confirm logout in modal
     await page.getByRole("button", { name: "Log Out", exact: true }).click();
-    await page.waitForURL("/login", { timeout: 10000 });
-    await expect(page).toHaveURL("/login");
+    await page.waitForURL("/", { timeout: 10000 });
+    await expect(page).toHaveURL("/");
 
     // 6. Verify logging back in with email and password
+    await page.goto("/login");
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#login-password").fill(testUser.password);
     await page.getByRole("button", { name: "Sign In" }).click();
@@ -344,8 +344,8 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
   test("dark theme toggle switches classes and persists in storage", async ({
     page,
   }) => {
-    // Public books page
-    await page.goto("/books");
+    // Landing page
+    await page.goto("/");
 
     const themeToggle = page.getByRole("button", { name: "Toggle theme" });
     await expect(themeToggle).toBeVisible();

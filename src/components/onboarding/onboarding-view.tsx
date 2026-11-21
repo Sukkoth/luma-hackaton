@@ -7,6 +7,7 @@ import { AlertCircle } from "lucide-react";
 import { completeOnboardingAction } from "@/actions/onboarding";
 import { OnboardingShowcase, ONBOARDING_SLIDES } from "./onboarding-showcase";
 import { TrackerSetupForm } from "./tracker-setup-form";
+import { LumaIcon } from "@/components/ui/luma-icon";
 
 type Props = {
   userName?: string;
@@ -69,7 +70,10 @@ export function OnboardingView({ userName = "Reader" }: Props) {
       <div className="ui-card relative z-10 w-full max-w-155 p-6 shadow-2xl sm:p-10">
         {/* Brand bar */}
         <div className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] border border-border/80 shadow-2xs overflow-hidden">
+              <LumaIcon className="size-full rounded-lg" size={28} priority />
+            </span>
             <span className="text-[20px] font-bold tracking-tight text-foreground">
               Luma<span className="text-primary">.</span>
             </span>

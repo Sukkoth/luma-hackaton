@@ -994,7 +994,7 @@ test.describe("In-App Notification System", () => {
         logoutModalA.getByText("Log Out of Your Account")
       ).toBeVisible();
       await logoutModalA.getByRole("button", { name: "Log Out" }).click();
-      await page.waitForURL("/login", { timeout: 10000 });
+      await page.waitForURL("/", { timeout: 10000 });
 
       // 3. User B signs up & onboards
       await page.goto("/signup");
@@ -1039,9 +1039,10 @@ test.describe("In-App Notification System", () => {
         logoutModalB.getByText("Log Out of Your Account")
       ).toBeVisible();
       await logoutModalB.getByRole("button", { name: "Log Out" }).click();
-      await page.waitForURL("/login", { timeout: 10000 });
+      await page.waitForURL("/", { timeout: 10000 });
 
       // 5. User A logs in on /login
+      await page.goto("/login");
       await page.locator("#login-email").fill(userA.email);
       await page.locator("#login-password").fill(userA.password);
       const signInBtnA = page.getByRole("button", { name: "Sign In" });
@@ -1093,9 +1094,10 @@ test.describe("In-App Notification System", () => {
         logoutModalA3.getByText("Log Out of Your Account")
       ).toBeVisible();
       await logoutModalA3.getByRole("button", { name: "Log Out" }).click();
-      await page.waitForURL("/login", { timeout: 15000 });
+      await page.waitForURL("/", { timeout: 15000 });
 
       // 7. User B logs back in on /login
+      await page.goto("/login");
       await page.locator("#login-email").fill(userB.email);
       await page.locator("#login-password").fill(userB.password);
       const signInBtnB = page.getByRole("button", { name: "Sign In" });

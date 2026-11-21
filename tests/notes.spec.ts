@@ -260,7 +260,10 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     await expect(page.getByTestId("archived-note-banner")).toBeVisible();
 
     // Restore note from archive
-    await page.getByTestId("restore-note-button").click();
+    const restoreBtn = page.getByTestId("restore-note-button");
+    await expect(restoreBtn).toBeEnabled();
+    await restoreBtn.click();
+    await expect(page.getByTestId("archived-note-banner")).not.toBeVisible();
     // After restore, archived list is empty for that note
     await expect(
       page
@@ -299,11 +302,9 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     // 15. Delete the note
     await page.getByRole("button", { name: "Delete note" }).click();
     const confirmDeleteBtn = page.getByTestId("confirm-delete-button");
-    if (
-      await confirmDeleteBtn.isVisible({ timeout: 1500 }).catch(() => false)
-    ) {
-      await confirmDeleteBtn.click();
-    }
+    await expect(confirmDeleteBtn).toBeVisible();
+    await confirmDeleteBtn.click();
+    await expect(confirmDeleteBtn).not.toBeVisible();
     await expect(
       page
         .locator("[data-testid^='note-card-']")
@@ -327,10 +328,12 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
 
     // 17. Test Delete Folder AND Notes option
     // Create new folder
-    const newFolderBtn = page.getByTestId("create-new-folder-button");
-    await expect(newFolderBtn).toBeEnabled();
+    const newFolderBtn = page.getByRole("button", { name: "New Collection" });
+    await expect(newFolderBtn).toBeVisible();
     await newFolderBtn.click();
-    const createFolderModal = page.getByRole("dialog");
+    const createFolderModal = page.getByRole("dialog", {
+      name: "New Study Folder",
+    });
     await expect(createFolderModal).toBeVisible();
     await createFolderModal
       .getByPlaceholder(/Pauline Epistles/i)

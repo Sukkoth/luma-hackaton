@@ -18,6 +18,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { LoginSchema } from "@/lib/schemas/auth";
 import { AuthShowcasePanel } from "@/components/auth/auth-showcase-panel";
+import { LumaIcon } from "@/components/ui/luma-icon";
 
 function LoginContent() {
   const router = useRouter();
@@ -152,7 +153,10 @@ function LoginContent() {
         {/* Center: Clean Login Form */}
         <div className="m-auto w-full max-w-97.5 py-8">
           <div className="text-left">
-            <div className="inline-flex items-center gap-2">
+            <div className="inline-flex items-center gap-2.5">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] border border-border/80 shadow-2xs overflow-hidden">
+                <LumaIcon className="size-full rounded-lg" size={28} priority />
+              </span>
               <span className="text-[20px] font-bold tracking-tight text-foreground">
                 Luma<span className="text-primary">.</span>
               </span>

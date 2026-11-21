@@ -100,3 +100,108 @@ export function parseLocalDate({ date }: ParseLocalDateParams): Date {
   }
   return new Date(date);
 }
+
+export const COMMON_TIMEZONES = [
+  "Africa/Addis_Ababa",
+  "Africa/Cairo",
+  "Africa/Johannesburg",
+  "Africa/Lagos",
+  "Africa/Nairobi",
+  "America/Anchorage",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "America/New_York",
+  "America/Sao_Paulo",
+  "America/Toronto",
+  "Asia/Dubai",
+  "Asia/Hong_Kong",
+  "Asia/Jerusalem",
+  "Asia/Kolkata",
+  "Asia/Seoul",
+  "Asia/Singapore",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+  "Europe/Berlin",
+  "Europe/London",
+  "Europe/Paris",
+  "Pacific/Auckland",
+  "Pacific/Honolulu",
+  "UTC",
+] as const;
+
+export type GetTimezoneLabelParams = {
+  timeZone: string;
+};
+
+export function getTimezoneLabel({ timeZone }: GetTimezoneLabelParams): string {
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      timeZoneName: "shortOffset",
+    });
+    const parts = formatter.formatToParts(new Date());
+    const offset = parts.find((p) => p.type === "timeZoneName")?.value || "";
+    const cleanName = timeZone.replace(/_/g, " ");
+    return offset ? `${cleanName} (${offset})` : cleanName;
+  } catch {
+    return timeZone;
+  }
+}
+
+export type TimezoneOption = {
+  value: string;
+  label: string;
+};
+
+export type TimezoneGroup = {
+  region: string;
+  timezones: ReadonlyArray<TimezoneOption>;
+};
+
+const REGION_DISPLAY_NAMES: Record<string, string> = {
+  Africa: "Africa",
+  America: "Americas",
+  Asia: "Asia",
+  Atlantic: "Atlantic",
+  Australia: "Australia & Pacific",
+  Europe: "Europe",
+  Indian: "Indian Ocean",
+  Pacific: "Pacific",
+};
+
+export function getAllTimezoneGroups(): ReadonlyArray<TimezoneGroup> {
+  const timezones =
+    typeof Intl !== "undefined" && "supportedValuesOf" in Intl
+      ? Intl.supportedValuesOf("timeZone")
+      : COMMON_TIMEZONES;
+
+  const groupMap = new Map<string, TimezoneOption[]>();
+
+  for (const tz of timezones) {
+    const [region] = tz.split("/");
+    if (!region) continue;
+    const regionName =
+      REGION_DISPLAY_NAMES[region] || (tz === "UTC" ? "Universal" : null);
+    if (!regionName) continue;
+
+    if (!groupMap.has(regionName)) {
+      groupMap.set(regionName, []);
+    }
+    groupMap.get(regionName)!.push({
+      value: tz,
+      label: getTimezoneLabel({ timeZone: tz }),
+    });
+  }
+
+  if (!groupMap.has("Universal")) {
+    groupMap.set("Universal", [
+      { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+    ]);
+  }
+
+  return Array.from(groupMap.entries()).map(([region, tzList]) => ({
+    region,
+    timezones: tzList,
+  }));
+}

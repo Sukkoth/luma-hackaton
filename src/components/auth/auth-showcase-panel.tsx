@@ -15,7 +15,7 @@ type Props = {
 
 export function AuthShowcasePanel({
   backHref = "/",
-  backLabel = "Back to Dashboard",
+  backLabel = "Back to Home",
   badge = "CANONICAL READING SANCTUARY",
   quoteTitle,
   scriptureRef,
