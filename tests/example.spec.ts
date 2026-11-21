@@ -48,28 +48,27 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       page.getByRole("heading", { name: /Read Deeply\. Track Faithfully\./i })
     ).toBeVisible();
     await expect(page.getByText("Start Reading for Free")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Browse Reading Plans" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Sign In" }).first()
+    ).toBeVisible();
 
-    // Verify unauthenticated top nav does NOT show Overview, Insights, Notes, or Settings
-    const guestNav = page.getByRole("navigation", { name: "Main Navigation" });
+    // Verify unauthenticated landing page does NOT show protected app navigation
     await expect(
-      guestNav.getByRole("link", { name: "Overview" })
+      page.getByRole("navigation", { name: "Main Navigation" })
     ).not.toBeVisible();
     await expect(
-      guestNav.getByRole("link", { name: "Insights" })
+      page.getByRole("link", { name: "Overview" })
     ).not.toBeVisible();
     await expect(
-      guestNav.getByRole("link", { name: "Notes" })
+      page.getByRole("link", { name: "Insights" })
     ).not.toBeVisible();
+    await expect(page.getByRole("link", { name: "Notes" })).not.toBeVisible();
     await expect(
       page.getByRole("link", { name: /Settings/i })
     ).not.toBeVisible();
-
-    // But DOES show Books and Plans
-    await expect(guestNav.getByRole("link", { name: "Books" })).toBeVisible();
-    await expect(guestNav.getByRole("link", { name: "Plans" })).toBeVisible();
-    await expect(
-      page.locator("header").getByRole("link", { name: "Sign In" })
-    ).toBeVisible();
 
     // 2. Plans Catalog is public
     await page.goto("/plans");
