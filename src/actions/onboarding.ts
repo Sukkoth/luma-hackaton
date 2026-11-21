@@ -30,6 +30,7 @@ export async function completeOnboardingAction({
     name: formData.get("name"),
     canon: formData.get("canon"),
     icon: formData.get("icon"),
+    timezone: formData.get("timezone"),
   });
 
   if (!parsed.success) {
@@ -63,6 +64,7 @@ export async function completeOnboardingAction({
           streakFreezesAvailable: 3,
           currentStreak: 0,
           longestStreak: 0,
+          timezone: parsed.output.timezone,
         })
         .onConflictDoUpdate({
           target: userSettings.userId,
@@ -70,6 +72,7 @@ export async function completeOnboardingAction({
             activeTrackerId: trackerId,
             hasCompletedOnboarding: true,
             streakFreezesAvailable: 0,
+            timezone: parsed.output.timezone,
             updatedAt: new Date(),
           },
         });

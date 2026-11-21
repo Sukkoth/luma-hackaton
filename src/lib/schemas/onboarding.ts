@@ -47,6 +47,14 @@ export const OnboardingTrackerSchema = v.object({
     v.string("Icon selection is required"),
     v.nonEmpty("Icon selection is required")
   ),
+  timezone: v.optional(
+    v.pipe(
+      v.string("Timezone must be a string"),
+      v.trim(),
+      v.nonEmpty("Timezone is required")
+    ),
+    "UTC"
+  ),
 });
 
 export type OnboardingTrackerInput = v.InferOutput<

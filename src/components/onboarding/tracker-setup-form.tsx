@@ -1,7 +1,18 @@
+import { useMemo } from "react";
 import type React from "react";
-import { BookOpen, ArrowRight, Loader2 } from "lucide-react";
+import { BookOpen, ArrowRight, Loader2, Globe } from "lucide-react";
 import { CanonSelector } from "./canon-selector";
 import { TRACKER_ICONS } from "@/components/trackers/tracker-icons";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getAllTimezoneGroups, getTimezoneLabel } from "@/lib/timezone";
 
 type Props = {
   selectedCanonId: string;
@@ -16,6 +27,21 @@ export function TrackerSetupForm({
   isLoading,
   onSubmit,
 }: Props) {
+  const detectedTz = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    } catch {
+      return "UTC";
+    }
+  }, []);
+
+  const detectedLabel = useMemo(
+    () => getTimezoneLabel({ timeZone: detectedTz }),
+    [detectedTz]
+  );
+
+  const timezoneGroups = useMemo(() => getAllTimezoneGroups(), []);
+
   return (
     <div>
       {/* Canon Selection Section */}
@@ -50,6 +76,54 @@ export function TrackerSetupForm({
               className="ui-input ui-input-icon-left w-full"
             />
           </div>
+        </div>
+
+        {/* Timezone Selection */}
+        <div>
+          <label
+            htmlFor="timezone-select"
+            className="block text-[12px] font-medium text-black dark:text-white"
+          >
+            Reading Timezone
+          </label>
+          <div className="relative mt-1.5">
+            <Globe className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-[#888888] dark:text-[#9CA3AF]" />
+            <Select name="timezone" defaultValue={detectedTz}>
+              <SelectTrigger
+                id="timezone-select"
+                style={{ paddingLeft: "2.75rem" }}
+                className="w-full"
+              >
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectGroup>
+                  <SelectLabel className="text-primary font-bold">
+                    Detected Timezone
+                  </SelectLabel>
+                  <SelectItem value={detectedTz}>
+                    {detectedLabel} (Detected)
+                  </SelectItem>
+                </SelectGroup>
+
+                {timezoneGroups.map((group) => (
+                  <SelectGroup key={group.region}>
+                    <SelectLabel>{group.region}</SelectLabel>
+                    {group.timezones
+                      .filter((tz) => tz.value !== detectedTz)
+                      .map((tz) => (
+                        <SelectItem key={tz.value} value={tz.value}>
+                          {tz.label}
+                        </SelectItem>
+                      ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="mt-1 text-[11px] text-[#888888] dark:text-[#9CA3AF]">
+            Streaks and daily reading progress align to your local midnight.
+          </p>
         </div>
 
         {/* Icon Badge Selection */}
