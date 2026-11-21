@@ -19,6 +19,7 @@ import Link from "next/link";
 import type { PlanInstanceDetail } from "@/actions/plans";
 import { deletePlanInstanceAction } from "@/actions/plans";
 import { celebratePlanCompletion } from "@/lib/confetti";
+import { parseLocalDate } from "@/lib/timezone";
 
 type PlanDetailsTabProps = {
   plan: PlanInstanceDetail;
@@ -26,7 +27,7 @@ type PlanDetailsTabProps = {
 
 function formatDisplayDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "Recorded";
-  const d = new Date(dateStr);
+  const d = parseLocalDate({ date: dateStr });
   if (isNaN(d.getTime())) return "Recorded";
   return d.toLocaleDateString(undefined, {
     weekday: "short",

@@ -1132,7 +1132,10 @@ export async function getPlanInstanceDetailAction({
     allowCustomPace: blueprint?.allowCustomPace !== false,
     allowSelfPaced: blueprint?.allowSelfPaced !== false,
     recommendedDays: blueprint?.recommendedDays || 30,
-    startDate: instance.startDate.toISOString(),
+    // Return date-only string (YYYY-MM-DD) to preserve user's local date intent.
+    // The timestamp is stored as UTC midnight but represents "Nov 21 in user's timezone".
+    // Returning date-only allows client to parse in their local timezone.
+    startDate: instance.startDate.toISOString().split("T")[0],
     targetEndDate: instance.targetEndDate
       ? instance.targetEndDate.toISOString()
       : null,

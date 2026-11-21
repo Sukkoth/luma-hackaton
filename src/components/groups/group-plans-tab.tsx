@@ -31,6 +31,7 @@ import type { UserTrackerSummary } from "@/actions/trackers";
 import { Button } from "@/components/ui/button";
 import { GroupPlanEnrollModal } from "@/components/groups/group-plan-enroll-modal";
 import { toast } from "@/components/ui/sonner";
+import { parseLocalDate } from "@/lib/timezone";
 
 export type GroupPlansTabProps = {
   groupId: string;
@@ -481,7 +482,9 @@ export function GroupPlansTab({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {scheduledPlans.map((plan) => {
-              const startDateObj = new Date(plan.scheduledStartDate);
+              const startDateObj = parseLocalDate({
+                date: plan.scheduledStartDate,
+              });
               const startDateStr = startDateObj.toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
@@ -489,7 +492,7 @@ export function GroupPlansTab({
               });
               const nowMidnight = new Date();
               nowMidnight.setHours(0, 0, 0, 0);
-              const diffDays = Math.ceil(
+              const diffDays = Math.round(
                 (startDateObj.getTime() - nowMidnight.getTime()) /
                   (1000 * 60 * 60 * 24)
               );

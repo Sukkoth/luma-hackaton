@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { parseLocalDate } from "@/lib/timezone";
 
 export type GroupSchedulePlanModalProps = {
   isOpen: boolean;
@@ -706,11 +707,14 @@ export function GroupSchedulePlanModal({
                     Cohort Start Date
                   </span>
                   <span className="text-sm font-semibold text-foreground">
-                    {new Date(startDate).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {parseLocalDate({ date: startDate }).toLocaleDateString(
+                      undefined,
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }
+                    )}
                   </span>
                 </div>
 

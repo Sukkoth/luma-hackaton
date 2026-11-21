@@ -74,3 +74,29 @@ export function getDaysDifference({
 
   return Math.round((endUtc - startUtc) / (1000 * 60 * 60 * 24));
 }
+
+export type ParseLocalDateParams = {
+  date: string | Date;
+};
+
+export function parseLocalDate({ date }: ParseLocalDateParams): Date {
+  if (date instanceof Date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+  const dateOnly = date.split("T")[0] ?? "";
+  const parts = dateOnly.split("-").map(Number);
+  const year = parts[0];
+  const month = parts[1];
+  const day = parts[2];
+  if (
+    typeof year === "number" &&
+    !isNaN(year) &&
+    typeof month === "number" &&
+    !isNaN(month) &&
+    typeof day === "number" &&
+    !isNaN(day)
+  ) {
+    return new Date(year, month - 1, day);
+  }
+  return new Date(date);
+}

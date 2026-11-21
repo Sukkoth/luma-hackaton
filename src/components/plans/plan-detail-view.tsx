@@ -34,6 +34,7 @@ import { PlanCatchUpModal } from "./plan-catchup-modal";
 import { PlanPausedLockModal } from "./plan-paused-lock-modal";
 import { celebratePlanCompletion } from "@/lib/confetti";
 import { RechartsPlanGauge } from "./recharts-plan-gauge";
+import { parseLocalDate } from "@/lib/timezone";
 
 type PlanDetailViewProps = {
   plan: PlanInstanceDetail;
@@ -126,20 +127,18 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   const completedSessionsCount = sessions.filter((s) => s.isCompleted).length;
 
   // Upcoming future scheduled plan detection
-  const planStartDateObj = new Date(currentPlan.startDate);
+  const planStartDateObj = parseLocalDate({ date: currentPlan.startDate });
   const nowMidnight = new Date();
   nowMidnight.setHours(0, 0, 0, 0);
-  const isScheduledFuture =
-    currentPlan.mode === "scheduled" &&
-    planStartDateObj.getTime() > nowMidnight.getTime();
+  const diffDays = Math.round(
+    (planStartDateObj.getTime() - nowMidnight.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const isScheduledFuture = currentPlan.mode === "scheduled" && diffDays > 0;
 
   let daysUntilStart = 0;
   let formattedPlanStartDate = "";
   if (isScheduledFuture) {
-    daysUntilStart = Math.ceil(
-      (planStartDateObj.getTime() - nowMidnight.getTime()) /
-        (1000 * 60 * 60 * 24)
-    );
+    daysUntilStart = diffDays;
     formattedPlanStartDate = planStartDateObj.toLocaleDateString(undefined, {
       weekday: "short",
       month: "short",

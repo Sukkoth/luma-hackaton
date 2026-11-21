@@ -13,6 +13,7 @@ import {
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { enrollInGroupPlanAction } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
+import { parseLocalDate } from "@/lib/timezone";
 
 export type GroupPlanEnrollModalProps = {
   isOpen: boolean;
@@ -49,30 +50,10 @@ export function GroupPlanEnrollModal({
     if (!scheduledStartDate) {
       return { isFuture: false, relativeDaysStr: "", formattedStartDate: "" };
     }
-    let sYear: number;
-    let sMonth: number;
-    let sDate: number;
-
-    if (
-      typeof scheduledStartDate === "string" &&
-      /^\d{4}-\d{2}-\d{2}/.test(scheduledStartDate)
-    ) {
-      const parts = scheduledStartDate.slice(0, 10).split("-").map(Number);
-      sYear = parts[0]!;
-      sMonth = parts[1]! - 1;
-      sDate = parts[2]!;
-    } else {
-      const startObj =
-        scheduledStartDate instanceof Date
-          ? scheduledStartDate
-          : new Date(scheduledStartDate);
-      sYear = startObj.getFullYear();
-      sMonth = startObj.getMonth();
-      sDate = startObj.getDate();
-    }
-
+    const startLocalMidnight = parseLocalDate({
+      date: scheduledStartDate,
+    }).getTime();
     const today = new Date();
-    const startLocalMidnight = new Date(sYear, sMonth, sDate).getTime();
     const todayLocalMidnight = new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -89,14 +70,11 @@ export function GroupPlanEnrollModal({
         : diffDays === 1
           ? "Starts Tomorrow"
           : `Starts in ${diffDays} days`;
-    const fmtStr = new Date(sYear, sMonth, sDate).toLocaleDateString(
-      undefined,
-      {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }
-    );
+    const fmtStr = new Date(startLocalMidnight).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
 
     return {
       isFuture: isFut,
