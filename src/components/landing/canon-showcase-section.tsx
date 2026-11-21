@@ -159,9 +159,6 @@ export function CanonShowcaseSection({
               <span>Track This Canon</span>
               <ArrowRight className="size-3.5" />
             </Link>
-            <Link href="/books" className="ui-btn-secondary ui-btn-sm gap-1.5">
-              <span>View Books Grid</span>
-            </Link>
           </div>
         </div>
       </div>

@@ -11,12 +11,6 @@ export function LandingFooter() {
 
       <div className="flex items-center gap-4">
         <Link
-          href="/books"
-          className="transition-colors hover:text-black dark:hover:text-white"
-        >
-          Bible Books
-        </Link>
-        <Link
           href="/plans"
           className="transition-colors hover:text-black dark:hover:text-white"
         >

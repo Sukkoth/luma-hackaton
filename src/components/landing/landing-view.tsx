@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Calendar } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import { TopNavbar } from "@/components/luma/top-navbar";
 import { CanonShowcaseSection } from "./canon-showcase-section";
 import { PillarsSection } from "./pillars-section";
@@ -53,14 +53,6 @@ export function LandingView() {
             <Link href="/plans" className="ui-btn-secondary gap-2">
               <Calendar className="size-4" />
               <span>Browse Reading Plans</span>
-            </Link>
-
-            <Link
-              href="/books"
-              className="inline-flex items-center gap-2 rounded-[14px] border border-black/8 bg-white/80 px-5 py-3 text-[14px] font-medium text-black shadow-2xs backdrop-blur-md transition-all hover:border-black/16 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/8"
-            >
-              <BookOpen className="size-4 text-[#888888] dark:text-[#A1A1AA]" />
-              <span>Explore Bible Books</span>
             </Link>
           </div>
 

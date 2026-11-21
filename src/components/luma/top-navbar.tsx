@@ -23,6 +23,7 @@ import {
 import { TrackerSwitcher } from "@/components/trackers/tracker-switcher";
 import { LumaIcon } from "@/components/ui/luma-icon";
 import type { UserTrackerSummary } from "@/actions/trackers";
+import { cn } from "@/lib/utils";
 
 type TopNavbarProps = {
   userName?: string;
@@ -43,7 +44,7 @@ export function TopNavbar({
   const effectiveUserName = session?.user?.name || userName;
   const isAuthenticated = !!session || (!!trackers && trackers.length > 0);
 
-  // When unauthenticated, user should not see Overview, Insights, Notes, or Settings
+  // When unauthenticated, no route buttons are shown in the top navbar
   const NAV_TABS = isAuthenticated
     ? [
         { label: "Overview", href: "/home", icon: Home },
@@ -52,16 +53,25 @@ export function TopNavbar({
         { label: "Notes", href: "/notes", icon: FileText },
         { label: "Insights", href: "/insights", icon: TrendingUp },
       ]
-    : [
-        { label: "Books", href: "/books", icon: BookOpen },
-        { label: "Plans", href: "/plans", icon: Calendar },
-      ];
+    : [];
 
   return (
     <>
-      <header className="flex items-center justify-between gap-2 py-3 md:gap-4 lg:py-4 xl:grid xl:grid-cols-12 xl:gap-3">
+      <header
+        className={cn(
+          "flex items-center justify-between gap-2 py-3 md:gap-4 lg:py-4 w-full",
+          isAuthenticated && "xl:grid xl:grid-cols-12 xl:gap-3"
+        )}
+      >
         {/* Left cluster: Tracker Switcher for Authenticated users, Luma brand logo for Guests */}
-        <div className="flex items-center min-w-[220px] sm:min-w-[260px] xl:col-span-3 w-full">
+        <div
+          className={cn(
+            "flex items-center",
+            isAuthenticated
+              ? "min-w-[220px] sm:min-w-[260px] xl:col-span-3 w-full"
+              : "shrink-0"
+          )}
+        >
           {isAuthenticated && trackers && trackers.length > 0 ? (
             <TrackerSwitcher
               trackers={trackers}
@@ -69,8 +79,8 @@ export function TopNavbar({
             />
           ) : (
             <Link href="/" className="group flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] text-primary border border-border/80 shadow-2xs">
-                <LumaIcon className="size-4.5 text-primary" />
+              <span className="flex size-7 items-center justify-center rounded-lg bg-[#0c0a09] border border-border/80 shadow-2xs overflow-hidden">
+                <LumaIcon className="size-full rounded-lg" size={28} />
               </span>
               <span className="text-[22px] lg:text-[24px] font-semibold tracking-tight text-foreground">
                 Luma<span className="text-foreground-dim">.</span>
@@ -79,37 +89,44 @@ export function TopNavbar({
           )}
         </div>
 
-        {/* Center cluster: Monochrome Tab Tiles (desktop only) */}
-        <div className="hidden md:flex xl:col-span-6 justify-center items-center">
-          <nav
-            aria-label="Main Navigation"
-            className="flex items-center gap-1 lg:gap-1.5 rounded-[16px] lg:rounded-[20px] border border-border bg-surface p-1 lg:p-1.5"
-          >
-            {NAV_TABS.map((tab) => {
-              const isActive =
-                tab.href === "/home"
-                  ? pathname === "/home"
-                  : pathname.startsWith(tab.href);
+        {/* Center cluster: Monochrome Tab Tiles (authenticated desktop only) */}
+        {isAuthenticated && NAV_TABS.length > 0 && (
+          <div className="hidden md:flex xl:col-span-6 justify-center items-center">
+            <nav
+              aria-label="Main Navigation"
+              className="flex items-center gap-1 lg:gap-1.5 rounded-[16px] lg:rounded-[20px] border border-border bg-surface p-1 lg:p-1.5"
+            >
+              {NAV_TABS.map((tab) => {
+                const isActive =
+                  tab.href === "/home"
+                    ? pathname === "/home"
+                    : pathname.startsWith(tab.href);
 
-              return (
-                <Link
-                  key={tab.label}
-                  href={tab.href}
-                  className={`flex items-center justify-center rounded-[12px] lg:rounded-[15px] px-3.5 py-1.5 lg:px-5.5 lg:py-2 text-[13px] lg:text-[14px] transition-all ${
-                    isActive
-                      ? "bg-primary font-medium text-primary-foreground shadow-xs"
-                      : "bg-transparent font-normal text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
-                  }`}
-                >
-                  {tab.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+                return (
+                  <Link
+                    key={tab.label}
+                    href={tab.href}
+                    className={`flex items-center justify-center rounded-[12px] lg:rounded-[15px] px-3.5 py-1.5 lg:px-5.5 lg:py-2 text-[13px] lg:text-[14px] transition-all ${
+                      isActive
+                        ? "bg-primary font-medium text-primary-foreground shadow-xs"
+                        : "bg-transparent font-normal text-foreground-secondary hover:bg-surface-elevated hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        )}
 
         {/* Right controls: Capsule with Streak, Theme Toggle, Settings/Auth */}
-        <div className="flex items-center justify-end xl:col-span-3 gap-2">
+        <div
+          className={cn(
+            "flex items-center justify-end gap-2",
+            isAuthenticated ? "xl:col-span-3" : "ml-auto"
+          )}
+        >
           {isAuthenticated ? (
             <div className="flex items-center gap-1.5 lg:gap-2 rounded-full border border-border bg-surface p-1 lg:p-1.5">
               {streak && (

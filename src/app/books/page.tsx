@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { connection } from "next/server";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
@@ -25,15 +26,7 @@ export default async function BooksPage() {
   ]);
 
   if (!session) {
-    return (
-      <BooksView
-        initialReadData={{}}
-        activeTrackerId={null}
-        canon="protestant"
-        userName={null}
-        verseOfTheDay={verseOfTheDay}
-      />
-    );
+    redirect("/login?redirect=/books");
   }
 
   const [trackersData, streak] = await Promise.all([
