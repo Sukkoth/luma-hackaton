@@ -14,7 +14,11 @@ import {
   Settings2,
   User,
   Download,
+  Smartphone,
+  WifiOff,
+  Sparkles,
 } from "lucide-react";
+import { usePwa } from "@/components/pwa/pwa-provider";
 import { toast } from "@/components/ui/sonner";
 import { AppShell } from "@/components/navigation/app-shell";
 import { authClient } from "@/lib/auth-client";
@@ -212,6 +216,7 @@ export function SettingsView({
   const [isCreateTrackerOpen, setIsCreateTrackerOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isTrackerListExpanded, setIsTrackerListExpanded] = useState(false);
+  const { isInstallable, isInstalled, isOffline, promptInstall } = usePwa();
 
   // Settings local state
   const [settings, setSettings] = useState<UserSettingsState>(initialSettings);
@@ -641,6 +646,71 @@ export function SettingsView({
                       onCheckedChange={handleToggleDailyReminder}
                     />
                   </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 3: Progressive Web App & Offline Device Access */}
+            <section className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Smartphone className="size-4 text-primary" />
+                    <h2 className="text-base font-semibold tracking-tight text-foreground">
+                      Mobile &amp; Offline Installation
+                    </h2>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Install Luma on your mobile or desktop device for full-screen view and offline scripture access.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {isInstalled ? (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <Check className="size-3.5" />
+                      <span>App Installed</span>
+                    </span>
+                  ) : isInstallable ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void promptInstall()}
+                      className="text-xs h-8 gap-1.5"
+                    >
+                      <Download className="size-3.5" />
+                      <span>Install App</span>
+                    </Button>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                      <span>Supported in Browser</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="p-3.5 rounded-xl border border-border bg-surface-elevated space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                    <WifiOff className="size-3.5 text-amber-500" />
+                    <span>Offline Cache Status</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    {isOffline
+                      ? "You are currently offline. Cached readings and study notes remain active."
+                      : "Service Worker cache is active. Scripture books and marginalia are precached for offline study."}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-border bg-surface-elevated space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                    <Sparkles className="size-3.5 text-primary" />
+                    <span>Full-Screen Experience</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Installing removes browser toolbars and places the floating pilled bottom navigation right at your fingertips.
+                  </p>
                 </div>
               </div>
             </section>

@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AchievementCelebrationListener } from "@/components/achievements/achievement-celebration-listener";
+import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -14,10 +15,31 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   title: "Luma Bible Tracker & Study Platform",
   description:
     "Aesthetic, habit-forming Bible reading companion and study journal.",
+  applicationName: "Luma",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Luma",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [{ url: "/favicon.ico" }, { url: "/icon.png", type: "image/png" }],
     apple: [
@@ -63,11 +85,13 @@ export default function RootLayout({
       >
         <NuqsAdapter>
           <ThemeProvider defaultTheme="system">
-            <Suspense fallback={null}>
-              <AchievementCelebrationListener />
-            </Suspense>
-            <Toaster position="top-right" richColors />
-            <main className="flex-1 pb-20 lg:pb-0">{children}</main>
+            <PwaProvider>
+              <Suspense fallback={null}>
+                <AchievementCelebrationListener />
+              </Suspense>
+              <Toaster position="top-right" richColors />
+              <main className="flex-1 pb-20 lg:pb-0">{children}</main>
+            </PwaProvider>
           </ThemeProvider>
         </NuqsAdapter>
       </body>
