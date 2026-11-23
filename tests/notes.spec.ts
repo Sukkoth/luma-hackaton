@@ -313,6 +313,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
 
     // 16. Verify folder and notes persist
     await page.getByTestId("tab-folders-view").click();
+    await page.waitForURL((url) => url.searchParams.get("tab") === "folders");
     await expect(page.getByTestId("folders-view-grid")).toBeVisible();
     await expect(
       page.getByTestId("folders-view-grid").getByText("Theology & Devotions")
@@ -320,6 +321,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
 
     // Switch to All Notes: the remaining note still exists!
     await page.getByTestId("tab-all-notes").click();
+    await page.waitForURL((url) => url.searchParams.get("tab") !== "folders");
     await expect(
       page
         .locator("[data-testid^='note-card-']")
@@ -349,6 +351,7 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
 
     // Switch to Folders view
     await page.getByTestId("tab-folders-view").click();
+    await page.waitForURL((url) => url.searchParams.get("tab") === "folders");
     const tempFolderCard = page.locator("[data-testid^='folder-card-']", {
       hasText: "Temporary Studies",
     });
