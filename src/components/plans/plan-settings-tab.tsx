@@ -108,8 +108,14 @@ export function PlanSettingsTab({
 
   // Local settings draft state (does NOT trigger API calls until "Update Settings" is clicked)
   const [mode, setMode] = useState<"scheduled" | "flexible">(plan.mode);
-  const [paceType, setPaceType] = useState<"by_daily_target" | "by_end_date">(
-    plan.paceType === "by_end_date" ? "by_end_date" : "by_daily_target"
+  const [paceType, setPaceType] = useState<
+    "curated" | "by_daily_target" | "by_end_date"
+  >(
+    plan.paceType === "curated"
+      ? "curated"
+      : plan.paceType === "by_end_date"
+        ? "by_end_date"
+        : "by_daily_target"
   );
   const [dailyChapters, setDailyChapters] = useState(plan.dailyTarget);
   const [targetDurationDays, setTargetDurationDays] = useState(
@@ -229,8 +235,10 @@ export function PlanSettingsTab({
     const submittedPaceType =
       submittedMode === "flexible"
         ? "self_paced"
-        : (formData.get("paceType") as "by_daily_target" | "by_end_date") ||
-          paceType;
+        : (formData.get("paceType") as
+            | "curated"
+            | "by_daily_target"
+            | "by_end_date") || paceType;
     const submittedDailyTarget =
       Number(formData.get("dailyTarget")) || dailyChapters;
     const submittedActiveDaysMask =
@@ -413,57 +421,86 @@ export function PlanSettingsTab({
           {/* Pacing Style Sub-Tabs (Only in Scheduled mode) */}
           {mode === "scheduled" && plan.allowCustomPace && (
             <TabsBar
-              tabs={[
-                { id: "by_daily_target", label: "By Chapters Per Day" },
-                { id: "by_end_date", label: "By Target Duration (Days)" },
-              ]}
+              tabs={
+                plan.hasCuratedSessions
+                  ? [
+                      { id: "curated", label: "Original Schedule" },
+                      { id: "by_daily_target", label: "By Chapters Per Day" },
+                      { id: "by_end_date", label: "By Target Duration (Days)" },
+                    ]
+                  : [
+                      { id: "by_daily_target", label: "By Chapters Per Day" },
+                      { id: "by_end_date", label: "By Target Duration (Days)" },
+                    ]
+              }
               activeTab={paceType}
               onTabChange={({ tab }) => {
                 setSuccessMessage(null);
-                setPaceType(tab as "by_daily_target" | "by_end_date");
+                setPaceType(
+                  tab as "curated" | "by_daily_target" | "by_end_date"
+                );
               }}
             />
           )}
 
+          {/* Option 0: Curated Schedule */}
+          {mode === "scheduled" && paceType === "curated" && (
+            <div className="rounded-xl border border-border bg-surface-elevated/40 p-4 space-y-1">
+              <span className="text-[13px] font-semibold text-foreground">
+                Author&apos;s Curated Schedule
+              </span>
+              <p className="text-[12px] text-foreground-secondary leading-relaxed">
+                Sessions are structured according to the author&apos;s recommended narrative itinerary, preserving historical event groupings. Chapter counts per day vary naturally.
+              </p>
+            </div>
+          )}
+
           {/* Option A: By Daily Target */}
           {(mode === "flexible" || paceType === "by_daily_target") && (
-            <div className="flex items-center justify-between py-2">
-              <div>
-                <span className="text-[13.5px] font-medium text-foreground">
-                  Daily Target
-                </span>
-                <p className="text-[11.5px] text-foreground-secondary">
-                  {mode === "scheduled"
-                    ? "Chapters assigned per active reading session"
-                    : "Target chapters you aim to complete daily"}
-                </p>
-              </div>
+            <div className="space-y-3 py-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[13.5px] font-medium text-foreground">
+                    Daily Target
+                  </span>
+                  <p className="text-[11.5px] text-foreground-secondary">
+                    {mode === "scheduled"
+                      ? "Chapters assigned per active reading session"
+                      : "Target chapters you aim to complete daily"}
+                  </p>
+                </div>
 
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  disabled={
-                    isPending || dailyChapters <= 1 || !plan.allowCustomPace
-                  }
-                  onClick={() => handleUpdateDailyPace(dailyChapters - 1)}
-                  className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
-                >
-                  -
-                </button>
-                <span className="w-8 text-center text-[16px] font-semibold text-foreground">
-                  {dailyChapters}
-                </span>
-                <button
-                  type="button"
-                  disabled={
-                    isPending || dailyChapters >= 50 || !plan.allowCustomPace
-                  }
-                  onClick={() => handleUpdateDailyPace(dailyChapters + 1)}
-                  className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
-                >
-                  +
-                </button>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    disabled={
+                      isPending || dailyChapters <= 1 || !plan.allowCustomPace
+                    }
+                    onClick={() => handleUpdateDailyPace(dailyChapters - 1)}
+                    className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
+                  >
+                    -
+                  </button>
+                  <span className="w-8 text-center text-[16px] font-semibold text-foreground">
+                    {dailyChapters}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={
+                      isPending || dailyChapters >= 50 || !plan.allowCustomPace
+                    }
+                    onClick={() => handleUpdateDailyPace(dailyChapters + 1)}
+                    className="ui-btn-secondary ui-btn-icon size-8.5 rounded-xl font-bold cursor-pointer disabled:opacity-30"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
+              {plan.hasCuratedSessions && (
+                <p className="rounded-lg bg-surface px-3 py-2 text-[11.5px] text-primary border border-border/50 font-medium">
+                  Custom pace: Chapters will be distributed evenly into sessions of {dailyChapters} chapters.
+                </p>
+              )}
             </div>
           )}
 

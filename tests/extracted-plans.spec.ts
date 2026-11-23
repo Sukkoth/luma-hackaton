@@ -4,6 +4,7 @@ import {
   isPlanCanonCompatible,
 } from "../src/data/readingPlans";
 import { PROTESTANT_BIBLE_BOOKS } from "../src/data/canons/protestant";
+import { buildPlanSessions } from "../src/lib/plans/export-plan-pdf";
 
 test.describe("Extracted 1-Year Reading Plans from Blue Letter Bible", () => {
   test("1-Year Blended Plan has 365 days, 1189 separate chapters, and resolves all abbreviations", () => {
@@ -138,5 +139,51 @@ test.describe("Extracted 1-Year Reading Plans from Blue Letter Bible", () => {
     expect(isPlanCanonCompatible({ plan, trackerCanon: "protestant" })).toBe(
       true
     );
+  });
+
+  test("Chronological Plan respects curated uneven sessions by default, but distributes evenly when customized", () => {
+    const plan = getReadingPlanById("chronological_1_year");
+    expect(plan).toBeDefined();
+    if (!plan) return;
+
+    // 1. Default / Curated pace: keeps author's 365 narrative sessions with uneven chapters
+    const curatedSessions = buildPlanSessions({
+      readings: plan.readings,
+      dailyTarget: 4,
+      paceType: "curated",
+    });
+    expect(curatedSessions.length).toBe(365);
+    // Session 1 has Gen 1, 2, 3 (3 chapters)
+    expect(curatedSessions[0]?.items.length).toBe(3);
+    // Session 2 has Gen 4, 5, 6, 7 (4 chapters)
+    expect(curatedSessions[1]?.items.length).toBe(4);
+
+    // 2. Custom pace of 4 chapters per day: evenly distributes readings into chunks of 4
+    const even4Sessions = buildPlanSessions({
+      readings: plan.readings,
+      dailyTarget: 4,
+      paceType: "by_daily_target",
+    });
+    // 1189 / 4 = 297.25 => 298 sessions
+    expect(even4Sessions.length).toBe(298);
+    // Every session except the last has exactly 4 chapters
+    for (let i = 0; i < even4Sessions.length - 1; i++) {
+      expect(even4Sessions[i]?.items.length).toBe(4);
+    }
+    // Last session has remainder 1189 % 4 = 1 chapter
+    expect(even4Sessions[even4Sessions.length - 1]?.items.length).toBe(1);
+
+    // 3. Custom pace of 5 chapters per day: evenly distributes readings into chunks of 5
+    const even5Sessions = buildPlanSessions({
+      readings: plan.readings,
+      dailyTarget: 5,
+      paceType: "by_daily_target",
+    });
+    // 1189 / 5 = 237.8 => 238 sessions
+    expect(even5Sessions.length).toBe(238);
+    for (let i = 0; i < even5Sessions.length - 1; i++) {
+      expect(even5Sessions[i]?.items.length).toBe(5);
+    }
+    expect(even5Sessions[even5Sessions.length - 1]?.items.length).toBe(4);
   });
 });

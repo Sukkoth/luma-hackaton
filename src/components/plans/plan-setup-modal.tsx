@@ -105,12 +105,26 @@ export function PlanSetupModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Setup options
+  const hasCuratedSessions = useMemo(
+    () => plan.readings.some((r) => r.dayNumber != null),
+    [plan.readings]
+  );
+  const curatedDaysCount = useMemo(() => {
+    if (!hasCuratedSessions) return plan.recommendedDays || 30;
+    const uniqueDays = new Set(
+      plan.readings
+        .map((r) => r.dayNumber)
+        .filter((d): d is number => typeof d === "number" && d > 0)
+    );
+    return uniqueDays.size || plan.recommendedDays || 365;
+  }, [hasCuratedSessions, plan]);
+
   const [pacingMode, setPacingMode] = useState<"scheduled" | "flexible">(
     plan.allowSelfPaced === false ? "scheduled" : "scheduled"
   );
-  const [paceType, setPaceType] = useState<"by_daily_target" | "by_end_date">(
-    "by_daily_target"
-  );
+  const [paceType, setPaceType] = useState<
+    "curated" | "by_daily_target" | "by_end_date"
+  >(hasCuratedSessions ? "curated" : "by_daily_target");
   const [dailyChapters, setDailyChapters] = useState<number>(
     plan.defaultDailyTarget || 2
   );
@@ -182,6 +196,9 @@ export function PlanSetupModal({
     if (plan.allowCustomPace === false) {
       return Math.max(1, plan.defaultDailyTarget);
     }
+    if (paceType === "curated") {
+      return Math.max(1, plan.defaultDailyTarget);
+    }
     if (paceType === "by_end_date") {
       const activeDaysPerWeek = Math.max(1, safeActiveDays.length);
       const estimatedActiveDays = Math.max(
@@ -195,9 +212,10 @@ export function PlanSetupModal({
 
   // Projected End Date calculation
   const projectedEndDate = useMemo(() => {
-    const totalReadingDaysNeeded = Math.ceil(
-      plan.totalChapters / effectiveDailyPace
-    );
+    const totalReadingDaysNeeded =
+      paceType === "curated"
+        ? curatedDaysCount
+        : Math.ceil(plan.totalChapters / effectiveDailyPace);
     const cursor = new Date(selectedStartMidnight.getTime());
     cursor.setHours(0, 0, 0, 0);
 
@@ -215,6 +233,8 @@ export function PlanSetupModal({
     }
     return cursor;
   }, [
+    paceType,
+    curatedDaysCount,
     plan.totalChapters,
     effectiveDailyPace,
     selectedStartMidnight,
@@ -231,8 +251,30 @@ export function PlanSetupModal({
     }
 
     let pastCount = 0;
-    for (let i = 0; i < plan.readings.length; i += effectiveDailyPace) {
-      const chunk = plan.readings.slice(i, i + effectiveDailyPace);
+    const sessionChunks: typeof plan.readings[] = [];
+    if (paceType === "curated" && hasCuratedSessions) {
+      const dayMap = new Map<number, typeof plan.readings>();
+      for (const r of plan.readings) {
+        const day = r.dayNumber ?? 1;
+        const list = dayMap.get(day) ?? [];
+        list.push(r);
+        dayMap.set(day, list);
+      }
+      const sortedDays = Array.from(dayMap.keys()).sort((a, b) => a - b);
+      for (const d of sortedDays) {
+        const items = dayMap.get(d);
+        if (items && items.length > 0) {
+          sessionChunks.push(items);
+        }
+      }
+    } else {
+      for (let i = 0; i < plan.readings.length; i += effectiveDailyPace) {
+        sessionChunks.push(plan.readings.slice(i, i + effectiveDailyPace));
+      }
+    }
+
+    for (let i = 0; i < sessionChunks.length; i++) {
+      const chunk = sessionChunks[i]!;
       if (i > 0) {
         cursor.setDate(cursor.getDate() + 1);
         while (!safeActiveDays.includes(cursor.getDay())) {
@@ -249,9 +291,11 @@ export function PlanSetupModal({
   }, [
     isStartDateInPast,
     pacingMode,
+    paceType,
+    hasCuratedSessions,
     selectedStartMidnight,
     safeActiveDays,
-    plan.readings,
+    plan,
     effectiveDailyPace,
     todayMidnight,
   ]);
@@ -340,7 +384,10 @@ export function PlanSetupModal({
     const trackerId = String(formData.get("trackerId"));
     const mode = String(formData.get("mode")) as "scheduled" | "flexible";
     const selectedPaceType = String(formData.get("paceType")) as
-      "by_daily_target" | "by_end_date" | "self_paced";
+      | "curated"
+      | "by_daily_target"
+      | "by_end_date"
+      | "self_paced";
     const startVal = String(formData.get("startDate"));
     const dailyTargetVal = Number(formData.get("dailyTarget"));
     const maskVal = String(formData.get("activeDaysMask"));
@@ -399,6 +446,7 @@ export function PlanSetupModal({
           : plan.defaultDailyTarget,
       startDate: selectedStartMidnight,
       activeDays: safeActiveDays,
+      paceType: pacingMode === "scheduled" ? paceType : "self_paced",
     });
 
     exportPlanToPdf({
@@ -874,6 +922,19 @@ export function PlanSetupModal({
                           Pacing Calculation
                         </label>
                         <div className="flex items-center gap-1 rounded-xl bg-surface p-1 border border-border">
+                          {hasCuratedSessions && (
+                            <button
+                              type="button"
+                              onClick={() => setPaceType("curated")}
+                              className={`rounded-lg px-3 py-1 text-[11.5px] font-medium transition-all ${
+                                paceType === "curated"
+                                  ? "bg-primary font-semibold text-primary-foreground shadow-2xs"
+                                  : "text-foreground-secondary hover:text-foreground"
+                              }`}
+                            >
+                              Curated Schedule
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => setPaceType("by_daily_target")}
@@ -899,43 +960,69 @@ export function PlanSetupModal({
                         </div>
                       </div>
 
-                      {paceType === "by_daily_target" ? (
-                        <div className="mt-3.5 flex items-center justify-between">
-                          <div>
-                            <span className="text-[13px] font-semibold text-foreground">
-                              Daily Chapters Target
+                      {paceType === "curated" ? (
+                        <div className="mt-3.5 space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-[13px] font-semibold text-foreground">
+                                Original Narrative Schedule
+                              </span>
+                              <p className="text-[11.5px] text-foreground-secondary">
+                                Spans {curatedDaysCount} scheduled days (~{plan.defaultDailyTarget} ch/day average)
+                              </p>
+                            </div>
+                            <span className="rounded-full bg-surface border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground">
+                              {curatedDaysCount} days
                             </span>
-                            <p className="text-[11.5px] text-foreground-secondary">
-                              Spans ~
-                              {Math.ceil(plan.totalChapters / dailyChapters)}{" "}
-                              reading days
+                          </div>
+                          <p className="rounded-xl bg-surface/60 p-3 text-[12px] text-foreground-secondary border border-border/50 leading-relaxed">
+                            Chapters follow the author&apos;s curated narrative itinerary preserving historical events. Daily chapter counts vary naturally (1–8 chapters).
+                          </p>
+                        </div>
+                      ) : paceType === "by_daily_target" ? (
+                        <div className="mt-3.5 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-[13px] font-semibold text-foreground">
+                                Daily Chapters Target
+                              </span>
+                              <p className="text-[11.5px] text-foreground-secondary">
+                                Spans ~
+                                {Math.ceil(plan.totalChapters / dailyChapters)}{" "}
+                                reading days
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setDailyChapters(Math.max(1, dailyChapters - 1))
+                                }
+                                className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
+                              >
+                                -
+                              </button>
+                              <span className="w-10 text-center text-[17px] font-semibold text-foreground">
+                                {dailyChapters}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setDailyChapters(
+                                    Math.min(50, dailyChapters + 1)
+                                  )
+                                }
+                                className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                          {hasCuratedSessions && (
+                            <p className="rounded-lg bg-surface/60 px-3 py-2 text-[11.5px] text-primary border border-border/50 font-medium">
+                              Custom pace: Chapters will be distributed evenly into sessions of {dailyChapters} chapters.
                             </p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setDailyChapters(Math.max(1, dailyChapters - 1))
-                              }
-                              className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
-                            >
-                              -
-                            </button>
-                            <span className="w-10 text-center text-[17px] font-semibold text-foreground">
-                              {dailyChapters}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setDailyChapters(
-                                  Math.min(50, dailyChapters + 1)
-                                )
-                              }
-                              className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
-                            >
-                              +
-                            </button>
-                          </div>
+                          )}
                         </div>
                       ) : (
                         <div className="mt-3.5 space-y-3">
@@ -1204,7 +1291,9 @@ export function PlanSetupModal({
                           Daily Target
                         </span>
                         <span className="font-semibold text-foreground">
-                          {effectiveDailyPace} chapters / reading day
+                          {paceType === "curated"
+                            ? `Curated narrative pace (~${plan.defaultDailyTarget} ch/day avg)`
+                            : `${effectiveDailyPace} chapters / reading day (even pace)`}
                         </span>
                       </div>
                       <div className="flex justify-between">
