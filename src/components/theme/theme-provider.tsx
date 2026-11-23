@@ -130,76 +130,22 @@ export function ThemeProvider({
     const targetColor = isDark ? "#0c0a09" : "#fbfbf9";
     const appleStyle = isDark ? "black-translucent" : "default";
 
-    let isSyncing = false;
-
-    const syncStatusBar = () => {
-      if (isSyncing) return;
-      isSyncing = true;
-      try {
-        const metas = Array.from(
-          document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
-        );
-
-        if (metas.length === 0) {
-          const newMeta = document.createElement("meta");
-          newMeta.name = "theme-color";
-          newMeta.content = targetColor;
-          document.head.appendChild(newMeta);
-        } else {
-          // Keep the primary meta tag and ensure its content matches targetColor without media attribute
-          const primaryMeta = metas[0];
-          if (
-            primaryMeta.getAttribute("content") !== targetColor ||
-            primaryMeta.hasAttribute("media")
-          ) {
-            primaryMeta.removeAttribute("media");
-            primaryMeta.setAttribute("content", targetColor);
-          }
-
-          // Remove any duplicate or media-queried tags injected by router navigation
-          for (let i = 1; i < metas.length; i++) {
-            metas[i].remove();
-          }
-        }
-
-        let appleMeta = document.querySelector<HTMLMetaElement>(
-          'meta[name="apple-mobile-web-app-status-bar-style"]'
-        );
-        if (!appleMeta) {
-          appleMeta = document.createElement("meta");
-          appleMeta.setAttribute(
-            "name",
-            "apple-mobile-web-app-status-bar-style"
-          );
-          appleMeta.setAttribute("content", appleStyle);
-          document.head.appendChild(appleMeta);
-        } else if (appleMeta.getAttribute("content") !== appleStyle) {
-          appleMeta.setAttribute("content", appleStyle);
-        }
-      } finally {
-        isSyncing = false;
+    // Safely update attributes without deleting any DOM nodes to avoid React hydration conflicts
+    const themeColorMetas = document.querySelectorAll<HTMLMetaElement>(
+      'meta[name="theme-color"]'
+    );
+    themeColorMetas.forEach((meta) => {
+      if (meta.getAttribute("content") !== targetColor) {
+        meta.setAttribute("content", targetColor);
       }
-    };
-
-    // Run immediately on theme change or mount
-    syncStatusBar();
-
-    // Observe document.head so Next.js client-side route transitions never
-    // overwrite or inject mismatched status bar meta tags
-    const observer = new MutationObserver(() => {
-      syncStatusBar();
     });
 
-    observer.observe(document.head, {
-      childList: true,
-      subtree: false,
-      attributes: true,
-      attributeFilter: ["content", "media"],
-    });
-
-    return () => {
-      observer.disconnect();
-    };
+    const appleMeta = document.querySelector<HTMLMetaElement>(
+      'meta[name="apple-mobile-web-app-status-bar-style"]'
+    );
+    if (appleMeta && appleMeta.getAttribute("content") !== appleStyle) {
+      appleMeta.setAttribute("content", appleStyle);
+    }
   }, [resolvedTheme]);
 
   const setTheme = useCallback(
