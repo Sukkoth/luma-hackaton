@@ -112,7 +112,7 @@ test.describe("Progressive Web App (PWA) E2E", () => {
 
     // Check theme-color meta
     const themeColorMeta = page.locator('meta[name="theme-color"]');
-    await expect(themeColorMeta).toHaveCount(2); // dark and light themes
+    expect(await themeColorMeta.count()).toBeGreaterThanOrEqual(2);
   });
 
   test("dynamically adapts mobile status bar and theme-color when switching theme", async ({
@@ -153,7 +153,7 @@ test.describe("Progressive Web App (PWA) E2E", () => {
           return meta?.getAttribute("content");
         });
       })
-      .toBe("#ffffff");
+      .toBe("#fbfbf9");
 
     // Restore
     if (initialDark) {

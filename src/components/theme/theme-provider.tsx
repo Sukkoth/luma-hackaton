@@ -127,7 +127,7 @@ export function ThemeProvider({
   useEffect(() => {
     if (!isBrowser()) return;
     const isDark = resolvedTheme === "dark";
-    const targetColor = isDark ? "#0c0a09" : "#ffffff";
+    const targetColor = isDark ? "#0c0a09" : "#fbfbf9";
 
     // Synchronize standard theme-color meta tags for mobile browsers (Chrome / Safari)
     const themeColorMetas = document.querySelectorAll(

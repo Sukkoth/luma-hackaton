@@ -18,7 +18,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: light)", color: "#fbfbf9" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -80,7 +80,7 @@ export default function RootLayout({
                   }
                   var metaTheme = document.querySelector('meta[name="theme-color"]');
                   if (metaTheme) {
-                    metaTheme.setAttribute('content', isDark ? '#0c0a09' : '#ffffff');
+                    metaTheme.setAttribute('content', isDark ? '#0c0a09' : '#fbfbf9');
                   }
                   var metaApple = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
                   if (metaApple) {
