@@ -1139,10 +1139,7 @@ export async function getPlanInstanceDetailAction({
     status: instance.status as "active" | "paused" | "completed" | "archived",
     mode: instance.mode as "scheduled" | "flexible",
     paceType: instance.paceType as
-      | "curated"
-      | "by_daily_target"
-      | "by_end_date"
-      | "self_paced",
+      "curated" | "by_daily_target" | "by_end_date" | "self_paced",
     hasCuratedSessions,
     allowCustomPace: blueprint?.allowCustomPace !== false,
     allowSelfPaced: blueprint?.allowSelfPaced !== false,

@@ -251,7 +251,7 @@ export function PlanSetupModal({
     }
 
     let pastCount = 0;
-    const sessionChunks: typeof plan.readings[] = [];
+    const sessionChunks: (typeof plan.readings)[] = [];
     if (paceType === "curated" && hasCuratedSessions) {
       const dayMap = new Map<number, typeof plan.readings>();
       for (const r of plan.readings) {
@@ -384,10 +384,7 @@ export function PlanSetupModal({
     const trackerId = String(formData.get("trackerId"));
     const mode = String(formData.get("mode")) as "scheduled" | "flexible";
     const selectedPaceType = String(formData.get("paceType")) as
-      | "curated"
-      | "by_daily_target"
-      | "by_end_date"
-      | "self_paced";
+      "curated" | "by_daily_target" | "by_end_date" | "self_paced";
     const startVal = String(formData.get("startDate"));
     const dailyTargetVal = Number(formData.get("dailyTarget"));
     const maskVal = String(formData.get("activeDaysMask"));
@@ -968,7 +965,8 @@ export function PlanSetupModal({
                                 Original Narrative Schedule
                               </span>
                               <p className="text-[11.5px] text-foreground-secondary">
-                                Spans {curatedDaysCount} scheduled days (~{plan.defaultDailyTarget} ch/day average)
+                                Spans {curatedDaysCount} scheduled days (~
+                                {plan.defaultDailyTarget} ch/day average)
                               </p>
                             </div>
                             <span className="rounded-full bg-surface border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground">
@@ -976,7 +974,9 @@ export function PlanSetupModal({
                             </span>
                           </div>
                           <p className="rounded-xl bg-surface/60 p-3 text-[12px] text-foreground-secondary border border-border/50 leading-relaxed">
-                            Chapters follow the author&apos;s curated narrative itinerary preserving historical events. Daily chapter counts vary naturally (1–8 chapters).
+                            Chapters follow the author&apos;s curated narrative
+                            itinerary preserving historical events. Daily
+                            chapter counts vary naturally (1–8 chapters).
                           </p>
                         </div>
                       ) : paceType === "by_daily_target" ? (
@@ -996,7 +996,9 @@ export function PlanSetupModal({
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setDailyChapters(Math.max(1, dailyChapters - 1))
+                                  setDailyChapters(
+                                    Math.max(1, dailyChapters - 1)
+                                  )
                                 }
                                 className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground shadow-2xs hover:bg-surface-elevated cursor-pointer"
                               >
@@ -1020,7 +1022,8 @@ export function PlanSetupModal({
                           </div>
                           {hasCuratedSessions && (
                             <p className="rounded-lg bg-surface/60 px-3 py-2 text-[11.5px] text-primary border border-border/50 font-medium">
-                              Custom pace: Chapters will be distributed evenly into sessions of {dailyChapters} chapters.
+                              Custom pace: Chapters will be distributed evenly
+                              into sessions of {dailyChapters} chapters.
                             </p>
                           )}
                         </div>

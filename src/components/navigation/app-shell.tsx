@@ -92,8 +92,7 @@ export function AppShell({
   const userHasActivePlans =
     hasActivePlans ??
     Boolean(
-      currentTracker?.hasActivePlans ??
-        trackers?.some((t) => t.hasActivePlans)
+      currentTracker?.hasActivePlans ?? trackers?.some((t) => t.hasActivePlans)
     );
   const plansHref = userHasActivePlans ? "/plans?tab=active" : "/plans";
 

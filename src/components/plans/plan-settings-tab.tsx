@@ -236,9 +236,7 @@ export function PlanSettingsTab({
       submittedMode === "flexible"
         ? "self_paced"
         : (formData.get("paceType") as
-            | "curated"
-            | "by_daily_target"
-            | "by_end_date") || paceType;
+            "curated" | "by_daily_target" | "by_end_date") || paceType;
     const submittedDailyTarget =
       Number(formData.get("dailyTarget")) || dailyChapters;
     const submittedActiveDaysMask =
@@ -450,7 +448,9 @@ export function PlanSettingsTab({
                 Author&apos;s Curated Schedule
               </span>
               <p className="text-[12px] text-foreground-secondary leading-relaxed">
-                Sessions are structured according to the author&apos;s recommended narrative itinerary, preserving historical event groupings. Chapter counts per day vary naturally.
+                Sessions are structured according to the author&apos;s
+                recommended narrative itinerary, preserving historical event
+                groupings. Chapter counts per day vary naturally.
               </p>
             </div>
           )}
@@ -498,7 +498,8 @@ export function PlanSettingsTab({
               </div>
               {plan.hasCuratedSessions && (
                 <p className="rounded-lg bg-surface px-3 py-2 text-[11.5px] text-primary border border-border/50 font-medium">
-                  Custom pace: Chapters will be distributed evenly into sessions of {dailyChapters} chapters.
+                  Custom pace: Chapters will be distributed evenly into sessions
+                  of {dailyChapters} chapters.
                 </p>
               )}
             </div>
