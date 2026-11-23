@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
@@ -121,6 +122,34 @@ export function ThemeProvider({
     getResolvedSnapshot,
     getResolvedServerSnapshot
   );
+
+  // Synchronize mobile status bar and theme-color meta tags with active theme
+  useEffect(() => {
+    if (!isBrowser()) return;
+    const isDark = resolvedTheme === "dark";
+    const targetColor = isDark ? "#0c0a09" : "#ffffff";
+
+    // Synchronize standard theme-color meta tags for mobile browsers (Chrome / Safari)
+    const themeColorMetas = document.querySelectorAll(
+      'meta[name="theme-color"]'
+    );
+    themeColorMetas.forEach((meta) => {
+      meta.setAttribute("content", targetColor);
+    });
+
+    // Synchronize Apple iOS PWA status bar style
+    // "default" renders dark status bar icons over light background
+    // "black-translucent" renders white status bar icons over dark background
+    const appleStatusBarMeta = document.querySelector(
+      'meta[name="apple-mobile-web-app-status-bar-style"]'
+    );
+    if (appleStatusBarMeta) {
+      appleStatusBarMeta.setAttribute(
+        "content",
+        isDark ? "black-translucent" : "default"
+      );
+    }
+  }, [resolvedTheme]);
 
   const setTheme = useCallback(
     (newTheme: Theme) => {

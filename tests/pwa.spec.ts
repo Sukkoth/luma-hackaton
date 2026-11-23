@@ -39,8 +39,8 @@ test.describe("Progressive Web App (PWA) E2E", () => {
     expect(contentType).toMatch(/application\/(manifest\+)?json|text\/plain/);
 
     const manifest = await response.json();
-    expect(manifest.name).toBe("Luma • Scripture Sanctuary & Bible Tracker");
-    expect(manifest.short_name).toBe("Luma");
+    expect(manifest.name).toBe("Bible Tracker & Plans");
+    expect(manifest.short_name).toBe("Bible Tracker");
     expect(manifest.start_url).toBe("/home");
     expect(manifest.display).toBe("standalone");
     expect(Array.isArray(manifest.icons)).toBe(true);
@@ -99,11 +99,69 @@ test.describe("Progressive Web App (PWA) E2E", () => {
     const appleTitleMeta = page.locator(
       'meta[name="apple-mobile-web-app-title"]'
     );
-    await expect(appleTitleMeta).toHaveAttribute("content", "Luma");
+    await expect(appleTitleMeta).toHaveAttribute(
+      "content",
+      "Bible Tracker & Plans"
+    );
+
+    // Check iOS splash screen startup image
+    const startupImageLink = page.locator(
+      'link[rel="apple-touch-startup-image"]'
+    );
+    await expect(startupImageLink).toHaveAttribute("href", "/icon-512.png");
 
     // Check theme-color meta
     const themeColorMeta = page.locator('meta[name="theme-color"]');
     await expect(themeColorMeta).toHaveCount(2); // dark and light themes
+  });
+
+  test("dynamically adapts mobile status bar and theme-color when switching theme", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+
+    // Default or system dark mode: verify theme-color contains #0c0a09 or adapts
+    const initialDark = await page.evaluate(() => {
+      return document.documentElement.classList.contains("dark");
+    });
+
+    // Toggle theme to dark and verify meta
+    await page.evaluate(() => {
+      localStorage.setItem("scripture-theme", "dark");
+      window.dispatchEvent(new CustomEvent("scripture-theme-change"));
+    });
+
+    await expect
+      .poll(async () => {
+        return page.evaluate(() => {
+          const meta = document.querySelector('meta[name="theme-color"]');
+          return meta?.getAttribute("content");
+        });
+      })
+      .toBe("#0c0a09");
+
+    // Toggle theme to light and verify meta adapts
+    await page.evaluate(() => {
+      localStorage.setItem("scripture-theme", "light");
+      window.dispatchEvent(new CustomEvent("scripture-theme-change"));
+    });
+
+    await expect
+      .poll(async () => {
+        return page.evaluate(() => {
+          const meta = document.querySelector('meta[name="theme-color"]');
+          return meta?.getAttribute("content");
+        });
+      })
+      .toBe("#ffffff");
+
+    // Restore
+    if (initialDark) {
+      await page.evaluate(() => {
+        localStorage.setItem("scripture-theme", "dark");
+        window.dispatchEvent(new CustomEvent("scripture-theme-change"));
+      });
+    }
   });
 
   test("displays PWA installation & offline management section in Settings", async ({

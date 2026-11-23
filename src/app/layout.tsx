@@ -28,14 +28,19 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Luma Bible Tracker & Study Platform",
+  title: "Bible Tracker & Plans",
   description:
     "Aesthetic, habit-forming Bible reading companion and study journal.",
-  applicationName: "Luma",
+  applicationName: "Bible Tracker & Plans",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Luma",
+    statusBarStyle: "default",
+    title: "Bible Tracker & Plans",
+    startupImage: [
+      {
+        url: "/icon-512.png",
+      },
+    ],
   },
   formatDetection: {
     telephone: false,
@@ -72,6 +77,14 @@ export default function RootLayout({
                     document.documentElement.classList.add('dark');
                   } else {
                     document.documentElement.classList.remove('dark');
+                  }
+                  var metaTheme = document.querySelector('meta[name="theme-color"]');
+                  if (metaTheme) {
+                    metaTheme.setAttribute('content', isDark ? '#0c0a09' : '#ffffff');
+                  }
+                  var metaApple = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+                  if (metaApple) {
+                    metaApple.setAttribute('content', isDark ? 'black-translucent' : 'default');
                   }
                 } catch (e) {}
               })();

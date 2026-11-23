@@ -3,7 +3,7 @@ import { WifiOff, RefreshCw, BookOpen, FileText, Home } from "lucide-react";
 import { LumaIcon } from "@/components/ui/luma-icon";
 
 export const metadata = {
-  title: "Offline • Luma Scripture Sanctuary",
+  title: "Offline • Bible Tracker & Plans",
   description: "You are currently browsing offline.",
 };
 

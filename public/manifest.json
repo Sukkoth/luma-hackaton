@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Luma • Scripture Sanctuary & Bible Tracker",
-  "short_name": "Luma",
-  "description": "Aesthetic, habit-forming Bible reading companion, study journal, and scripture tracker.",
+  "name": "Bible Tracker & Plans",
+  "short_name": "Bible Tracker",
+  "description": "Luma Bible Tracker & Plans companion and habit tracker.",
   "start_url": "/home",
   "scope": "/",
   "display": "standalone",
