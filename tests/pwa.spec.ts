@@ -56,7 +56,7 @@ test.describe("Progressive Web App (PWA) E2E", () => {
     expect(response.status()).toBe(200);
 
     const text = await response.text();
-    expect(text).toContain("luma-pwa-v1");
+    expect(text).toContain("luma-pwa-v2");
     expect(text).toContain("PRECACHE_ASSETS");
     expect(text).toContain("self.addEventListener(\"install\"");
     expect(text).toContain("self.addEventListener(\"fetch\"");

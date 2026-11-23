@@ -162,10 +162,18 @@ export function ThemeProvider({
           }
         }
 
-        const appleMeta = document.querySelector<HTMLMetaElement>(
+        let appleMeta = document.querySelector<HTMLMetaElement>(
           'meta[name="apple-mobile-web-app-status-bar-style"]'
         );
-        if (appleMeta && appleMeta.getAttribute("content") !== appleStyle) {
+        if (!appleMeta) {
+          appleMeta = document.createElement("meta");
+          appleMeta.setAttribute(
+            "name",
+            "apple-mobile-web-app-status-bar-style"
+          );
+          appleMeta.setAttribute("content", appleStyle);
+          document.head.appendChild(appleMeta);
+        } else if (appleMeta.getAttribute("content") !== appleStyle) {
           appleMeta.setAttribute("content", appleStyle);
         }
       } finally {

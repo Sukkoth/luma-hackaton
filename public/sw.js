@@ -1,5 +1,5 @@
-// Luma Progressive Web App Service Worker (v1)
-const CACHE_NAME = "luma-pwa-v1";
+// Luma Progressive Web App Service Worker (v2)
+const CACHE_NAME = "luma-pwa-v2";
 
 const PRECACHE_ASSETS = [
   "/",
@@ -12,20 +12,27 @@ const PRECACHE_ASSETS = [
   "/apple-touch-icon.png",
 ];
 
+// Check if running on localhost / development environment
+const isDev =
+  self.location.hostname === "localhost" ||
+  self.location.hostname === "127.0.0.1" ||
+  self.location.hostname.endsWith(".local") ||
+  Boolean(self.location.port);
+
 // Install: precache essential shell assets and activate immediately
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(PRECACHE_ASSETS))
-      .then(() => self.skipWaiting())
       .catch((err) => {
         console.warn("[PWA SW] Precache failed:", err);
       })
   );
 });
 
-// Activate: clean up stale caches from previous versions and claim clients
+// Activate: clean up stale caches from previous versions and claim clients immediately
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -34,6 +41,7 @@ self.addEventListener("activate", (event) => {
         return Promise.all(
           cacheNames.map((name) => {
             if (name !== CACHE_NAME) {
+              console.log("[PWA SW] Purging obsolete cache:", name);
               return caches.delete(name);
             }
           })
@@ -61,6 +69,17 @@ self.addEventListener("fetch", (event) => {
 
   // Bypass API and auth calls directly to network
   if (url.pathname.startsWith("/api/")) {
+    return;
+  }
+
+  // In development mode, bypass caching for Next.js chunks, HMR, and webpack/turbopack runtime
+  // to prevent stale JS client bundles from causing React hydration mismatches
+  if (
+    isDev &&
+    (url.pathname.startsWith("/_next/") ||
+      url.pathname.includes("__turbopack") ||
+      url.pathname.includes("hot-update"))
+  ) {
     return;
   }
 

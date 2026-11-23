@@ -100,7 +100,10 @@ export function PlanActiveBanner({
       </section>
 
       {/* ── Signature Horizon Ribbon (Hidden on mobile) ── */}
-      <section className="hidden md:block rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs">
+      <section
+        suppressHydrationWarning
+        className="hidden md:block rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
           {/* Column 1: Active Journey or Public Callout */}
           <div className="pr-0 md:pr-8 space-y-3">
