@@ -29,6 +29,7 @@ export type BuildSessionsParams = {
   dailyTarget?: number;
   startDate?: Date;
   activeDays?: ReadonlyArray<number>; // 0=Sun, 1=Mon, ..., 6=Sat
+  paceType?: "curated" | "by_daily_target" | "by_end_date" | "self_paced";
 };
 
 /**
@@ -39,6 +40,7 @@ export function buildPlanSessions({
   dailyTarget = 1,
   startDate,
   activeDays = [0, 1, 2, 3, 4, 5, 6],
+  paceType,
 }: BuildSessionsParams): ReadonlyArray<ExportPlanSession> {
   if (!readings || readings.length === 0) return [];
 
@@ -46,14 +48,16 @@ export function buildPlanSessions({
   const safeActiveDays =
     activeDays.length > 0 ? activeDays : [0, 1, 2, 3, 4, 5, 6];
 
-  // Check if readings already carry distinct day numbers
+  // Check if readings should use static curated day numbers
   const hasDayNumbers = readings.some(
     (r) => typeof r.dayNumber === "number" && r.dayNumber > 0
   );
+  const useCuratedSessions =
+    hasDayNumbers && (paceType === "curated" || paceType === undefined);
 
   const rawGroups: Map<number, ExportSessionItem[]> = new Map();
 
-  if (hasDayNumbers) {
+  if (useCuratedSessions) {
     for (const r of readings) {
       const day = r.dayNumber && r.dayNumber > 0 ? r.dayNumber : 1;
       const group = rawGroups.get(day) ?? [];

@@ -409,15 +409,13 @@ export function NotesManager({
 
   // Delete note implementation
   const performDeleteNote = ({ noteId }: DeleteNoteParams) => {
-    setNotesList((prev) => {
-      const nextList = prev.filter((n) => n.id !== noteId);
-      const nextActive = nextList.find((n) =>
-        activeTab === "archived" ? n.isArchived : !n.isArchived
-      );
-      void setActiveNoteId(nextActive?.id ?? "");
-      setFallbackNoteId(nextActive?.id ?? null);
-      return nextList;
-    });
+    const nextList = notesList.filter((n) => n.id !== noteId);
+    const nextActive = nextList.find((n) =>
+      activeTab === "archived" ? n.isArchived : !n.isArchived
+    );
+    setNotesList(nextList);
+    void setActiveNoteId(nextActive?.id ?? "");
+    setFallbackNoteId(nextActive?.id ?? null);
     setIsDirty(false);
     setMobileView("list");
 

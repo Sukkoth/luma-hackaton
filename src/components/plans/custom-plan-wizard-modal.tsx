@@ -42,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
   buildPlanSessions,
   exportPlanToPdf,
@@ -940,14 +941,26 @@ export function CustomPlanWizardModal({
                   </Select>
                 </div>
 
-                <div className="relative flex-1 sm:max-w-xs">
-                  <Search className="absolute left-3 top-2.5 size-4 text-foreground-dim" />
-                  <input
+                <div className="flex-1 sm:max-w-xs">
+                  <Input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search books..."
-                    className="ui-input w-full pl-9 pr-3 py-1.5 text-[12.5px]"
+                    startIcon={<Search className="size-4" />}
+                    endIcon={
+                      searchQuery ? (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery("")}
+                          className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                          aria-label="Clear search"
+                        >
+                          <X className="size-3.5" />
+                        </button>
+                      ) : undefined
+                    }
+                    className="h-9.5 text-[12.5px]"
                   />
                 </div>
               </div>

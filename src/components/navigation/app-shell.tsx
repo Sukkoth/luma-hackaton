@@ -39,6 +39,7 @@ export type AppShellProps = {
   streak?: StreakData;
   trackers?: ReadonlyArray<UserTrackerSummary>;
   activeTrackerId?: string | null;
+  hasActivePlans?: boolean;
   className?: string;
 };
 
@@ -59,6 +60,7 @@ export function AppShell({
   streak,
   trackers,
   activeTrackerId,
+  hasActivePlans,
   className = "",
 }: AppShellProps) {
   const pathname = usePathname();
@@ -83,6 +85,16 @@ export function AppShell({
         .join("")
         .toUpperCase()
     : "R";
+
+  // Route to active plans tab if user has active reading plans
+  const currentTracker =
+    trackers?.find((t) => t.id === activeTrackerId) || trackers?.[0];
+  const userHasActivePlans =
+    hasActivePlans ??
+    Boolean(
+      currentTracker?.hasActivePlans ?? trackers?.some((t) => t.hasActivePlans)
+    );
+  const plansHref = userHasActivePlans ? "/plans?tab=active" : "/plans";
 
   // Derive page title for desktop top bar header
   let viewTitle = "Reading Hub";
@@ -207,6 +219,7 @@ export function AppShell({
             </span>
             <nav aria-label="Main Navigation" className="flex flex-col gap-1">
               {MENU_ITEMS.map((tab) => {
+                const targetHref = tab.label === "Plans" ? plansHref : tab.href;
                 const isActive =
                   tab.href === "/home"
                     ? pathname === "/home"
@@ -216,7 +229,7 @@ export function AppShell({
                 return (
                   <Link
                     key={tab.label}
-                    href={tab.href}
+                    href={targetHref}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all",
                       isActive
@@ -411,6 +424,7 @@ export function AppShell({
         className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/80 bg-background/95 backdrop-blur-md px-2 py-1 flex items-center justify-around safe-area-inset-bottom"
       >
         {MENU_ITEMS.map((tab) => {
+          const targetHref = tab.label === "Plans" ? plansHref : tab.href;
           const isActive =
             tab.href === "/home"
               ? pathname === "/home"
@@ -420,7 +434,7 @@ export function AppShell({
           return (
             <Link
               key={tab.label}
-              href={tab.href}
+              href={targetHref}
               className={cn(
                 "flex flex-col items-center justify-center min-w-[54px] min-h-[48px] py-1 px-2 rounded-xl text-[11px] font-medium transition-colors",
                 isActive

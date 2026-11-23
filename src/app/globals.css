@@ -415,13 +415,9 @@ html.dark body {
   box-shadow: 0 0 0 1px var(--primary);
 }
 
-@utility ui-input-icon-left {
-  padding-left: 2.75rem !important;
-}
-
-@utility ui-input-icon-both {
-  padding-left: 2.75rem !important;
-  padding-right: 2.75rem !important;
+.ui-input-search,
+input.ui-input-search {
+  padding-left: 2.25rem !important;
 }
 
 .ui-input-icon-left,

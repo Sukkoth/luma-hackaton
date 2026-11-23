@@ -56,7 +56,7 @@ export type StartPlanActionParams = {
   templateId: string;
   trackerId: string;
   mode: "scheduled" | "flexible";
-  paceType: "by_daily_target" | "by_end_date" | "self_paced";
+  paceType: "curated" | "by_daily_target" | "by_end_date" | "self_paced";
   allowCustomPace?: boolean;
   allowSelfPaced?: boolean;
   recommendedDays?: number;
@@ -217,6 +217,7 @@ type CalculatePastReadingsParams = {
   todayMidnight: Date;
   dailyTarget: number;
   activeDays: ReadonlyArray<number>;
+  paceType?: "curated" | "by_daily_target" | "by_end_date" | "self_paced";
 };
 
 function calculatePastReadings({
@@ -225,6 +226,7 @@ function calculatePastReadings({
   todayMidnight,
   dailyTarget,
   activeDays,
+  paceType,
 }: CalculatePastReadingsParams): ReadonlyArray<PlanReadingItem> {
   if (startMidnight.getTime() >= todayMidnight.getTime()) {
     return [];
@@ -242,9 +244,11 @@ function calculatePastReadings({
   const past: PlanReadingItem[] = [];
 
   const hasCuratedSessions = readings.some((r) => r.dayNumber != null);
+  const useCuratedSessions =
+    hasCuratedSessions && (paceType === "curated" || paceType === undefined);
   const sessionChunks: PlanReadingItem[][] = [];
 
-  if (hasCuratedSessions) {
+  if (useCuratedSessions) {
     const dayMap = new Map<number, PlanReadingItem[]>();
     for (const r of readings) {
       const day = r.dayNumber ?? 1;
@@ -418,6 +422,7 @@ export async function startPlanAction({
           todayMidnight,
           dailyTarget: input.dailyTarget,
           activeDays: safeActiveDays,
+          paceType: input.paceType,
         })
       : [];
 
@@ -795,7 +800,8 @@ export type PlanInstanceDetail = {
   accentColor: string;
   status: "active" | "paused" | "completed" | "archived";
   mode: "scheduled" | "flexible";
-  paceType: "by_daily_target" | "by_end_date" | "self_paced";
+  paceType: "curated" | "by_daily_target" | "by_end_date" | "self_paced";
+  hasCuratedSessions: boolean;
   allowCustomPace: boolean;
   allowSelfPaced: boolean;
   recommendedDays: number;
@@ -907,9 +913,14 @@ export async function getPlanInstanceDetailAction({
   ];
 
   const hasCuratedSessions = readings.some((r) => r.dayNumber != null);
+  const useCuratedSessions =
+    hasCuratedSessions &&
+    (instance.paceType === "curated" ||
+      (!instance.paceType &&
+        instance.dailyTarget === (blueprint?.defaultDailyTarget ?? 4)));
   const sessionChunks: PlanReadingItem[][] = [];
 
-  if (hasCuratedSessions) {
+  if (useCuratedSessions) {
     const dayMap = new Map<number, PlanReadingItem[]>();
     for (const r of readings) {
       const day = r.dayNumber ?? 1;
@@ -1128,7 +1139,8 @@ export async function getPlanInstanceDetailAction({
     status: instance.status as "active" | "paused" | "completed" | "archived",
     mode: instance.mode as "scheduled" | "flexible",
     paceType: instance.paceType as
-      "by_daily_target" | "by_end_date" | "self_paced",
+      "curated" | "by_daily_target" | "by_end_date" | "self_paced",
+    hasCuratedSessions,
     allowCustomPace: blueprint?.allowCustomPace !== false,
     allowSelfPaced: blueprint?.allowSelfPaced !== false,
     recommendedDays: blueprint?.recommendedDays || 30,
@@ -1421,7 +1433,7 @@ export type UpdatePlanSettingsActionParams = {
   instanceId: string;
   status?: "active" | "paused" | "archived";
   mode?: "scheduled" | "flexible";
-  paceType?: "by_daily_target" | "by_end_date" | "self_paced";
+  paceType?: "curated" | "by_daily_target" | "by_end_date" | "self_paced";
   dailyTarget?: number;
   targetEndDate?: string;
   activeDaysMask?: string;

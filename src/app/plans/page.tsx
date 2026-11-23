@@ -98,6 +98,7 @@ export default async function PlansPage() {
       streak={streak}
       trackers={trackersData.trackers}
       activeTrackerId={trackersData.activeTracker?.id}
+      hasActivePlans={activePlanInstances.length > 0}
     >
       <div className="w-full max-w-[1440px] mx-auto">
         <PlanCatalog

@@ -269,7 +269,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
       : notifications;
 
   const NotificationListContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col min-h-0 flex-1 h-full overflow-hidden">
       {/* Header & Filter Tabs */}
       <div className="p-4 border-b border-border/70 shrink-0 space-y-3">
         <div className="flex items-center justify-between">
@@ -330,7 +330,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
       </div>
 
       {/* Notifications Scroll List */}
-      <div className="overflow-y-auto flex-1 p-2 space-y-1.5 overscroll-contain">
+      <div className="overflow-y-auto flex-1 min-h-0 p-2 space-y-1.5 overscroll-contain">
         {filteredNotifications.length === 0 ? (
           <div className="py-12 px-4 text-center flex flex-col items-center justify-center text-muted-foreground">
             <div className="size-10 rounded-full bg-muted flex items-center justify-center mb-2.5">
@@ -486,7 +486,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
       {!isMobile && isOpen && (
         <div
           data-testid="notifications-popover"
-          className="absolute right-0 mt-2 w-84 sm:w-96 rounded-2xl border border-border bg-card shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[520px] overflow-hidden"
+          className="absolute right-0 mt-2 w-84 sm:w-96 rounded-2xl border border-border bg-card shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 max-h-[min(520px,calc(100vh-5rem))] flex flex-col overflow-hidden"
         >
           {NotificationListContent}
         </div>
@@ -499,7 +499,7 @@ export function NotificationCenter({ isMobile = false }: Props) {
             side="bottom"
             showHandle={true}
             showCloseButton={true}
-            className="max-h-[85dvh] rounded-t-[28px] border-border/80 bg-card p-0 shadow-2xl flex flex-col overflow-hidden"
+            className="h-[85dvh] rounded-t-[28px] border-border/80 bg-card shadow-2xl flex flex-col overflow-hidden"
           >
             <div className="sr-only">
               <SheetHeader>

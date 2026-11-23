@@ -8,7 +8,7 @@ export const StartPlanSchema = v.object({
     "Mode must be scheduled or flexible"
   ),
   paceType: v.picklist(
-    ["by_daily_target", "by_end_date", "self_paced"],
+    ["curated", "by_daily_target", "by_end_date", "self_paced"],
     "Invalid pace type"
   ),
   startDate: v.pipe(v.string(), v.minLength(1, "Start date is required")),
@@ -47,7 +47,7 @@ export const UpdatePlanSettingsSchema = v.object({
   status: v.optional(v.picklist(["active", "paused", "archived"])),
   mode: v.optional(v.picklist(["scheduled", "flexible"])),
   paceType: v.optional(
-    v.picklist(["by_daily_target", "by_end_date", "self_paced"])
+    v.picklist(["curated", "by_daily_target", "by_end_date", "self_paced"])
   ),
   dailyTarget: v.optional(v.pipe(v.number(), v.minValue(1), v.maxValue(50))),
   targetEndDate: v.optional(v.string()),

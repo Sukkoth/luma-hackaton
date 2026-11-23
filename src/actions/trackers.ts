@@ -6,7 +6,7 @@ import { and, eq } from "drizzle-orm";
 import * as v from "valibot";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
-import { readingTrackers, userSettings } from "@/db/schema";
+import { readingTrackers, userSettings, planInstances } from "@/db/schema";
 import {
   CreateTrackerSchema,
   UpdateTrackerSchema,
@@ -22,6 +22,7 @@ export type UserTrackerSummary = {
   icon: string;
   canon: string;
   isArchived: boolean;
+  hasActivePlans?: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -260,8 +261,9 @@ export async function getUserTrackersData({
 }: GetUserTrackersDataParams): Promise<{
   trackers: UserTrackerSummary[];
   activeTracker: UserTrackerSummary | null;
+  hasActivePlans?: boolean;
 }> {
-  const [trackers, settings] = await Promise.all([
+  const [trackers, settings, activePlanRecords] = await Promise.all([
     db.query.readingTrackers.findMany({
       where: and(
         eq(readingTrackers.userId, userId),
@@ -272,9 +274,25 @@ export async function getUserTrackersData({
     db.query.userSettings.findFirst({
       where: eq(userSettings.userId, userId),
     }),
+    db.query.planInstances.findMany({
+      where: and(
+        eq(planInstances.userId, userId),
+        eq(planInstances.status, "active")
+      ),
+      columns: { trackerId: true },
+    }),
   ]);
 
-  if (trackers.length === 0) {
+  const trackerIdsWithActivePlans = new Set(
+    activePlanRecords.map((p) => p.trackerId)
+  );
+
+  const mappedTrackers: UserTrackerSummary[] = trackers.map((t) => ({
+    ...t,
+    hasActivePlans: trackerIdsWithActivePlans.has(t.id),
+  }));
+
+  if (mappedTrackers.length === 0) {
     try {
       const trackerId = crypto.randomUUID();
       const [newTracker] = await db
@@ -301,9 +319,15 @@ export async function getUserTrackersData({
             set: { activeTrackerId: trackerId },
           });
 
+        const initialSummary: UserTrackerSummary = {
+          ...newTracker,
+          hasActivePlans: false,
+        };
+
         return {
-          trackers: [newTracker],
-          activeTracker: newTracker,
+          trackers: [initialSummary],
+          activeTracker: initialSummary,
+          hasActivePlans: false,
         };
       }
     } catch (e: unknown) {
@@ -312,12 +336,13 @@ export async function getUserTrackersData({
   }
 
   const activeTracker =
-    trackers.find((t) => t.id === settings?.activeTrackerId) ??
-    trackers[0] ??
+    mappedTrackers.find((t) => t.id === settings?.activeTrackerId) ??
+    mappedTrackers[0] ??
     null;
 
   return {
-    trackers,
+    trackers: mappedTrackers,
     activeTracker,
+    hasActivePlans: activePlanRecords.length > 0,
   };
 }
