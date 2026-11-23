@@ -112,10 +112,10 @@ test.describe("Progressive Web App (PWA) E2E", () => {
 
     // Check theme-color meta
     const themeColorMeta = page.locator('meta[name="theme-color"]');
-    expect(await themeColorMeta.count()).toBeGreaterThanOrEqual(2);
+    expect(await themeColorMeta.count()).toBeGreaterThanOrEqual(1);
   });
 
-  test("dynamically adapts mobile status bar and theme-color when switching theme", async ({
+  test("dynamically adapts mobile status bar and theme-color when switching theme and navigating", async ({
     page,
   }) => {
     await page.goto("/login");
@@ -154,6 +154,26 @@ test.describe("Progressive Web App (PWA) E2E", () => {
         });
       })
       .toBe("#fbfbf9");
+
+    // Verify status bar style remains light on client-side route navigation
+    await page.getByRole("link", { name: /sign up/i }).click();
+    await page.waitForURL("**/signup");
+
+    await expect
+      .poll(async () => {
+        return page.evaluate(() => {
+          const meta = document.querySelector('meta[name="theme-color"]');
+          return meta?.getAttribute("content");
+        });
+      })
+      .toBe("#fbfbf9");
+
+    const appleMetaContent = await page.evaluate(() => {
+      return document
+        .querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+        ?.getAttribute("content");
+    });
+    expect(appleMetaContent).toBe("default");
 
     // Restore
     if (initialDark) {

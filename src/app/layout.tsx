@@ -16,10 +16,6 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
-    { media: "(prefers-color-scheme: light)", color: "#fbfbf9" },
-  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -66,6 +62,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <meta name="theme-color" content="#fbfbf9" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

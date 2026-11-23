@@ -128,27 +128,70 @@ export function ThemeProvider({
     if (!isBrowser()) return;
     const isDark = resolvedTheme === "dark";
     const targetColor = isDark ? "#0c0a09" : "#fbfbf9";
+    const appleStyle = isDark ? "black-translucent" : "default";
 
-    // Synchronize standard theme-color meta tags for mobile browsers (Chrome / Safari)
-    const themeColorMetas = document.querySelectorAll(
-      'meta[name="theme-color"]'
-    );
-    themeColorMetas.forEach((meta) => {
-      meta.setAttribute("content", targetColor);
+    let isSyncing = false;
+
+    const syncStatusBar = () => {
+      if (isSyncing) return;
+      isSyncing = true;
+      try {
+        const metas = Array.from(
+          document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+        );
+
+        if (metas.length === 0) {
+          const newMeta = document.createElement("meta");
+          newMeta.name = "theme-color";
+          newMeta.content = targetColor;
+          document.head.appendChild(newMeta);
+        } else {
+          // Keep the primary meta tag and ensure its content matches targetColor without media attribute
+          const primaryMeta = metas[0];
+          if (
+            primaryMeta.getAttribute("content") !== targetColor ||
+            primaryMeta.hasAttribute("media")
+          ) {
+            primaryMeta.removeAttribute("media");
+            primaryMeta.setAttribute("content", targetColor);
+          }
+
+          // Remove any duplicate or media-queried tags injected by router navigation
+          for (let i = 1; i < metas.length; i++) {
+            metas[i].remove();
+          }
+        }
+
+        const appleMeta = document.querySelector<HTMLMetaElement>(
+          'meta[name="apple-mobile-web-app-status-bar-style"]'
+        );
+        if (appleMeta && appleMeta.getAttribute("content") !== appleStyle) {
+          appleMeta.setAttribute("content", appleStyle);
+        }
+      } finally {
+        isSyncing = false;
+      }
+    };
+
+    // Run immediately on theme change or mount
+    syncStatusBar();
+
+    // Observe document.head so Next.js client-side route transitions never
+    // overwrite or inject mismatched status bar meta tags
+    const observer = new MutationObserver(() => {
+      syncStatusBar();
     });
 
-    // Synchronize Apple iOS PWA status bar style
-    // "default" renders dark status bar icons over light background
-    // "black-translucent" renders white status bar icons over dark background
-    const appleStatusBarMeta = document.querySelector(
-      'meta[name="apple-mobile-web-app-status-bar-style"]'
-    );
-    if (appleStatusBarMeta) {
-      appleStatusBarMeta.setAttribute(
-        "content",
-        isDark ? "black-translucent" : "default"
-      );
-    }
+    observer.observe(document.head, {
+      childList: true,
+      subtree: false,
+      attributes: true,
+      attributeFilter: ["content", "media"],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
   }, [resolvedTheme]);
 
   const setTheme = useCallback(
