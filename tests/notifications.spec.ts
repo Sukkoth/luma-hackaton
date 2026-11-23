@@ -1138,5 +1138,66 @@ test.describe("In-App Notification System", () => {
       await popoverB2.getByRole("button", { name: /Unread/i }).click();
       await expect(popoverB2.getByText("All caught up!")).toBeVisible();
     });
+
+    test("scrolls smoothly and stays bounded when many notifications are present", async ({
+      page,
+    }) => {
+      const timestamp = Date.now();
+      const testUser = await createAndOnboardUser({
+        page,
+        fullName: `Many Notifs User ${timestamp}`,
+        email: `manynotifs_${timestamp}@example.com`,
+      });
+
+      // Insert 15 notifications to exceed popover max-height
+      const bulkNotifications = Array.from({ length: 15 }, (_, i) => ({
+        id: `bulk_notif_${timestamp}_${i}`,
+        userId: testUser.id,
+        type: "plan_reminder" as const,
+        title: `Daily Scripture Reminder #${i + 1}`,
+        body: `Time for your daily devotional reflection step #${i + 1}.`,
+        isRead: false,
+        createdAt: new Date(Date.now() - i * 60000),
+      }));
+
+      await db.insert(notifications).values(bulkNotifications);
+
+      await page.reload();
+      await page.waitForURL("/home");
+
+      const notifBtn = page.getByTestId("desktop-notifications-button");
+      await expect(notifBtn).toBeVisible();
+      await notifBtn.click();
+
+      const popover = page.getByTestId("notifications-popover");
+      await expect(popover).toBeVisible();
+
+      // Wait for notifications to load into the popover
+      const firstItem = popover.getByTestId(
+        `notification-item-bulk_notif_${timestamp}_0`
+      );
+      await expect(firstItem).toBeVisible();
+
+      // Check popover height is capped at 520px
+      const box = await popover.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.height).toBeLessThanOrEqual(520);
+
+      // Verify scrollable container has scrollable height
+      const scrollContainer = popover.locator(".overflow-y-auto");
+      await expect(scrollContainer).toBeVisible();
+
+      const isScrollable = await scrollContainer.evaluate(
+        (el) => el.scrollHeight > el.clientHeight
+      );
+      expect(isScrollable).toBe(true);
+
+      // Scroll to bottom and verify last notification can be scrolled into view
+      const lastItem = popover.getByTestId(
+        `notification-item-bulk_notif_${timestamp}_14`
+      );
+      await lastItem.scrollIntoViewIfNeeded();
+      await expect(lastItem).toBeVisible();
+    });
   });
 });
