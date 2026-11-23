@@ -10,12 +10,12 @@ import {
   Flame,
   BookOpen,
   Calendar,
-  TrendingUp,
   FileText,
   LayoutDashboard,
   LogOut,
   Loader2,
   Users,
+  Award,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -49,7 +49,7 @@ const MENU_ITEMS = [
   { label: "Plans", href: "/plans", icon: Calendar },
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Notes", href: "/notes", icon: FileText },
-  { label: "Insights", href: "/insights", icon: TrendingUp },
+  { label: "Achievements", href: "/achievements", icon: Award },
 ] as const;
 
 export function AppShell({
@@ -106,8 +106,11 @@ export function AppShell({
     viewTitle = "Community & Cohorts";
   } else if (pathname.startsWith("/notes")) {
     viewTitle = "Study Journal";
-  } else if (pathname.startsWith("/insights")) {
-    viewTitle = "Reading Insights & Analytics";
+  } else if (
+    pathname.startsWith("/achievements") ||
+    pathname.startsWith("/insights")
+  ) {
+    viewTitle = "Achievements & Milestones";
   } else if (pathname.startsWith("/settings")) {
     viewTitle = "Preferences & Settings";
   }
@@ -421,7 +424,7 @@ export function AppShell({
           ========================================================================= */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/80 bg-background/95 backdrop-blur-md px-2 py-1 flex items-center justify-around safe-area-inset-bottom"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/80 bg-background/95 backdrop-blur-md px-2 py-1.5 flex items-center justify-around safe-area-inset-bottom"
       >
         {MENU_ITEMS.map((tab) => {
           const targetHref = tab.label === "Plans" ? plansHref : tab.href;
@@ -435,18 +438,19 @@ export function AppShell({
             <Link
               key={tab.label}
               href={targetHref}
+              aria-label={tab.label}
               className={cn(
-                "flex flex-col items-center justify-center min-w-[54px] min-h-[48px] py-1 px-2 rounded-xl text-[11px] font-medium transition-colors",
+                "flex items-center justify-center size-11 rounded-xl transition-all",
                 isActive
-                  ? "text-primary font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               )}
             >
               <Icon
-                className={cn("size-5 mb-0.5", isActive && "text-primary")}
+                className={cn("size-5", isActive && "text-primary")}
                 strokeWidth={isActive ? 2.3 : 1.75}
               />
-              <span className="tracking-tight">{tab.label}</span>
+              <span className="sr-only">{tab.label}</span>
             </Link>
           );
         })}

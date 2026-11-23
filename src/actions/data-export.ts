@@ -78,6 +78,7 @@ export async function importUserDataAction({
     revalidatePath("/settings");
     revalidatePath("/home");
     revalidatePath("/insights");
+    revalidatePath("/achievements");
     revalidatePath("/plans");
     revalidatePath("/notes");
     revalidatePath("/bible");

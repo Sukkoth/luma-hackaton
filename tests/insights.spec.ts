@@ -41,7 +41,7 @@ test.describe("Insights & Visualisations E2E", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("displays scripture coverage KPIs, theological divisions, and updates dynamically after reading a chapter", async ({
+  test("redirects /insights to dedicated /achievements page and displays milestones", async ({
     page,
   }) => {
     const testId = Date.now();
@@ -50,46 +50,23 @@ test.describe("Insights & Visualisations E2E", () => {
 
     await createAndOnboardUser({ page, fullName, email });
 
-    // 1. Navigate to /insights
+    // 1. Navigate to /insights and verify redirect to /achievements
     await page.goto("/insights");
-    await expect(page).toHaveURL(/\/insights/);
+    await expect(page).toHaveURL(/\/achievements/);
 
-    // 2. Verify segmented tabs in InsightsContainer
+    // 2. Verify dedicated Achievements & Milestones heading
     await expect(
-      page.getByRole("button", { name: "Scripture Coverage" })
+      page.getByRole("heading", { name: "Scripture Achievements & Milestones" })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Badges & Milestones/i })
+      page.getByRole("heading", { name: "Milestone Gallery" })
     ).toBeVisible();
 
     // 3. Verify KPI Overview Cards
-    await expect(
-      page.getByText("Reading Streak", { exact: true })
-    ).toBeVisible();
-    await expect(
-      page.getByText("Bible Complete", { exact: true })
-    ).toBeVisible();
-    await expect(
-      page.getByText("Streak Freezes", { exact: true })
-    ).toBeVisible();
-    await expect(
-      page.getByText("Active Tracker", { exact: true })
-    ).toBeVisible();
-    await expect(page.getByText("Personal Reading").first()).toBeVisible();
-
-    // 4. Verify Canon Coverage Section & Theological Divisions
-    const canonSection = page.locator("section").filter({
-      hasText: "Canon Coverage & Scripture Divisions",
-    });
-    await expect(canonSection).toBeVisible();
-    await expect(canonSection.getByText(/Protestant Standard/i)).toBeVisible();
-
-    // Initial state: 0 / 187 chapters for Pentateuch
-    const pentateuchCard = canonSection
-      .locator("div")
-      .filter({ hasText: "Law & Pentateuch" })
-      .first();
-    await expect(pentateuchCard.getByText("0 / 187")).toBeVisible();
+    await expect(page.getByText("Total Badges")).toBeVisible();
+    await expect(page.getByText("Unlocked", { exact: true })).toBeVisible();
+    await expect(page.getByText("In Progress", { exact: true })).toBeVisible();
+    await expect(page.getByText("Completion Rate")).toBeVisible();
 
     // 5. Navigate to /books and mark Genesis Chapter 1 as read
     await page.goto("/books");
@@ -144,26 +121,13 @@ test.describe("Insights & Visualisations E2E", () => {
       })
       .toBe(1);
 
-    // 6. Return to /insights and verify updated counts
-    await page.goto("/insights");
-    await expect(page).toHaveURL(/\/insights/);
-
-    const freshCanonSection = page.locator("section").filter({
-      hasText: "Canon Coverage & Scripture Divisions",
-    });
-    const freshPentateuchCard = freshCanonSection
-      .locator("div")
-      .filter({ hasText: "Law & Pentateuch" })
-      .first();
-
-    // Law / Pentateuch division now reflects 1 / 187
-    await expect(freshPentateuchCard.getByText("1 / 187")).toBeVisible();
-
-    // Reading streak now indicates active reading
-    await expect(page.getByText("1 Day").first()).toBeVisible();
-
-    // Bible complete indicates 1 chapter read
-    await expect(page.getByText(/1 of 1,?189 chapters/i).first()).toBeVisible();
+    // 6. Return to /achievements and verify First Step milestone unlocked
+    await page.goto("/achievements");
+    await expect(page).toHaveURL(/\/achievements/);
+    await expect(
+      page.getByRole("heading", { name: "Milestone Gallery" })
+    ).toBeVisible();
+    await expect(page.getByText("First Step")).toBeVisible();
   });
 
   test("renders all five interactive visualisations on overview dashboard with mode toggles", async ({

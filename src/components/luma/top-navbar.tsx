@@ -11,7 +11,7 @@ import {
   Home,
   BookOpen,
   Calendar,
-  TrendingUp,
+  Award,
   FileText,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -51,7 +51,7 @@ export function TopNavbar({
         { label: "Books", href: "/books", icon: BookOpen },
         { label: "Plans", href: "/plans", icon: Calendar },
         { label: "Notes", href: "/notes", icon: FileText },
-        { label: "Insights", href: "/insights", icon: TrendingUp },
+        { label: "Achievements", href: "/achievements", icon: Award },
       ]
     : [];
 
@@ -205,16 +205,15 @@ export function TopNavbar({
             <Link
               key={tab.label}
               href={tab.href}
-              className={`flex flex-1 flex-col items-center justify-center py-1 transition-all ${
+              aria-label={tab.label}
+              className={`flex size-11 items-center justify-center rounded-xl transition-all ${
                 isActive
-                  ? "font-semibold text-foreground"
-                  : "font-medium text-foreground-dim hover:text-foreground"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-foreground-dim hover:bg-muted/60 hover:text-foreground"
               }`}
             >
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
-              <span className="mt-1 text-[11px] tracking-tight">
-                {tab.label}
-              </span>
+              <span className="sr-only">{tab.label}</span>
             </Link>
           );
         })}

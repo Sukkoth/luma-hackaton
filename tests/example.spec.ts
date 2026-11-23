@@ -295,10 +295,12 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await page.waitForURL("/home", { timeout: 10000 });
     await expect(page).toHaveURL("/home");
 
-    // Verify authenticated user can see Home, Insights, Notes, and Settings in top nav
+    // Verify authenticated user can see Home, Achievements, Notes, and Settings in top nav
     const authNav = page.getByRole("navigation", { name: "Main Navigation" });
     await expect(authNav.getByRole("link", { name: "Home" })).toBeVisible();
-    await expect(authNav.getByRole("link", { name: "Insights" })).toBeVisible();
+    await expect(
+      authNav.getByRole("link", { name: "Achievements" })
+    ).toBeVisible();
     await expect(authNav.getByRole("link", { name: "Notes" })).toBeVisible();
     await expect(page.getByRole("link", { name: /Settings/i })).toBeVisible();
 
