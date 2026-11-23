@@ -192,9 +192,9 @@ export function TopNavbar({
       {/* Mobile Pilled Bottom Navigation Bar (Visible on mobile phone, hidden on md+) */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-4 inset-x-0 z-50 flex items-center justify-center pointer-events-none pb-[env(safe-area-inset-bottom)] px-4 md:hidden"
+        className="fixed bottom-4 inset-x-0 z-50 flex items-center justify-center pointer-events-none pb-[env(safe-area-inset-bottom)] px-3 sm:px-4 md:hidden"
       >
-        <div className="pointer-events-auto flex items-center gap-1 sm:gap-1.5 rounded-full border border-border/80 bg-background/90 dark:bg-card/90 backdrop-blur-xl p-1.5 shadow-2xl ring-1 ring-black/5 dark:ring-white/10 max-w-fit">
+        <div className="pointer-events-auto flex items-center justify-around w-[calc(100%-1.5rem)] max-w-[360px] rounded-full border border-border/80 bg-background/90 dark:bg-card/90 backdrop-blur-xl px-2 py-1.5 shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
           {NAV_TABS.map((tab) => {
             const isActive =
               tab.href === "/home"
@@ -207,13 +207,13 @@ export function TopNavbar({
                 key={tab.label}
                 href={tab.href}
                 aria-label={tab.label}
-                className={`relative flex size-10 sm:size-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95 ${
+                className={`relative flex size-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95 ${
                   isActive
                     ? "bg-primary text-primary-foreground font-semibold shadow-xs"
                     : "text-foreground-dim hover:bg-muted/70 hover:text-foreground"
                 }`}
               >
-                <Icon className="size-4.5 sm:size-5" strokeWidth={isActive ? 2.3 : 1.75} />
+                <Icon className="size-5" strokeWidth={isActive ? 2.3 : 1.75} />
                 <span className="sr-only">{tab.label}</span>
               </Link>
             );
