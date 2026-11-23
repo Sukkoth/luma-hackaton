@@ -447,10 +447,7 @@ export function AppShell({
                     : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                 )}
               >
-                <Icon
-                  className="size-5"
-                  strokeWidth={isActive ? 2.3 : 1.75}
-                />
+                <Icon className="size-5" strokeWidth={isActive ? 2.3 : 1.75} />
                 <span className="sr-only">{tab.label}</span>
               </Link>
             );

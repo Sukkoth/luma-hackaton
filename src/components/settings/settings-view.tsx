@@ -664,7 +664,8 @@ export function SettingsView({
                     </h2>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Install Luma on your mobile or desktop device for full-screen view and offline scripture access.
+                    Install Luma on your mobile or desktop device for
+                    full-screen view and offline scripture access.
                   </p>
                 </div>
 
@@ -712,7 +713,8 @@ export function SettingsView({
                     <span>Full-Screen Experience</span>
                   </div>
                   <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    Installing removes browser toolbars and places the floating pilled bottom navigation right at your fingertips.
+                    Installing removes browser toolbars and places the floating
+                    pilled bottom navigation right at your fingertips.
                   </p>
                 </div>
               </div>

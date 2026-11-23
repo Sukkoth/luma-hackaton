@@ -58,9 +58,9 @@ test.describe("Progressive Web App (PWA) E2E", () => {
     const text = await response.text();
     expect(text).toContain("luma-pwa-v2");
     expect(text).toContain("PRECACHE_ASSETS");
-    expect(text).toContain("self.addEventListener(\"install\"");
-    expect(text).toContain("self.addEventListener(\"fetch\"");
-    expect(text).toContain("self.addEventListener(\"activate\"");
+    expect(text).toContain('self.addEventListener("install"');
+    expect(text).toContain('self.addEventListener("fetch"');
+    expect(text).toContain('self.addEventListener("activate"');
   });
 
   test("renders branded offline fallback page at /offline", async ({

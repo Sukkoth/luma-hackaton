@@ -107,7 +107,10 @@ self.addEventListener("fetch", (event) => {
           if (offlineFallback) {
             return offlineFallback;
           }
-          return new Response("Offline", { status: 503, statusText: "Offline" });
+          return new Response("Offline", {
+            status: 503,
+            statusText: "Offline",
+          });
         })
     );
     return;

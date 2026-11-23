@@ -115,7 +115,8 @@ export function PwaProvider({ children }: PwaProviderProps) {
                     navigator.serviceWorker.controller
                   ) {
                     toast.info("New version of Luma available", {
-                      description: "Reload to get the latest scripture features.",
+                      description:
+                        "Reload to get the latest scripture features.",
                       action: {
                         label: "Reload",
                         onClick: () => window.location.reload(),

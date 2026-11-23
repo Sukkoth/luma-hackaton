@@ -29,8 +29,8 @@ export default function OfflinePage() {
             You are currently offline
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Luma preserves your cached reading sessions, spiritual marginalia, and
-            daily scripture matrix locally on your device.
+            Luma preserves your cached reading sessions, spiritual marginalia,
+            and daily scripture matrix locally on your device.
           </p>
         </div>
 
