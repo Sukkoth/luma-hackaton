@@ -77,34 +77,25 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
 
     // 6. Navigate to /books and verify active canon filtering (81 books)
     await page.goto("/books");
-    await expect(
-      page.getByRole("heading", { name: "All Books" })
-    ).toBeVisible();
-    await expect(
-      page.getByText("Ancient Ethiopian Scrolls").first()
-    ).toBeVisible();
-    await expect(page.getByText("81 Books")).toBeVisible();
+    await page.getByRole("button", { name: "Choose book and chapter" }).click();
+    const sheet = page.getByRole("dialog");
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByText("0/1927 (0%)")).toBeVisible();
 
     // Search for a book unique to Ethiopian canon (e.g. Enoch)
-    const searchInput = page.getByPlaceholder("Search books...");
+    const searchInput = sheet.getByPlaceholder("Search books...");
     await searchInput.fill("Enoch");
-    await expect(page.getByText("1 Books")).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Enoch/i }).first()
+      sheet.getByRole("button", { name: /Enoch/i }).first()
     ).toBeVisible();
 
-    // Clear search and mark Chapter 1 in Genesis for this Ethiopian tracker
-    await searchInput.fill("");
-    await page
-      .getByRole("button", { name: /Genesis/i })
-      .first()
-      .click();
-    await expect(page.locator("#chapter-dialog-title")).toHaveText("Genesis");
-
-    const dialog = page.getByRole("dialog");
-    await dialog.getByRole("button", { name: "1", exact: true }).click();
-    await expect(page.getByText("1 of 50 chapters read")).toBeVisible();
-    await page.getByRole("button", { name: "Close chapter sheet" }).click();
+    // Close picker and mark Chapter 1 in Genesis for this Ethiopian tracker
+    await sheet.getByRole("button", { name: "Close" }).click();
+    await expect(sheet).not.toBeVisible();
+    await page.getByRole("button", { name: "Mark Read" }).click();
+    await expect(
+      page.getByRole("button", { name: "Read", exact: true })
+    ).toHaveAttribute("aria-pressed", "true");
 
     // 7. Switch back to Tracker 1 ("Personal Reading" - 66 books) from top navbar
     await switcherBtn.click();
@@ -115,18 +106,14 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
 
     // Verify /books immediately filters to 66 books and has isolated progress
     await expect(switcherBtn).toContainText("Personal Reading");
-    await expect(
-      page.getByRole("heading", { name: "All Books" })
-    ).toBeVisible();
-    await expect(page.getByText("66 Books")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Mark Read" })).toBeVisible();
 
-    // Verify Genesis has 0 read in Personal Reading tracker
-    await page
-      .getByRole("button", { name: /Genesis/i })
-      .first()
-      .click();
-    await expect(page.getByText("0 of 50 chapters read")).toBeVisible();
-    await page.getByRole("button", { name: "Close chapter sheet" }).click();
+    await page.getByRole("button", { name: "Choose book and chapter" }).click();
+    const sheet2 = page.getByRole("dialog");
+    await expect(sheet2.getByText("0/1189 (0%)")).toBeVisible();
+    await sheet2.getByPlaceholder("Search books...").fill("Enoch");
+    await expect(sheet2.getByText("No matching books")).toBeVisible();
+    await sheet2.getByRole("button", { name: "Close" }).click();
 
     // 8. Edit Tracker: User can update details, but canon is locked & immutable
     await switcherBtn.click();

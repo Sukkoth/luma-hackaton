@@ -123,20 +123,13 @@ test.describe("Achievements & Milestones E2E", () => {
 
     // 2. Mark first Bible chapter (Genesis 1) as read
     await page.goto("/books");
-    await page
-      .getByRole("button", { name: /Genesis/i })
-      .first()
-      .click();
-
-    const chapterDialog = page.getByRole("dialog");
-    await expect(chapterDialog).toBeVisible();
-    const ch1 = chapterDialog.getByRole("button", { name: "1", exact: true });
-    await ch1.click();
-    await expect(ch1).toHaveAttribute("aria-pressed", "true");
-
-    // Close chapter dialog
-    await chapterDialog.getByRole("button", { name: "Close" }).click();
-    await expect(chapterDialog).not.toBeVisible();
+    const markReadBtn = page.getByRole("button", { name: "Mark Read" });
+    await expect(markReadBtn).toBeVisible();
+    await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
+    await markReadBtn.click();
+    await expect(
+      page.getByRole("button", { name: "Read", exact: true })
+    ).toHaveAttribute("aria-pressed", "true");
 
     const [uRecord] = await db
       .select()
