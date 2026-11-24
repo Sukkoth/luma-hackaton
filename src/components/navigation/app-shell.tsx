@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Settings,
   LogIn,
@@ -10,12 +10,12 @@ import {
   Flame,
   BookOpen,
   Calendar,
-  TrendingUp,
   FileText,
   LayoutDashboard,
   LogOut,
   Loader2,
   Users,
+  Award,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -49,7 +49,7 @@ const MENU_ITEMS = [
   { label: "Plans", href: "/plans", icon: Calendar },
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Notes", href: "/notes", icon: FileText },
-  { label: "Insights", href: "/insights", icon: TrendingUp },
+  { label: "Achievements", href: "/achievements", icon: Award },
 ] as const;
 
 export function AppShell({
@@ -64,7 +64,6 @@ export function AppShell({
   className = "",
 }: AppShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { data: session } = useSession();
 
   const [isStreakOpen, setIsStreakOpen] = useState(false);
@@ -106,8 +105,11 @@ export function AppShell({
     viewTitle = "Community & Cohorts";
   } else if (pathname.startsWith("/notes")) {
     viewTitle = "Study Journal";
-  } else if (pathname.startsWith("/insights")) {
-    viewTitle = "Reading Insights & Analytics";
+  } else if (
+    pathname.startsWith("/achievements") ||
+    pathname.startsWith("/insights")
+  ) {
+    viewTitle = "Achievements & Milestones";
   } else if (pathname.startsWith("/settings")) {
     viewTitle = "Preferences & Settings";
   }
@@ -118,8 +120,7 @@ export function AppShell({
       await authClient.signOut();
       setIsLogoutModalOpen(false);
       setIsSigningOut(false);
-      router.push("/");
-      router.refresh();
+      window.location.replace("/");
     } catch {
       setIsSigningOut(false);
     }
@@ -417,39 +418,39 @@ export function AppShell({
       </div>
 
       {/* =========================================================================
-          MOBILE BOTTOM NAVIGATION (< 1024px / lg:hidden)
+          MOBILE PILLED BOTTOM NAVIGATION (< 1024px / lg:hidden)
           ========================================================================= */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/80 bg-background/95 backdrop-blur-md px-2 py-1 flex items-center justify-around safe-area-inset-bottom"
+        className="lg:hidden fixed bottom-4 inset-x-0 z-40 flex items-center justify-center pointer-events-none pb-[env(safe-area-inset-bottom)] px-3 sm:px-4"
       >
-        {MENU_ITEMS.map((tab) => {
-          const targetHref = tab.label === "Plans" ? plansHref : tab.href;
-          const isActive =
-            tab.href === "/home"
-              ? pathname === "/home"
-              : pathname.startsWith(tab.href);
-          const Icon = tab.icon;
+        <div className="pointer-events-auto flex items-center justify-around w-[calc(100%-1.5rem)] max-w-[400px] rounded-full border border-border/80 bg-background/90 dark:bg-card/90 backdrop-blur-xl px-2 py-1.5 shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
+          {MENU_ITEMS.map((tab) => {
+            const targetHref = tab.label === "Plans" ? plansHref : tab.href;
+            const isActive =
+              tab.href === "/home"
+                ? pathname === "/home"
+                : pathname.startsWith(tab.href);
+            const Icon = tab.icon;
 
-          return (
-            <Link
-              key={tab.label}
-              href={targetHref}
-              className={cn(
-                "flex flex-col items-center justify-center min-w-[54px] min-h-[48px] py-1 px-2 rounded-xl text-[11px] font-medium transition-colors",
-                isActive
-                  ? "text-primary font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Icon
-                className={cn("size-5 mb-0.5", isActive && "text-primary")}
-                strokeWidth={isActive ? 2.3 : 1.75}
-              />
-              <span className="tracking-tight">{tab.label}</span>
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={tab.label}
+                href={targetHref}
+                aria-label={tab.label}
+                className={cn(
+                  "relative flex size-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95",
+                  isActive
+                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                )}
+              >
+                <Icon className="size-5" strokeWidth={isActive ? 2.3 : 1.75} />
+                <span className="sr-only">{tab.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Streak Details Modal */}

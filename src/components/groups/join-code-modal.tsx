@@ -48,7 +48,6 @@ export function JoinCodeModal({ isOpen, onClose }: JoinCodeModalProps) {
 
       onClose();
       router.push(`/groups/${res.groupId}`);
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to join group.");
       setIsSubmitting(false);

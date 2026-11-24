@@ -2,19 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Calendar,
-  BarChart3,
-  FileText,
-  Settings,
-} from "lucide-react";
+import { BookOpen, Calendar, Award, FileText, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Books", icon: BookOpen },
   { href: "/plans", label: "Plans", icon: Calendar },
   { href: "/notes", label: "Notes", icon: FileText },
-  { href: "/insights", label: "Insights", icon: BarChart3 },
+  { href: "/achievements", label: "Achievements", icon: Award },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

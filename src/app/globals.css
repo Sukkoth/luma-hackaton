@@ -57,6 +57,11 @@
   --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
+html {
+  color-scheme: light;
+  background-color: #fbfbf9;
+}
+
 :root.dark,
 .dark,
 html.dark {

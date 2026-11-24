@@ -95,6 +95,7 @@ export async function createTrackerAction({
     revalidatePath("/home");
     revalidatePath("/books");
     revalidatePath("/insights");
+    revalidatePath("/achievements");
     revalidatePath("/notes");
     revalidatePath("/plans");
     revalidatePath("/settings");
@@ -169,6 +170,7 @@ export async function updateTrackerAction({
     revalidatePath("/home");
     revalidatePath("/books");
     revalidatePath("/insights");
+    revalidatePath("/achievements");
     revalidatePath("/notes");
     revalidatePath("/plans");
     revalidatePath("/settings");
@@ -236,6 +238,7 @@ export async function switchTrackerAction({
     revalidatePath("/home");
     revalidatePath("/books");
     revalidatePath("/insights");
+    revalidatePath("/achievements");
     revalidatePath("/notes");
     revalidatePath("/plans");
     revalidatePath("/settings");

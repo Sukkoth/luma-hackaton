@@ -295,7 +295,7 @@ export async function evaluateAndUnlockAchievementsAction({
           type: "achievement",
           title: `Milestone Unlocked: ${ach.title}`,
           body: ach.description,
-          actionUrl: "/insights?tab=achievements",
+          actionUrl: "/achievements",
         },
       });
     }

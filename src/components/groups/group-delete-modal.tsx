@@ -72,7 +72,6 @@ export function GroupDeleteModal({
         toast.success("Fellowship deleted successfully.");
         handleClose();
         router.push("/groups");
-        router.refresh();
       } else {
         const error = res.error || "Failed to delete fellowship.";
         setErrorMessage(error);

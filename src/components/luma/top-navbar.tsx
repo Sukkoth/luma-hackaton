@@ -11,7 +11,7 @@ import {
   Home,
   BookOpen,
   Calendar,
-  TrendingUp,
+  Award,
   FileText,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -51,7 +51,7 @@ export function TopNavbar({
         { label: "Books", href: "/books", icon: BookOpen },
         { label: "Plans", href: "/plans", icon: Calendar },
         { label: "Notes", href: "/notes", icon: FileText },
-        { label: "Insights", href: "/insights", icon: TrendingUp },
+        { label: "Achievements", href: "/achievements", icon: Award },
       ]
     : [];
 
@@ -189,35 +189,36 @@ export function TopNavbar({
         )}
       </header>
 
-      {/* Mobile Bottom Navigation Bar (Visible on mobile phone, hidden on md+) */}
+      {/* Mobile Pilled Bottom Navigation Bar (Visible on mobile phone, hidden on md+) */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-border bg-surface/95 px-2 py-2 backdrop-blur-xl md:hidden pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        className="fixed bottom-4 inset-x-0 z-50 flex items-center justify-center pointer-events-none pb-[env(safe-area-inset-bottom)] px-3 sm:px-4 md:hidden"
       >
-        {NAV_TABS.map((tab) => {
-          const isActive =
-            tab.href === "/home"
-              ? pathname === "/home"
-              : pathname.startsWith(tab.href);
-          const Icon = tab.icon;
+        <div className="pointer-events-auto flex items-center justify-around w-[calc(100%-1.5rem)] max-w-[360px] rounded-full border border-border/80 bg-background/90 dark:bg-card/90 backdrop-blur-xl px-2 py-1.5 shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
+          {NAV_TABS.map((tab) => {
+            const isActive =
+              tab.href === "/home"
+                ? pathname === "/home"
+                : pathname.startsWith(tab.href);
+            const Icon = tab.icon;
 
-          return (
-            <Link
-              key={tab.label}
-              href={tab.href}
-              className={`flex flex-1 flex-col items-center justify-center py-1 transition-all ${
-                isActive
-                  ? "font-semibold text-foreground"
-                  : "font-medium text-foreground-dim hover:text-foreground"
-              }`}
-            >
-              <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
-              <span className="mt-1 text-[11px] tracking-tight">
-                {tab.label}
-              </span>
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={tab.label}
+                href={tab.href}
+                aria-label={tab.label}
+                className={`relative flex size-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95 ${
+                  isActive
+                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                    : "text-foreground-dim hover:bg-muted/70 hover:text-foreground"
+                }`}
+              >
+                <Icon className="size-5" strokeWidth={isActive ? 2.3 : 1.75} />
+                <span className="sr-only">{tab.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
     </>
   );

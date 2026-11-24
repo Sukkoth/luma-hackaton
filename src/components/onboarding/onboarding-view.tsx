@@ -57,7 +57,6 @@ export function OnboardingView({ userName = "Reader" }: Props) {
     }
 
     router.push("/home");
-    router.refresh();
   };
 
   return (

@@ -630,7 +630,7 @@ test.describe("In-App Notification System", () => {
       const achNotif = notifs.find((n) => n.type === "achievement");
       expect(achNotif).toBeDefined();
       expect(achNotif!.title).toContain("Milestone Unlocked");
-      expect(achNotif!.actionUrl).toBe("/insights?tab=achievements");
+      expect(achNotif!.actionUrl).toBe("/achievements");
     });
 
     test("purge retention action cleans up old read notifications and old activities", async () => {

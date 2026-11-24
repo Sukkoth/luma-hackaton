@@ -65,7 +65,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
 
       onClose();
       router.push(`/groups/${res.groupId}`);
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create group.");
       setIsSubmitting(false);

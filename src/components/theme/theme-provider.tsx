@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
@@ -121,6 +122,31 @@ export function ThemeProvider({
     getResolvedSnapshot,
     getResolvedServerSnapshot
   );
+
+  // Synchronize mobile status bar and theme-color meta tags with active theme
+  useEffect(() => {
+    if (!isBrowser()) return;
+    const isDark = resolvedTheme === "dark";
+    const targetColor = isDark ? "#0c0a09" : "#fbfbf9";
+    const appleStyle = isDark ? "black-translucent" : "default";
+
+    // Safely update attributes without deleting any DOM nodes to avoid React hydration conflicts
+    const themeColorMetas = document.querySelectorAll<HTMLMetaElement>(
+      'meta[name="theme-color"]'
+    );
+    themeColorMetas.forEach((meta) => {
+      if (meta.getAttribute("content") !== targetColor) {
+        meta.setAttribute("content", targetColor);
+      }
+    });
+
+    const appleMeta = document.querySelector<HTMLMetaElement>(
+      'meta[name="apple-mobile-web-app-status-bar-style"]'
+    );
+    if (appleMeta && appleMeta.getAttribute("content") !== appleStyle) {
+      appleMeta.setAttribute("content", appleStyle);
+    }
+  }, [resolvedTheme]);
 
   const setTheme = useCallback(
     (newTheme: Theme) => {

@@ -95,6 +95,7 @@ export async function toggleChapterAction({
       revalidatePath("/books");
       revalidatePath("/home");
       revalidatePath("/insights");
+      revalidatePath("/achievements");
 
       return {
         success: true,
@@ -135,6 +136,7 @@ export async function toggleChapterAction({
     revalidatePath("/books");
     revalidatePath("/home");
     revalidatePath("/insights");
+    revalidatePath("/achievements");
 
     return {
       success: true,
@@ -263,6 +265,7 @@ export async function markAllChaptersAction({
       revalidatePath("/books");
       revalidatePath("/home");
       revalidatePath("/insights");
+      revalidatePath("/achievements");
     }
 
     return {
@@ -337,6 +340,7 @@ export async function clearAllChaptersAction({
     revalidatePath("/books");
     revalidatePath("/home");
     revalidatePath("/insights");
+    revalidatePath("/achievements");
 
     return { success: true };
   } catch (error) {

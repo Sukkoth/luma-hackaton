@@ -58,7 +58,6 @@ export function GroupJoinLandingClient({
         setIsJoined(true);
         setTimeout(() => {
           router.push(`/groups/${res.groupId}`);
-          router.refresh();
         }, 800);
       }
     } catch (err) {

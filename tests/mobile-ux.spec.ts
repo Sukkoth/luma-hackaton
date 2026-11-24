@@ -52,7 +52,7 @@ test.describe("Mobile Navigation & Filter UX", () => {
     await expect(mobileNav.getByRole("link", { name: "Books" })).toBeVisible();
     await expect(mobileNav.getByRole("link", { name: "Plans" })).toBeVisible();
     await expect(
-      mobileNav.getByRole("link", { name: "Insights" })
+      mobileNav.getByRole("link", { name: "Achievements" })
     ).toBeVisible();
     await expect(mobileNav.getByRole("link", { name: "Notes" })).toBeVisible();
 
