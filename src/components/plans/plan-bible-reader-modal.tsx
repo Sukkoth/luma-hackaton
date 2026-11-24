@@ -23,6 +23,7 @@ import {
   detectDefaultVersion,
   saveSelectedVersion,
   buildBibleComPath,
+  isBookSupportedInSixtySixBookVersions,
 } from "@/lib/bible-versions";
 
 export type PlanBibleReaderModalProps = {
@@ -205,16 +206,21 @@ export function PlanBibleReaderModal({
   const hasNext =
     currentIndex >= 0 && currentIndex < flattenedReadings.length - 1;
 
+  const isBookSupported = currentReading
+    ? isBookSupportedInSixtySixBookVersions({ bookId: currentReading.bookId })
+    : false;
+
   // Bible proxy path and active src (decoupled from theme changes to prevent iframe remounting)
-  const biblePath = currentReading
-    ? buildBibleComPath({
-        versionId: selectedVersion.id,
-        bookId: currentReading.bookId,
-        chapter: currentReading.chapter,
-        startVerse: currentReading.startVerse,
-        endVerse: currentReading.endVerse,
-      })
-    : "";
+  const biblePath =
+    currentReading && isBookSupported
+      ? buildBibleComPath({
+          versionId: selectedVersion.id,
+          bookId: currentReading.bookId,
+          chapter: currentReading.chapter,
+          startVerse: currentReading.startVerse,
+          endVerse: currentReading.endVerse,
+        })
+      : "";
 
   const iframeSrc = biblePath
     ? `/api/bible-proxy?path=${encodeURIComponent(biblePath)}`
@@ -243,13 +249,19 @@ export function PlanBibleReaderModal({
       } else if (e.key === "ArrowLeft" && hasPrev) {
         e.preventDefault();
         const prevItem = flattenedReadings[currentIndex - 1];
-        if (prevItem) {
+        if (
+          prevItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: prevItem.bookId })
+        ) {
           onSelectReadingAction(prevItem.id);
         }
       } else if (e.key === "ArrowRight" && hasNext) {
         e.preventDefault();
         const nextItem = flattenedReadings[currentIndex + 1];
-        if (nextItem) {
+        if (
+          nextItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: nextItem.bookId })
+        ) {
           onSelectReadingAction(nextItem.id);
         }
       } else if (
@@ -301,7 +313,10 @@ export function PlanBibleReaderModal({
     if (hasNext) {
       nextTimer = setTimeout(() => {
         const nextItem = flattenedReadings[currentIndex + 1];
-        if (nextItem) {
+        if (
+          nextItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: nextItem.bookId })
+        ) {
           const path = buildBibleComPath({
             versionId: selectedVersion.id,
             bookId: nextItem.bookId,
@@ -321,7 +336,10 @@ export function PlanBibleReaderModal({
     if (hasPrev) {
       prevTimer = setTimeout(() => {
         const prevItem = flattenedReadings[currentIndex - 1];
-        if (prevItem) {
+        if (
+          prevItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: prevItem.bookId })
+        ) {
           const path = buildBibleComPath({
             versionId: selectedVersion.id,
             bookId: prevItem.bookId,
@@ -441,7 +459,8 @@ export function PlanBibleReaderModal({
         {/* Center: Version Selector & Font Size Controls */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Version Selector Dropdown */}
-          <div ref={versionMenuRef} className="relative">
+          {isBookSupported && (
+            <div ref={versionMenuRef} className="relative">
             <button
               type="button"
               onClick={() => {
@@ -502,7 +521,8 @@ export function PlanBibleReaderModal({
                 })}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
           {/* Font Size Menu */}
           <div ref={fontMenuRef} className="relative">
@@ -707,16 +727,30 @@ export function PlanBibleReaderModal({
           </div>
         )}
 
-        {/* Themed Proxy Iframe */}
-        <iframe
-          ref={iframeRef}
-          key={`${iframeSrc}-${currentReading.id}`}
-          src={iframeSrc}
-          title={`Bible reading ${readingTitle}`}
-          onLoad={handleIframeLoad}
-          className="size-full border-0 bg-background"
-          sandbox="allow-scripts allow-same-origin allow-popups"
-        />
+        {!isBookSupported ? (
+          <div className="flex size-full items-center justify-center p-6 text-center">
+            <div className="max-w-md space-y-2">
+              <BookOpen className="mx-auto size-8 text-foreground-dim" />
+              <h2 className="text-base font-semibold text-foreground">
+                Book unavailable in the reader
+              </h2>
+              <p className="text-sm text-foreground-dim">
+                {readingTitle} is outside the 66-book canon supported by the
+                available Bible translations.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            key={`${iframeSrc}-${currentReading.id}`}
+            src={iframeSrc}
+            title={`Bible reading ${readingTitle}`}
+            onLoad={handleIframeLoad}
+            className="size-full border-0 bg-background"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          />
+        )}
       </main>
 
       {/* =========================================================================
