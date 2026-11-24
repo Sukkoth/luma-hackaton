@@ -188,7 +188,33 @@ export default function PrivacyPolicyPage() {
           {/* Section 6 */}
           <section className="space-y-2">
             <h2 className="text-base font-bold text-foreground">
-              6. Data Export &amp; Deletion
+              6. Cookies &amp; Local Storage
+            </h2>
+            <p className="text-muted-foreground">
+              We keep tracking to zero. We don&apos;t use third-party
+              advertising or marketing trackers. We only use:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+              <li>
+                <strong className="text-foreground">
+                  Essential Session Cookies:
+                </strong>{" "}
+                Keeps you logged in securely while you browse.
+              </li>
+              <li>
+                <strong className="text-foreground">
+                  Local Browser Storage:
+                </strong>{" "}
+                Remembers your theme (light/dark) and caches reading progress so
+                pages load instantly and work offline.
+              </li>
+            </ul>
+          </section>
+
+          {/* Section 7 */}
+          <section className="space-y-2">
+            <h2 className="text-base font-bold text-foreground">
+              7. Data Export &amp; Deletion
             </h2>
             <p className="text-muted-foreground">You own your data:</p>
             <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
@@ -218,11 +244,37 @@ export default function PrivacyPolicyPage() {
             </ul>
           </section>
 
-          {/* Section 7 */}
+          {/* Section 8 */}
+          <section className="space-y-2">
+            <h2 className="text-base font-bold text-foreground">
+              8. Children&apos;s Privacy
+            </h2>
+            <p className="text-muted-foreground">
+              Luma is intended for general audiences and is not directed at
+              children under 13. We do not knowingly collect personal
+              information from children under 13. If you believe a child has
+              signed up, please reach out and we will delete the account
+              immediately.
+            </p>
+          </section>
+
+          {/* Section 9 */}
+          <section className="space-y-2">
+            <h2 className="text-base font-bold text-foreground">
+              9. Updates to this Policy
+            </h2>
+            <p className="text-muted-foreground">
+              If we ever update our practices, we&apos;ll revise the &ldquo;Last
+              updated&rdquo; date at the top. For any significant changes, we
+              will display a notice inside the app so you are always aware.
+            </p>
+          </section>
+
+          {/* Section 10 */}
           <section className="space-y-2">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2">
               <Mail className="size-4 text-primary" />
-              <span>7. Questions or Feedback?</span>
+              <span>10. Questions or Feedback?</span>
             </h2>
             <p className="text-muted-foreground">
               If you have any questions or want something cleared up, shoot an
