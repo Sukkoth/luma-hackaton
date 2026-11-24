@@ -14,12 +14,15 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ForgotPasswordSchema } from "@/lib/schemas/auth";
 import { AuthShowcasePanel } from "@/components/auth/auth-showcase-panel";
 import { LumaIcon } from "@/components/ui/luma-icon";
+import { authClient } from "@/lib/auth-client";
+import { Loader2 } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
 
@@ -33,7 +36,31 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    setSubmittedEmail(parsed.output.email);
+    setIsLoading(true);
+
+    try {
+      const email = parsed.output.email.toLowerCase();
+      const res = await authClient.requestPasswordReset({
+        email,
+        redirectTo: "/reset-password",
+      });
+
+      if (res.error) {
+        setErrorMessage(
+          res.error.message || "Failed to send reset link. Please try again."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      setSubmittedEmail(email);
+      setIsLoading(false);
+    } catch {
+      setErrorMessage(
+        "An unexpected network error occurred. Please try again."
+      );
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -158,8 +185,15 @@ export default function ForgotPasswordPage() {
                   </div>
                 </div>
 
-                <button type="submit" className="ui-btn-primary w-full">
-                  Send Reset Link
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="ui-btn-primary w-full gap-2 cursor-pointer disabled:opacity-60"
+                >
+                  {isLoading && <Loader2 className="size-4 animate-spin" />}
+                  <span>
+                    {isLoading ? "Sending Link..." : "Send Reset Link"}
+                  </span>
                 </button>
               </form>
             )}
