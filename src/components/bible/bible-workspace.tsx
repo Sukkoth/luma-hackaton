@@ -1,23 +1,14 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+import { useRouter, useSearchParams } from "next/navigation";
+import { BookOpen, Search, ChevronLeft, ChevronRight, ChevronDown, Check, CheckCircle2, Loader2, Minus, Plus, RotateCcw, X, ArrowLeft } from "lucide-react";
 import {
-  BookOpen,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  Loader2,
-  Minus,
-  Plus,
-  RotateCcw,
-  X,
-  ArrowLeft,
-  PanelLeft,
-  PanelLeftClose,
-} from "lucide-react";
+  type BibleCanon,
+  type BibleBook,
+  getBibleBooks,
+} from "@/data/bibleData";
 import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
 import {
   BIBLE_VERSIONS,
@@ -27,11 +18,10 @@ import {
   buildBibleComPath,
   isBookSupportedInSixtySixBookVersions,
 } from "@/lib/bible-versions";
-import { useTheme } from "@/components/theme/theme-provider";
+import { toast } from "sonner";
 import { togglePlanReadingItemAction } from "@/actions/plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -50,20 +40,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 const FONT_SIZE_STORAGE_KEY = "luma-bible-font-size";
-const LAST_READ_STORAGE_KEY = "luma-last-read";
 const DEFAULT_FONT_SIZE = 18;
 const MIN_FONT_SIZE = 16;
 const MAX_FONT_SIZE = 32;
-
-const OT_BOOKS = PROTESTANT_BIBLE_BOOKS.filter((b) => b.testament === "OT");
-const NT_BOOKS = PROTESTANT_BIBLE_BOOKS.filter((b) => b.testament === "NT");
 
 type FlattenedPlanReading = {
   id: string;
@@ -84,12 +65,10 @@ type PlanContextData = {
   flattenedReadings: ReadonlyArray<FlattenedPlanReading>;
 };
 
-type LastRead = {
-  bookId: string;
-  chapter: number;
-  versionId: number;
-  timestamp: number;
-};
+type PassageState =
+  | { status: "loading" }
+  | { status: "error"; message: string }
+  | { status: "success"; path: string; contentHtml: string };
 
 function getStoredFontSize(): number {
   if (typeof window === "undefined") return DEFAULT_FONT_SIZE;
@@ -112,50 +91,117 @@ function saveStoredFontSize({ fontSize }: { fontSize: number }): void {
   }
 }
 
-function getStoredLastRead(): LastRead | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(LAST_READ_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as LastRead;
-  } catch {
-    return null;
-  }
+export type BibleWorkspaceProps = {
+  canon?: BibleCanon;
+  readChapters?: Record<string, ReadonlyArray<number>>;
+  totalReadChapters?: number;
+  totalChaptersAcrossCanon?: number;
+  canonPercentage?: number;
+  onToggleTrackerChapter?: (params: {
+    bookId: string;
+    bookName: string;
+    chapter: number;
+  }) => void;
+  onMarkAllChapters?: (params: { book: BibleBook }) => void;
+  onClearAllChapters?: (params: { bookId: string }) => void;
+};
+
+type ReaderQueryState = {
+  book: string;
+  ch: number;
+  v: number | null;
+  plan: string | null;
+  readingId: string | null;
+  startVerse: number | null;
+  endVerse: number | null;
+};
+
+function parseReaderQuery(searchParams: URLSearchParams): ReaderQueryState {
+  const rawBook = searchParams.get("book")?.trim().toLowerCase();
+  const rawCh = Number.parseInt(searchParams.get("ch") ?? "", 10);
+  const rawV = Number.parseInt(searchParams.get("v") ?? "", 10);
+  const rawStart = Number.parseInt(searchParams.get("startVerse") ?? "", 10);
+  const rawEnd = Number.parseInt(searchParams.get("endVerse") ?? "", 10);
+
+  return {
+    book: rawBook || "gen",
+    ch: Number.isFinite(rawCh) && rawCh > 0 ? rawCh : 1,
+    v: Number.isFinite(rawV) ? rawV : null,
+    plan: searchParams.get("plan") || null,
+    readingId: searchParams.get("readingId") || null,
+    startVerse: Number.isFinite(rawStart) ? rawStart : null,
+    endVerse: Number.isFinite(rawEnd) ? rawEnd : null,
+  };
 }
 
-function saveStoredLastRead({
-  bookId,
-  chapter,
-  versionId,
-}: {
-  bookId: string;
-  chapter: number;
-  versionId: number;
-}): void {
-  try {
-    localStorage.setItem(
-      LAST_READ_STORAGE_KEY,
-      JSON.stringify({ bookId, chapter, versionId, timestamp: Date.now() })
-    );
-  } catch {
-    // Ignore storage restrictions
-  }
-}
-
-export function BibleWorkspace() {
+export function BibleWorkspace({
+  canon = "protestant",
+  readChapters = {},
+  totalReadChapters = 0,
+  totalChaptersAcrossCanon = 1189,
+  canonPercentage = 0,
+  onToggleTrackerChapter,
+  onMarkAllChapters,
+  onClearAllChapters,
+}: BibleWorkspaceProps = {}) {
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
+  const searchParams = useSearchParams();
+  const searchKey = searchParams.toString();
 
-  // URL state managed atomically with nuqs
-  const [queryState, setQueryState] = useQueryStates({
-    book: parseAsString.withDefault("gen"),
-    ch: parseAsInteger.withDefault(1),
-    v: parseAsInteger,
-    plan: parseAsString,
-    readingId: parseAsString,
-    startVerse: parseAsInteger,
-    endVerse: parseAsInteger,
-  });
+  const [readerQuery, setReaderQuery] = useState<ReaderQueryState>(() =>
+    parseReaderQuery(searchParams)
+  );
+  const [prevSearchKey, setPrevSearchKey] = useState(searchKey);
+
+  // Sync when Next.js searchParams changes via external route navigation
+  if (searchKey !== prevSearchKey) {
+    setPrevSearchKey(searchKey);
+    setReaderQuery(parseReaderQuery(searchParams));
+  }
+
+  const updateReaderQuery = useCallback(
+    (patch: Partial<ReaderQueryState>) => {
+      setReaderQuery((prev) => ({ ...prev, ...patch }));
+    },
+    []
+  );
+
+  // Sync URL bar after commit so Next.js Router never updates during render
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (readerQuery.book && readerQuery.book !== "gen") {
+      params.set("book", readerQuery.book);
+    } else {
+      params.delete("book");
+    }
+    if (readerQuery.ch > 1) {
+      params.set("ch", String(readerQuery.ch));
+    } else {
+      params.delete("ch");
+    }
+    if (readerQuery.v != null) params.set("v", String(readerQuery.v));
+    else params.delete("v");
+    if (readerQuery.plan) params.set("plan", readerQuery.plan);
+    else params.delete("plan");
+    if (readerQuery.readingId) params.set("readingId", readerQuery.readingId);
+    else params.delete("readingId");
+    if (readerQuery.startVerse != null)
+      params.set("startVerse", String(readerQuery.startVerse));
+    else params.delete("startVerse");
+    if (readerQuery.endVerse != null)
+      params.set("endVerse", String(readerQuery.endVerse));
+    else params.delete("endVerse");
+
+    const qs = params.toString();
+    const nextUrl = qs
+      ? `${window.location.pathname}?${qs}`
+      : window.location.pathname;
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (nextUrl !== currentUrl) {
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }, [readerQuery]);
 
   const {
     book: bookParam,
@@ -165,30 +211,25 @@ export function BibleWorkspace() {
     readingId: readingIdParam,
     startVerse: startVerseParam,
     endVerse: endVerseParam,
-  } = queryState;
+  } = readerQuery;
 
   // Local UI state
   const [searchQuery, setSearchQuery] = useState("");
   const [fontSize, setFontSize] = useState<number>(DEFAULT_FONT_SIZE);
   const [storedVersionId, setStoredVersionId] = useState<number | null>(null);
-  const [iframeInit, setIframeInit] = useState<{
-    theme: string;
-    fontSize: number;
-  } | null>(null);
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
-  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const [isBookPickerOpen, setIsBookPickerOpen] = useState(false);
+  const [pickerBook, setPickerBook] = useState<BibleBook | null>(null);
+  const [pickerTestament, setPickerTestament] = useState<"OT" | "NT">("OT");
+  const [passageState, setPassageState] = useState<PassageState>({
+    status: "loading",
+  });
+  const [passageRetryNonce, setPassageRetryNonce] = useState(0);
   const [planContext, setPlanContext] = useState<PlanContextData | null>(null);
-  const [activeTestamentOverride, setActiveTestamentOverride] = useState<
-    "OT" | "NT" | null
-  >(null);
-  const [expandedBookId, setExpandedBookId] = useState<string | null>(null);
+  const [isTogglingPlan, setIsTogglingPlan] = useState(false);
 
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const hasRestoredLastReadRef = useRef(false);
   const hasHydratedPrefsRef = useRef(false);
 
-  // Resolve active book & chapter
+  // Resolve active book & chapter (from 66-book readable canon)
   const normalizedBookId = bookParam.toLowerCase();
   const activeBookIndex = PROTESTANT_BIBLE_BOOKS.findIndex(
     (b) => b.id === normalizedBookId
@@ -217,55 +258,16 @@ export function BibleWorkspace() {
     );
   }, [versionParam, storedVersionId]);
 
-  // Hydrate client-only preferences (fontSize, saved version, initial iframe theme) after mount
+  // Hydrate client-only preferences (fontSize, saved version) after mount
   useEffect(() => {
     if (hasHydratedPrefsRef.current) return;
     const timer = setTimeout(() => {
       hasHydratedPrefsRef.current = true;
-      const storedSize = getStoredFontSize();
-      const detectedVersion = detectDefaultVersion({});
-      setFontSize(storedSize);
-      setStoredVersionId(detectedVersion.id);
-      setIframeInit({ theme: resolvedTheme, fontSize: storedSize });
+      setFontSize(getStoredFontSize());
+      setStoredVersionId(detectDefaultVersion({}).id);
     }, 0);
     return () => clearTimeout(timer);
-  }, [resolvedTheme]);
-
-  // Derived testament tab: follows user click override or active book's testament
-  const activeTestament: "OT" | "NT" =
-    activeTestamentOverride ?? activeBook.testament;
-
-  // Restore last read on initial visit when no explicit book/plan query is set
-  useEffect(() => {
-    if (hasRestoredLastReadRef.current) return;
-    hasRestoredLastReadRef.current = true;
-    if (typeof window === "undefined") return;
-
-    const search = new URLSearchParams(window.location.search);
-    if (search.has("book") || search.has("ch") || search.has("plan")) return;
-
-    const last = getStoredLastRead();
-    if (!last) return;
-    const matched = PROTESTANT_BIBLE_BOOKS.find(
-      (b) => b.id === last.bookId.toLowerCase()
-    );
-    if (!matched) return;
-
-    void setQueryState({
-      book: matched.id,
-      ch: Math.min(matched.chapters, Math.max(1, last.chapter || 1)),
-    }).catch(() => {});
-  }, [setQueryState]);
-
-  // Persist last read in standalone mode
-  useEffect(() => {
-    if (planIdParam) return;
-    saveStoredLastRead({
-      bookId: activeBook.id,
-      chapter: activeChapter,
-      versionId: selectedVersion.id,
-    });
-  }, [planIdParam, activeBook.id, activeChapter, selectedVersion.id]);
+  }, []);
 
   // Fetch plan context when ?plan=...&readingId=... is present
   useEffect(() => {
@@ -308,26 +310,6 @@ export function BibleWorkspace() {
       isCancelled = true;
     };
   }, [planIdParam, readingIdParam, router]);
-
-  // Sync theme to iframe without reloading
-  useEffect(() => {
-    if (iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        { type: "SET_THEME", theme: resolvedTheme },
-        window.location.origin
-      );
-    }
-  }, [resolvedTheme]);
-
-  // Sync font size to iframe without reloading
-  useEffect(() => {
-    if (iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        { type: "SET_FONT_SIZE", fontSize },
-        window.location.origin
-      );
-    }
-  }, [fontSize]);
 
   // Plan navigation state
   const flattenedReadings = useMemo(
@@ -373,12 +355,46 @@ export function BibleWorkspace() {
       })
     : "";
 
-  const iframeSrc =
-    biblePath && iframeInit
-      ? `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&theme=${iframeInit.theme}&fontSize=${iframeInit.fontSize}`
-      : "";
+  const isPassageLoading =
+    isBookSupported &&
+    (passageState.status === "loading" ||
+      (passageState.status === "success" && passageState.path !== biblePath));
 
-  const isIframeLoading = Boolean(iframeSrc) && loadedSrc !== iframeSrc;
+  // Fetch sanitized passage HTML directly as JSON
+  useEffect(() => {
+    if (!biblePath) return;
+    const controller = new AbortController();
+
+    async function loadPassage() {
+      try {
+        const res = await fetch(
+          `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&format=json`,
+          { signal: controller.signal }
+        );
+        const data = (await res.json()) as {
+          contentHtml?: string;
+          error?: string;
+        };
+        if (!res.ok || !data.contentHtml) {
+          throw new Error(data.error || `Failed to load passage (${res.status})`);
+        }
+        setPassageState({
+          status: "success",
+          path: biblePath,
+          contentHtml: data.contentHtml,
+        });
+        window.scrollTo({ top: 0, behavior: "instant" });
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        const message =
+          err instanceof Error ? err.message : "Unable to load passage";
+        setPassageState({ status: "error", message });
+      }
+    }
+
+    void loadPassage();
+    return () => controller.abort();
+  }, [biblePath, passageRetryNonce]);
 
   // Standalone previous / next targets
   const standaloneNav = useMemo(() => {
@@ -420,19 +436,17 @@ export function BibleWorkspace() {
 
   const navigateToBookChapter = useCallback(
     ({ nextBookId, nextChapter }: { nextBookId: string; nextChapter: number }) => {
-      setActiveTestamentOverride(null);
-      setExpandedBookId(null);
-      setIsMobileDrawerOpen(false);
-      setIsDesktopSidebarOpen(false);
-      void setQueryState({
+      setIsBookPickerOpen(false);
+      setPickerBook(null);
+      updateReaderQuery({
         book: nextBookId,
         ch: nextChapter,
         startVerse: null,
         endVerse: null,
-        ...(readingIdParam ? { readingId: null } : {}),
-      }).catch(() => {});
+        readingId: null,
+      });
     },
-    [setQueryState, readingIdParam]
+    [updateReaderQuery]
   );
 
   const handlePrev = useCallback(() => {
@@ -441,14 +455,13 @@ export function BibleWorkspace() {
     if (isPlanMode) {
       const prevItem = flattenedReadings[planReadingIndex - 1];
       if (!prevItem) return;
-      setActiveTestamentOverride(null);
-      void setQueryState({
+      updateReaderQuery({
         book: prevItem.bookId.toLowerCase(),
         ch: prevItem.chapter,
         readingId: prevItem.id,
         startVerse: prevItem.startVerse ?? null,
         endVerse: prevItem.endVerse ?? null,
-      }).catch(() => {});
+      });
       return;
     }
 
@@ -464,7 +477,7 @@ export function BibleWorkspace() {
     flattenedReadings,
     planReadingIndex,
     standaloneNav.prev,
-    setQueryState,
+    updateReaderQuery,
     navigateToBookChapter,
   ]);
 
@@ -474,14 +487,13 @@ export function BibleWorkspace() {
     if (isPlanMode) {
       const nextItem = flattenedReadings[planReadingIndex + 1];
       if (!nextItem) return;
-      setActiveTestamentOverride(null);
-      void setQueryState({
+      updateReaderQuery({
         book: nextItem.bookId.toLowerCase(),
         ch: nextItem.chapter,
         readingId: nextItem.id,
         startVerse: nextItem.startVerse ?? null,
         endVerse: nextItem.endVerse ?? null,
-      }).catch(() => {});
+      });
       return;
     }
 
@@ -497,13 +509,14 @@ export function BibleWorkspace() {
     flattenedReadings,
     planReadingIndex,
     standaloneNav.next,
-    setQueryState,
+    updateReaderQuery,
     navigateToBookChapter,
   ]);
 
-  // Keyboard shortcuts (ArrowLeft / ArrowRight when not typing)
+  // Keyboard shortcuts (ArrowLeft / ArrowRight when picker closed and not typing)
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
+      if (isBookPickerOpen) return;
       const target = e.target as HTMLElement | null;
       if (
         target &&
@@ -523,11 +536,11 @@ export function BibleWorkspace() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [hasPrev, hasNext, handlePrev, handleNext]);
+  }, [isBookPickerOpen, hasPrev, hasNext, handlePrev, handleNext]);
 
   // Background prefetch adjacent chapter/reading
   useEffect(() => {
-    if (isIframeLoading) return;
+    if (isPassageLoading) return;
     const controller = new AbortController();
 
     const nextTarget = isPlanMode
@@ -556,9 +569,10 @@ export function BibleWorkspace() {
         startVerse: nextTarget.startVerse,
         endVerse: nextTarget.endVerse,
       });
-      void fetch(`/api/bible-proxy?path=${encodeURIComponent(path)}`, {
-        signal: controller.signal,
-      }).catch(() => {});
+      void fetch(
+        `/api/bible-proxy?path=${encodeURIComponent(path)}&format=json`,
+        { signal: controller.signal }
+      ).catch(() => {});
     }, 800);
 
     return () => {
@@ -566,7 +580,7 @@ export function BibleWorkspace() {
       controller.abort();
     };
   }, [
-    isIframeLoading,
+    isPassageLoading,
     isPlanMode,
     flattenedReadings,
     planReadingIndex,
@@ -580,7 +594,7 @@ export function BibleWorkspace() {
     if (!match) return;
     saveSelectedVersion({ versionId: match.id });
     setStoredVersionId(match.id);
-    void setQueryState({ v: match.id }).catch(() => {});
+    updateReaderQuery({ v: match.id });
   };
 
   const handleUpdateFontSize = ({ newSize }: { newSize: number }) => {
@@ -590,11 +604,12 @@ export function BibleWorkspace() {
   };
 
   const handleTogglePlanReading = async () => {
-    if (!planContext || !activePlanReading) return;
+    if (!planContext || !activePlanReading || isTogglingPlan) return;
     const targetId = activePlanReading.id;
     const prevCompleted = activePlanReading.isCompleted;
     const nextCompleted = !prevCompleted;
 
+    setIsTogglingPlan(true);
     setPlanContext((prev) => {
       if (!prev) return null;
       return {
@@ -615,6 +630,7 @@ export function BibleWorkspace() {
         readingItemId: targetId,
       });
       if (!res.success) {
+        toast.error(res.error || "Failed to update reading status");
         setPlanContext((prev) => {
           if (!prev) return null;
           return {
@@ -628,8 +644,37 @@ export function BibleWorkspace() {
             ),
           };
         });
+      } else {
+        setPlanContext((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            reading:
+              prev.reading.id === targetId
+                ? { ...prev.reading, isCompleted: res.isCompleted }
+                : prev.reading,
+            flattenedReadings: prev.flattenedReadings.map((r) =>
+              r.id === targetId ? { ...r, isCompleted: res.isCompleted } : r
+            ),
+          };
+        });
+        if (res.newlyUnlocked && res.newlyUnlocked.length > 0) {
+          window.dispatchEvent(
+            new CustomEvent("achievement-unlocked", {
+              detail: res.newlyUnlocked,
+            })
+          );
+        }
+        try {
+          sessionStorage.setItem("luma-plan-dirty", planContext.plan.id);
+        } catch {
+          // Ignore storage restrictions
+        }
       }
-    } catch {
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to update reading status";
+      toast.error(msg);
       setPlanContext((prev) => {
         if (!prev) return null;
         return {
@@ -643,246 +688,65 @@ export function BibleWorkspace() {
           ),
         };
       });
+    } finally {
+      setIsTogglingPlan(false);
     }
   };
 
-  const handleIframeLoad = () => {
-    setLoadedSrc(iframeSrc);
-    if (iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        { type: "SET_THEME", theme: resolvedTheme },
-        window.location.origin
-      );
-      iframeRef.current.contentWindow.postMessage(
-        { type: "SET_FONT_SIZE", fontSize },
-        window.location.origin
-      );
-    }
-  };
-
-  const visibleBooks = useMemo(() => {
-    const base = activeTestament === "OT" ? OT_BOOKS : NT_BOOKS;
+  // Books for the picker Sheet (follows active tracker's canon)
+  const canonBooks = useMemo(() => getBibleBooks(canon), [canon]);
+  const filteredPickerBooks = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return base;
-    return PROTESTANT_BIBLE_BOOKS.filter(
-      (b) => b.name.toLowerCase().includes(q) || b.id.toLowerCase().includes(q)
-    );
-  }, [activeTestament, searchQuery]);
+    return canonBooks.filter((b) => {
+      if (q) {
+        return (
+          b.name.toLowerCase().includes(q) ||
+          b.id.toLowerCase().includes(q) ||
+          b.category.toLowerCase().includes(q)
+        );
+      }
+      return b.testament === pickerTestament;
+    });
+  }, [canonBooks, searchQuery, pickerTestament]);
 
   const readingTitle = activePlanReading
     ? activePlanReading.displayText ||
       `${activePlanReading.bookName || activeBook.name} ${activePlanReading.chapter}`
     : `${activeBook.name} ${activeChapter}`;
 
-  const renderSidebarContent = () => (
-    <div className="flex h-full flex-col">
-      {/* Top OT / NT Switcher + Search */}
-      <div className="p-3.5 border-b border-border-subtle space-y-2.5 bg-surface-elevated/40">
-        <div
-          role="tablist"
-          aria-label="Testament"
-          className="grid grid-cols-2 gap-1 rounded-[12px] bg-surface-elevated p-1 border border-border-subtle"
-        >
-          <Button
-            type="button"
-            role="tab"
-            size="sm"
-            variant={activeTestament === "OT" ? "primary" : "ghost"}
-            aria-selected={activeTestament === "OT"}
-            onClick={() => {
-              setActiveTestamentOverride("OT");
-              setSearchQuery("");
-            }}
-            className="h-7.5 rounded-[9px] text-[12px]"
-          >
-            Old Testament
-          </Button>
-          <Button
-            type="button"
-            role="tab"
-            size="sm"
-            variant={activeTestament === "NT" ? "primary" : "ghost"}
-            aria-selected={activeTestament === "NT"}
-            onClick={() => {
-              setActiveTestamentOverride("NT");
-              setSearchQuery("");
-            }}
-            className="h-7.5 rounded-[9px] text-[12px]"
-          >
-            New Testament
-          </Button>
-        </div>
-
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-foreground-dim z-10" />
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search books..."
-            className="h-8.5 pl-8.5 pr-7 text-[12.5px]"
-          />
-          {searchQuery && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Clear book search"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-1 top-1/2 -translate-y-1/2 size-6 text-foreground-dim hover:text-foreground"
-            >
-              <X className="size-3.5" />
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Book List + Collapsible Chapter Grid */}
-      <div className="luma-thin-scroll flex-1 overflow-y-auto p-2 space-y-0.5">
-        {visibleBooks.length === 0 ? (
-          <p className="px-3 py-6 text-center text-xs text-foreground-dim">
-            No matching books
-          </p>
-        ) : (
-          visibleBooks.map((book) => {
-            const openBookId =
-              expandedBookId === "" ? null : (expandedBookId ?? currentBookId);
-            const isExpandedBook = book.id === openBookId;
-            const isCurrentReadingBook = book.id === currentBookId;
-            return (
-              <Collapsible
-                key={book.id}
-                open={isExpandedBook}
-                onOpenChange={(open) => setExpandedBookId(open ? book.id : "")}
-                className={`rounded-[12px] transition-colors ${
-                  isExpandedBook ? "bg-surface-elevated/80 my-1" : ""
-                }`}
-              >
-                <CollapsibleTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className={`w-full justify-between px-3 py-2 h-auto rounded-[12px] text-left ${
-                      isExpandedBook || isCurrentReadingBook
-                        ? "text-primary font-semibold hover:text-primary"
-                        : "text-foreground-secondary font-normal hover:text-foreground"
-                    }`}
-                  >
-                    <span className="truncate text-[13px]">{book.name}</span>
-                    {isExpandedBook && (
-                      <Badge
-                        variant="secondary"
-                        className="text-[10.5px] tabular-nums text-primary bg-primary/10 border-transparent shrink-0"
-                      >
-                        {book.chapters} ch
-                      </Badge>
-                    )}
-                  </Button>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent className="px-2.5 pb-2.5 pt-0.5">
-                  <div className="grid grid-cols-6 gap-1">
-                    {Array.from(
-                      { length: book.chapters },
-                      (_, idx) => idx + 1
-                    ).map((chNum) => {
-                      const isActiveCh =
-                        isCurrentReadingBook && chNum === currentChapter;
-                      return (
-                        <Button
-                          key={chNum}
-                          type="button"
-                          size="sm"
-                          variant={isActiveCh ? "primary" : "outline"}
-                          onClick={() =>
-                            navigateToBookChapter({
-                              nextBookId: book.id,
-                              nextChapter: chNum,
-                            })
-                          }
-                          className="h-7 px-0 rounded-[8px] text-[11.5px] font-semibold tabular-nums"
-                        >
-                          {chNum}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            );
-          })
-        )}
-      </div>
-    </div>
+  const isCurrentChapterRead = (readChapters[currentBookId] ?? []).includes(
+    currentChapter
   );
 
+  const openBookPicker = () => {
+    setPickerBook(null);
+    setPickerTestament(activeBook.testament);
+    setSearchQuery("");
+    setIsBookPickerOpen(true);
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100dvh-10.5rem)] min-h-[420px] lg:h-[calc(100dvh-6.75rem)] lg:min-h-[560px] rounded-[16px] border border-border bg-surface shadow-xs overflow-hidden lg:divide-x lg:divide-border-subtle">
-      {/* ── Desktop Left Sidebar: OT/NT + Books + Chapters ── */}
-      {!hideBookSelector && isDesktopSidebarOpen && (
-        <aside className="hidden lg:flex w-68 xl:w-72 shrink-0 flex-col bg-surface overflow-hidden">
-          {renderSidebarContent()}
-        </aside>
-      )}
-
-      {/* ── Mobile Sheet Drawer for Books & Chapters ── */}
-      {!hideBookSelector && (
-        <Sheet open={isMobileDrawerOpen} onOpenChange={setIsMobileDrawerOpen}>
-          <SheetContent
-            side="left"
-            className="w-80 max-w-[85vw] p-0 flex flex-col gap-0 lg:hidden"
-          >
-            <SheetHeader className="px-4 py-3 border-b border-border-subtle">
-              <SheetTitle className="text-sm font-bold">
-                Books &amp; Chapters
-              </SheetTitle>
-            </SheetHeader>
-            <div className="flex-1 min-h-0">{renderSidebarContent()}</div>
-          </SheetContent>
-        </Sheet>
-      )}
-
-      {/* ── Right Pane: Reader Canvas ── */}
-      <section className="flex flex-1 min-w-0 flex-col bg-surface overflow-hidden">
-        {/* Top Reader Toolbar */}
-        <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border-subtle bg-surface px-4 sm:px-6">
-          {/* Left: Sidebar Toggles + Plan Back + Passage Title */}
+    <div className="flex w-full flex-col min-h-[calc(100dvh-10.5rem)] lg:min-h-[calc(100dvh-6.75rem)]">
+      {/* ── Sticky Reader Toolbar ── */}
+      <header className="sticky top-0 z-20 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 border-b border-border/70 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-[820px] items-center justify-between gap-2">
+          {/* Left: Book & Chapter Picker Trigger / Plan Context */}
           <div className="flex items-center gap-2 min-w-0">
             {!hideBookSelector && (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsDesktopSidebarOpen((prev) => !prev)}
-                  aria-label={
-                    isDesktopSidebarOpen
-                      ? "Hide books sidebar"
-                      : "Show books sidebar"
-                  }
-                  aria-expanded={isDesktopSidebarOpen}
-                  className="hidden lg:inline-flex gap-1.5 h-8 px-2.5 text-xs shrink-0"
-                >
-                  {isDesktopSidebarOpen ? (
-                    <PanelLeftClose className="size-3.5 text-primary" />
-                  ) : (
-                    <PanelLeft className="size-3.5 text-primary" />
-                  )}
-                  <span>{isDesktopSidebarOpen ? "Hide" : "Books"}</span>
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsMobileDrawerOpen(true)}
-                  aria-label="Open books and chapters"
-                  className="inline-flex lg:hidden gap-1.5 h-8 px-2.5 text-xs shrink-0"
-                >
-                  <PanelLeft className="size-3.5 text-primary" />
-                  <span>Books</span>
-                </Button>
-              </>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={openBookPicker}
+                aria-label="Choose book and chapter"
+                className="h-8 gap-1.5 px-3 text-xs font-semibold shrink-0"
+              >
+                <BookOpen className="size-3.5 text-primary" />
+                <span>
+                  {activeBook.name} {activeChapter}
+                </span>
+                <ChevronDown className="size-3 text-foreground-dim" />
+              </Button>
             )}
 
             {isPlanMode && planContext && (
@@ -902,13 +766,18 @@ export function BibleWorkspace() {
             )}
 
             {isPlanMode && activePlanReading && (
-              <p className="truncate text-xs font-medium text-foreground-dim">
-                {activePlanReading.sessionTitle}
-              </p>
+              <div className="min-w-0 flex items-baseline gap-1.5">
+                <span className="truncate text-xs sm:text-sm font-bold text-foreground">
+                  {readingTitle}
+                </span>
+                <span className="hidden sm:inline truncate text-[11px] font-medium text-foreground-dim">
+                  • {activePlanReading.sessionTitle}
+                </span>
+              </div>
             )}
           </div>
 
-          {/* Right: Version Select, Font Size Popover, Plan Mark Read */}
+          {/* Right: Version Select, Font Size Popover, Mark Read */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {isBookSupported && (
               <Select
@@ -937,7 +806,7 @@ export function BibleWorkspace() {
               </Select>
             )}
 
-            <Popover modal>
+            <Popover>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -1011,6 +880,7 @@ export function BibleWorkspace() {
                 size="sm"
                 variant={activePlanReading.isCompleted ? "outline" : "primary"}
                 onClick={handleTogglePlanReading}
+                disabled={isTogglingPlan}
                 aria-pressed={activePlanReading.isCompleted}
                 className="h-8 px-2.5 sm:px-3 gap-1.5 text-xs"
               >
@@ -1020,106 +890,430 @@ export function BibleWorkspace() {
                 </span>
               </Button>
             )}
-          </div>
-        </header>
 
-        {/* Chapter Content Area */}
-        <div className="relative flex-1 min-h-0 bg-background">
-          {isIframeLoading && isBookSupported && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background p-6">
-              <div className="w-full max-w-xl space-y-5">
-                <div className="space-y-2 border-b border-border/50 pb-4">
-                  <div className="h-7 w-44 rounded-lg bg-surface-elevated animate-pulse" />
-                  <div className="h-3.5 w-28 rounded bg-surface-elevated/70 animate-pulse" />
-                </div>
-                <div className="space-y-3">
-                  <div className="h-4 w-full rounded bg-surface-elevated animate-pulse" />
-                  <div className="h-4 w-11/12 rounded bg-surface-elevated animate-pulse" />
-                  <div className="h-4 w-4/5 rounded bg-surface-elevated animate-pulse" />
-                </div>
-                <div className="flex items-center justify-center gap-2 pt-4 text-foreground-dim">
-                  <Loader2 className="size-4 animate-spin text-primary" />
-                  <span className="text-xs font-medium">
-                    Loading scripture...
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!isBookSupported ? (
-            <div className="flex size-full items-center justify-center p-6 text-center">
-              <div className="max-w-md space-y-2">
-                <BookOpen className="mx-auto size-8 text-foreground-dim" />
-                <h2 className="text-base font-semibold text-foreground">
-                  Book unavailable in the reader
-                </h2>
-                <p className="text-sm text-foreground-dim">
-                  {readingTitle} is outside the 66-book canon supported by the
-                  available Bible translations.
-                </p>
-              </div>
-            </div>
-          ) : iframeSrc ? (
-            <iframe
-              ref={iframeRef}
-              key={iframeSrc}
-              src={iframeSrc}
-              title={`Bible reading ${readingTitle}`}
-              onLoad={handleIframeLoad}
-              className="size-full border-0 bg-background"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-            />
-          ) : null}
-        </div>
-
-        {/* Bottom Previous / Next Bar */}
-        <footer className="flex h-14 shrink-0 items-center justify-between border-t border-border-subtle bg-surface px-4 sm:px-6">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handlePrev}
-            disabled={!hasPrev}
-            aria-label={isPlanMode ? "Previous plan reading" : "Previous chapter"}
-            className="h-8 gap-1.5 text-xs"
-          >
-            <ChevronLeft className="size-3.5" />
-            <span>Previous</span>
-          </Button>
-
-          <div className="min-w-0 px-2 text-center text-[12.5px] font-medium text-foreground">
-            {isPlanMode ? (
-              <span className="truncate block">
-                {readingTitle}{" "}
-                <span className="font-normal text-foreground-dim">
-                  • {planReadingIndex + 1} of {flattenedReadings.length}
+            {!isPlanMode && onToggleTrackerChapter && isBookSupported && (
+              <Button
+                type="button"
+                size="sm"
+                variant={isCurrentChapterRead ? "outline" : "primary"}
+                onClick={() =>
+                  onToggleTrackerChapter({
+                    bookId: currentBookId,
+                    bookName: activeBook.name,
+                    chapter: currentChapter,
+                  })
+                }
+                aria-pressed={isCurrentChapterRead}
+                className="h-8 px-2.5 sm:px-3 gap-1.5 text-xs"
+              >
+                <Check className="size-3.5 stroke-[2.5]" />
+                <span className="hidden sm:inline">
+                  {isCurrentChapterRead ? "Read" : "Mark Read"}
                 </span>
-              </span>
-            ) : (
-              <span>
-                {activeBook.name} {activeChapter}{" "}
-                <span className="font-normal text-foreground-dim">
-                  of {activeBook.chapters}
-                </span>
-              </span>
+              </Button>
             )}
           </div>
+        </div>
+      </header>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleNext}
-            disabled={!hasNext}
-            aria-label={isPlanMode ? "Next plan reading" : "Next chapter"}
-            className="h-8 gap-1.5 text-xs"
+      {/* ── Open Editorial Reading Column ── */}
+      <div className="mx-auto w-full max-w-[760px] flex-1 px-2 sm:px-6 py-6 sm:py-10">
+        {!isBookSupported ? (
+          <div className="flex min-h-[50vh] items-center justify-center p-6 text-center">
+            <div className="max-w-md space-y-2">
+              <BookOpen className="mx-auto size-8 text-foreground-dim" />
+              <h2 className="text-base font-semibold text-foreground">
+                Book unavailable in the reader
+              </h2>
+              <p className="text-sm text-foreground-dim">
+                {readingTitle} is outside the 66-book canon supported by the
+                available Bible translations.
+              </p>
+            </div>
+          </div>
+        ) : isPassageLoading ? (
+          <div className="space-y-6 py-2">
+            {[
+              ["w-full", "w-11/12", "w-4/5"],
+              ["w-full", "w-5/6", "w-3/4"],
+              ["w-11/12", "w-full", "w-2/3"],
+              ["w-full", "w-4/5", "w-5/6"],
+              ["w-5/6", "w-full", "w-3/5"],
+              ["w-full", "w-11/12", "w-4/5"],
+              ["w-4/5", "w-full", "w-2/3"],
+            ].map((widths, idx) => (
+              <div key={idx} className="space-y-2.5">
+                {widths.map((widthClass, lineIdx) => (
+                  <div
+                    key={lineIdx}
+                    className={`h-4 ${widthClass} rounded bg-surface-elevated animate-pulse`}
+                  />
+                ))}
+              </div>
+            ))}
+            <div className="flex items-center justify-center gap-2 pt-2 text-foreground-dim">
+              <Loader2 className="size-4 animate-spin text-primary" />
+              <span className="text-xs font-medium">Loading scripture...</span>
+            </div>
+          </div>
+        ) : passageState.status === "error" ? (
+          <div className="flex min-h-[50vh] items-center justify-center p-6 text-center">
+            <div className="max-w-md space-y-3">
+              <h2 className="text-base font-semibold text-foreground">
+                Unable to load passage
+              </h2>
+              <p className="text-sm text-foreground-dim">
+                {passageState.message}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPassageRetryNonce((n) => n + 1)}
+              >
+                Retry Passage
+              </Button>
+            </div>
+          </div>
+        ) : passageState.status === "success" ? (
+          <article
+            style={{ "--bible-font-size": `${fontSize}px` } as CSSProperties}
+            className="luma-bible-passage"
+            /* Passage HTML is returned by YouVersion API and sanitized server-side via sanitize-html */
+            dangerouslySetInnerHTML={{ __html: passageState.contentHtml }}
+          />
+        ) : null}
+      </div>
+
+      {/* ── Bottom Previous / Next Navigation ── */}
+      <footer className="mx-auto w-full max-w-[760px] px-2 sm:px-6 pb-8 pt-4 border-t border-border/60 flex items-center justify-between gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handlePrev}
+          disabled={!hasPrev}
+          aria-label={isPlanMode ? "Previous plan reading" : "Previous chapter"}
+          className="h-8 gap-1.5 text-xs"
+        >
+          <ChevronLeft className="size-3.5" />
+          <span>Previous</span>
+        </Button>
+
+        <div className="min-w-0 px-2 text-center text-[12.5px] font-medium text-foreground">
+          {isPlanMode ? (
+            <span className="truncate block">
+              {readingTitle}{" "}
+              <span className="font-normal text-foreground-dim">
+                • {planReadingIndex + 1} of {flattenedReadings.length}
+              </span>
+            </span>
+          ) : (
+            <span>
+              {activeBook.name} {activeChapter}{" "}
+              <span className="font-normal text-foreground-dim">
+                of {activeBook.chapters}
+              </span>
+            </span>
+          )}
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleNext}
+          disabled={!hasNext}
+          aria-label={isPlanMode ? "Next plan reading" : "Next chapter"}
+          className="h-8 gap-1.5 text-xs"
+        >
+          <span>Next</span>
+          <ChevronRight className="size-3.5" />
+        </Button>
+      </footer>
+
+      {/* ── Unified Book & Progress Picker Sheet ── */}
+      {!hideBookSelector && (
+        <Sheet open={isBookPickerOpen} onOpenChange={setIsBookPickerOpen}>
+          <SheetContent
+            side="left"
+            className="w-[90vw] sm:max-w-[440px] p-0 flex flex-col gap-0"
           >
-            <span>Next</span>
-            <ChevronRight className="size-3.5" />
-          </Button>
-        </footer>
-      </section>
+            <SheetHeader className="px-5 py-4 border-b border-border-subtle space-y-2">
+              <div className="flex items-center justify-between pr-6">
+                <SheetTitle className="text-base font-bold">
+                  {pickerBook ? pickerBook.name : "Books & Progress"}
+                </SheetTitle>
+                <span className="text-xs font-semibold tabular-nums text-primary">
+                  {totalReadChapters}/{totalChaptersAcrossCanon} ({canonPercentage}
+                  %)
+                </span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
+                <div
+                  style={{ width: `${canonPercentage}%` }}
+                  className="h-full rounded-full bg-primary transition-all duration-300"
+                />
+              </div>
+            </SheetHeader>
+
+            {pickerBook ? (
+              <div className="flex flex-1 min-h-0 flex-col">
+                {/* Book Subheader + Bulk Actions */}
+                <div className="px-5 py-3 border-b border-border-subtle flex flex-wrap items-center justify-between gap-2 bg-surface-elevated/40">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPickerBook(null)}
+                    className="h-8 px-2 gap-1 text-xs"
+                  >
+                    <ArrowLeft className="size-3.5" />
+                    <span>All Books</span>
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    {onMarkAllChapters && (
+                      <Button
+                        type="button"
+                        variant="primary"
+                        size="sm"
+                        onClick={() => onMarkAllChapters({ book: pickerBook })}
+                        className="h-8 gap-1.5 text-xs"
+                      >
+                        <CheckCircle2 className="size-3.5" />
+                        <span>Mark All Read</span>
+                      </Button>
+                    )}
+                    {onClearAllChapters &&
+                      (readChapters[pickerBook.id]?.length ?? 0) > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            onClearAllChapters({ bookId: pickerBook.id })
+                          }
+                          className="h-8 gap-1 text-xs text-destructive hover:text-destructive"
+                        >
+                          <RotateCcw className="size-3" />
+                          <span>Reset</span>
+                        </Button>
+                      )}
+                  </div>
+                </div>
+
+                {/* Chapter Grid */}
+                <div className="luma-thin-scroll flex-1 overflow-y-auto p-5">
+                  {!isBookSupportedInSixtySixBookVersions({
+                    bookId: pickerBook.id,
+                  }) && (
+                    <p className="mb-3 rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs text-foreground-secondary">
+                      Tracking only — this book is outside the 66-book reader
+                      translations. Tap chapters to mark them read.
+                    </p>
+                  )}
+
+                  <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
+                    {Array.from(
+                      { length: pickerBook.chapters },
+                      (_, idx) => idx + 1
+                    ).map((chNum) => {
+                      const isReadable = isBookSupportedInSixtySixBookVersions({
+                        bookId: pickerBook.id,
+                      });
+                      const isActiveCh =
+                        isReadable &&
+                        pickerBook.id === currentBookId &&
+                        chNum === currentChapter;
+                      const isReadCh = (
+                        readChapters[pickerBook.id] ?? []
+                      ).includes(chNum);
+                      return (
+                        <Button
+                          key={chNum}
+                          type="button"
+                          size="sm"
+                          variant={isActiveCh ? "primary" : "ghost"}
+                          onClick={() => {
+                            if (isReadable) {
+                              navigateToBookChapter({
+                                nextBookId: pickerBook.id,
+                                nextChapter: chNum,
+                              });
+                            } else if (onToggleTrackerChapter) {
+                              onToggleTrackerChapter({
+                                bookId: pickerBook.id,
+                                bookName: pickerBook.name,
+                                chapter: chNum,
+                              });
+                            }
+                          }}
+                          className={`h-10 px-0 rounded-[12px] text-[13.5px] tabular-nums transition-all ${
+                            isActiveCh
+                              ? "bg-primary border border-primary font-semibold text-primary-foreground shadow-xs"
+                              : isReadCh
+                                ? "border border-primary/60 bg-surface-elevated font-medium text-foreground-secondary hover:border-primary hover:text-foreground hover:bg-surface-elevated"
+                                : "border border-border bg-surface-elevated font-medium text-foreground-secondary hover:border-border-strong hover:text-foreground hover:bg-surface-elevated"
+                          }`}
+                        >
+                          {chNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-1 min-h-0 flex-col">
+                {/* OT / NT Tabs + Search */}
+                <div className="p-4 border-b border-border-subtle space-y-2.5 bg-surface-elevated/40">
+                  <div
+                    role="tablist"
+                    aria-label="Testament"
+                    className="grid grid-cols-2 gap-1 rounded-[12px] bg-surface-elevated p-1 border border-border-subtle"
+                  >
+                    <Button
+                      type="button"
+                      role="tab"
+                      size="sm"
+                      variant={pickerTestament === "OT" ? "primary" : "ghost"}
+                      aria-selected={pickerTestament === "OT"}
+                      onClick={() => {
+                        setPickerTestament("OT");
+                        setSearchQuery("");
+                      }}
+                      className="h-7.5 rounded-[9px] text-xs"
+                    >
+                      Old Testament
+                    </Button>
+                    <Button
+                      type="button"
+                      role="tab"
+                      size="sm"
+                      variant={pickerTestament === "NT" ? "primary" : "ghost"}
+                      aria-selected={pickerTestament === "NT"}
+                      onClick={() => {
+                        setPickerTestament("NT");
+                        setSearchQuery("");
+                      }}
+                      className="h-7.5 rounded-[9px] text-xs"
+                    >
+                      New Testament
+                    </Button>
+                  </div>
+
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-foreground-dim z-10" />
+                    <Input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search books..."
+                      className="h-8.5 pl-8.5 pr-7 text-[12.5px]"
+                    />
+                    {searchQuery && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Clear book search"
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 size-6 text-foreground-dim hover:text-foreground"
+                      >
+                        <X className="size-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* BookCard Grid */}
+                <div className="luma-thin-scroll flex-1 overflow-y-auto p-4">
+                  {filteredPickerBooks.length === 0 ? (
+                    <p className="py-8 text-center text-xs text-foreground-dim">
+                      No matching books
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                      {filteredPickerBooks.map((book) => {
+                        const readCount = readChapters[book.id]?.length ?? 0;
+                        const isFullyRead =
+                          readCount >= book.chapters && book.chapters > 0;
+                        const progressPercent = isFullyRead
+                          ? 100
+                          : book.chapters > 0
+                            ? Math.min(
+                                99,
+                                Math.round((readCount / book.chapters) * 100)
+                              )
+                            : 0;
+                        const orderFormatted =
+                          book.order < 10 ? `0${book.order}` : `${book.order}`;
+                        return (
+                          <button
+                            key={book.id}
+                            type="button"
+                            onClick={() => setPickerBook(book)}
+                            className="group relative flex flex-col justify-between overflow-hidden rounded-[12px] border border-border bg-surface p-2.5 text-left transition-all duration-150 hover:border-border-strong hover:bg-surface-elevated/60 active:scale-[0.98] cursor-pointer"
+                          >
+                            {isFullyRead ? (
+                              <div
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-0 bg-primary/10 rounded-[12px]"
+                              />
+                            ) : progressPercent > 0 ? (
+                              <div
+                                aria-hidden="true"
+                                style={{ width: `${progressPercent}%` }}
+                                className="pointer-events-none absolute inset-y-0 left-0 bg-primary/8 rounded-l-[12px]"
+                              />
+                            ) : null}
+
+                            <div className="relative z-10 flex items-center justify-between gap-1">
+                              <span className="text-[10px] tabular-nums text-foreground-dim">
+                                {orderFormatted}
+                              </span>
+                              {isFullyRead ? (
+                                <span className="flex size-3.5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                  <Check className="size-2" strokeWidth={3} />
+                                </span>
+                              ) : progressPercent > 0 ? (
+                                <span className="text-[9.5px] font-semibold tabular-nums text-primary">
+                                  {progressPercent}%
+                                </span>
+                              ) : null}
+                            </div>
+
+                            <div className="relative z-10 mt-1.5">
+                              <h3 className="text-[12.5px] font-medium tracking-tight text-foreground truncate">
+                                {book.name}
+                              </h3>
+                              <p className="text-[10.5px] text-foreground-dim">
+                                {readCount > 0
+                                  ? `${readCount}/${book.chapters}`
+                                  : `${book.chapters} ch`}
+                              </p>
+                            </div>
+
+                            <div className="relative z-10 mt-2 h-1 w-full overflow-hidden rounded-full bg-surface-elevated">
+                              <div
+                                style={{ width: `${progressPercent}%` }}
+                                className={`h-full rounded-full ${
+                                  isFullyRead ? "bg-primary" : "bg-primary/70"
+                                }`}
+                              />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   );
 }
