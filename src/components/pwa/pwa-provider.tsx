@@ -101,7 +101,7 @@ export function PwaProvider({ children }: PwaProviderProps) {
 
     // Register Service Worker in production or active dev
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
+      const registerServiceWorker = () => {
         navigator.serviceWorker
           .register("/sw.js")
           .then((registration) => {
@@ -130,7 +130,13 @@ export function PwaProvider({ children }: PwaProviderProps) {
           .catch((err) => {
             console.warn("[PWA] Service worker registration failed:", err);
           });
-      });
+      };
+
+      if (document.readyState === "complete") {
+        registerServiceWorker();
+      } else {
+        window.addEventListener("load", registerServiceWorker);
+      }
     }
 
     // Network connectivity notifications

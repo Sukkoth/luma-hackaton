@@ -32,12 +32,18 @@ export function TrackerSwitcher({
   variant = "default",
 }: Props) {
   const router = useRouter();
+  const [updatedTracker, setUpdatedTracker] =
+    useState<UserTrackerSummary | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [editingTracker, setEditingTracker] =
     useState<UserTrackerSummary | null>(null);
   const [isPending, startTransition] = useTransition();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const trackerList = trackers.map((t) =>
+    updatedTracker && t.id === updatedTracker.id ? updatedTracker : t
+  );
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -57,12 +63,12 @@ export function TrackerSwitcher({
     };
   }, [isOpen]);
 
-  if (!trackers || trackers.length === 0) {
+  if (!trackerList || trackerList.length === 0) {
     return null;
   }
 
   const activeTracker =
-    trackers.find((t) => t.id === activeTrackerId) ?? trackers[0]!;
+    trackerList.find((t) => t.id === activeTrackerId) ?? trackerList[0]!;
 
   const handleSwitch = (trackerId: string) => {
     if (trackerId === activeTracker.id || isPending) {
@@ -205,14 +211,14 @@ export function TrackerSwitcher({
                 Reading Trackers
               </span>
               <span className="text-[11px] text-muted-foreground">
-                {trackers.length}{" "}
-                {trackers.length === 1 ? "tracker" : "trackers"}
+                {trackerList.length}{" "}
+                {trackerList.length === 1 ? "tracker" : "trackers"}
               </span>
             </div>
 
             {/* Trackers List */}
             <div className="space-y-1 max-h-64 overflow-y-auto overflow-x-hidden">
-              {trackers.map((tracker) => {
+              {trackerList.map((tracker) => {
                 const isActive = tracker.id === activeTracker.id;
                 const canonInfo =
                   CANON_OPTIONS.find((c) => c.id === tracker.canon) ??
@@ -316,6 +322,9 @@ export function TrackerSwitcher({
           tracker={editingTracker}
           isOpen={true}
           onClose={() => setEditingTracker(null)}
+          onTrackerUpdated={(updated) => {
+            setUpdatedTracker(updated);
+          }}
         />
       )}
     </>

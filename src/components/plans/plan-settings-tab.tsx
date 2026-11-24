@@ -28,6 +28,8 @@ import {
   type PlanInstanceDetail,
 } from "@/actions/plans";
 import { TabsBar } from "@/components/ui/tabs-bar";
+import { ReminderTimeSelect } from "@/components/ui/reminder-time-select";
+import { requestAndSubscribePush } from "@/lib/push-client";
 
 type PlanSettingsTabProps = {
   plan: PlanInstanceDetail;
@@ -218,8 +220,8 @@ export function PlanSettingsTab({
     const nextVal = !reminderEnabled;
     setReminderEnabled(nextVal);
 
-    if (nextVal && typeof window !== "undefined" && "Notification" in window) {
-      await Notification.requestPermission();
+    if (nextVal) {
+      await requestAndSubscribePush();
     }
   };
 
@@ -683,14 +685,13 @@ export function PlanSettingsTab({
               <span className="text-[12px] text-foreground-secondary">
                 Reminder Time
               </span>
-              <input
-                type="time"
+              <ReminderTimeSelect
+                name="reminderTime"
                 value={reminderTime}
-                onChange={(e) => {
+                onChange={(t) => {
                   setSuccessMessage(null);
-                  setReminderTime(e.target.value);
+                  setReminderTime(t);
                 }}
-                className="ui-input py-1 text-[12px] font-medium"
               />
             </div>
           )}

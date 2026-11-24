@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useTransition, useSyncExternalStore } from "react";
+import {
+  useState,
+  useEffect,
+  useTransition,
+  useSyncExternalStore,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import {
@@ -41,6 +46,11 @@ import { ProfileSettingsSection } from "./profile-settings-section";
 import { DataExportTab } from "./data-export-tab";
 import type { BibleCanon } from "@/data/bibleData";
 import { cn } from "@/lib/utils";
+import {
+  requestAndSubscribePush,
+  sendTestNotification,
+} from "@/lib/push-client";
+import { ReminderTimeSelect } from "@/components/ui/reminder-time-select";
 
 function formatCanonTitle({ canon }: { canon: string }): string {
   switch (canon) {
@@ -210,9 +220,14 @@ export function SettingsView({
   ];
 
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [optimisticTrackerId, setOptimisticTrackerId] = useState<string | null>(
+    null
+  );
   const [switchingTrackerId, setSwitchingTrackerId] = useState<string | null>(
     null
   );
+
+  const effectiveActiveTrackerId = optimisticTrackerId ?? activeTrackerId;
   const [isCreateTrackerOpen, setIsCreateTrackerOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isTrackerListExpanded, setIsTrackerListExpanded] = useState(false);
@@ -236,16 +251,59 @@ export function SettingsView({
   );
 
   const notificationPermission = permissionOverride ?? browserPermission;
+  const [isTestingPush, setIsTestingPush] = useState(false);
+
+  // Silently ensure push subscription is registered in DB if permission is already granted
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      void requestAndSubscribePush();
+    }
+  }, []);
 
   const requestNotificationPermission = async () => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      const permission = await Notification.requestPermission();
-      setPermissionOverride(permission);
-      if (permission === "granted") {
-        toast.success("Notification permissions enabled");
-      } else if (permission === "denied") {
-        toast.error("Notifications blocked in your browser settings");
+    const res = await requestAndSubscribePush();
+    if (res.permission !== "unsupported") {
+      setPermissionOverride(res.permission);
+    }
+    if (res.success) {
+      toast.success("Push notification permissions enabled");
+    } else if (res.permission === "denied") {
+      toast.error("Notifications are blocked in your browser settings");
+    } else if (res.error) {
+      toast.error(res.error);
+    }
+  };
+
+  const handleSendTestAlert = async () => {
+    setIsTestingPush(true);
+    try {
+      // 1. Ensure the browser's active push subscription is synced to the database
+      const subRes = await requestAndSubscribePush();
+      if (!subRes.success) {
+        toast.error(
+          subRes.error ||
+            "Please enable notification permissions on this device first."
+        );
+        return;
       }
+
+      // 2. Dispatch the test notification
+      const res = await sendTestNotification();
+      if (res.success) {
+        toast.success(
+          "Test alert dispatched! Check your device notifications."
+        );
+      } else {
+        toast.error(res.error || "Failed to deliver test alert.");
+      }
+    } catch {
+      toast.error("Network error triggering test alert.");
+    } finally {
+      setIsTestingPush(false);
     }
   };
 
@@ -262,15 +320,17 @@ export function SettingsView({
   };
 
   const handleSwitchTracker = async ({ trackerId }: { trackerId: string }) => {
-    if (trackerId === activeTrackerId || switchingTrackerId) return;
+    if (trackerId === effectiveActiveTrackerId || switchingTrackerId) return;
     setSwitchingTrackerId(trackerId);
 
     try {
       const res = await switchTrackerAction({ trackerId });
       if (res.success) {
+        setOptimisticTrackerId(trackerId);
         toast.success("Active reading tracker updated");
         router.refresh();
       } else {
+        setOptimisticTrackerId(null);
         toast.error(res.error || "Failed to switch tracker.");
       }
     } catch {
@@ -280,45 +340,89 @@ export function SettingsView({
     }
   };
 
-  const handleToggleDailyReminder = (enabled: boolean) => {
+  const applyDailyReminderToggle = (enabled: boolean) => {
     setSettings((prev) => ({ ...prev, dailyReminderEnabled: enabled }));
     startTransition(async () => {
-      const res = await updateUserSettingsAction({
-        settings: { dailyReminderEnabled: enabled },
-      });
-      if (res.success) {
-        toast.success(
-          enabled ? "Daily reminder enabled" : "Daily reminder disabled"
-        );
-        router.refresh();
-      } else {
-        toast.error(res.error);
+      try {
+        const res = await updateUserSettingsAction({
+          settings: { dailyReminderEnabled: enabled },
+        });
+        if (res.success) {
+          toast.success(
+            enabled ? "Daily reminder enabled" : "Daily reminder disabled"
+          );
+        } else {
+          setSettings((prev) => ({ ...prev, dailyReminderEnabled: !enabled }));
+          toast.error(res.error || "Failed to update reminder settings.");
+        }
+      } catch (err: unknown) {
+        setSettings((prev) => ({ ...prev, dailyReminderEnabled: !enabled }));
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to update reminder settings.";
+        toast.error(message);
       }
     });
   };
 
+  const handleToggleDailyReminder = (enabled: boolean) => {
+    if (enabled) {
+      void (async () => {
+        try {
+          const pushRes = await requestAndSubscribePush();
+          if (pushRes.permission !== "unsupported") {
+            setPermissionOverride(pushRes.permission);
+          }
+          if (pushRes.permission === "denied") {
+            toast.error(
+              "Please unblock notifications in your browser settings first."
+            );
+            return;
+          }
+          applyDailyReminderToggle(enabled);
+        } catch {
+          toast.error("Failed to request push notification permissions.");
+        }
+      })();
+      return;
+    }
+
+    applyDailyReminderToggle(enabled);
+  };
+
   const handleTimeChange = (time: string) => {
+    const prevTime = settings.dailyReminderTime;
     setSettings((prev) => ({ ...prev, dailyReminderTime: time }));
     startTransition(async () => {
-      const res = await updateUserSettingsAction({
-        settings: { dailyReminderTime: time },
-      });
-      if (res.success) {
-        toast.success(`Reminder time set to ${time}`);
-        router.refresh();
-      } else {
-        toast.error(res.error);
+      try {
+        const res = await updateUserSettingsAction({
+          settings: { dailyReminderTime: time },
+        });
+        if (res.success) {
+          toast.success(`Reminder time set to ${time}`);
+        } else {
+          setSettings((prev) => ({ ...prev, dailyReminderTime: prevTime }));
+          toast.error(res.error || "Failed to update reminder time.");
+        }
+      } catch (err: unknown) {
+        setSettings((prev) => ({ ...prev, dailyReminderTime: prevTime }));
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to update reminder time.";
+        toast.error(message);
       }
     });
   };
 
   const displayName = user.name.split(" ")[0] || user.name || "Reader";
   const activeTracker =
-    trackers.find((t) => t.id === activeTrackerId) ?? trackers[0];
+    trackers.find((t) => t.id === effectiveActiveTrackerId) ?? trackers[0];
 
   const sortedTrackers = [...trackers].sort((a, b) => {
-    if (a.id === activeTrackerId) return -1;
-    if (b.id === activeTrackerId) return 1;
+    if (a.id === effectiveActiveTrackerId) return -1;
+    if (b.id === effectiveActiveTrackerId) return 1;
     return 0;
   });
 
@@ -338,7 +442,7 @@ export function SettingsView({
       userImage={user.image ?? undefined}
       streak={streak}
       trackers={trackers}
-      activeTrackerId={activeTrackerId}
+      activeTrackerId={effectiveActiveTrackerId}
     >
       <div className="w-full max-w-[1440px] mx-auto space-y-6">
         {/* ── Unboxed Editorial Masthead ── */}
@@ -523,7 +627,7 @@ export function SettingsView({
                     <TrackerCard
                       key={tracker.id}
                       tracker={tracker}
-                      isActive={tracker.id === activeTrackerId}
+                      isActive={tracker.id === effectiveActiveTrackerId}
                       isSwitching={switchingTrackerId === tracker.id}
                       onSwitch={handleSwitchTracker}
                     />
@@ -537,7 +641,7 @@ export function SettingsView({
                         <TrackerCard
                           key={tracker.id}
                           tracker={tracker}
-                          isActive={tracker.id === activeTrackerId}
+                          isActive={tracker.id === effectiveActiveTrackerId}
                           isSwitching={switchingTrackerId === tracker.id}
                           onSwitch={handleSwitchTracker}
                         />
@@ -588,16 +692,28 @@ export function SettingsView({
                   </p>
                 </div>
 
-                {/* Notification Permission Request */}
+                {/* Notification Permission Request & Test */}
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-medium text-muted-foreground">
                     System Alerts:
                   </span>
                   {notificationPermission === "granted" ? (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                      <Check className="size-3" />
-                      <span>Enabled</span>
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                        <Check className="size-3" />
+                        <span>Enabled</span>
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isTestingPush}
+                        onClick={handleSendTestAlert}
+                        className="text-[11px] h-6 px-2 text-foreground-secondary hover:text-foreground"
+                      >
+                        {isTestingPush ? "Sending..." : "Test Alert"}
+                      </Button>
+                    </div>
                   ) : notificationPermission === "denied" ? (
                     <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 border border-destructive/20 px-2 py-0.5 text-[11px] font-semibold text-destructive">
                       <span>Blocked in Browser</span>
@@ -630,15 +746,13 @@ export function SettingsView({
                   </div>
 
                   <div className="flex items-center gap-4 self-end sm:self-center">
-                    {/* Time selector */}
+                    {/* 30-minute interval Time selector */}
                     <div className="flex items-center gap-1.5">
                       <Calendar className="size-3.5 text-muted-foreground" />
-                      <input
-                        type="time"
-                        value={settings.dailyReminderTime}
+                      <ReminderTimeSelect
+                        value={settings.dailyReminderTime || "20:00"}
                         disabled={!settings.dailyReminderEnabled || isPending}
-                        onChange={(e) => handleTimeChange(e.target.value)}
-                        className="h-8 rounded-lg border border-border bg-card px-2 text-xs font-medium text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary disabled:opacity-50"
+                        onChange={handleTimeChange}
                       />
                     </div>
 

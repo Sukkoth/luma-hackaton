@@ -36,6 +36,8 @@ import {
   buildPlanSessions,
   exportPlanToPdf,
 } from "@/lib/plans/export-plan-pdf";
+import { requestAndSubscribePush } from "@/lib/push-client";
+import { ReminderTimeSelect } from "@/components/ui/reminder-time-select";
 
 type Props = {
   isOpen: boolean;
@@ -349,13 +351,11 @@ export function PlanSetupModal({
   const handleToggleReminder = async () => {
     const nextVal = !reminderEnabled;
     if (nextVal) {
-      if (typeof window !== "undefined" && "Notification" in window) {
-        const perm = await Notification.requestPermission();
-        if (perm !== "granted") {
-          setErrorMessage(
-            "Notification permission was not granted in your browser. Reminders will be logged in-app."
-          );
-        }
+      const pushRes = await requestAndSubscribePush();
+      if (!pushRes.success && pushRes.permission !== "granted") {
+        setErrorMessage(
+          "Notification permission was not granted in your browser. Reminders will be logged in-app."
+        );
       }
     }
     setReminderEnabled(nextVal);
@@ -868,14 +868,9 @@ export function PlanSetupModal({
                         <span className="text-[12px] text-foreground-secondary">
                           Reminder Time
                         </span>
-                        <input
-                          type="time"
+                        <ReminderTimeSelect
                           value={reminderTime}
-                          onChange={(e) => setReminderTime(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          className="rounded-lg border border-border bg-surface px-2.5 py-1 text-[12px] font-medium text-foreground"
+                          onChange={setReminderTime}
                         />
                       </div>
                     )}
@@ -1237,14 +1232,9 @@ export function PlanSetupModal({
                           <span className="text-[12px] text-foreground-secondary">
                             Reminder Time
                           </span>
-                          <input
-                            type="time"
+                          <ReminderTimeSelect
                             value={reminderTime}
-                            onChange={(e) => setReminderTime(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") e.preventDefault();
-                            }}
-                            className="rounded-lg border border-border bg-surface px-2.5 py-1 text-[12px] font-medium text-foreground"
+                            onChange={setReminderTime}
                           />
                         </div>
                       )}

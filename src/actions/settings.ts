@@ -63,7 +63,6 @@ export async function updateUserSettingsAction({
       });
 
     revalidatePath("/settings");
-    revalidatePath("/", "layout");
 
     return { success: true };
   } catch (err: unknown) {

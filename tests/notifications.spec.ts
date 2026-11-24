@@ -1025,6 +1025,7 @@ test.describe("In-App Notification System", () => {
       const notifBtnB = page
         .getByTestId("desktop-notifications-button")
         .first();
+      await expect(notifBtnB).toBeVisible({ timeout: 15000 });
       await notifBtnB.click();
       const popoverB = page.getByTestId("notifications-popover");
       await expect(popoverB.getByText("Joined Group")).toBeVisible();

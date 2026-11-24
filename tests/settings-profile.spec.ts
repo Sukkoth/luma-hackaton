@@ -225,7 +225,7 @@ test.describe("Settings & Profile E2E", () => {
     const reminderSwitch = reminderCard.getByRole("switch");
     await expect(reminderSwitch).toBeVisible();
 
-    const timeInput = reminderCard.locator('input[type="time"]');
+    const timeCombobox = reminderCard.getByTestId("reminder-time-select");
 
     // Toggle switch on/off
     const initialChecked = await reminderSwitch.getAttribute("aria-checked");
@@ -243,8 +243,17 @@ test.describe("Settings & Profile E2E", () => {
       await expect(reminderSwitch).toHaveAttribute("aria-checked", "true");
     }
 
-    await expect(timeInput).toBeEnabled();
-    await timeInput.fill("08:30");
-    await expect(timeInput).toHaveValue("08:30");
+    await expect(timeCombobox).toBeEnabled();
+    await timeCombobox.click();
+    await page
+      .getByRole("option", { name: /8:30|08:30/ })
+      .first()
+      .click();
+    await expect(timeCombobox).toContainText(/8:30|08:30/);
+
+    // Toggle switch back OFF to verify turning off notifications
+    await reminderSwitch.click();
+    await expect(reminderSwitch).toHaveAttribute("aria-checked", "false");
+    await expect(page.getByText(/Daily reminder disabled/i)).toBeVisible();
   });
 });
