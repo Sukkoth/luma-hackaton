@@ -333,6 +333,55 @@ function renderMessagePage({
   );
 }
 
+type BibleProxyErrorParams = {
+  message: string;
+  userMessage: string;
+  status: number;
+  retryable: boolean;
+};
+
+class BibleProxyError extends Error {
+  readonly userMessage: string;
+  readonly status: number;
+  readonly retryable: boolean;
+
+  constructor({
+    message,
+    userMessage,
+    status,
+    retryable,
+  }: BibleProxyErrorParams) {
+    super(message);
+    this.name = "BibleProxyError";
+    this.userMessage = userMessage;
+    this.status = status;
+    this.retryable = retryable;
+  }
+}
+
+function mapPassageError({ error }: { error: unknown }): {
+  status: number;
+  userMessage: string;
+} {
+  if (error instanceof BibleProxyError) {
+    return { status: error.status, userMessage: error.userMessage };
+  }
+
+  if (error instanceof Error && error.name === "TimeoutError") {
+    return {
+      status: 504,
+      userMessage:
+        "Loading this passage took too long. Please check your connection and try again.",
+    };
+  }
+
+  return {
+    status: 502,
+    userMessage:
+      "We couldn't reach the Bible service right now. Please check your connection and try again.",
+  };
+}
+
 async function fetchYouVersionPassage({
   versionId,
   reference,
@@ -342,12 +391,18 @@ async function fetchYouVersionPassage({
 }): Promise<CachedPassage> {
   const appKey = process.env.APP_KEY;
   if (!appKey) {
-    throw new Error("YouVersion API key (APP_KEY) is not configured.");
+    throw new BibleProxyError({
+      message: "YouVersion API key (APP_KEY) is not configured.",
+      userMessage:
+        "The Bible reader is temporarily unavailable. Please try again later.",
+      status: 503,
+      retryable: false,
+    });
   }
 
   const url = `https://api.youversion.com/v1/bibles/${versionId}/passages/${encodeURIComponent(reference)}?format=html`;
   const retryDelaysMs = [250, 600];
-  let lastError: Error | null = null;
+  let lastError: unknown = null;
 
   for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
     try {
@@ -359,22 +414,54 @@ async function fetchYouVersionPassage({
         signal: AbortSignal.timeout(12000),
       });
 
-      if (response.status >= 500 && attempt < retryDelaysMs.length) {
-        lastError = new Error(`YouVersion API returned ${response.status}`);
-        await new Promise((resolve) =>
-          setTimeout(resolve, retryDelaysMs[attempt])
-        );
-        continue;
+      if (response.status >= 500) {
+        throw new BibleProxyError({
+          message: `YouVersion API returned ${response.status}`,
+          userMessage:
+            "The Bible service is having trouble right now. Please try again in a moment.",
+          status: 502,
+          retryable: true,
+        });
       }
 
       if (!response.ok) {
-        throw new Error(`YouVersion API returned ${response.status}`);
+        if (response.status === 404) {
+          throw new BibleProxyError({
+            message: `YouVersion API returned 404 for ${versionId}/${reference}`,
+            userMessage:
+              "This passage isn't available in the selected translation. Try another translation or chapter.",
+            status: 404,
+            retryable: false,
+          });
+        }
+        if (response.status === 429) {
+          throw new BibleProxyError({
+            message: "YouVersion API returned 429 (rate limited)",
+            userMessage:
+              "The Bible service is busy right now. Please wait a moment and try again.",
+            status: 503,
+            retryable: false,
+          });
+        }
+        throw new BibleProxyError({
+          message: `YouVersion API returned ${response.status}`,
+          userMessage:
+            "This passage couldn't be loaded right now. Try another translation or try again.",
+          status: 502,
+          retryable: false,
+        });
       }
 
       const rawJson: unknown = await response.json();
       const parsed = v.safeParse(YouVersionHtmlPassageSchema, rawJson);
       if (!parsed.success) {
-        throw new Error("Invalid passage response from YouVersion API.");
+        throw new BibleProxyError({
+          message: "Invalid passage response from YouVersion API.",
+          userMessage:
+            "We received an unexpected response for this passage. Please try again.",
+          status: 502,
+          retryable: false,
+        });
       }
 
       const version = BIBLE_VERSIONS.find((item) => item.id === versionId);
@@ -386,15 +473,11 @@ async function fetchYouVersionPassage({
         timestamp: Date.now(),
       };
     } catch (err) {
-      const errorObj =
-        err instanceof Error ? err : new Error("Failed to fetch passage");
-      lastError = errorObj;
-      // Do not retry non-5xx HTTP errors or schema validation errors
-      const isNonRetryableHttp =
-        errorObj.message.startsWith("YouVersion API returned 4") ||
-        errorObj.message.startsWith("Invalid passage response");
-      if (isNonRetryableHttp || attempt >= retryDelaysMs.length) {
-        throw errorObj;
+      lastError = err;
+      const isNonRetryable =
+        err instanceof BibleProxyError && !err.retryable;
+      if (isNonRetryable || attempt >= retryDelaysMs.length) {
+        throw err;
       }
       await new Promise((resolve) =>
         setTimeout(resolve, retryDelaysMs[attempt])
@@ -402,7 +485,9 @@ async function fetchYouVersionPassage({
     }
   }
 
-  throw lastError ?? new Error("Failed to fetch passage");
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Failed to fetch passage");
 }
 
 export async function GET(request: NextRequest): Promise<Response> {
@@ -572,13 +657,18 @@ export async function GET(request: NextRequest): Promise<Response> {
       }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[bible-proxy] Failed to load passage", {
+      versionId,
+      reference,
+      error,
+    });
+    const { status, userMessage } = mapPassageError({ error });
     if (isJson) {
-      return Response.json({ error: message }, { status: 502 });
+      return Response.json({ error: userMessage }, { status });
     }
     return renderMessagePage({
       title: "Unable to load passage",
-      message: `${message}. Please check your connection or try again.`,
+      message: userMessage,
       theme,
       showRetry: true,
     });

@@ -368,6 +368,21 @@ export function BibleWorkspace({
     async function loadPassage() {
       const retryDelaysMs = [300, 800];
 
+      class PassageLoadError extends Error {
+        readonly retryable: boolean;
+
+        constructor({
+          message,
+          retryable,
+        }: {
+          message: string;
+          retryable: boolean;
+        }) {
+          super(message);
+          this.retryable = retryable;
+        }
+      }
+
       for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
         try {
           const res = await fetch(
@@ -382,14 +397,20 @@ export function BibleWorkspace({
             continue;
           }
 
-          const data = (await res.json()) as {
+          const data = (await res.json().catch(() => null)) as {
             contentHtml?: string;
             error?: string;
-          };
-          if (!res.ok || !data.contentHtml) {
-            throw new Error(
-              data.error || `Failed to load passage (${res.status})`
-            );
+          } | null;
+
+          if (!res.ok || !data?.contentHtml) {
+            const fallbackMessage =
+              res.status >= 500
+                ? "The Bible service is having trouble right now. Please try again in a moment."
+                : "We couldn't load this passage right now. Please try again.";
+            throw new PassageLoadError({
+              message: data?.error || fallbackMessage,
+              retryable: res.status >= 500,
+            });
           }
 
           setPassageState({
@@ -401,15 +422,20 @@ export function BibleWorkspace({
           return;
         } catch (err) {
           if (controller.signal.aborted) return;
-          if (attempt < retryDelaysMs.length) {
+          const isNonRetryable =
+            err instanceof PassageLoadError && !err.retryable;
+          if (!isNonRetryable && attempt < retryDelaysMs.length) {
             await new Promise((resolve) =>
               setTimeout(resolve, retryDelaysMs[attempt])
             );
             continue;
           }
           const message =
-            err instanceof Error ? err.message : "Unable to load passage";
+            err instanceof PassageLoadError
+              ? err.message
+              : "Couldn't reach the Bible reader. Please check your connection and try again.";
           setPassageState({ status: "error", message });
+          return;
         }
       }
     }
