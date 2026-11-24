@@ -366,29 +366,51 @@ export function BibleWorkspace({
     const controller = new AbortController();
 
     async function loadPassage() {
-      try {
-        const res = await fetch(
-          `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&format=json`,
-          { signal: controller.signal }
-        );
-        const data = (await res.json()) as {
-          contentHtml?: string;
-          error?: string;
-        };
-        if (!res.ok || !data.contentHtml) {
-          throw new Error(data.error || `Failed to load passage (${res.status})`);
+      const retryDelaysMs = [300, 800];
+
+      for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
+        try {
+          const res = await fetch(
+            `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&format=json`,
+            { signal: controller.signal }
+          );
+
+          if (res.status >= 500 && attempt < retryDelaysMs.length) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, retryDelaysMs[attempt])
+            );
+            continue;
+          }
+
+          const data = (await res.json()) as {
+            contentHtml?: string;
+            error?: string;
+          };
+          if (!res.ok || !data.contentHtml) {
+            throw new Error(
+              data.error || `Failed to load passage (${res.status})`
+            );
+          }
+
+          setPassageState({
+            status: "success",
+            path: biblePath,
+            contentHtml: data.contentHtml,
+          });
+          window.scrollTo({ top: 0, behavior: "instant" });
+          return;
+        } catch (err) {
+          if (controller.signal.aborted) return;
+          if (attempt < retryDelaysMs.length) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, retryDelaysMs[attempt])
+            );
+            continue;
+          }
+          const message =
+            err instanceof Error ? err.message : "Unable to load passage";
+          setPassageState({ status: "error", message });
         }
-        setPassageState({
-          status: "success",
-          path: biblePath,
-          contentHtml: data.contentHtml,
-        });
-        window.scrollTo({ top: 0, behavior: "instant" });
-      } catch (err) {
-        if (controller.signal.aborted) return;
-        const message =
-          err instanceof Error ? err.message : "Unable to load passage";
-        setPassageState({ status: "error", message });
       }
     }
 

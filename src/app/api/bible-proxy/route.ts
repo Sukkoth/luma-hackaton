@@ -346,32 +346,63 @@ async function fetchYouVersionPassage({
   }
 
   const url = `https://api.youversion.com/v1/bibles/${versionId}/passages/${encodeURIComponent(reference)}?format=html`;
-  const response = await fetch(url, {
-    headers: {
-      "X-YVP-App-Key": appKey,
-      Accept: "application/json",
-    },
-    signal: AbortSignal.timeout(12000),
-  });
+  const retryDelaysMs = [250, 600];
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    throw new Error(`YouVersion API returned ${response.status}`);
+  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "X-YVP-App-Key": appKey,
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(12000),
+      });
+
+      if (response.status >= 500 && attempt < retryDelaysMs.length) {
+        lastError = new Error(`YouVersion API returned ${response.status}`);
+        await new Promise((resolve) =>
+          setTimeout(resolve, retryDelaysMs[attempt])
+        );
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`YouVersion API returned ${response.status}`);
+      }
+
+      const rawJson: unknown = await response.json();
+      const parsed = v.safeParse(YouVersionHtmlPassageSchema, rawJson);
+      if (!parsed.success) {
+        throw new Error("Invalid passage response from YouVersion API.");
+      }
+
+      const version = BIBLE_VERSIONS.find((item) => item.id === versionId);
+
+      return {
+        reference: parsed.output.reference,
+        contentHtml: sanitizePassageHtml({ html: parsed.output.content }),
+        versionLabel: version?.abbreviation ?? String(versionId),
+        timestamp: Date.now(),
+      };
+    } catch (err) {
+      const errorObj =
+        err instanceof Error ? err : new Error("Failed to fetch passage");
+      lastError = errorObj;
+      // Do not retry non-5xx HTTP errors or schema validation errors
+      const isNonRetryableHttp =
+        errorObj.message.startsWith("YouVersion API returned 4") ||
+        errorObj.message.startsWith("Invalid passage response");
+      if (isNonRetryableHttp || attempt >= retryDelaysMs.length) {
+        throw errorObj;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, retryDelaysMs[attempt])
+      );
+    }
   }
 
-  const rawJson: unknown = await response.json();
-  const parsed = v.safeParse(YouVersionHtmlPassageSchema, rawJson);
-  if (!parsed.success) {
-    throw new Error("Invalid passage response from YouVersion API.");
-  }
-
-  const version = BIBLE_VERSIONS.find((item) => item.id === versionId);
-
-  return {
-    reference: parsed.output.reference,
-    contentHtml: sanitizePassageHtml({ html: parsed.output.content }),
-    versionLabel: version?.abbreviation ?? String(versionId),
-    timestamp: Date.now(),
-  };
+  throw lastError ?? new Error("Failed to fetch passage");
 }
 
 export async function GET(request: NextRequest): Promise<Response> {
