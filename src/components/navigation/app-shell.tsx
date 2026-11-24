@@ -97,7 +97,9 @@ export function AppShell({
 
   // Derive page title for desktop top bar header
   let viewTitle = "Reading Hub";
-  if (pathname.startsWith("/books")) {
+  if (pathname.startsWith("/bible")) {
+    viewTitle = "Scripture Reader";
+  } else if (pathname.startsWith("/books")) {
     viewTitle = "Bible Books & Chapters";
   } else if (pathname.startsWith("/plans")) {
     viewTitle = "Reading Plans";

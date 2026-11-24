@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
-import { BibleLandingPage } from "@/components/bible/bible-landing-page";
+import { BibleWorkspace } from "@/components/bible/bible-workspace";
 
 export const instant = false;
 
@@ -41,8 +41,16 @@ export default async function BiblePage() {
         trackers={trackersData.trackers}
         activeTrackerId={trackersData.activeTracker?.id}
       >
-        <div className="w-full max-w-[1440px] mx-auto pb-16">
-          <BibleLandingPage />
+        <div className="w-full max-w-[1440px] mx-auto pb-2">
+          <Suspense
+            fallback={
+              <div className="flex h-[calc(100dvh-7.5rem)] items-center justify-center rounded-2xl border border-border/80 bg-surface">
+                <div className="size-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+              </div>
+            }
+          >
+            <BibleWorkspace />
+          </Suspense>
         </div>
       </AppShell>
     </Suspense>

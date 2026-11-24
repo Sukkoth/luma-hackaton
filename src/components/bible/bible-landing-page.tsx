@@ -5,92 +5,24 @@ import Link from "next/link";
 import {
   BookOpen,
   Search,
-  Clock,
-  Zap,
-  Settings,
   Compass,
   Play,
+  X,
+  ArrowUpRight,
 } from "lucide-react";
-import { detectDefaultVersion } from "@/lib/bible-versions";
-import { TabsBar } from "@/components/ui/tabs-bar";
+import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
+import type { BibleBook } from "@/data/canons/types";
+import {
+  BIBLE_VERSIONS,
+  type BibleVersion,
+  detectDefaultVersion,
+  saveSelectedVersion,
+} from "@/lib/bible-versions";
+import { FilterPills } from "@/components/ui/filter-pills";
 import {
   HeaderActions,
   HeaderActionButton,
 } from "@/components/ui/header-action-button";
-
-const OLD_TESTAMENT_BOOKS = [
-  { id: "gen", name: "Genesis", chapters: 50 },
-  { id: "exo", name: "Exodus", chapters: 40 },
-  { id: "lev", name: "Leviticus", chapters: 27 },
-  { id: "num", name: "Numbers", chapters: 36 },
-  { id: "deu", name: "Deuteronomy", chapters: 34 },
-  { id: "jos", name: "Joshua", chapters: 24 },
-  { id: "jdg", name: "Judges", chapters: 21 },
-  { id: "rut", name: "Ruth", chapters: 4 },
-  { id: "1sa", name: "1 Samuel", chapters: 31 },
-  { id: "2sa", name: "2 Samuel", chapters: 24 },
-  { id: "1ki", name: "1 Kings", chapters: 22 },
-  { id: "2ki", name: "2 Kings", chapters: 25 },
-  { id: "1ch", name: "1 Chronicles", chapters: 29 },
-  { id: "2ch", name: "2 Chronicles", chapters: 36 },
-  { id: "ezr", name: "Ezra", chapters: 10 },
-  { id: "neh", name: "Nehemiah", chapters: 13 },
-  { id: "est", name: "Esther", chapters: 10 },
-  { id: "job", name: "Job", chapters: 42 },
-  { id: "psa", name: "Psalms", chapters: 150 },
-  { id: "pro", name: "Proverbs", chapters: 31 },
-  { id: "ecc", name: "Ecclesiastes", chapters: 12 },
-  { id: "sng", name: "Song of Solomon", chapters: 8 },
-  { id: "isa", name: "Isaiah", chapters: 66 },
-  { id: "jer", name: "Jeremiah", chapters: 52 },
-  { id: "lam", name: "Lamentations", chapters: 5 },
-  { id: "ezk", name: "Ezekiel", chapters: 48 },
-  { id: "dan", name: "Daniel", chapters: 12 },
-  { id: "hos", name: "Hosea", chapters: 14 },
-  { id: "jol", name: "Joel", chapters: 3 },
-  { id: "amo", name: "Amos", chapters: 9 },
-  { id: "oba", name: "Obadiah", chapters: 1 },
-  { id: "jon", name: "Jonah", chapters: 4 },
-  { id: "mic", name: "Micah", chapters: 7 },
-  { id: "nam", name: "Nahum", chapters: 3 },
-  { id: "hab", name: "Habakkuk", chapters: 3 },
-  { id: "zep", name: "Zephaniah", chapters: 3 },
-  { id: "hag", name: "Haggai", chapters: 2 },
-  { id: "zec", name: "Zechariah", chapters: 14 },
-  { id: "mal", name: "Malachi", chapters: 4 },
-];
-
-const NEW_TESTAMENT_BOOKS = [
-  { id: "mat", name: "Matthew", chapters: 28 },
-  { id: "mrk", name: "Mark", chapters: 16 },
-  { id: "luk", name: "Luke", chapters: 24 },
-  { id: "jhn", name: "John", chapters: 21 },
-  { id: "act", name: "Acts", chapters: 28 },
-  { id: "rom", name: "Romans", chapters: 16 },
-  { id: "1co", name: "1 Corinthians", chapters: 16 },
-  { id: "2co", name: "2 Corinthians", chapters: 13 },
-  { id: "gal", name: "Galatians", chapters: 6 },
-  { id: "eph", name: "Ephesians", chapters: 6 },
-  { id: "php", name: "Philippians", chapters: 4 },
-  { id: "col", name: "Colossians", chapters: 4 },
-  { id: "1th", name: "1 Thessalonians", chapters: 5 },
-  { id: "2th", name: "2 Thessalonians", chapters: 3 },
-  { id: "1ti", name: "1 Timothy", chapters: 6 },
-  { id: "2ti", name: "2 Timothy", chapters: 4 },
-  { id: "tit", name: "Titus", chapters: 3 },
-  { id: "phm", name: "Philemon", chapters: 1 },
-  { id: "heb", name: "Hebrews", chapters: 13 },
-  { id: "jas", name: "James", chapters: 5 },
-  { id: "1pe", name: "1 Peter", chapters: 5 },
-  { id: "2pe", name: "2 Peter", chapters: 3 },
-  { id: "1jn", name: "1 John", chapters: 5 },
-  { id: "2jn", name: "2 John", chapters: 1 },
-  { id: "3jn", name: "3 John", chapters: 1 },
-  { id: "jud", name: "Jude", chapters: 1 },
-  { id: "rev", name: "Revelation", chapters: 22 },
-];
-
-const ALL_BOOKS = [...OLD_TESTAMENT_BOOKS, ...NEW_TESTAMENT_BOOKS];
 
 const LAST_READ_STORAGE_KEY = "luma-last-read";
 
@@ -106,43 +38,90 @@ function getLastRead(): LastRead | null {
   try {
     const raw = localStorage.getItem(LAST_READ_STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    return JSON.parse(raw) as LastRead;
   } catch {
     return null;
   }
 }
 
+const AVAILABLE_CATEGORIES = Array.from(
+  new Set(PROTESTANT_BIBLE_BOOKS.map((book) => book.category))
+);
+
+const FILTER_ITEMS = [
+  { id: "All", label: "All (66)" },
+  { id: "Old Testament", label: "Old Testament (39)" },
+  { id: "New Testament", label: "New Testament (27)" },
+  ...AVAILABLE_CATEGORIES.map((category) => ({
+    id: category,
+    label: category,
+  })),
+];
+
 export function BibleLandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"ot" | "nt" | "search">("ot");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [lastRead, setLastRead] = useState<LastRead | null>(null);
-  const [selectedVersion] = useState(() => detectDefaultVersion({}));
+  const [selectedVersion, setSelectedVersion] = useState<BibleVersion>(() =>
+    detectDefaultVersion({})
+  );
+  const [activeBook, setActiveBook] = useState<BibleBook | null>(null);
 
-  // Initialize lastRead from localStorage on mount
   useEffect(() => {
     const lr = getLastRead();
-    if (lr) {
-      // Use a callback to avoid synchronous setState in effect
-      const timer = setTimeout(() => {
-        setLastRead(lr);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
+    if (!lr) return;
+    const timer = setTimeout(() => {
+      setLastRead(lr);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!activeBook) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveBook(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeBook]);
+
+  const handleSelectVersion = ({ version }: { version: BibleVersion }) => {
+    setSelectedVersion(version);
+    saveSelectedVersion({ versionId: version.id });
+  };
+
   const filteredBooks = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const q = searchQuery.toLowerCase();
-    return ALL_BOOKS.filter(
-      (b) => b.name.toLowerCase().includes(q) || b.id.toLowerCase().includes(q)
-    );
-  }, [searchQuery]);
+    const q = searchQuery.trim().toLowerCase();
+    return PROTESTANT_BIBLE_BOOKS.filter((book) => {
+      const matchesSearch =
+        !q ||
+        book.name.toLowerCase().includes(q) ||
+        book.id.toLowerCase().includes(q) ||
+        book.category.toLowerCase().includes(q);
 
-  const booksForTab =
-    activeTab === "ot" ? OLD_TESTAMENT_BOOKS : NEW_TESTAMENT_BOOKS;
+      if (!matchesSearch) return false;
+      if (selectedCategory === "All") return true;
+      if (selectedCategory === "Old Testament") return book.testament === "OT";
+      if (selectedCategory === "New Testament") return book.testament === "NT";
+      return book.category === selectedCategory;
+    });
+  }, [searchQuery, selectedCategory]);
 
-  const lastReadBookName =
-    ALL_BOOKS.find((b) => b.id === lastRead?.bookId)?.name || lastRead?.bookId;
+  const lastReadBook = lastRead
+    ? PROTESTANT_BIBLE_BOOKS.find(
+        (b) => b.id === lastRead.bookId.toLowerCase()
+      )
+    : undefined;
+
+  const resumeHref = lastReadBook
+    ? `/bible/${lastReadBook.id}/${lastRead?.chapter ?? 1}?v=${selectedVersion.id}`
+    : `/bible/gen/1?v=${selectedVersion.id}`;
+
+  const resumeLabel = lastReadBook
+    ? `${lastReadBook.name} ${lastRead?.chapter ?? 1}`
+    : "Genesis 1";
 
   return (
     <div className="space-y-6">
@@ -151,14 +130,14 @@ export function BibleLandingPage() {
         <div className="space-y-1.5 max-w-xl">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-primary">
             <span className="size-1.5 rounded-full bg-primary" />
-            <span>Scripture Reader & Living Text</span>
+            <span>Scripture Reader &amp; Living Text</span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
             The Holy Scriptures, chapter by chapter.
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Read, study, and meditate on God&apos;s Word across canonical
-            testaments, parallel translations, and original verses.
+            Browse all 66 canonical books, switch translations inline, and jump
+            directly to any chapter.
           </p>
         </div>
 
@@ -171,17 +150,17 @@ export function BibleLandingPage() {
           />
           <HeaderActionButton
             type="primary"
-            href="/bible/GEN/1"
+            href={resumeHref}
             icon={<BookOpen className="size-4" />}
-            label="Genesis 1"
+            label={resumeLabel}
           />
         </HeaderActions>
       </section>
 
-      {/* ── Signature Horizon Ribbon (Hidden on mobile) ── */}
+      {/* ── Signature Horizon Ribbon (Resume + Translation Switcher) ── */}
       <section
         suppressHydrationWarning
-        className="hidden md:block rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs"
+        className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-border/60">
           {/* Column 1: Continue Reading Session */}
@@ -193,7 +172,7 @@ export function BibleLandingPage() {
                   <span className="relative inline-flex size-2 rounded-full bg-primary" />
                 </span>
                 <span className="text-xs font-semibold text-foreground">
-                  {lastRead ? "Recent Reading Session" : "Scripture Reader"}
+                  {lastReadBook ? "Recent Reading Session" : "Scripture Reader"}
                 </span>
               </div>
               <span className="text-[11px] font-medium text-muted-foreground">
@@ -204,239 +183,257 @@ export function BibleLandingPage() {
             <div className="space-y-1">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
-                  {lastRead
-                    ? `${lastReadBookName} ${lastRead.chapter}`
-                    : "Genesis 1"}
+                  {resumeLabel}
                 </span>
                 <span className="text-xs font-semibold text-primary">
-                  {lastRead ? "Resume Chapter" : "Creation"}
+                  {lastReadBook ? "Resume Chapter" : "Start Reading"}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                {lastRead
+                {lastReadBook
                   ? `Pick up where you left off in ${selectedVersion.name}.`
                   : "In the beginning, God created the heavens and the earth."}
               </p>
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
-              <span>
-                {lastRead
-                  ? `Version: ${selectedVersion.abbreviation}`
-                  : "66 books ready to explore"}
-              </span>
+              <span>66 books • 1,189 chapters</span>
               <Link
-                href={
-                  lastRead
-                    ? `/bible/${lastRead.bookId}/${lastRead.chapter}?v=${lastRead.versionId}`
-                    : "/bible/GEN/1"
-                }
+                href={resumeHref}
                 className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline"
               >
                 <Play className="size-3 fill-current" />
-                <span>{lastRead ? "Resume Reading" : "Start Genesis 1"} →</span>
+                <span>
+                  {lastReadBook ? "Resume Reading" : "Start Genesis 1"} →
+                </span>
               </Link>
             </div>
           </div>
 
-          {/* Column 2: Scripture Library Architecture */}
+          {/* Column 2: Active Translation Switcher */}
           <div className="pl-0 md:pl-8 pt-5 md:pt-0 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="size-3.5 text-primary" />
                 <span className="text-xs font-semibold text-foreground">
-                  Scripture Library Structure
+                  Bible Translation
                 </span>
               </div>
               <span className="text-[11px] font-medium text-primary">
-                {selectedVersion.abbreviation} Active
+                {selectedVersion.language.toUpperCase()}
               </span>
             </div>
 
             <div className="space-y-1">
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
-                  66
+                <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
+                  {selectedVersion.abbreviation}
                 </span>
-                <span className="text-xs font-semibold text-muted-foreground">
-                  Canonical Books • 1,189 Chapters
+                <span className="text-xs font-medium text-muted-foreground truncate">
+                  {selectedVersion.name}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                39 Old Testament books and 27 New Testament books with full
-                verse coverage.
+                Choose a translation below before opening any book or chapter.
               </p>
             </div>
 
-            {/* Canon Chips */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                39 Old Testament
-              </span>
-              <span className="rounded-md border border-border/70 bg-surface-elevated px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                27 New Testament
-              </span>
-              <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                {selectedVersion.abbreviation}
-              </span>
+            <div
+              role="radiogroup"
+              aria-label="Bible translation"
+              className="flex flex-wrap items-center gap-1.5 pt-1"
+            >
+              {BIBLE_VERSIONS.map((version) => {
+                const isSelected = version.id === selectedVersion.id;
+                return (
+                  <button
+                    key={version.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => handleSelectVersion({ version })}
+                    className={`rounded-lg border px-2.5 py-1 text-[11.5px] font-semibold transition-colors cursor-pointer ${
+                      isSelected
+                        ? "border-primary bg-primary text-primary-foreground shadow-2xs"
+                        : "border-border/70 bg-surface-elevated text-foreground-secondary hover:border-border-strong hover:text-foreground"
+                    }`}
+                  >
+                    {version.abbreviation}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Version Selector */}
-      <div className="ui-card p-4 shadow-xs">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
-              <BookOpen className="size-5" />
-            </div>
-            <div>
-              <p className="text-[11px] font-medium text-foreground-dim">
-                Translation
-              </p>
-              <p className="text-[14px] font-semibold text-foreground">
-                {selectedVersion.abbreviation} — {selectedVersion.name}
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/settings"
-            className="ui-btn-secondary ui-btn-sm gap-1.5 cursor-pointer"
-          >
-            <Settings className="size-3.5" />
-            <span>Change</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Link
-          href={`/bible/psa/23?v=${selectedVersion.id}`}
-          className="ui-card flex flex-col items-center gap-3 p-5 text-center shadow-xs hover:shadow-sm transition-shadow cursor-pointer"
-        >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-green-500/10 text-green-600 dark:text-green-400">
-            <Zap className="size-5" />
-          </div>
-          <span className="text-[13px] font-medium text-foreground">
-            Psalm 23
-          </span>
-          <span className="text-[11px] text-foreground-dim">
-            The Lord is my Shepherd
-          </span>
-        </Link>
-        <Link
-          href={`/bible/jhn/3?v=${selectedVersion.id}`}
-          className="ui-card flex flex-col items-center gap-3 p-5 text-center shadow-xs hover:shadow-sm transition-shadow cursor-pointer"
-        >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-blue-500/10 text-blue-600 dark:text-blue-400">
-            <BookOpen className="size-5" />
-          </div>
-          <span className="text-[13px] font-medium text-foreground">
-            John 3:16
-          </span>
-          <span className="text-[11px] text-foreground-dim">
-            For God so loved the world
-          </span>
-        </Link>
-        <Link
-          href={`/bible/rom/8?v=${selectedVersion.id}`}
-          className="ui-card flex flex-col items-center gap-3 p-5 text-center shadow-xs hover:shadow-sm transition-shadow cursor-pointer"
-        >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <Clock className="size-5" />
-          </div>
-          <span className="text-[13px] font-medium text-foreground">
-            Romans 8
-          </span>
-          <span className="text-[11px] text-foreground-dim">
-            No condemnation
-          </span>
-        </Link>
-        <Link
-          href={`/bible/phil/4?v=${selectedVersion.id}`}
-          className="ui-card flex flex-col items-center gap-3 p-5 text-center shadow-xs hover:shadow-sm transition-shadow cursor-pointer"
-        >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-orange-500/10 text-orange-600 dark:text-orange-400">
-            <Search className="size-5" />
-          </div>
-          <span className="text-[13px] font-medium text-foreground">
-            Philippians 4
-          </span>
-          <span className="text-[11px] text-foreground-dim">
-            Rejoice always
-          </span>
-        </Link>
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4.5 text-foreground-dim" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search for a book..."
-          className="w-full pl-10 pr-4 py-3 rounded-[14px] border border-border bg-surface text-foreground placeholder:text-foreground-dim text-[14px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-        />
-      </div>
-
-      {searchQuery && (
-        <div className="space-y-2">
-          <p className="text-[12px] font-medium text-foreground-dim">
-            {filteredBooks.length} result{filteredBooks.length !== 1 ? "s" : ""}
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {filteredBooks.map((book: (typeof ALL_BOOKS)[0]) => (
-              <Link
-                key={book.id}
-                href={`/bible/${book.id}/1?v=${selectedVersion.id}`}
-                className="ui-card flex items-center justify-between px-3 py-2.5 shadow-xs hover:shadow-sm transition-shadow cursor-pointer"
+      {/* ── Search & Canonical Filters ── */}
+      <section className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-foreground-dim" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search books by name or category (e.g. Psalms, Gospels)..."
+              className="w-full rounded-[14px] border border-border bg-surface pl-10 pr-9 py-2.5 text-[13.5px] text-foreground placeholder:text-foreground-dim focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-dim hover:text-foreground cursor-pointer"
               >
-                <span className="text-[13px] font-medium text-foreground truncate">
-                  {book.name}
-                </span>
-                <span className="text-[11px] text-foreground-dim shrink-0 ml-2">
-                  {book.chapters} ch
-                </span>
-              </Link>
-            ))}
+                <X className="size-4" />
+              </button>
+            )}
           </div>
+
+          <span className="text-[12px] font-medium text-foreground-dim shrink-0">
+            Showing {filteredBooks.length} of {PROTESTANT_BIBLE_BOOKS.length}{" "}
+            books
+          </span>
+        </div>
+
+        <FilterPills
+          items={FILTER_ITEMS}
+          activeFilter={selectedCategory}
+          onFilterChange={({ filter }) => setSelectedCategory(filter)}
+        />
+      </section>
+
+      {/* ── Book Grid ── */}
+      {filteredBooks.length === 0 ? (
+        <div className="rounded-2xl border border-border/80 bg-surface p-10 text-center space-y-2">
+          <p className="text-sm font-semibold text-foreground">
+            No matching books found
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Try clearing your search or switching back to All books.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+          {filteredBooks.map((book) => {
+            const orderFormatted =
+              book.order < 10 ? `0${book.order}` : `${book.order}`;
+            return (
+              <button
+                key={book.id}
+                type="button"
+                onClick={() => setActiveBook(book)}
+                className="group flex flex-col justify-between rounded-[16px] border border-border bg-surface p-3.5 text-left transition-all duration-150 hover:border-border-strong hover:bg-surface-elevated/60 active:scale-[0.98] cursor-pointer"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-medium tabular-nums text-foreground-dim">
+                    {orderFormatted}
+                  </span>
+                  <span className="rounded-md bg-surface-elevated px-1.5 py-0.5 text-[10px] font-medium text-foreground-secondary truncate">
+                    {book.category}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex items-end justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="text-[14.5px] font-semibold tracking-tight text-foreground truncate group-hover:text-primary transition-colors">
+                      {book.name}
+                    </h3>
+                    <p className="mt-0.5 text-[11.5px] text-foreground-dim">
+                      {book.chapters}{" "}
+                      {book.chapters === 1 ? "chapter" : "chapters"}
+                    </p>
+                  </div>
+                  <ArrowUpRight className="size-3.5 shrink-0 text-foreground-dim opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* Book Grid Tabs */}
-      {!searchQuery && (
-        <>
-          <TabsBar
-            className="w-full justify-center"
-            tabs={[
-              { id: "ot", label: "Old Testament" },
-              { id: "nt", label: "New Testament" },
-            ]}
-            activeTab={activeTab === "ot" ? "ot" : "nt"}
-            onTabChange={({ tab }) => setActiveTab(tab as "ot" | "nt")}
-          />
+      {/* ── Chapter Picker Modal ── */}
+      {activeBook && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bible-chapter-dialog-title"
+          onClick={() => setActiveBook(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="ui-card relative flex max-h-[85vh] w-full max-w-145 flex-col p-6 shadow-2xl sm:p-7"
+          >
+            <div className="flex items-start justify-between border-b border-border-subtle pb-4">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-medium text-foreground-secondary">
+                  <span className="text-primary font-semibold">
+                    {activeBook.category}
+                  </span>
+                  <span>•</span>
+                  <span>
+                    {activeBook.testament === "OT"
+                      ? "Old Testament"
+                      : "New Testament"}
+                  </span>
+                  <span>•</span>
+                  <span>{selectedVersion.abbreviation}</span>
+                </div>
+                <h3
+                  id="bible-chapter-dialog-title"
+                  className="mt-2 text-[24px] font-medium tracking-tight text-foreground"
+                >
+                  {activeBook.name}
+                </h3>
+                <p className="mt-0.5 text-[13px] text-foreground-secondary">
+                  Select a chapter to open in the reader ({activeBook.chapters}{" "}
+                  {activeBook.chapters === 1 ? "chapter" : "chapters"})
+                </p>
+              </div>
 
-          {/* Book Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-            {booksForTab.map((book) => (
-              <Link
-                key={book.id}
-                href={`/bible/${book.id}/1?v=${selectedVersion.id}`}
-                className="ui-card flex items-center justify-between px-3 py-2.5 shadow-xs hover:shadow-sm transition-shadow cursor-pointer"
+              <button
+                type="button"
+                aria-label="Close chapter picker"
+                onClick={() => setActiveBook(null)}
+                className="flex size-8 items-center justify-center rounded-full bg-surface-elevated text-foreground-secondary transition-colors hover:text-foreground cursor-pointer"
               >
-                <span className="text-[13px] font-medium text-foreground truncate">
-                  {book.name}
-                </span>
-                <span className="text-[11px] text-foreground-dim shrink-0 ml-2">
-                  {book.chapters} ch
-                </span>
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between py-3 border-b border-border-subtle">
+              <span className="text-[12px] font-medium text-foreground-dim">
+                Opening in {selectedVersion.name}
+              </span>
+              <Link
+                href={`/bible/${activeBook.id}/1?v=${selectedVersion.id}`}
+                className="ui-btn-primary ui-btn-sm gap-1.5"
+              >
+                <BookOpen className="size-3.5" />
+                <span>Read Chapter 1</span>
               </Link>
-            ))}
+            </div>
+
+            <div className="my-3 max-h-[46vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
+                {Array.from(
+                  { length: activeBook.chapters },
+                  (_, index) => index + 1
+                ).map((chapterNum) => (
+                  <Link
+                    key={chapterNum}
+                    href={`/bible/${activeBook.id}/${chapterNum}?v=${selectedVersion.id}`}
+                    className="flex h-10 items-center justify-center rounded-xl border border-border bg-surface-elevated text-[13px] font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    {chapterNum}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

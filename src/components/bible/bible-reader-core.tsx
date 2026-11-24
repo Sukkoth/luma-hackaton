@@ -17,12 +17,14 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/components/theme/theme-provider";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
 import {
   BIBLE_VERSIONS,
   type BibleVersion,
   detectDefaultVersion,
   saveSelectedVersion,
   buildBibleComPath,
+  isBookSupportedInSixtySixBookVersions,
 } from "@/lib/bible-versions";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -197,15 +199,20 @@ export function BibleReaderCore({
         isCompleted: Boolean(r.isCompleted),
       }));
     }
+    const normalizedBookId = bookId.toLowerCase();
+    const matchedBook = PROTESTANT_BIBLE_BOOKS.find(
+      (b) => b.id === normalizedBookId
+    );
+    const resolvedBookName = matchedBook?.name ?? bookId.toUpperCase();
     return [
       {
         id: "standalone",
-        bookId,
-        bookName: bookId.toUpperCase(),
+        bookId: normalizedBookId,
+        bookName: resolvedBookName,
         chapter,
         startVerse,
         endVerse,
-        displayText: bookId.toUpperCase(),
+        displayText: resolvedBookName,
         isCompleted: false,
         sessionIndex: 1,
         sessionTitle: "Bible",
@@ -225,20 +232,65 @@ export function BibleReaderCore({
 
   const currentReading =
     flattenedReadings[currentIndex] ?? flattenedReadings[0];
-  const hasPrev = currentIndex > 0;
-  const hasNext =
-    currentIndex >= 0 && currentIndex < flattenedReadings.length - 1;
+
+  const standaloneNav = useMemo(() => {
+    if (planContext) {
+      return { prev: null, next: null };
+    }
+    const normalizedBookId = bookId.toLowerCase();
+    const bookIdx = PROTESTANT_BIBLE_BOOKS.findIndex(
+      (b) => b.id === normalizedBookId
+    );
+    if (bookIdx === -1) {
+      return { prev: null, next: null };
+    }
+    const currentBook = PROTESTANT_BIBLE_BOOKS[bookIdx];
+
+    const prev =
+      chapter > 1
+        ? { bookId: currentBook.id, chapter: chapter - 1 }
+        : bookIdx > 0
+          ? {
+              bookId: PROTESTANT_BIBLE_BOOKS[bookIdx - 1].id,
+              chapter: PROTESTANT_BIBLE_BOOKS[bookIdx - 1].chapters,
+            }
+          : null;
+
+    const next =
+      chapter < currentBook.chapters
+        ? { bookId: currentBook.id, chapter: chapter + 1 }
+        : bookIdx < PROTESTANT_BIBLE_BOOKS.length - 1
+          ? {
+              bookId: PROTESTANT_BIBLE_BOOKS[bookIdx + 1].id,
+              chapter: 1,
+            }
+          : null;
+
+    return { prev, next };
+  }, [planContext, bookId, chapter]);
+
+  const hasPrev = planContext
+    ? currentIndex > 0
+    : Boolean(standaloneNav.prev);
+  const hasNext = planContext
+    ? currentIndex >= 0 && currentIndex < flattenedReadings.length - 1
+    : Boolean(standaloneNav.next);
 
   // Build Bible proxy path
-  const biblePath = currentReading
-    ? buildBibleComPath({
-        versionId: selectedVersion.id,
-        bookId: currentReading.bookId,
-        chapter: currentReading.chapter,
-        startVerse: currentReading.startVerse,
-        endVerse: currentReading.endVerse,
-      })
-    : "";
+  const isBookSupported = isBookSupportedInSixtySixBookVersions({
+    bookId: currentReading.bookId,
+  });
+
+  const biblePath =
+    currentReading && isBookSupported
+      ? buildBibleComPath({
+          versionId: selectedVersion.id,
+          bookId: currentReading.bookId,
+          chapter: currentReading.chapter,
+          startVerse: currentReading.startVerse,
+          endVerse: currentReading.endVerse,
+        })
+      : "";
 
   const iframeSrc = biblePath
     ? `/api/bible-proxy?path=${encodeURIComponent(biblePath)}`
@@ -260,18 +312,18 @@ export function BibleReaderCore({
   // Navigation
   const handlePrev = useCallback(() => {
     if (!hasPrev) return;
-    const prev = flattenedReadings[currentIndex - 1];
-    if (!prev) return;
 
     if (planContext) {
+      const prev = flattenedReadings[currentIndex - 1];
+      if (!prev) return;
       const params = new URLSearchParams(searchParams.toString());
       params.set("readingId", prev.id);
       router.replace(
         `/bible/${prev.bookId.toLowerCase()}/${prev.chapter}?${params.toString()}`
       );
-    } else {
+    } else if (standaloneNav.prev) {
       router.replace(
-        `/bible/${prev.bookId.toLowerCase()}/${prev.chapter}?v=${selectedVersion.id}`
+        `/bible/${standaloneNav.prev.bookId}/${standaloneNav.prev.chapter}?v=${selectedVersion.id}`
       );
     }
   }, [
@@ -279,6 +331,7 @@ export function BibleReaderCore({
     currentIndex,
     flattenedReadings,
     planContext,
+    standaloneNav.prev,
     searchParams,
     router,
     selectedVersion.id,
@@ -286,18 +339,18 @@ export function BibleReaderCore({
 
   const handleNext = useCallback(() => {
     if (!hasNext) return;
-    const next = flattenedReadings[currentIndex + 1];
-    if (!next) return;
 
     if (planContext) {
+      const next = flattenedReadings[currentIndex + 1];
+      if (!next) return;
       const params = new URLSearchParams(searchParams.toString());
       params.set("readingId", next.id);
       router.replace(
         `/bible/${next.bookId.toLowerCase()}/${next.chapter}?${params.toString()}`
       );
-    } else {
+    } else if (standaloneNav.next) {
       router.replace(
-        `/bible/${next.bookId.toLowerCase()}/${next.chapter}?v=${selectedVersion.id}`
+        `/bible/${standaloneNav.next.bookId}/${standaloneNav.next.chapter}?v=${selectedVersion.id}`
       );
     }
   }, [
@@ -305,6 +358,7 @@ export function BibleReaderCore({
     currentIndex,
     flattenedReadings,
     planContext,
+    standaloneNav.next,
     searchParams,
     router,
     selectedVersion.id,
@@ -351,14 +405,26 @@ export function BibleReaderCore({
 
     if (hasNext) {
       nextTimer = setTimeout(() => {
-        const nextItem = flattenedReadings[currentIndex + 1];
-        if (nextItem) {
+        const nextTarget = planContext
+          ? flattenedReadings[currentIndex + 1]
+          : standaloneNav.next
+            ? {
+                bookId: standaloneNav.next.bookId,
+                chapter: standaloneNav.next.chapter,
+                startVerse: undefined,
+                endVerse: undefined,
+              }
+            : null;
+        if (
+          nextTarget &&
+          isBookSupportedInSixtySixBookVersions({ bookId: nextTarget.bookId })
+        ) {
           const path = buildBibleComPath({
             versionId: selectedVersion.id,
-            bookId: nextItem.bookId,
-            chapter: nextItem.chapter,
-            startVerse: nextItem.startVerse,
-            endVerse: nextItem.endVerse,
+            bookId: nextTarget.bookId,
+            chapter: nextTarget.chapter,
+            startVerse: nextTarget.startVerse,
+            endVerse: nextTarget.endVerse,
           });
           void fetch(`/api/bible-proxy?path=${encodeURIComponent(path)}`, {
             signal: controller.signal,
@@ -371,14 +437,26 @@ export function BibleReaderCore({
 
     if (hasPrev) {
       prevTimer = setTimeout(() => {
-        const prevItem = flattenedReadings[currentIndex - 1];
-        if (prevItem) {
+        const prevTarget = planContext
+          ? flattenedReadings[currentIndex - 1]
+          : standaloneNav.prev
+            ? {
+                bookId: standaloneNav.prev.bookId,
+                chapter: standaloneNav.prev.chapter,
+                startVerse: undefined,
+                endVerse: undefined,
+              }
+            : null;
+        if (
+          prevTarget &&
+          isBookSupportedInSixtySixBookVersions({ bookId: prevTarget.bookId })
+        ) {
           const path = buildBibleComPath({
             versionId: selectedVersion.id,
-            bookId: prevItem.bookId,
-            chapter: prevItem.chapter,
-            startVerse: prevItem.startVerse,
-            endVerse: prevItem.endVerse,
+            bookId: prevTarget.bookId,
+            chapter: prevTarget.chapter,
+            startVerse: prevTarget.startVerse,
+            endVerse: prevTarget.endVerse,
           });
           void fetch(`/api/bible-proxy?path=${encodeURIComponent(path)}`, {
             signal: controller.signal,
@@ -400,6 +478,9 @@ export function BibleReaderCore({
     isIframeLoading,
     currentIndex,
     flattenedReadings,
+    planContext,
+    standaloneNav.next,
+    standaloneNav.prev,
     selectedVersion.id,
   ]);
 
@@ -459,8 +540,9 @@ export function BibleReaderCore({
 
         {/* Center: Version Selector & Font Size Controls */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          {/* Version Selector Dropdown */}
-          <div ref={versionMenuRef} className="relative">
+          {/* Version Selector Dropdown (hidden for books outside the 66-book versions) */}
+          {isBookSupported && (
+            <div ref={versionMenuRef} className="relative">
             <button
               type="button"
               onClick={() => {
@@ -521,7 +603,8 @@ export function BibleReaderCore({
                 })}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
           {/* Font Size Menu */}
           <div ref={fontMenuRef} className="relative">
@@ -732,16 +815,30 @@ export function BibleReaderCore({
           </div>
         )}
 
-        {/* Themed Proxy Iframe */}
-        <iframe
-          ref={iframeRef}
-          key={`${iframeSrc}-${currentReading.id}`}
-          src={iframeSrc}
-          title={`Bible reading ${readingTitle}`}
-          onLoad={handleIframeLoad}
-          className="size-full border-0 bg-background"
-          sandbox="allow-scripts allow-same-origin allow-popups"
-        />
+        {!isBookSupported ? (
+          <div className="flex size-full items-center justify-center p-6 text-center">
+            <div className="max-w-md space-y-2">
+              <BookOpen className="mx-auto size-8 text-foreground-dim" />
+              <h2 className="text-base font-semibold text-foreground">
+                Book unavailable in the reader
+              </h2>
+              <p className="text-sm text-foreground-dim">
+                {readingTitle} is outside the 66-book canon supported by the
+                available Bible translations.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            key={`${iframeSrc}-${currentReading.id}`}
+            src={iframeSrc}
+            title={`Bible reading ${readingTitle}`}
+            onLoad={handleIframeLoad}
+            className="size-full border-0 bg-background"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          />
+        )}
       </main>
 
       {/* =========================================================================
