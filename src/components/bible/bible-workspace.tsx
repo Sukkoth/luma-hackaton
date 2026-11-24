@@ -20,6 +20,23 @@ import {
 } from "@/lib/bible-versions";
 import { toast } from "sonner";
 import { togglePlanReadingItemAction } from "@/actions/plans";
+import {
+  createHighlightAction,
+  deleteHighlightAction,
+  getChapterHighlightsAction,
+  updateHighlightColorAction,
+  type BibleHighlightDetail,
+} from "@/actions/highlights";
+import type { HighlightColor } from "@/lib/schemas/highlights";
+import {
+  applyHighlightsToPassageDom,
+  extractHighlightRangeFromSelection,
+  getFullVerseHighlightRange,
+  getVerseAtPoint,
+  selectVerseInDom,
+  type PassageHighlightRange,
+} from "@/lib/bible-highlights";
+import { HighlightToolbar } from "@/components/bible/highlight-toolbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -69,6 +86,49 @@ type PassageState =
   | { status: "loading" }
   | { status: "error"; message: string }
   | { status: "success"; path: string; contentHtml: string };
+
+type ActiveHighlightPrompt =
+  | {
+      mode: "create";
+      range: PassageHighlightRange;
+      position: { top: number; left: number } | null;
+    }
+  | {
+      mode: "edit";
+      highlight: BibleHighlightDetail;
+      position: { top: number; left: number } | null;
+    };
+
+function computeHighlightToolbarPosition({
+  rect,
+}: {
+  rect: DOMRect;
+}): { top: number; left: number } | null {
+  if (typeof window === "undefined") return null;
+  if (rect.width === 0 && rect.height === 0) return null;
+  const padding = 136;
+  const left = Math.min(
+    window.innerWidth - padding,
+    Math.max(padding, rect.left + rect.width / 2)
+  );
+  const top =
+    rect.top < 120
+      ? Math.min(window.innerHeight - 64, rect.bottom + 10)
+      : Math.max(68, rect.top - 48);
+  return { top, left };
+}
+
+function formatHighlightVerseLabel({
+  startVerse,
+  endVerse,
+}: {
+  startVerse: number;
+  endVerse: number;
+}): string {
+  return startVerse === endVerse
+    ? `v. ${startVerse}`
+    : `v. ${startVerse}–${endVerse}`;
+}
 
 function getStoredFontSize(): number {
   if (typeof window === "undefined") return DEFAULT_FONT_SIZE;
@@ -226,8 +286,13 @@ export function BibleWorkspace({
   const [passageRetryNonce, setPassageRetryNonce] = useState(0);
   const [planContext, setPlanContext] = useState<PlanContextData | null>(null);
   const [isTogglingPlan, setIsTogglingPlan] = useState(false);
+  const [highlights, setHighlights] = useState<BibleHighlightDetail[]>([]);
+  const [highlightPrompt, setHighlightPrompt] =
+    useState<ActiveHighlightPrompt | null>(null);
+  const [isSavingHighlight, setIsSavingHighlight] = useState(false);
 
   const hasHydratedPrefsRef = useRef(false);
+  const passageArticleRef = useRef<HTMLElement | null>(null);
 
   // Resolve active book & chapter (from 66-book readable canon)
   const normalizedBookId = bookParam.toLowerCase();
@@ -443,6 +508,317 @@ export function BibleWorkspace({
     void loadPassage();
     return () => controller.abort();
   }, [biblePath, passageRetryNonce]);
+
+  // Load saved highlights for the active translation + book + chapter
+  useEffect(() => {
+    setHighlightPrompt(null);
+    if (!isBookSupported) {
+      setHighlights([]);
+      return;
+    }
+
+    let isCancelled = false;
+    async function loadHighlights() {
+      const result = await getChapterHighlightsAction({
+        versionId: selectedVersion.id,
+        bookId: currentBookId,
+        chapter: currentChapter,
+      });
+      if (isCancelled) return;
+      if (result.success) {
+        setHighlights(result.highlights);
+      } else {
+        setHighlights([]);
+      }
+    }
+
+    void loadHighlights();
+    return () => {
+      isCancelled = true;
+    };
+  }, [isBookSupported, selectedVersion.id, currentBookId, currentChapter]);
+
+  // Apply highlights to the rendered passage DOM
+  useEffect(() => {
+    if (
+      passageState.status !== "success" ||
+      passageState.path !== biblePath ||
+      !passageArticleRef.current
+    ) {
+      return;
+    }
+
+    applyHighlightsToPassageDom({
+      container: passageArticleRef.current,
+      highlights,
+    });
+  }, [passageState, biblePath, highlights]);
+
+  const handlePassageSelectionEnd = useCallback(() => {
+    window.setTimeout(() => {
+      const container = passageArticleRef.current;
+      const selection = window.getSelection();
+      if (!container || !selection || selection.isCollapsed) return;
+
+      const range = extractHighlightRangeFromSelection({
+        container,
+        selection,
+      });
+      if (!range) return;
+
+      const domRange = selection.getRangeAt(0);
+      const rect = domRange.getBoundingClientRect();
+      setHighlightPrompt({
+        mode: "create",
+        range,
+        position: computeHighlightToolbarPosition({ rect }),
+      });
+    }, 10);
+  }, []);
+
+  // Also detect selection changes (mobile handles, keyboard selection, mouseup outside article)
+  useEffect(() => {
+    if (passageState.status !== "success") return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const handleSelectionChange = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        const container = passageArticleRef.current;
+        const selection = window.getSelection();
+        if (!container || !selection || selection.isCollapsed) {
+          setHighlightPrompt((prev) => (prev?.mode === "create" ? null : prev));
+          return;
+        }
+
+        const range = extractHighlightRangeFromSelection({
+          container,
+          selection,
+        });
+        if (!range) {
+          setHighlightPrompt((prev) => (prev?.mode === "create" ? null : prev));
+          return;
+        }
+
+        const domRange = selection.getRangeAt(0);
+        const rect = domRange.getBoundingClientRect();
+        setHighlightPrompt({
+          mode: "create",
+          range,
+          position: computeHighlightToolbarPosition({ rect }),
+        });
+      }, 120);
+    };
+
+    const handleDocumentPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (passageArticleRef.current?.contains(target)) return;
+      if (
+        target.closest(
+          '[role="toolbar"][aria-label="Passage highlight actions"]'
+        )
+      ) {
+        return;
+      }
+      setHighlightPrompt(null);
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
+    return () => {
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("selectionchange", handleSelectionChange);
+      document.removeEventListener("pointerdown", handleDocumentPointerDown);
+    };
+  }, [passageState.status]);
+
+  const handlePassageClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      const container = passageArticleRef.current;
+      if (!container) return;
+
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      const selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        return;
+      }
+
+      // Tap on a verse number -> select the full verse
+      const verseLabelEl = target.closest<HTMLElement>(".yv-vlbl");
+      if (verseLabelEl) {
+        const prevSibling = verseLabelEl.previousElementSibling;
+        const verseEl =
+          verseLabelEl.closest<HTMLElement>("span[v]") ??
+          (prevSibling?.matches("span[v]")
+            ? (prevSibling as HTMLElement)
+            : null);
+        const rawVerse =
+          verseEl?.getAttribute("v") ?? verseLabelEl.textContent?.trim();
+        const verse = rawVerse ? Number.parseInt(rawVerse, 10) : Number.NaN;
+        if (!Number.isFinite(verse) || verse < 1) return;
+
+        const fullRange = getFullVerseHighlightRange({ container, verse });
+        if (!fullRange) return;
+
+        const rect = verseLabelEl.getBoundingClientRect();
+        const existingFull = highlights.find(
+          (item) =>
+            item.startVerse === verse &&
+            item.endVerse === verse &&
+            item.startOffset === 0 &&
+            item.endOffset === fullRange.endOffset
+        );
+
+        if (existingFull) {
+          setHighlightPrompt({
+            mode: "edit",
+            highlight: existingFull,
+            position: computeHighlightToolbarPosition({ rect }),
+          });
+        } else {
+          selectVerseInDom({ container, verse });
+          setHighlightPrompt({
+            mode: "create",
+            range: fullRange,
+            position: computeHighlightToolbarPosition({ rect }),
+          });
+        }
+        return;
+      }
+
+      // Tap on an existing highlight -> open edit/remove toolbar
+      const markEl = target.closest<HTMLElement>("mark[data-highlight-id]");
+      if (markEl) {
+        const highlightId = markEl.dataset.highlightId;
+        const match = highlights.find((item) => item.id === highlightId);
+        if (!match) return;
+
+        const rect = markEl.getBoundingClientRect();
+        setHighlightPrompt({
+          mode: "edit",
+          highlight: match,
+          position: computeHighlightToolbarPosition({ rect }),
+        });
+        return;
+      }
+
+      // Single click on verse text (with collapsed selection) -> select full verse
+      if (e.detail === 1) {
+        const verse = getVerseAtPoint({
+          container,
+          x: e.clientX,
+          y: e.clientY,
+        });
+        if (verse !== null) {
+          const fullRange = getFullVerseHighlightRange({ container, verse });
+          if (fullRange) {
+            const existingFull = highlights.find(
+              (item) =>
+                item.startVerse === verse &&
+                item.endVerse === verse &&
+                item.startOffset === 0 &&
+                item.endOffset === fullRange.endOffset
+            );
+            if (existingFull) {
+              const rect = target.getBoundingClientRect();
+              setHighlightPrompt({
+                mode: "edit",
+                highlight: existingFull,
+                position: computeHighlightToolbarPosition({ rect }),
+              });
+              return;
+            }
+
+            const selRect = selectVerseInDom({ container, verse });
+            const rect = selRect ?? target.getBoundingClientRect();
+            setHighlightPrompt({
+              mode: "create",
+              range: fullRange,
+              position: computeHighlightToolbarPosition({ rect }),
+            });
+            return;
+          }
+        }
+      }
+
+      setHighlightPrompt(null);
+    },
+    [highlights]
+  );
+
+  const handleSelectHighlightColor = useCallback(
+    async ({ color }: { color: HighlightColor }) => {
+      if (!highlightPrompt || isSavingHighlight) return;
+      setIsSavingHighlight(true);
+
+      try {
+        if (highlightPrompt.mode === "create") {
+          const result = await createHighlightAction({
+            versionId: selectedVersion.id,
+            bookId: currentBookId,
+            chapter: currentChapter,
+            ...highlightPrompt.range,
+            color,
+          });
+          if (!result.success) {
+            toast.error(result.error);
+            return;
+          }
+          setHighlights((prev) => [...prev, result.highlight]);
+          window.getSelection()?.removeAllRanges();
+          setHighlightPrompt(null);
+          return;
+        }
+
+        const result = await updateHighlightColorAction({
+          highlightId: highlightPrompt.highlight.id,
+          color,
+        });
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
+        setHighlights((prev) =>
+          prev.map((item) =>
+            item.id === result.highlight.id ? result.highlight : item
+          )
+        );
+        setHighlightPrompt(null);
+      } finally {
+        setIsSavingHighlight(false);
+      }
+    },
+    [
+      highlightPrompt,
+      isSavingHighlight,
+      selectedVersion.id,
+      currentBookId,
+      currentChapter,
+    ]
+  );
+
+  const handleDeleteHighlight = useCallback(async () => {
+    if (highlightPrompt?.mode !== "edit" || isSavingHighlight) return;
+    setIsSavingHighlight(true);
+    try {
+      const result = await deleteHighlightAction({
+        highlightId: highlightPrompt.highlight.id,
+      });
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      setHighlights((prev) =>
+        prev.filter((item) => item.id !== result.highlightId)
+      );
+      setHighlightPrompt(null);
+    } finally {
+      setIsSavingHighlight(false);
+    }
+  }, [highlightPrompt, isSavingHighlight]);
 
   // Standalone previous / next targets
   const standaloneNav = useMemo(() => {
@@ -1024,12 +1400,50 @@ export function BibleWorkspace({
             </div>
           </div>
         ) : passageState.status === "success" ? (
-          <article
-            style={{ "--bible-font-size": `${fontSize}px` } as CSSProperties}
-            className="luma-bible-passage"
-            /* Passage HTML is returned by YouVersion API and sanitized server-side via sanitize-html */
-            dangerouslySetInnerHTML={{ __html: passageState.contentHtml }}
-          />
+          <>
+            <article
+              ref={passageArticleRef}
+              onMouseUp={handlePassageSelectionEnd}
+              onTouchEnd={handlePassageSelectionEnd}
+              onClick={handlePassageClick}
+              style={{ "--bible-font-size": `${fontSize}px` } as CSSProperties}
+              className="luma-bible-passage"
+              /* Passage HTML is returned by YouVersion API and sanitized server-side via sanitize-html */
+              dangerouslySetInnerHTML={{ __html: passageState.contentHtml }}
+            />
+            {highlightPrompt ? (
+              <HighlightToolbar
+                verseLabel={formatHighlightVerseLabel({
+                  startVerse:
+                    highlightPrompt.mode === "create"
+                      ? highlightPrompt.range.startVerse
+                      : highlightPrompt.highlight.startVerse,
+                  endVerse:
+                    highlightPrompt.mode === "create"
+                      ? highlightPrompt.range.endVerse
+                      : highlightPrompt.highlight.endVerse,
+                })}
+                activeColor={
+                  highlightPrompt.mode === "edit"
+                    ? highlightPrompt.highlight.color
+                    : undefined
+                }
+                isEditing={highlightPrompt.mode === "edit"}
+                isBusy={isSavingHighlight}
+                position={highlightPrompt.position}
+                onSelectColor={handleSelectHighlightColor}
+                onDelete={
+                  highlightPrompt.mode === "edit"
+                    ? handleDeleteHighlight
+                    : undefined
+                }
+                onClose={() => {
+                  window.getSelection()?.removeAllRanges();
+                  setHighlightPrompt(null);
+                }}
+              />
+            ) : null}
+          </>
         ) : null}
       </div>
 

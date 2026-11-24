@@ -961,3 +961,50 @@ export const pushSubscriptionsRelations = relations(
     }),
   })
 );
+
+// --- Bible Highlights ---
+export const bibleHighlights = pgTable(
+  "bible_highlights",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    versionId: integer("version_id").notNull(),
+    bookId: varchar("book_id", { length: 16 }).notNull(),
+    chapter: integer("chapter").notNull(),
+    startVerse: integer("start_verse").notNull(),
+    startOffset: integer("start_offset").notNull(),
+    endVerse: integer("end_verse").notNull(),
+    endOffset: integer("end_offset").notNull(),
+    color: varchar("color", { length: 24 }).default("amber").notNull(),
+    selectedText: text("selected_text").default("").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("idx_bible_highlights_lookup").on(
+      table.userId,
+      table.versionId,
+      table.bookId,
+      table.chapter
+    ),
+  ]
+);
+
+export const bibleHighlightsRelations = relations(
+  bibleHighlights,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [bibleHighlights.userId],
+      references: [user.id],
+    }),
+  })
+);

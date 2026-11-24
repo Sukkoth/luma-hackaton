@@ -561,6 +561,7 @@ input.ui-input-icon-both {
 .luma-bible-passage .pc,
 .luma-bible-passage .li1 {
   margin: 0 0 1.35em;
+  cursor: pointer;
 }
 
 .luma-bible-passage .pi {
@@ -573,6 +574,7 @@ input.ui-input-icon-both {
   margin: 0.35em 0;
   padding-left: 1.25em;
   line-height: 1.85;
+  cursor: pointer;
 }
 
 .luma-bible-passage .q2,
@@ -585,6 +587,7 @@ input.ui-input-icon-both {
   font-style: italic;
   color: var(--muted-foreground);
   font-size: 0.92em;
+  cursor: default;
 }
 
 .luma-bible-passage .s,
@@ -595,6 +598,7 @@ input.ui-input-icon-both {
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--foreground);
+  cursor: default;
 }
 
 .luma-bible-passage .yv-vlbl {
@@ -606,6 +610,60 @@ input.ui-input-icon-both {
   margin-right: 0.4em;
   margin-left: 0.25em;
   user-select: none;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.08em 0.18em;
+  transition: background-color 150ms ease;
+}
+
+.luma-bible-passage .yv-vlbl:hover {
+  background-color: color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.luma-bible-passage mark[data-highlight-id] {
+  color: inherit;
+  border-radius: 0.2rem;
+  padding: 0.05em 0;
+  cursor: pointer;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: filter 150ms ease;
+}
+
+.luma-bible-passage mark[data-highlight-id]:hover {
+  filter: brightness(0.95);
+}
+
+.luma-bible-passage mark[data-highlight-color="amber"] {
+  background-color: rgba(252, 211, 77, 0.6);
+}
+.luma-bible-passage mark[data-highlight-color="green"] {
+  background-color: rgba(110, 231, 183, 0.55);
+}
+.luma-bible-passage mark[data-highlight-color="blue"] {
+  background-color: rgba(125, 211, 252, 0.6);
+}
+.luma-bible-passage mark[data-highlight-color="rose"] {
+  background-color: rgba(253, 164, 175, 0.55);
+}
+.luma-bible-passage mark[data-highlight-color="purple"] {
+  background-color: rgba(216, 180, 254, 0.55);
+}
+
+.dark .luma-bible-passage mark[data-highlight-color="amber"] {
+  background-color: rgba(245, 158, 11, 0.55);
+}
+.dark .luma-bible-passage mark[data-highlight-color="green"] {
+  background-color: rgba(16, 185, 129, 0.5);
+}
+.dark .luma-bible-passage mark[data-highlight-color="blue"] {
+  background-color: rgba(14, 165, 233, 0.55);
+}
+.dark .luma-bible-passage mark[data-highlight-color="rose"] {
+  background-color: rgba(244, 63, 94, 0.55);
+}
+.dark .luma-bible-passage mark[data-highlight-color="purple"] {
+  background-color: rgba(168, 85, 247, 0.55);
 }
 
 .luma-bible-passage .nd {
