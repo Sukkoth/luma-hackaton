@@ -169,6 +169,12 @@ function renderHtmlDocument({
       word-spacing: 0.04em;
     }
 
+    @media (max-width: 639px) {
+      .luma-reader {
+        padding: 1.5rem 1.25rem 4rem;
+      }
+    }
+
     .luma-passage .p,
     .luma-passage .pi,
     .luma-passage .m,
@@ -237,7 +243,7 @@ function renderHtmlDocument({
       if (e.data.type === "SET_FONT_SIZE") {
         var size = Number(e.data.fontSize);
         if (!isNaN(size)) {
-          var clamped = Math.min(32, Math.max(20, size));
+          var clamped = Math.min(32, Math.max(16, size));
           document.documentElement.style.setProperty("--bible-font-size", clamped + "px");
           if (document.body) {
             document.body.style.setProperty("--bible-font-size", clamped + "px");
@@ -373,11 +379,11 @@ export async function GET(request: NextRequest): Promise<Response> {
   const theme =
     request.nextUrl.searchParams.get("theme") === "dark" ? "dark" : "light";
   const fontSizeParam = Number(
-    request.nextUrl.searchParams.get("fontSize") || "22"
+    request.nextUrl.searchParams.get("fontSize") || "18"
   );
   const fontSize = Math.min(
     32,
-    Math.max(20, Number.isNaN(fontSizeParam) ? 22 : fontSizeParam)
+    Math.max(16, Number.isNaN(fontSizeParam) ? 18 : fontSizeParam)
   );
 
   const parsedPath = parseBiblePath({ path });
