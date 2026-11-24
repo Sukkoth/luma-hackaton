@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Calendar, LogIn, Sparkles } from "lucide-react";
+import { LumaIcon } from "@/components/ui/luma-icon";
 import { InterlockingStats } from "./interlocking-stats";
 import { ReadingWorkflowSection } from "./reading-workflow-section";
 import { CanonShowcaseSection } from "./canon-showcase-section";
@@ -38,10 +39,10 @@ export function LandingView() {
 
         {/* Hero Content (Floating directly in the airy sky of the landscape) */}
         <div className="relative z-10 mx-auto max-w-4xl px-6 pt-12 sm:pt-16 lg:pt-20 text-center">
-          {/* Eyebrow Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/90 px-4 py-1.5 text-[11px] lg:text-[12px] font-semibold tracking-wide text-foreground shadow-xs backdrop-blur-md dark:border-white/15 dark:bg-stone-900/90 dark:text-stone-200">
-            <Sparkles className="size-3 lg:size-3.5 text-primary animate-pulse" />
-            <span>Multi-Canon Scripture Sanctuary</span>
+          {/* Eyebrow Brand */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/90 px-4 py-1.5 text-[12px] lg:text-[13px] font-bold tracking-wide text-foreground shadow-xs backdrop-blur-md dark:border-white/15 dark:bg-stone-900/90 dark:text-stone-200">
+            <LumaIcon className="size-3.5 rounded-xs" size={14} />
+            <span>Luma</span>
           </div>
 
           {/* Monumental Headline */}
