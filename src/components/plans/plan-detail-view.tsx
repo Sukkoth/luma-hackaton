@@ -72,8 +72,17 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     setNotes(plan.notes);
   }
 
-  // Refresh server data when navigating back via browser back/forward cache
+  // Refresh server data when navigating back from reader after toggling items or bfcache
   useEffect(() => {
+    try {
+      if (sessionStorage.getItem("luma-plan-dirty") === plan.id) {
+        sessionStorage.removeItem("luma-plan-dirty");
+        router.refresh();
+      }
+    } catch {
+      // Ignore storage restrictions
+    }
+
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
         router.refresh();
@@ -81,7 +90,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     };
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
-  }, [router]);
+  }, [router, plan.id]);
 
   // Determine initial focus session (first uncompleted session, or session 1)
   const initialFocusSession =
@@ -272,6 +281,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
   // Build unified Bible reader URL
   const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
     const params = new URLSearchParams();
+    params.set("view", "read");
     params.set("book", reading.bookId.toLowerCase());
     params.set("ch", reading.chapter.toString());
     params.set("plan", currentPlan.id);
@@ -282,7 +292,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     if (reading.endVerse != null) {
       params.set("endVerse", reading.endVerse.toString());
     }
-    return `/bible?${params.toString()}`;
+    return `/books?${params.toString()}`;
   };
 
   return (

@@ -152,6 +152,7 @@ export function PlanReadingFlow({
   // Build unified Bible reader URL for a reading
   const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
     const params = new URLSearchParams();
+    params.set("view", "read");
     params.set("book", reading.bookId.toLowerCase());
     params.set("ch", reading.chapter.toString());
     params.set("plan", instanceId);
@@ -160,7 +161,7 @@ export function PlanReadingFlow({
       params.set("startVerse", reading.startVerse.toString());
     if (reading.endVerse != null)
       params.set("endVerse", reading.endVerse.toString());
-    return `/bible?${params.toString()}`;
+    return `/books?${params.toString()}`;
   };
 
   return (
