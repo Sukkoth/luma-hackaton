@@ -112,7 +112,6 @@ export function GroupPlanEnrollModal({
       } else {
         onClose();
         router.push(`/plans/${res.planInstanceId}`);
-        router.refresh();
       }
     } catch (err) {
       setError(

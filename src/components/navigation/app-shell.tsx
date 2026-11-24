@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Settings,
   LogIn,
@@ -64,7 +64,6 @@ export function AppShell({
   className = "",
 }: AppShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { data: session } = useSession();
 
   const [isStreakOpen, setIsStreakOpen] = useState(false);
@@ -121,8 +120,7 @@ export function AppShell({
       await authClient.signOut();
       setIsLogoutModalOpen(false);
       setIsSigningOut(false);
-      router.push("/");
-      router.refresh();
+      window.location.replace("/");
     } catch {
       setIsSigningOut(false);
     }

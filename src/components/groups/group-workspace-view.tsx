@@ -91,7 +91,6 @@ export function GroupWorkspaceView({
       if (res.success) {
         toast.success("You have left the fellowship.");
         router.push("/groups");
-        router.refresh();
       } else {
         toast.error(res.error || "Failed to leave fellowship.");
         setIsLeavingGroup(false);

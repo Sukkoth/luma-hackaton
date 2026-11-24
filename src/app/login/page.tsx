@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import * as v from "valibot";
 import {
   ArrowLeft,
@@ -21,7 +21,6 @@ import { AuthShowcasePanel } from "@/components/auth/auth-showcase-panel";
 import { LumaIcon } from "@/components/ui/luma-icon";
 
 function LoginContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams.get("redirect") || "/home";
   const errorParam = searchParams.get("error");
@@ -110,8 +109,7 @@ function LoginContent() {
       }
 
       setIsLoading(false);
-      router.push(redirectTarget);
-      router.refresh();
+      window.location.replace(redirectTarget);
     } catch {
       setErrorMessage(
         "An unexpected network error occurred. Please try again."

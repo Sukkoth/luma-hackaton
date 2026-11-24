@@ -117,7 +117,6 @@ function SignUpContent() {
       }
 
       router.push(redirectTarget);
-      router.refresh();
     } catch {
       setErrorMessage(
         "An unexpected network error occurred. Please try again."

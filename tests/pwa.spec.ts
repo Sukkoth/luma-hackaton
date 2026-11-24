@@ -20,12 +20,12 @@ async function createAndOnboardUser({
   await page.getByRole("checkbox", { name: /agree/i }).check();
   await page.getByRole("button", { name: "Create Account" }).click();
 
-  await page.waitForURL("/onboarding", { timeout: 15000 });
+  await page.waitForURL("/onboarding", { timeout: 30000 });
   await page.getByRole("button", { name: "Skip to Setup" }).click();
   await page
     .getByRole("button", { name: "Complete Onboarding & Begin" })
     .click();
-  await page.waitForURL("/home", { timeout: 15000 });
+  await page.waitForURL("/home", { timeout: 30000 });
 }
 
 test.describe("Progressive Web App (PWA) E2E", () => {

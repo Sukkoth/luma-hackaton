@@ -255,8 +255,7 @@ export function SettingsView({
       await authClient.signOut();
       setIsLogoutModalOpen(false);
       setIsSigningOut(false);
-      router.push("/");
-      router.refresh();
+      window.location.replace("/");
     } catch {
       setIsSigningOut(false);
     }
