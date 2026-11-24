@@ -127,7 +127,9 @@ test.describe("Insights & Visualisations E2E", () => {
     await expect(
       page.getByRole("heading", { name: "Milestone Gallery" })
     ).toBeVisible();
-    await expect(page.getByText("First Step")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "First Step", level: 3 })
+    ).toBeVisible();
   });
 
   test("renders all five interactive visualisations on overview dashboard with mode toggles", async ({
