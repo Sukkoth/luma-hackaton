@@ -70,6 +70,21 @@ export function LandingFooter() {
       {/* Divider & Copyright */}
       <div className="mt-10 pt-6 border-t border-stone-950/15 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-stone-900/75 dark:text-stone-400">
         <p>© 2026 Luma Scripture Tracker. All rights reserved.</p>
+        <div className="flex items-center gap-3 text-[11px]">
+          <Link
+            href="/privacy"
+            className="hover:text-stone-950 dark:hover:text-white transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          <span>•</span>
+          <Link
+            href="/tos"
+            className="hover:text-stone-950 dark:hover:text-white transition-colors"
+          >
+            Terms of Service
+          </Link>
+        </div>
         <p className="text-[11px]">
           Honoring Catholic, Orthodox, Protestant, and Ethiopian traditions.
         </p>

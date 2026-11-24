@@ -197,6 +197,7 @@ test.describe("Groups & Community Fellowship E2E", () => {
       .click();
 
     // 4. Group Plans tab updates to show active plan
+    await expect(wizardModal).not.toBeVisible();
     await expect(
       page.getByRole("heading", { name: /Active Reading Plans \(1\)/i })
     ).toBeVisible();
@@ -417,6 +418,7 @@ test.describe("Groups & Community Fellowship E2E", () => {
     await wizardModal
       .getByRole("button", { name: "Publish Fellowship Plan" })
       .click();
+    await expect(wizardModal).not.toBeVisible();
 
     // Enroll in the plan
     await page

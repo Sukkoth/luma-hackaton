@@ -20,7 +20,11 @@ import * as v from "valibot";
 import { READING_PLANS, isPlanCanonCompatible } from "@/data/readingPlans";
 import type { BibleCanon } from "@/data/bibleData";
 import { ScheduleGroupPlanSchema } from "@/lib/schemas/groups";
-import { scheduleGroupPlanAction } from "@/actions/groups";
+import {
+  scheduleGroupPlanAction,
+  type GroupPlanSummary,
+} from "@/actions/groups";
+import type { GroupLateJoinPolicy } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -36,6 +40,7 @@ export type GroupSchedulePlanModalProps = {
   isOpen: boolean;
   onClose: () => void;
   groupId: string;
+  onPlanScheduled?: (plan: GroupPlanSummary) => void;
 };
 
 type WizardStep = "template" | "pacing" | "policy" | "review";
@@ -65,6 +70,7 @@ export function GroupSchedulePlanModal({
   isOpen,
   onClose,
   groupId,
+  onPlanScheduled,
 }: GroupSchedulePlanModalProps) {
   const router = useRouter();
   const [step, setStep] = useState<WizardStep>("template");
@@ -187,6 +193,24 @@ export function GroupSchedulePlanModal({
         return;
       }
 
+      const planTemplate = READING_PLANS.find(
+        (p) => p.id === parsed.output.planTemplateId
+      );
+
+      onPlanScheduled?.({
+        id: res.groupPlanId || crypto.randomUUID(),
+        planTemplateId: parsed.output.planTemplateId,
+        templateTitle: planTemplate?.title || "Reading Plan",
+        scheduledStartDate: new Date(parsed.output.scheduledStartDate),
+        status: "active",
+        lateJoinPolicy: parsed.output.lateJoinPolicy as GroupLateJoinPolicy,
+        dailyChapterTarget: parsed.output.dailyChapterTarget,
+        activeWeekdaysMask: parsed.output.activeWeekdaysMask,
+        totalChapters: planTemplate?.totalChapters || 0,
+        userEnrolledInstanceId: null,
+        enrolledMembersCount: 0,
+        createdAt: new Date(),
+      });
       onClose();
       router.refresh();
     } catch (err) {

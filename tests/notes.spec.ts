@@ -332,11 +332,15 @@ test.describe("Notes & Tiptap Rich Text Editor E2E", () => {
     // Create new folder
     const newFolderBtn = page.getByRole("button", { name: "New Collection" });
     await expect(newFolderBtn).toBeVisible();
-    await newFolderBtn.click();
     const createFolderModal = page.getByRole("dialog", {
       name: "New Study Folder",
     });
-    await expect(createFolderModal).toBeVisible();
+    await expect(async () => {
+      if (!(await createFolderModal.isVisible())) {
+        await newFolderBtn.click();
+      }
+      await expect(createFolderModal).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
     await createFolderModal
       .getByPlaceholder(/Pauline Epistles/i)
       .fill("Temporary Studies");

@@ -1,7 +1,9 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { after } from "next/server";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 const trustedOrigins = [
   "http://localhost:3000",
@@ -33,6 +35,26 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url, token }) => {
+      const resetUrl =
+        url ||
+        `${process.env.BETTER_AUTH_URL || ""}/reset-password?token=${token}`;
+      try {
+        after(async () => {
+          await sendPasswordResetEmail({
+            to: user.email,
+            url: resetUrl,
+            userName: user.name,
+          });
+        });
+      } catch {
+        void sendPasswordResetEmail({
+          to: user.email,
+          url: resetUrl,
+          userName: user.name,
+        });
+      }
+    },
   },
   account: {
     accountLinking: {

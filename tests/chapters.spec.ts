@@ -517,7 +517,11 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     const planInstanceId = currentUrl.split("/plans/")[1]!.split("?")[0]!;
 
     // Test Updating settings via explicit 'Update Settings' button
-    await page.getByRole("button", { name: "Pacing & Settings" }).click();
+    const pacingSettingsBtn = page.getByRole("button", {
+      name: "Pacing & Settings",
+    });
+    await expect(pacingSettingsBtn).toBeVisible({ timeout: 15000 });
+    await pacingSettingsBtn.click();
     await expect(
       page.getByRole("button", { name: "Update Settings" })
     ).toBeVisible();

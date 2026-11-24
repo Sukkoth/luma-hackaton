@@ -371,7 +371,23 @@ function SignUpContent() {
                   htmlFor="agree-terms"
                   className="text-[12px] leading-snug text-foreground-dim select-none"
                 >
-                  I agree to the Scripture Terms of Service and Privacy Policy.
+                  I agree to the{" "}
+                  <Link
+                    href="/tos"
+                    target="_blank"
+                    className="font-semibold text-foreground underline underline-offset-2 hover:text-primary transition-colors"
+                  >
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/privacy"
+                    target="_blank"
+                    className="font-semibold text-foreground underline underline-offset-2 hover:text-primary transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
                 </label>
               </div>
 
@@ -402,8 +418,22 @@ function SignUpContent() {
         </div>
 
         {/* Minimal Footer */}
-        <div className="text-center text-[11px] text-[#888888] dark:text-[#A1A1AA]">
-          <span>Scripture Tracker & Planner • Luma</span>
+        <div className="flex flex-wrap items-center justify-center gap-2.5 text-center text-[11px] text-[#888888] dark:text-[#A1A1AA]">
+          <span>Scripture Tracker &amp; Planner • Luma</span>
+          <span>•</span>
+          <Link
+            href="/privacy"
+            className="hover:text-foreground transition-colors hover:underline"
+          >
+            Privacy Policy
+          </Link>
+          <span>•</span>
+          <Link
+            href="/tos"
+            className="hover:text-foreground transition-colors hover:underline"
+          >
+            Terms of Service
+          </Link>
         </div>
       </section>
     </div>
