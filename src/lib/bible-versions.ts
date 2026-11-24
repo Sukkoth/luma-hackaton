@@ -1,3 +1,5 @@
+import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
+
 export type BibleVersion = {
   readonly id: number;
   readonly abbreviation: string;
@@ -6,59 +8,42 @@ export type BibleVersion = {
   readonly isPopular?: boolean;
 };
 
+export const AMHARIC_NASV_VERSION_ID = 1260;
+
 export const BIBLE_VERSIONS: ReadonlyArray<BibleVersion> = [
   {
-    id: 3867,
-    abbreviation: "አማ54",
-    name: "Amharic (1954)",
-    language: "amh",
-    isPopular: true,
-  },
-  {
-    id: 3202,
-    abbreviation: "MACQUL",
-    name: "Macaafa Qulqulluu Afaan Oromoo",
-    language: "gaz",
+    id: AMHARIC_NASV_VERSION_ID,
+    abbreviation: "NASV",
+    name: "New Amharic Standard Version",
+    language: "am",
     isPopular: true,
   },
   {
     id: 111,
     abbreviation: "NIV",
     name: "New International Version",
-    language: "eng",
-    isPopular: true,
-  },
-  {
-    id: 59,
-    abbreviation: "ESV",
-    name: "English Standard Version",
-    language: "eng",
+    language: "en",
     isPopular: true,
   },
   {
     id: 1588,
     abbreviation: "AMP",
     name: "Amplified Bible",
-    language: "eng",
+    language: "en",
     isPopular: true,
   },
   {
-    id: 114,
-    abbreviation: "NKJV",
-    name: "New King James Version",
-    language: "eng",
+    id: 2692,
+    abbreviation: "NASB2020",
+    name: "New American Standard Bible 2020",
+    language: "en",
+    isPopular: true,
   },
   {
-    id: 116,
-    abbreviation: "NLT",
-    name: "New Living Translation",
-    language: "eng",
-  },
-  {
-    id: 107,
-    abbreviation: "NET",
-    name: "New English Translation",
-    language: "eng",
+    id: 12,
+    abbreviation: "ASV",
+    name: "American Standard Version",
+    language: "en",
   },
 ] as const;
 
@@ -186,8 +171,34 @@ export function buildBibleComPath({
     reference = `${reference}.${startVerse}`;
   }
 
-  // Canonical Bible.com URL schema: {versionId}/{reference} (e.g. 3867/HEB.1 or 111/GEN.1)
+  // Canonical Bible.com / YouVersion passage path: {versionId}/{reference} (e.g. 1260/HEB.1 or 111/GEN.1)
   return `${versionId}/${reference}`;
+}
+
+const SIXTY_SIX_BOOK_IDS = new Set(
+  PROTESTANT_BIBLE_BOOKS.map((book) => book.id.toLowerCase())
+);
+
+const SIXTY_SIX_BOOK_USFMS = new Set(
+  PROTESTANT_BIBLE_BOOKS.map((book) => getBookUsfm({ bookId: book.id }))
+);
+
+export type IsBookSupportedInSixtySixBookVersionsParams = {
+  bookId: string;
+};
+
+/**
+ * All currently integrated YouVersion API versions contain the 66-book Protestant canon.
+ */
+export function isBookSupportedInSixtySixBookVersions({
+  bookId,
+}: IsBookSupportedInSixtySixBookVersionsParams): boolean {
+  const normalized = bookId.trim().toLowerCase();
+  if (!normalized) return false;
+  return (
+    SIXTY_SIX_BOOK_IDS.has(normalized) ||
+    SIXTY_SIX_BOOK_USFMS.has(normalized.toUpperCase())
+  );
 }
 
 type DetectDefaultVersionParams = {
@@ -218,7 +229,9 @@ export function detectDefaultVersion({
     tz?.toLowerCase().includes("ethiopia");
 
   if (isEthiopia) {
-    const amharic = BIBLE_VERSIONS.find((v) => v.id === 3867);
+    const amharic = BIBLE_VERSIONS.find(
+      (v) => v.id === AMHARIC_NASV_VERSION_ID
+    );
     if (amharic) return amharic;
   }
 
