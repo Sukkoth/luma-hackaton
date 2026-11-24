@@ -34,15 +34,11 @@ test.describe("Settings & Profile E2E", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("updates display name and avatar URL with persistence check", async ({
-    page,
-  }) => {
+  test("updates display name with persistence check", async ({ page }) => {
     const testId = Date.now();
     const email = `profile_user_${testId}@example.com`;
     const initialName = `Pioneer John ${testId}`;
     const updatedName = `Elder John ${testId}`;
-    const avatarUrl =
-      "https://ui-avatars.com/api/?name=Elder+John&background=0D8ABC&color=fff";
 
     await createAndOnboardUser({ page, fullName: initialName, email });
 
@@ -62,11 +58,11 @@ test.describe("Settings & Profile E2E", () => {
     await expect(emailInput).toHaveValue(email);
     await expect(emailInput).toBeDisabled();
 
-    // 3. Edit display name and avatar image
+    // Avatar image input should no longer exist
+    await expect(page.locator("#profile-image")).toHaveCount(0);
+
+    // 3. Edit display name
     await nameInput.fill(updatedName);
-    const imageInput = page.locator("#profile-image");
-    await imageInput.fill(avatarUrl);
-    await imageInput.blur();
 
     // 4. Submit profile changes
     await page.getByRole("button", { name: "Save Profile Changes" }).click();
@@ -79,7 +75,6 @@ test.describe("Settings & Profile E2E", () => {
     await page.goto("/settings");
     await page.getByRole("button", { name: "Profile" }).click();
     await expect(page.locator("#profile-name")).toHaveValue(updatedName);
-    await expect(page.locator("#profile-image")).toHaveValue(avatarUrl);
   });
 
   test("validates password confirmation and updates password successfully", async ({

@@ -12,7 +12,6 @@ import {
   Save,
   LogOut,
   Mail,
-  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { updateProfileAction, changePasswordAction } from "@/actions/profile";
@@ -52,11 +51,6 @@ export function ProfileSettingsSection({
     text: string;
   } | null>(null);
 
-  // Local avatar preview URL (for immediate visual feedback)
-  const [previewImage, setPreviewImage] = useState<string | null>(
-    user.image ?? null
-  );
-
   const initials = user.name
     ? user.name
         .split(" ")
@@ -82,7 +76,6 @@ export function ProfileSettingsSection({
           type: "success",
           text: "Profile updated successfully.",
         });
-        setPreviewImage(result.image);
         router.refresh();
       } else {
         setProfileMessage({
@@ -166,12 +159,12 @@ export function ProfileSettingsSection({
 
         <form onSubmit={handleProfileSubmit} className="mt-5 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-            {/* Avatar Preview */}
+            {/* Avatar Display */}
             <div className="flex flex-col items-center sm:items-start gap-2 shrink-0">
-              <div className="relative group size-20 sm:size-22 rounded-2xl overflow-hidden border-2 border-border/80 bg-surface-elevated shadow-xs flex items-center justify-center">
-                {previewImage ? (
+              <div className="size-20 sm:size-22 rounded-2xl overflow-hidden border-2 border-border/80 bg-surface-elevated shadow-xs flex items-center justify-center">
+                {user.image ? (
                   <Image
-                    src={previewImage}
+                    src={user.image}
                     alt={user.name}
                     width={88}
                     height={88}
@@ -183,12 +176,9 @@ export function ProfileSettingsSection({
                     {initials}
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white pointer-events-none">
-                  <Camera className="size-5" />
-                </div>
               </div>
               <span className="text-[11px] font-medium text-muted-foreground text-center sm:text-left">
-                Avatar Preview
+                Profile Avatar
               </span>
             </div>
 
@@ -213,31 +203,6 @@ export function ProfileSettingsSection({
                   defaultValue={user.name}
                   placeholder="e.g. Grace Hooper"
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
-                />
-              </div>
-
-              {/* Avatar Image URL */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="profile-image"
-                  className="text-xs font-semibold text-foreground flex items-center justify-between"
-                >
-                  <span>Avatar Image URL</span>
-                  <span className="text-[11px] text-muted-foreground font-normal">
-                    Direct image link (HTTPS)
-                  </span>
-                </label>
-                <input
-                  id="profile-image"
-                  name="image"
-                  type="url"
-                  defaultValue={user.image ?? ""}
-                  placeholder="https://images.unsplash.com/..."
-                  onBlur={(e) => {
-                    const val = e.currentTarget.value.trim();
-                    setPreviewImage(val || null);
-                  }}
-                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all font-mono text-xs"
                 />
               </div>
 

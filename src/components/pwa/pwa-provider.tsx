@@ -20,14 +20,12 @@ interface BeforeInstallPromptEvent extends Event {
 type PwaContextType = {
   isInstallable: boolean;
   isInstalled: boolean;
-  isOffline: boolean;
   promptInstall: () => Promise<boolean>;
 };
 
 const PwaContext = createContext<PwaContextType>({
   isInstallable: false,
   isInstalled: false,
-  isOffline: false,
   promptInstall: async () => false,
 });
 
@@ -38,23 +36,6 @@ export function usePwa() {
 type PwaProviderProps = {
   children: ReactNode;
 };
-
-function subscribeOffline(callback: () => void): () => void {
-  window.addEventListener("online", callback);
-  window.addEventListener("offline", callback);
-  return () => {
-    window.removeEventListener("online", callback);
-    window.removeEventListener("offline", callback);
-  };
-}
-
-function getOfflineSnapshot(): boolean {
-  return !navigator.onLine;
-}
-
-function getOfflineServerSnapshot(): boolean {
-  return false;
-}
 
 function subscribeStandalone(callback: () => void): () => void {
   const mq = window.matchMedia("(display-mode: standalone)");
@@ -80,12 +61,6 @@ export function PwaProvider({ children }: PwaProviderProps) {
     useState<BeforeInstallPromptEvent | null>(null);
   const [installedViaEvent, setInstalledViaEvent] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
-
-  const isOffline = useSyncExternalStore(
-    subscribeOffline,
-    getOfflineSnapshot,
-    getOfflineServerSnapshot
-  );
 
   const isStandalone = useSyncExternalStore(
     subscribeStandalone,
@@ -217,7 +192,6 @@ export function PwaProvider({ children }: PwaProviderProps) {
       value={{
         isInstallable: Boolean(deferredPrompt),
         isInstalled,
-        isOffline,
         promptInstall,
       }}
     >

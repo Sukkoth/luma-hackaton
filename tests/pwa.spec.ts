@@ -199,7 +199,6 @@ test.describe("Progressive Web App (PWA) E2E", () => {
     await expect(
       page.getByRole("heading", { name: /Mobile & Offline Installation/i })
     ).toBeVisible();
-    await expect(page.getByText("Offline Cache Status")).toBeVisible();
     await expect(page.getByText("Full-Screen Experience")).toBeVisible();
   });
 });

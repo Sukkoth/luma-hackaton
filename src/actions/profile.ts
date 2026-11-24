@@ -16,7 +16,6 @@ export type UpdateProfileActionResult =
   | {
       success: true;
       name: string;
-      image: string | null;
     }
   | { success: false; error: string };
 
@@ -37,7 +36,6 @@ export async function updateProfileAction({
 
   const raw = {
     name: formData.get("name"),
-    image: formData.get("image") || "",
   };
 
   const parsed = v.safeParse(UpdateProfileSchema, raw);
@@ -47,8 +45,7 @@ export async function updateProfileAction({
     return { success: false, error: errorMsg };
   }
 
-  const { name, image } = parsed.output;
-  const normalizedImage = image ? image.trim() : null;
+  const { name } = parsed.output;
 
   try {
     // 1. Update user record directly in the DB
@@ -56,7 +53,6 @@ export async function updateProfileAction({
       .update(user)
       .set({
         name,
-        image: normalizedImage,
         updatedAt: new Date(),
       })
       .where(eq(user.id, session.user.id));
@@ -66,7 +62,6 @@ export async function updateProfileAction({
       await auth.api.updateUser({
         body: {
           name,
-          image: normalizedImage ?? undefined,
         },
         headers: await headers(),
       });
@@ -80,7 +75,6 @@ export async function updateProfileAction({
     return {
       success: true,
       name,
-      image: normalizedImage,
     };
   } catch (error) {
     const message =
