@@ -27,6 +27,7 @@ import type {
   GroupMemberSummary,
   LeaderboardEntry,
   GroupPlanSummary,
+  GroupPinnedNotice,
 } from "@/actions/groups";
 import { leaveGroupAction } from "@/actions/groups";
 import type { UserTrackerSummary } from "@/actions/trackers";
@@ -76,6 +77,25 @@ export function GroupWorkspaceView({
   const [isLeavingGroup, setIsLeavingGroup] = useState(false);
   const [selectedPlanForEnroll, setSelectedPlanForEnroll] =
     useState<GroupPlanSummary | null>(null);
+
+  const [pinnedNoticeOverride, setPinnedNoticeOverride] = useState<
+    GroupPinnedNotice | null | undefined
+  >(undefined);
+  const [scheduledPlansOverride, setScheduledPlansOverride] = useState<
+    ReadonlyArray<GroupPlanSummary>
+  >([]);
+
+  const currentNotice =
+    pinnedNoticeOverride !== undefined
+      ? pinnedNoticeOverride
+      : group.pinnedNotice;
+
+  const currentActivePlans = [
+    ...scheduledPlansOverride.filter(
+      (sp) => !group.activePlans.some((ap) => ap.id === sp.id)
+    ),
+    ...group.activePlans,
+  ];
 
   const isOwner = group.currentUserRole === "owner";
   const isAdmin = isOwner || group.currentUserRole === "admin";
@@ -203,8 +223,8 @@ export function GroupWorkspaceView({
                 <span className="flex items-center gap-1.5 font-medium">
                   <BookOpen className="size-3.5 text-primary" />
                   <span>
-                    {group.activePlans.length} active{" "}
-                    {group.activePlans.length === 1 ? "plan" : "plans"}
+                    {currentActivePlans.length} active{" "}
+                    {currentActivePlans.length === 1 ? "plan" : "plans"}
                   </span>
                 </span>
                 {group.scheduledPlans.length > 0 && (
@@ -300,7 +320,7 @@ export function GroupWorkspaceView({
                       }
                       className="rounded-xl h-9"
                     >
-                      {group.pinnedNotice ? "Edit Bulletin" : "Pin Bulletin"}
+                      {currentNotice ? "Edit Bulletin" : "Pin Bulletin"}
                     </Button>
                     <Button
                       type="button"
@@ -323,7 +343,7 @@ export function GroupWorkspaceView({
       {/* ── Pinned Fellowship Bulletin (Timed Notice) ── */}
       <GroupPinnedBulletin
         groupId={group.id}
-        notice={group.pinnedNotice}
+        notice={currentNotice}
         isAdmin={isAdmin}
         onOpenNoticeModal={() => setIsNoticeModalOpen(true)}
       />
@@ -333,7 +353,7 @@ export function GroupWorkspaceView({
         tabs={[
           {
             id: "plans",
-            label: `Plans (${group.activePlans.length})`,
+            label: `Plans (${currentActivePlans.length})`,
             icon: <BookOpen className="size-3.5" />,
           },
           {
@@ -366,7 +386,7 @@ export function GroupWorkspaceView({
         {activeTab === "plans" && (
           <GroupPlansTab
             groupId={group.id}
-            activePlans={group.activePlans}
+            activePlans={currentActivePlans}
             scheduledPlans={group.scheduledPlans}
             completedPlans={group.completedPlans}
             trackers={trackers}
@@ -384,7 +404,7 @@ export function GroupWorkspaceView({
         {activeTab === "leaderboard" && (
           <GroupLeaderboardTab
             groupId={group.id}
-            activePlans={group.activePlans}
+            activePlans={currentActivePlans}
             leaderboardsByPlanId={leaderboardsByPlanId}
             currentUserHideProgress={group.currentUserHideProgress}
             currentUserPrivacyUpdatedAt={group.currentUserPrivacyUpdatedAt}
@@ -433,6 +453,9 @@ export function GroupWorkspaceView({
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
         groupId={group.id}
+        onPlanScheduled={(newPlan) =>
+          setScheduledPlansOverride((prev) => [newPlan, ...prev])
+        }
       />
 
       {canInvite && (
@@ -450,7 +473,8 @@ export function GroupWorkspaceView({
         isOpen={isNoticeModalOpen}
         onClose={() => setIsNoticeModalOpen(false)}
         groupId={group.id}
-        initialNotice={group.pinnedNotice}
+        initialNotice={currentNotice}
+        onNoticeUpdated={(notice) => setPinnedNoticeOverride(notice)}
       />
 
       {/* Leave Fellowship Confirmation Modal */}
@@ -505,7 +529,7 @@ export function GroupWorkspaceView({
           memberCount: group.memberCount,
           requiresApproval: group.requiresApproval,
           inviteCode: group.inviteCode,
-          activePlans: group.activePlans,
+          activePlans: currentActivePlans,
           scheduledPlans: group.scheduledPlans,
         }}
         trackers={trackers}

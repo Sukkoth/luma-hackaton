@@ -17,7 +17,7 @@ export type GroupPinnedNoticeModalProps = {
   onClose: () => void;
   groupId: string;
   initialNotice?: GroupPinnedNotice | null;
-  onNoticeUpdated?: () => void;
+  onNoticeUpdated?: (notice: GroupPinnedNotice | null) => void;
 };
 
 type DurationOption = "24h" | "3d" | "7d" | "14d" | "custom";
@@ -110,7 +110,14 @@ export function GroupPinnedNoticeModal({
         return;
       }
 
-      onNoticeUpdated?.();
+      onNoticeUpdated?.({
+        title: parsed.output.title || null,
+        content: parsed.output.content,
+        expiresAt: parsed.output.expiresAt,
+        authorId: "",
+        authorName: null,
+        updatedAt: new Date().toISOString(),
+      });
       router.refresh();
       onClose();
     } catch (err) {
@@ -129,7 +136,7 @@ export function GroupPinnedNoticeModal({
         setIsDeleting(false);
         return;
       }
-      onNoticeUpdated?.();
+      onNoticeUpdated?.(null);
       router.refresh();
       onClose();
     } catch (err) {

@@ -281,6 +281,8 @@ export function PlanSettingsTab({
   // Handle Pause / Resume (dedicated immediate action)
   const handleTogglePause = () => {
     startTransition(async () => {
+      const nextStatus = plan.status === "paused" ? "active" : "paused";
+      onPlanUpdatedAction?.({ ...plan, status: nextStatus });
       let res;
       if (plan.status === "paused") {
         res = await resumePlanAction({ instanceId: plan.id });
@@ -289,6 +291,7 @@ export function PlanSettingsTab({
       }
       if (!res.success) {
         setErrorMessage(res.error);
+        onPlanUpdatedAction?.(plan);
       } else {
         if (res.plan) {
           onPlanUpdatedAction?.(res.plan);
