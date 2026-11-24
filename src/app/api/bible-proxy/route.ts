@@ -376,6 +376,8 @@ async function fetchYouVersionPassage({
 
 export async function GET(request: NextRequest): Promise<Response> {
   const path = request.nextUrl.searchParams.get("path") ?? "";
+  const format = request.nextUrl.searchParams.get("format");
+  const isJson = format === "json";
   const theme =
     request.nextUrl.searchParams.get("theme") === "dark" ? "dark" : "light";
   const fontSizeParam = Number(
@@ -388,6 +390,12 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   const parsedPath = parseBiblePath({ path });
   if (!parsedPath) {
+    if (isJson) {
+      return Response.json(
+        { error: "The requested passage reference could not be parsed." },
+        { status: 400 }
+      );
+    }
     return renderMessagePage({
       title: "Invalid passage request",
       message: "The requested passage reference could not be parsed.",
@@ -398,6 +406,12 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { versionId, reference, bookCode } = parsedPath;
 
   if (!ALLOWED_VERSION_IDS.has(versionId)) {
+    if (isJson) {
+      return Response.json(
+        { error: "This Bible version is not enabled." },
+        { status: 400 }
+      );
+    }
     return renderMessagePage({
       title: "Bible version unavailable",
       message:
@@ -407,6 +421,15 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 
   if (!isBookSupportedInSixtySixBookVersions({ bookId: bookCode })) {
+    if (isJson) {
+      return Response.json(
+        {
+          error:
+            "The available Bible translations only include the 66-book canon.",
+        },
+        { status: 400 }
+      );
+    }
     return renderMessagePage({
       title: "Book not available in this version",
       message:
@@ -418,7 +441,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   const cacheKey = `${CONTENT_VERSION}:${versionId}:${reference}`;
   const etag = `"${crypto
     .createHash("sha256")
-    .update(`${cacheKey}:${theme}:${fontSize}`)
+    .update(`${cacheKey}:${isJson ? "json" : `${theme}:${fontSize}`}`)
     .digest("hex")
     .slice(0, 16)}"`;
 
@@ -428,6 +451,23 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   const memCached = passageCache.get(cacheKey);
   if (memCached && Date.now() - memCached.timestamp < MEMORY_CACHE_TTL_MS) {
+    if (isJson) {
+      return Response.json(
+        {
+          reference: memCached.reference,
+          contentHtml: memCached.contentHtml,
+          versionLabel: memCached.versionLabel,
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": STANDARD_HEADERS["Cache-Control"],
+            ETag: etag,
+            "X-Cache": "HIT",
+          },
+        }
+      );
+    }
     return new Response(
       renderHtmlDocument({
         reference: memCached.reference,
@@ -466,6 +506,24 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
     passageCache.set(cacheKey, passage);
 
+    if (isJson) {
+      return Response.json(
+        {
+          reference: passage.reference,
+          contentHtml: passage.contentHtml,
+          versionLabel: passage.versionLabel,
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": STANDARD_HEADERS["Cache-Control"],
+            ETag: etag,
+            "X-Cache": "MISS",
+          },
+        }
+      );
+    }
+
     return new Response(
       renderHtmlDocument({
         reference: passage.reference,
@@ -484,6 +542,9 @@ export async function GET(request: NextRequest): Promise<Response> {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    if (isJson) {
+      return Response.json({ error: message }, { status: 502 });
+    }
     return renderMessagePage({
       title: "Unable to load passage",
       message: `${message}. Please check your connection or try again.`,
