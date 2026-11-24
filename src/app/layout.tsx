@@ -25,10 +25,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Bible Tracker & Plans",
+  title: "Luma: Bible Tracker & Plans",
   description:
     "Aesthetic, habit-forming Bible reading companion and study journal.",
-  applicationName: "Bible Tracker & Plans",
+  applicationName: "Luma: Bible Tracker & Plans",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -49,6 +49,12 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/manifest.json",
+  openGraph: {
+    siteName: "Luma",
+    title: "Luma: Bible Tracker & Plans",
+    description:
+      "Aesthetic, habit-forming Bible reading companion and study journal.",
+  },
 };
 
 export default function RootLayout({
