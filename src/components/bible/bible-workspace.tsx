@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import {
   BookOpen,
   Search,
@@ -58,8 +58,8 @@ import {
 
 const FONT_SIZE_STORAGE_KEY = "luma-bible-font-size";
 const LAST_READ_STORAGE_KEY = "luma-last-read";
-const DEFAULT_FONT_SIZE = 22;
-const MIN_FONT_SIZE = 20;
+const DEFAULT_FONT_SIZE = 18;
+const MIN_FONT_SIZE = 16;
 const MAX_FONT_SIZE = 32;
 
 const OT_BOOKS = PROTESTANT_BIBLE_BOOKS.filter((b) => b.testament === "OT");
@@ -146,29 +146,26 @@ export function BibleWorkspace() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
 
-  // URL state managed with nuqs
-  const [bookParam, setBookParam] = useQueryState(
-    "book",
-    parseAsString.withDefault("gen")
-  );
-  const [chapterParam, setChapterParam] = useQueryState(
-    "ch",
-    parseAsInteger.withDefault(1)
-  );
-  const [versionParam, setVersionParam] = useQueryState("v", parseAsInteger);
-  const [planIdParam] = useQueryState("plan", parseAsString);
-  const [readingIdParam, setReadingIdParam] = useQueryState(
-    "readingId",
-    parseAsString
-  );
-  const [startVerseParam, setStartVerseParam] = useQueryState(
-    "startVerse",
-    parseAsInteger
-  );
-  const [endVerseParam, setEndVerseParam] = useQueryState(
-    "endVerse",
-    parseAsInteger
-  );
+  // URL state managed atomically with nuqs
+  const [queryState, setQueryState] = useQueryStates({
+    book: parseAsString.withDefault("gen"),
+    ch: parseAsInteger.withDefault(1),
+    v: parseAsInteger,
+    plan: parseAsString,
+    readingId: parseAsString,
+    startVerse: parseAsInteger,
+    endVerse: parseAsInteger,
+  });
+
+  const {
+    book: bookParam,
+    ch: chapterParam,
+    v: versionParam,
+    plan: planIdParam,
+    readingId: readingIdParam,
+    startVerse: startVerseParam,
+    endVerse: endVerseParam,
+  } = queryState;
 
   // Local UI state
   const [searchQuery, setSearchQuery] = useState("");
@@ -254,11 +251,11 @@ export function BibleWorkspace() {
     );
     if (!matched) return;
 
-    void setBookParam(matched.id);
-    void setChapterParam(
-      Math.min(matched.chapters, Math.max(1, last.chapter || 1))
-    );
-  }, [setBookParam, setChapterParam]);
+    void setQueryState({
+      book: matched.id,
+      ch: Math.min(matched.chapters, Math.max(1, last.chapter || 1)),
+    }).catch(() => {});
+  }, [setQueryState]);
 
   // Persist last read in standalone mode
   useEffect(() => {
@@ -412,6 +409,7 @@ export function BibleWorkspace() {
   }, [activeBookIndex, activeChapter]);
 
   const isPlanMode = Boolean(planContext && activePlanReading);
+  const hideBookSelector = Boolean(planIdParam && readingIdParam);
 
   const hasPrev = isPlanMode
     ? planReadingIndex > 0
@@ -426,22 +424,15 @@ export function BibleWorkspace() {
       setExpandedBookId(null);
       setIsMobileDrawerOpen(false);
       setIsDesktopSidebarOpen(false);
-      void setBookParam(nextBookId);
-      void setChapterParam(nextChapter);
-      void setStartVerseParam(null);
-      void setEndVerseParam(null);
-      if (readingIdParam) {
-        void setReadingIdParam(null);
-      }
+      void setQueryState({
+        book: nextBookId,
+        ch: nextChapter,
+        startVerse: null,
+        endVerse: null,
+        ...(readingIdParam ? { readingId: null } : {}),
+      }).catch(() => {});
     },
-    [
-      setBookParam,
-      setChapterParam,
-      setStartVerseParam,
-      setEndVerseParam,
-      readingIdParam,
-      setReadingIdParam,
-    ]
+    [setQueryState, readingIdParam]
   );
 
   const handlePrev = useCallback(() => {
@@ -451,11 +442,13 @@ export function BibleWorkspace() {
       const prevItem = flattenedReadings[planReadingIndex - 1];
       if (!prevItem) return;
       setActiveTestamentOverride(null);
-      void setBookParam(prevItem.bookId.toLowerCase());
-      void setChapterParam(prevItem.chapter);
-      void setReadingIdParam(prevItem.id);
-      void setStartVerseParam(prevItem.startVerse ?? null);
-      void setEndVerseParam(prevItem.endVerse ?? null);
+      void setQueryState({
+        book: prevItem.bookId.toLowerCase(),
+        ch: prevItem.chapter,
+        readingId: prevItem.id,
+        startVerse: prevItem.startVerse ?? null,
+        endVerse: prevItem.endVerse ?? null,
+      }).catch(() => {});
       return;
     }
 
@@ -471,11 +464,7 @@ export function BibleWorkspace() {
     flattenedReadings,
     planReadingIndex,
     standaloneNav.prev,
-    setBookParam,
-    setChapterParam,
-    setReadingIdParam,
-    setStartVerseParam,
-    setEndVerseParam,
+    setQueryState,
     navigateToBookChapter,
   ]);
 
@@ -486,11 +475,13 @@ export function BibleWorkspace() {
       const nextItem = flattenedReadings[planReadingIndex + 1];
       if (!nextItem) return;
       setActiveTestamentOverride(null);
-      void setBookParam(nextItem.bookId.toLowerCase());
-      void setChapterParam(nextItem.chapter);
-      void setReadingIdParam(nextItem.id);
-      void setStartVerseParam(nextItem.startVerse ?? null);
-      void setEndVerseParam(nextItem.endVerse ?? null);
+      void setQueryState({
+        book: nextItem.bookId.toLowerCase(),
+        ch: nextItem.chapter,
+        readingId: nextItem.id,
+        startVerse: nextItem.startVerse ?? null,
+        endVerse: nextItem.endVerse ?? null,
+      }).catch(() => {});
       return;
     }
 
@@ -506,11 +497,7 @@ export function BibleWorkspace() {
     flattenedReadings,
     planReadingIndex,
     standaloneNav.next,
-    setBookParam,
-    setChapterParam,
-    setReadingIdParam,
-    setStartVerseParam,
-    setEndVerseParam,
+    setQueryState,
     navigateToBookChapter,
   ]);
 
@@ -593,7 +580,7 @@ export function BibleWorkspace() {
     if (!match) return;
     saveSelectedVersion({ versionId: match.id });
     setStoredVersionId(match.id);
-    void setVersionParam(match.id);
+    void setQueryState({ v: match.id }).catch(() => {});
   };
 
   const handleUpdateFontSize = ({ newSize }: { newSize: number }) => {
@@ -830,28 +817,30 @@ export function BibleWorkspace() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100dvh-6.75rem)] min-h-[560px] rounded-[16px] border border-border bg-surface shadow-xs overflow-hidden lg:divide-x lg:divide-border-subtle">
+    <div className="flex flex-col lg:flex-row h-[calc(100dvh-10.5rem)] min-h-[420px] lg:h-[calc(100dvh-6.75rem)] lg:min-h-[560px] rounded-[16px] border border-border bg-surface shadow-xs overflow-hidden lg:divide-x lg:divide-border-subtle">
       {/* ── Desktop Left Sidebar: OT/NT + Books + Chapters ── */}
-      {isDesktopSidebarOpen && (
+      {!hideBookSelector && isDesktopSidebarOpen && (
         <aside className="hidden lg:flex w-68 xl:w-72 shrink-0 flex-col bg-surface overflow-hidden">
           {renderSidebarContent()}
         </aside>
       )}
 
       {/* ── Mobile Sheet Drawer for Books & Chapters ── */}
-      <Sheet open={isMobileDrawerOpen} onOpenChange={setIsMobileDrawerOpen}>
-        <SheetContent
-          side="left"
-          className="w-80 max-w-[85vw] p-0 flex flex-col gap-0 lg:hidden"
-        >
-          <SheetHeader className="px-4 py-3 border-b border-border-subtle">
-            <SheetTitle className="text-sm font-bold">
-              Books &amp; Chapters
-            </SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 min-h-0">{renderSidebarContent()}</div>
-        </SheetContent>
-      </Sheet>
+      {!hideBookSelector && (
+        <Sheet open={isMobileDrawerOpen} onOpenChange={setIsMobileDrawerOpen}>
+          <SheetContent
+            side="left"
+            className="w-80 max-w-[85vw] p-0 flex flex-col gap-0 lg:hidden"
+          >
+            <SheetHeader className="px-4 py-3 border-b border-border-subtle">
+              <SheetTitle className="text-sm font-bold">
+                Books &amp; Chapters
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 min-h-0">{renderSidebarContent()}</div>
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* ── Right Pane: Reader Canvas ── */}
       <section className="flex flex-1 min-w-0 flex-col bg-surface overflow-hidden">
@@ -859,38 +848,42 @@ export function BibleWorkspace() {
         <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border-subtle bg-surface px-4 sm:px-6">
           {/* Left: Sidebar Toggles + Plan Back + Passage Title */}
           <div className="flex items-center gap-2 min-w-0">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDesktopSidebarOpen((prev) => !prev)}
-              aria-label={
-                isDesktopSidebarOpen
-                  ? "Hide books sidebar"
-                  : "Show books sidebar"
-              }
-              aria-expanded={isDesktopSidebarOpen}
-              className="hidden lg:inline-flex gap-1.5 h-8 px-2.5 text-xs shrink-0"
-            >
-              {isDesktopSidebarOpen ? (
-                <PanelLeftClose className="size-3.5 text-primary" />
-              ) : (
-                <PanelLeft className="size-3.5 text-primary" />
-              )}
-              <span>{isDesktopSidebarOpen ? "Hide" : "Books"}</span>
-            </Button>
+            {!hideBookSelector && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsDesktopSidebarOpen((prev) => !prev)}
+                  aria-label={
+                    isDesktopSidebarOpen
+                      ? "Hide books sidebar"
+                      : "Show books sidebar"
+                  }
+                  aria-expanded={isDesktopSidebarOpen}
+                  className="hidden lg:inline-flex gap-1.5 h-8 px-2.5 text-xs shrink-0"
+                >
+                  {isDesktopSidebarOpen ? (
+                    <PanelLeftClose className="size-3.5 text-primary" />
+                  ) : (
+                    <PanelLeft className="size-3.5 text-primary" />
+                  )}
+                  <span>{isDesktopSidebarOpen ? "Hide" : "Books"}</span>
+                </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMobileDrawerOpen(true)}
-              aria-label="Open books and chapters"
-              className="inline-flex lg:hidden gap-1.5 h-8 px-2.5 text-xs shrink-0"
-            >
-              <PanelLeft className="size-3.5 text-primary" />
-              <span>Books</span>
-            </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsMobileDrawerOpen(true)}
+                  aria-label="Open books and chapters"
+                  className="inline-flex lg:hidden gap-1.5 h-8 px-2.5 text-xs shrink-0"
+                >
+                  <PanelLeft className="size-3.5 text-primary" />
+                  <span>Books</span>
+                </Button>
+              </>
+            )}
 
             {isPlanMode && planContext && (
               <Button
@@ -908,16 +901,11 @@ export function BibleWorkspace() {
               </Button>
             )}
 
-            <div className="min-w-0">
-              <h1 className="truncate text-sm sm:text-base font-bold tracking-tight text-foreground">
-                {readingTitle}
-              </h1>
-              {isPlanMode && activePlanReading && (
-                <p className="truncate text-[10.5px] text-foreground-dim">
-                  {activePlanReading.sessionTitle}
-                </p>
-              )}
-            </div>
+            {isPlanMode && activePlanReading && (
+              <p className="truncate text-xs font-medium text-foreground-dim">
+                {activePlanReading.sessionTitle}
+              </p>
+            )}
           </div>
 
           {/* Right: Version Select, Font Size Popover, Plan Mark Read */}
@@ -929,7 +917,7 @@ export function BibleWorkspace() {
               >
                 <SelectTrigger
                   aria-label="Bible version"
-                  className="h-8 w-auto min-w-[96px] gap-1.5 rounded-[12px] px-2.5 text-xs font-semibold"
+                  className="h-8 w-auto sm:min-w-[96px] gap-1.5 rounded-[12px] px-2.5 text-xs font-semibold"
                 >
                   <BookOpen className="size-3.5 text-primary shrink-0" />
                   <SelectValue>{selectedVersion.abbreviation}</SelectValue>
@@ -1100,12 +1088,12 @@ export function BibleWorkspace() {
             <span>Previous</span>
           </Button>
 
-          <div className="text-center text-[12.5px] font-medium text-foreground">
+          <div className="min-w-0 px-2 text-center text-[12.5px] font-medium text-foreground">
             {isPlanMode ? (
-              <span>
-                {planReadingIndex + 1}{" "}
+              <span className="truncate block">
+                {readingTitle}{" "}
                 <span className="font-normal text-foreground-dim">
-                  of {flattenedReadings.length}
+                  • {planReadingIndex + 1} of {flattenedReadings.length}
                 </span>
               </span>
             ) : (
