@@ -590,15 +590,23 @@ input.ui-input-icon-both {
   cursor: default;
 }
 
+.luma-bible-passage .yv-h,
 .luma-bible-passage .s,
 .luma-bible-passage .s1,
 .luma-bible-passage .s2 {
-  margin: 1.75em 0 0.65em;
-  font-size: 1em;
+  margin: 1.75em 0 0.9em;
+  font-size: 1.55em;
+  line-height: 1.3;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  text-align: center;
   color: var(--foreground);
   cursor: default;
+}
+
+.luma-bible-passage > div > .yv-h:first-child,
+.luma-bible-passage > .yv-h:first-child {
+  margin-top: 0.25em;
 }
 
 .luma-bible-passage .yv-vlbl {

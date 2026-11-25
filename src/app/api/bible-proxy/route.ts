@@ -7,7 +7,7 @@ import {
   isBookSupportedInSixtySixBookVersions,
 } from "@/lib/bible-versions";
 
-const CONTENT_VERSION = "yvp-v1";
+const CONTENT_VERSION = "yvp-v2";
 const MEMORY_CACHE_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
 const MAX_MEMORY_CACHE_ENTRIES = 500;
 
@@ -400,7 +400,7 @@ async function fetchYouVersionPassage({
     });
   }
 
-  const url = `https://api.youversion.com/v1/bibles/${versionId}/passages/${encodeURIComponent(reference)}?format=html`;
+  const url = `https://api.youversion.com/v1/bibles/${versionId}/passages/${encodeURIComponent(reference)}?format=html&include_headings=true`;
   const retryDelaysMs = [250, 600];
   let lastError: unknown = null;
 
