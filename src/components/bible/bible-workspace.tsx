@@ -899,6 +899,102 @@ export function BibleWorkspace({
     ]
   );
 
+  const buildSelectionShareUrl = useCallback(
+    ({
+      startVerse,
+      endVerse,
+    }: {
+      startVerse: number;
+      endVerse: number;
+    }): string => {
+      const params = new URLSearchParams({
+        book: currentBookId,
+        ch: String(currentChapter),
+        v: String(selectedVersion.id),
+        startVerse: String(startVerse),
+        endVerse: String(endVerse),
+      });
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      return `${origin}/bible?${params.toString()}`;
+    },
+    [currentBookId, currentChapter, selectedVersion.id]
+  );
+
+  const handleCopyFromToolbar = useCallback(async () => {
+    if (!highlightPrompt) return;
+    const range =
+      highlightPrompt.mode === "create"
+        ? highlightPrompt.range
+        : {
+            startVerse: highlightPrompt.highlight.startVerse,
+            endVerse: highlightPrompt.highlight.endVerse,
+            selectedText: highlightPrompt.highlight.selectedText,
+          };
+
+    const versePart =
+      range.startVerse === range.endVerse
+        ? `${range.startVerse}`
+        : `${range.startVerse}–${range.endVerse}`;
+    const shareUrl = buildSelectionShareUrl({
+      startVerse: range.startVerse,
+      endVerse: range.endVerse,
+    });
+    const textToCopy = `"${range.selectedText}" — ${currentBookName} ${currentChapter}:${versePart} (${selectedVersion.abbreviation})\n${shareUrl}`;
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      toast.success("Copied passage & link");
+    } catch {
+      toast.error("Couldn't copy to clipboard");
+    }
+    window.getSelection()?.removeAllRanges();
+    setHighlightPrompt(null);
+  }, [
+    highlightPrompt,
+    buildSelectionShareUrl,
+    currentBookName,
+    currentChapter,
+    selectedVersion.abbreviation,
+  ]);
+
+  const handleShareFromToolbar = useCallback(async () => {
+    if (!highlightPrompt) return;
+    const range =
+      highlightPrompt.mode === "create"
+        ? highlightPrompt.range
+        : {
+            startVerse: highlightPrompt.highlight.startVerse,
+            endVerse: highlightPrompt.highlight.endVerse,
+          };
+
+    const shareUrl = buildSelectionShareUrl({
+      startVerse: range.startVerse,
+      endVerse: range.endVerse,
+    });
+
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({ url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Link copied to clipboard");
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Link copied to clipboard");
+      } catch {
+        toast.error("Couldn't share link");
+      }
+    }
+    window.getSelection()?.removeAllRanges();
+    setHighlightPrompt(null);
+  }, [highlightPrompt, buildSelectionShareUrl]);
+
   const handleOpenNoteFromToolbar = useCallback(() => {
     if (!highlightPrompt) return;
     const range =
@@ -1656,6 +1752,8 @@ export function BibleWorkspace({
                 position={highlightPrompt.position}
                 onSelectColor={handleSelectHighlightColor}
                 onAddNote={handleOpenNoteFromToolbar}
+                onCopy={handleCopyFromToolbar}
+                onShare={handleShareFromToolbar}
                 onDelete={
                   highlightPrompt.mode === "edit"
                     ? handleDeleteHighlight
@@ -1693,6 +1791,27 @@ export function BibleWorkspace({
                   );
                 }}
               />
+            ) : null}
+
+            {/* ── Expand shared verse selection to full chapter (Bible experience only) ── */}
+            {!isPlanMode &&
+            (currentStartVerse != null || currentEndVerse != null) ? (
+              <div className="mt-6 flex justify-center">
+                <Button
+                  type="button"
+                  size="default"
+                  variant="outline"
+                  onClick={() =>
+                    updateReaderQuery({ startVerse: null, endVerse: null })
+                  }
+                  className="h-9.5 rounded-lg px-4 gap-1.5 text-xs sm:text-sm shadow-xs"
+                >
+                  <BookOpen className="size-3.5 text-primary" />
+                  <span>
+                    Read full chapter ({activeBook.name} {currentChapter})
+                  </span>
+                </Button>
+              </div>
             ) : null}
 
             {/* ── End-of-chapter Mark Read / Completed Action ── */}

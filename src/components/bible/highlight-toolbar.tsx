@@ -1,6 +1,6 @@
 "use client";
 
-import { StickyNote, Trash2, X } from "lucide-react";
+import { Copy, Share2, StickyNote, Trash2, X } from "lucide-react";
 import {
   HIGHLIGHT_COLORS,
   type HighlightColor,
@@ -25,6 +25,8 @@ export type HighlightToolbarProps = {
   position: { top: number; left: number } | null;
   onSelectColor: (params: { color: HighlightColor }) => void;
   onAddNote?: () => void;
+  onCopy?: () => void;
+  onShare?: () => void;
   onDelete?: () => void;
   onClose: () => void;
 };
@@ -37,6 +39,8 @@ export function HighlightToolbar({
   position,
   onSelectColor,
   onAddNote,
+  onCopy,
+  onShare,
   onDelete,
   onClose,
 }: HighlightToolbarProps) {
@@ -85,21 +89,48 @@ export function HighlightToolbar({
         })}
       </div>
 
+      {onAddNote || onCopy || onShare ? (
+        <div className="mx-0.5 sm:mx-1 h-4 w-px bg-border" />
+      ) : null}
+
       {onAddNote ? (
-        <>
-          <div className="mx-0.5 sm:mx-1 h-4 w-px bg-border" />
-          <button
-            type="button"
-            disabled={isBusy}
-            aria-label="Add note"
-            title="Add note"
-            onClick={onAddNote}
-            className="flex h-7 items-center gap-1 rounded-full px-2 text-xs font-medium text-foreground-dim transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-          >
-            <StickyNote className="size-3.5 text-primary" />
-            <span className="hidden sm:inline">Note</span>
-          </button>
-        </>
+        <button
+          type="button"
+          disabled={isBusy}
+          aria-label="Add note"
+          title="Add note"
+          onClick={onAddNote}
+          className="flex h-7 items-center gap-1 rounded-full px-1.5 sm:px-2 text-xs font-medium text-foreground-dim transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          <StickyNote className="size-3.5 text-primary" />
+          <span className="hidden sm:inline">Note</span>
+        </button>
+      ) : null}
+
+      {onCopy ? (
+        <button
+          type="button"
+          disabled={isBusy}
+          aria-label="Copy passage"
+          title="Copy passage & link"
+          onClick={onCopy}
+          className="flex h-7 w-7 items-center justify-center rounded-full text-foreground-dim transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          <Copy className="size-3.5" />
+        </button>
+      ) : null}
+
+      {onShare ? (
+        <button
+          type="button"
+          disabled={isBusy}
+          aria-label="Share link"
+          title="Share link"
+          onClick={onShare}
+          className="flex h-7 w-7 items-center justify-center rounded-full text-foreground-dim transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          <Share2 className="size-3.5" />
+        </button>
       ) : null}
 
       {isEditing && onDelete ? (
