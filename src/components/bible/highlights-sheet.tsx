@@ -3,8 +3,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowDown,
-  ArrowUp,
   BookOpen,
   ExternalLink,
   Highlighter,
@@ -31,6 +29,15 @@ import {
   type HighlightColor,
 } from "@/lib/schemas/highlights";
 import { Input } from "@/components/ui/input";
+import { FilterPills } from "@/components/ui/filter-pills";
+import { TabsBar } from "@/components/ui/tabs-bar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -336,7 +343,7 @@ export function HighlightsSheet({
         side="right"
         className="w-full sm:max-w-md p-0 flex flex-col bg-background"
       >
-        <SheetHeader className="px-5 py-4 border-b border-border/70 space-y-3">
+        <SheetHeader className="px-5 pt-4 pb-4 border-b border-border/70 space-y-4">
           <div className="flex items-center justify-between pr-6">
             <SheetTitle className="flex items-center gap-2 text-base font-bold">
               {activeTab === "highlights" ? (
@@ -346,7 +353,7 @@ export function HighlightsSheet({
               )}
               <span>{activeTab === "highlights" ? "Highlights" : "Notes"}</span>
               {activeCount > 0 ? (
-                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-foreground-dim">
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold tabular-nums text-muted-foreground">
                   {activeCount}
                 </span>
               ) : null}
@@ -356,7 +363,7 @@ export function HighlightsSheet({
               <Link
                 href="/notes"
                 onClick={() => onOpenChange(false)}
-                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-foreground-dim hover:bg-muted hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
                 <span>Open Studio</span>
                 <ExternalLink className="size-3" />
@@ -364,184 +371,133 @@ export function HighlightsSheet({
             ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted/50 p-1">
-            <button
-              type="button"
-              onClick={() => setActiveTab("highlights")}
-              className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                activeTab === "highlights"
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-foreground-dim hover:text-foreground"
-              }`}
-            >
-              <Highlighter className="size-3.5" />
-              <span>Highlights</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("notes")}
-              className={`flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                activeTab === "notes"
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-foreground-dim hover:text-foreground"
-              }`}
-            >
-              <StickyNote className="size-3.5" />
-              <span>Notes</span>
-            </button>
-          </div>
+          <TabsBar
+            activeTab={activeTab}
+            onTabChange={({ tab }) => setActiveTab(tab)}
+            className="w-full grid grid-cols-2"
+            tabs={[
+              {
+                id: "highlights",
+                label: "Highlights",
+                icon: <Highlighter className="size-3.5" />,
+              },
+              {
+                id: "notes",
+                label: "Notes",
+                icon: <StickyNote className="size-3.5" />,
+              },
+            ]}
+          />
+
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            startIcon={<Search className="size-3.5" />}
+            placeholder={
+              activeTab === "highlights"
+                ? "Search verse or text..."
+                : "Search notes or verse..."
+            }
+            aria-label={
+              activeTab === "highlights" ? "Search highlights" : "Search notes"
+            }
+            className="h-9 text-xs"
+          />
 
           {activeTab === "highlights" ? (
-            <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted/50 p-1">
-              <button
-                type="button"
-                onClick={() => setScopeFilter("all")}
-                className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  scopeFilter === "all"
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-foreground-dim hover:text-foreground"
-                }`}
-              >
-                All Books
-              </button>
-              <button
-                type="button"
-                onClick={() => setScopeFilter("book")}
-                className={`truncate rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  scopeFilter === "book"
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-foreground-dim hover:text-foreground"
-                }`}
-              >
-                This Book ({currentBookName})
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted/50 p-1">
-              <button
-                type="button"
-                onClick={() => setNoteScopeFilter("chapter")}
-                className={`truncate rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  noteScopeFilter === "chapter"
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-foreground-dim hover:text-foreground"
-                }`}
-              >
-                {currentBookName} {currentChapter}
-              </button>
-              <button
-                type="button"
-                onClick={() => setNoteScopeFilter("all")}
-                className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  noteScopeFilter === "all"
-                    ? "bg-card text-foreground shadow-xs"
-                    : "text-foreground-dim hover:text-foreground"
-                }`}
-              >
-                All Notes
-              </button>
-            </div>
-          )}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <FilterPills
+                  activeFilter={scopeFilter}
+                  onFilterChange={({ filter }) => setScopeFilter(filter)}
+                  className="w-auto flex-1 pb-0"
+                  items={[
+                    { id: "all", label: "All Books" },
+                    { id: "book", label: `This Book (${currentBookName})` },
+                  ]}
+                />
 
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-foreground-dim" />
-            <Input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={
-                activeTab === "highlights"
-                  ? "Search verse or text..."
-                  : "Search notes or verse..."
-              }
-              aria-label={
-                activeTab === "highlights"
-                  ? "Search highlights"
-                  : "Search notes"
-              }
-              className="h-9 pl-8 text-xs"
-            />
-          </div>
-
-          {activeTab === "highlights" ? (
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
-              <button
-                type="button"
-                onClick={() => setColorFilter("all")}
-                className={`shrink-0 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  colorFilter === "all"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-card text-foreground-dim hover:text-foreground"
-                }`}
-              >
-                All
-              </button>
-              {HIGHLIGHT_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setColorFilter(color)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                    colorFilter === color
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border bg-card text-foreground-dim hover:text-foreground"
-                  }`}
+                <Select
+                  value={colorFilter}
+                  onValueChange={(value) =>
+                    setColorFilter(value as HighlightColor | "all")
+                  }
                 >
-                  <span
-                    className={`size-2.5 rounded-full ${COLOR_DOT_CLASSES[color]}`}
-                  />
-                  <span>{COLOR_LABELS[color]}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setNoteSortBy("createdAt")}
-                  aria-pressed={noteSortBy === "createdAt"}
-                  className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                    noteSortBy === "createdAt"
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-card text-foreground-dim hover:text-foreground"
-                  }`}
-                >
-                  Sort: Created
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setNoteSortBy("book")}
-                  aria-pressed={noteSortBy === "book"}
-                  className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                    noteSortBy === "book"
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-card text-foreground-dim hover:text-foreground"
-                  }`}
-                >
-                  Sort: Book
-                </button>
+                  <SelectTrigger
+                    aria-label="Filter by highlight color"
+                    className="h-8 w-[122px] shrink-0 rounded-xl px-2.5 text-xs"
+                  >
+                    <SelectValue placeholder="All colors" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All colors</SelectItem>
+                    {HIGHLIGHT_COLORS.map((color) => (
+                      <SelectItem key={color} value={color}>
+                        <span className="flex items-center gap-2">
+                          <span
+                            className={`size-2 rounded-full ${COLOR_DOT_CLASSES[color]}`}
+                          />
+                          <span>{COLOR_LABELS[color]}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setNoteSortDir((prev) => (prev === "desc" ? "asc" : "desc"))
-                }
-                aria-label={`Sort ${noteSortDir === "desc" ? "descending" : "ascending"}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-foreground-dim hover:text-foreground transition-colors"
-              >
-                {noteSortDir === "desc" ? (
-                  <>
-                    <ArrowDown className="size-3" />
-                    <span>Desc</span>
-                  </>
-                ) : (
-                  <>
-                    <ArrowUp className="size-3" />
-                    <span>Asc</span>
-                  </>
-                )}
-              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <FilterPills
+                activeFilter={noteScopeFilter}
+                onFilterChange={({ filter }) => setNoteScopeFilter(filter)}
+                className="pb-0"
+                items={[
+                  {
+                    id: "chapter",
+                    label: `${currentBookName} ${currentChapter}`,
+                  },
+                  { id: "all", label: "All Notes" },
+                ]}
+              />
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <Select
+                  value={noteSortBy}
+                  onValueChange={(value) =>
+                    setNoteSortBy(value as "createdAt" | "book")
+                  }
+                >
+                  <SelectTrigger
+                    aria-label="Sort notes by"
+                    className="h-8 rounded-xl px-2.5 text-xs"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="createdAt">Sort: Created</SelectItem>
+                    <SelectItem value="book">Sort: Book</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={noteSortDir}
+                  onValueChange={(value) =>
+                    setNoteSortDir(value as "asc" | "desc")
+                  }
+                >
+                  <SelectTrigger
+                    aria-label="Sort direction"
+                    className="h-8 rounded-xl px-2.5 text-xs"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Order: Desc</SelectItem>
+                    <SelectItem value="asc">Order: Asc</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
         </SheetHeader>
