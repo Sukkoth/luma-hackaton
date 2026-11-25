@@ -99,6 +99,13 @@ test.describe("Achievements & Milestones E2E", () => {
     await expect(page).toHaveURL(/category=Trackers/);
     await expect(page.getByText("Dual Track Scholar")).toBeVisible();
 
+    await page
+      .getByRole("button", { name: "Fellowships", exact: true })
+      .click();
+    await expect(page).toHaveURL(/category=Fellowships/);
+    await expect(page.getByText("Circle of Faith")).toBeVisible();
+    await expect(page.getByText("Shared Finish Line")).toBeVisible();
+
     // Reset category filter
     await page
       .getByRole("button", { name: "All Categories", exact: true })
