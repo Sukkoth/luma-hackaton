@@ -2,14 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import {
-  BookOpen,
-  Search,
-  Compass,
-  Play,
-  X,
-  ArrowUpRight,
-} from "lucide-react";
+import { BookOpen, Search, Compass, Play, X, ArrowUpRight } from "lucide-react";
 import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
 import type { BibleBook } from "@/data/canons/types";
 import {
@@ -110,9 +103,7 @@ export function BibleLandingPage() {
   }, [searchQuery, selectedCategory]);
 
   const lastReadBook = lastRead
-    ? PROTESTANT_BIBLE_BOOKS.find(
-        (b) => b.id === lastRead.bookId.toLowerCase()
-      )
+    ? PROTESTANT_BIBLE_BOOKS.find((b) => b.id === lastRead.bookId.toLowerCase())
     : undefined;
 
   const resumeHref = lastReadBook

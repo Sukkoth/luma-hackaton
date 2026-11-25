@@ -3,7 +3,25 @@
 import type { CSSProperties } from "react";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookOpen, Search, ChevronLeft, ChevronRight, ChevronDown, Check, CheckCircle2, Loader2, Minus, Plus, RotateCcw, X, ArrowLeft, CaseSensitive, Highlighter, Maximize2, Minimize2 } from "lucide-react";
+import {
+  BookOpen,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  CheckCircle2,
+  Loader2,
+  Minus,
+  Plus,
+  RotateCcw,
+  X,
+  ArrowLeft,
+  CaseSensitive,
+  Highlighter,
+  Maximize2,
+  Minimize2,
+} from "lucide-react";
 import {
   type BibleCanon,
   type BibleBook,
@@ -226,12 +244,9 @@ export function BibleWorkspace({
     setReaderQuery(parseReaderQuery(searchParams));
   }
 
-  const updateReaderQuery = useCallback(
-    (patch: Partial<ReaderQueryState>) => {
-      setReaderQuery((prev) => ({ ...prev, ...patch }));
-    },
-    []
-  );
+  const updateReaderQuery = useCallback((patch: Partial<ReaderQueryState>) => {
+    setReaderQuery((prev) => ({ ...prev, ...patch }));
+  }, []);
 
   // Sync URL bar after commit so Next.js Router never updates during render
   useEffect(() => {
@@ -328,9 +343,7 @@ export function BibleWorkspace({
       const match = BIBLE_VERSIONS.find((ver) => ver.id === storedVersionId);
       if (match) return match;
     }
-    return (
-      BIBLE_VERSIONS.find((ver) => ver.id === 111) ?? BIBLE_VERSIONS[0]
-    );
+    return BIBLE_VERSIONS.find((ver) => ver.id === 111) ?? BIBLE_VERSIONS[0];
   }, [versionParam, storedVersionId]);
 
   // Hydrate client-only preferences (fontSize, saved version) after mount
@@ -400,7 +413,7 @@ export function BibleWorkspace({
   const activePlanReading =
     planReadingIndex >= 0
       ? flattenedReadings[planReadingIndex]
-      : planContext?.reading ?? null;
+      : (planContext?.reading ?? null);
 
   // Determine current passage to load
   const currentBookId = activePlanReading
@@ -411,10 +424,10 @@ export function BibleWorkspace({
     : activeChapter;
   const currentStartVerse = activePlanReading
     ? activePlanReading.startVerse
-    : startVerseParam ?? undefined;
+    : (startVerseParam ?? undefined);
   const currentEndVerse = activePlanReading
     ? activePlanReading.endVerse
-    : endVerseParam ?? undefined;
+    : (endVerseParam ?? undefined);
 
   const isBookSupported = isBookSupportedInSixtySixBookVersions({
     bookId: currentBookId,
@@ -884,7 +897,13 @@ export function BibleWorkspace({
     : Boolean(standaloneNav.next);
 
   const navigateToBookChapter = useCallback(
-    ({ nextBookId, nextChapter }: { nextBookId: string; nextChapter: number }) => {
+    ({
+      nextBookId,
+      nextChapter,
+    }: {
+      nextBookId: string;
+      nextChapter: number;
+    }) => {
       setIsBookPickerOpen(false);
       setPickerBook(null);
       updateReaderQuery({
@@ -1199,179 +1218,179 @@ export function BibleWorkspace({
 
       {/* ── Sticky Reader Toolbar ── */}
       {!isZenMode ? (
-      <header className="sticky top-0 z-20 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 border-b border-border/70 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-[820px] items-center justify-between gap-2">
-          {/* Left: Book & Chapter Picker Trigger / Plan Context */}
-          <div className="flex items-center gap-2 min-w-0">
-            {!hideBookSelector && (
-              <Button
-                type="button"
-                variant="outline"
-                size="default"
-                onClick={openBookPicker}
-                aria-label="Choose book and chapter"
-                className="h-9.5 gap-1.5 rounded-lg px-3.5 text-xs sm:text-sm font-medium shadow-xs shrink-0"
-              >
-                <BookOpen className="size-3.5 text-primary" />
-                <span>
-                  {activeBook.name} {activeChapter}
-                </span>
-                <ChevronDown className="size-3.5 text-foreground-dim" />
-              </Button>
-            )}
-
-            {isPlanMode && planContext && (
-              <Button
-                type="button"
-                variant="outline"
-                size="default"
-                onClick={() => router.push(`/plans/${planContext.plan.id}`)}
-                aria-label="Back to reading plan"
-                className="h-9.5 rounded-lg px-3 text-xs sm:text-sm font-medium gap-1.5 shadow-xs shrink-0"
-              >
-                <ArrowLeft className="size-3.5" />
-                <span className="hidden sm:inline max-w-[140px] truncate">
-                  {planContext.plan.title}
-                </span>
-              </Button>
-            )}
-
-            {isPlanMode && activePlanReading && (
-              <div className="min-w-0 flex items-baseline gap-1.5">
-                <span className="truncate text-xs sm:text-sm font-bold text-foreground">
-                  {readingTitle}
-                </span>
-                <span className="hidden sm:inline truncate text-[11px] font-medium text-foreground-dim">
-                  • {activePlanReading.sessionTitle}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Right: Version Select, Font Size Popover, Mark Read */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {isBookSupported && (
-              <Select
-                value={String(selectedVersion.id)}
-                onValueChange={handleVersionValueChange}
-              >
-                <SelectTrigger
-                  aria-label="Bible version"
-                  className="h-9.5 w-auto sm:min-w-[96px] gap-1.5 rounded-lg px-3 text-xs sm:text-sm font-medium shadow-xs"
-                >
-                  <BookOpen className="size-3.5 text-primary shrink-0" />
-                  <SelectValue>{selectedVersion.abbreviation}</SelectValue>
-                </SelectTrigger>
-                <SelectContent align="end" className="w-64">
-                  {BIBLE_VERSIONS.map((ver) => (
-                    <SelectItem key={ver.id} value={String(ver.id)}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{ver.name}</span>
-                        <span className="text-[10.5px] text-foreground-dim">
-                          {ver.abbreviation} • {ver.language.toUpperCase()}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            <Popover>
-              <PopoverTrigger asChild>
+        <header className="sticky top-0 z-20 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 border-b border-border/70 bg-background/90 backdrop-blur-md">
+          <div className="mx-auto flex h-14 max-w-[820px] items-center justify-between gap-2">
+            {/* Left: Book & Chapter Picker Trigger / Plan Context */}
+            <div className="flex items-center gap-2 min-w-0">
+              {!hideBookSelector && (
                 <Button
                   type="button"
                   variant="outline"
                   size="default"
-                  aria-label="Adjust font size"
-                  className="h-9.5 rounded-lg px-3 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
+                  onClick={openBookPicker}
+                  aria-label="Choose book and chapter"
+                  className="h-9.5 gap-1.5 rounded-lg px-3.5 text-xs sm:text-sm font-medium shadow-xs shrink-0"
                 >
-                  <CaseSensitive className="size-4 text-primary" />
-                  <span className="hidden sm:inline text-xs text-foreground-dim">
-                    {fontSize}
+                  <BookOpen className="size-3.5 text-primary" />
+                  <span>
+                    {activeBook.name} {activeChapter}
+                  </span>
+                  <ChevronDown className="size-3.5 text-foreground-dim" />
+                </Button>
+              )}
+
+              {isPlanMode && planContext && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="default"
+                  onClick={() => router.push(`/plans/${planContext.plan.id}`)}
+                  aria-label="Back to reading plan"
+                  className="h-9.5 rounded-lg px-3 text-xs sm:text-sm font-medium gap-1.5 shadow-xs shrink-0"
+                >
+                  <ArrowLeft className="size-3.5" />
+                  <span className="hidden sm:inline max-w-[140px] truncate">
+                    {planContext.plan.title}
                   </span>
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-52 p-3 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10.5px] font-bold uppercase tracking-wider text-foreground-dim">
-                    Text Size
+              )}
+
+              {isPlanMode && activePlanReading && (
+                <div className="min-w-0 flex items-baseline gap-1.5">
+                  <span className="truncate text-xs sm:text-sm font-bold text-foreground">
+                    {readingTitle}
                   </span>
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    onClick={() =>
-                      handleUpdateFontSize({ newSize: DEFAULT_FONT_SIZE })
-                    }
-                    className="h-auto p-0 text-[11px] gap-1"
-                  >
-                    <RotateCcw className="size-3" />
-                    <span>Reset</span>
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between rounded-xl border border-border bg-surface-elevated p-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() =>
-                      handleUpdateFontSize({ newSize: fontSize - 2 })
-                    }
-                    disabled={fontSize <= MIN_FONT_SIZE}
-                    aria-label="Decrease font size"
-                    className="size-8 rounded-lg"
-                  >
-                    <Minus className="size-3.5" />
-                  </Button>
-                  <span className="text-xs font-bold tabular-nums text-foreground">
-                    {fontSize}px
+                  <span className="hidden sm:inline truncate text-[11px] font-medium text-foreground-dim">
+                    • {activePlanReading.sessionTitle}
                   </span>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Version Select, Font Size Popover, Mark Read */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {isBookSupported && (
+                <Select
+                  value={String(selectedVersion.id)}
+                  onValueChange={handleVersionValueChange}
+                >
+                  <SelectTrigger
+                    aria-label="Bible version"
+                    className="h-9.5 w-auto sm:min-w-[96px] gap-1.5 rounded-lg px-3 text-xs sm:text-sm font-medium shadow-xs"
+                  >
+                    <BookOpen className="size-3.5 text-primary shrink-0" />
+                    <SelectValue>{selectedVersion.abbreviation}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent align="end" className="w-64">
+                    {BIBLE_VERSIONS.map((ver) => (
+                      <SelectItem key={ver.id} value={String(ver.id)}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{ver.name}</span>
+                          <span className="text-[10.5px] text-foreground-dim">
+                            {ver.abbreviation} • {ver.language.toUpperCase()}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              <Popover>
+                <PopoverTrigger asChild>
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() =>
-                      handleUpdateFontSize({ newSize: fontSize + 2 })
-                    }
-                    disabled={fontSize >= MAX_FONT_SIZE}
-                    aria-label="Increase font size"
-                    className="size-8 rounded-lg"
+                    variant="outline"
+                    size="default"
+                    aria-label="Adjust font size"
+                    className="h-9.5 rounded-lg px-3 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
                   >
-                    <Plus className="size-3.5" />
+                    <CaseSensitive className="size-4 text-primary" />
+                    <span className="hidden sm:inline text-xs text-foreground-dim">
+                      {fontSize}
+                    </span>
                   </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-52 p-3 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10.5px] font-bold uppercase tracking-wider text-foreground-dim">
+                      Text Size
+                    </span>
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      onClick={() =>
+                        handleUpdateFontSize({ newSize: DEFAULT_FONT_SIZE })
+                      }
+                      className="h-auto p-0 text-[11px] gap-1"
+                    >
+                      <RotateCcw className="size-3" />
+                      <span>Reset</span>
+                    </Button>
+                  </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              onClick={() => setIsHighlightsSheetOpen(true)}
-              aria-label="View highlights"
-              className="h-9.5 rounded-lg px-2.5 sm:px-3 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
-            >
-              <Highlighter className="size-3.5 text-primary" />
-              <span className="hidden sm:inline">Highlights</span>
-            </Button>
+                  <div className="flex items-center justify-between rounded-xl border border-border bg-surface-elevated p-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        handleUpdateFontSize({ newSize: fontSize - 2 })
+                      }
+                      disabled={fontSize <= MIN_FONT_SIZE}
+                      aria-label="Decrease font size"
+                      className="size-8 rounded-lg"
+                    >
+                      <Minus className="size-3.5" />
+                    </Button>
+                    <span className="text-xs font-bold tabular-nums text-foreground">
+                      {fontSize}px
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        handleUpdateFontSize({ newSize: fontSize + 2 })
+                      }
+                      disabled={fontSize >= MAX_FONT_SIZE}
+                      aria-label="Increase font size"
+                      className="size-8 rounded-lg"
+                    >
+                      <Plus className="size-3.5" />
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              onClick={() => setIsZenMode(true)}
-              aria-label="Enter Zen mode"
-              title="Zen mode"
-              className="h-9.5 rounded-lg px-2.5 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
-            >
-              <Maximize2 className="size-3.5 text-primary" />
-              <span className="hidden md:inline">Zen</span>
-            </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={() => setIsHighlightsSheetOpen(true)}
+                aria-label="View highlights"
+                className="h-9.5 rounded-lg px-2.5 sm:px-3 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
+              >
+                <Highlighter className="size-3.5 text-primary" />
+                <span className="hidden sm:inline">Highlights</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={() => setIsZenMode(true)}
+                aria-label="Enter Zen mode"
+                title="Zen mode"
+                className="h-9.5 rounded-lg px-2.5 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
+              >
+                <Maximize2 className="size-3.5 text-primary" />
+                <span className="hidden md:inline">Zen</span>
+              </Button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
       ) : null}
 
       {/* ── Open Editorial Reading Column ── */}
@@ -1484,7 +1503,9 @@ export function BibleWorkspace({
                 <Button
                   type="button"
                   size="default"
-                  variant={activePlanReading.isCompleted ? "outline" : "primary"}
+                  variant={
+                    activePlanReading.isCompleted ? "outline" : "primary"
+                  }
                   onClick={handleTogglePlanReading}
                   disabled={isTogglingPlan}
                   aria-pressed={activePlanReading.isCompleted}
@@ -1590,7 +1611,8 @@ export function BibleWorkspace({
                   {pickerBook ? pickerBook.name : "Books & Progress"}
                 </SheetTitle>
                 <span className="text-xs font-semibold tabular-nums text-primary">
-                  {totalReadChapters}/{totalChaptersAcrossCanon} ({canonPercentage}
+                  {totalReadChapters}/{totalChaptersAcrossCanon} (
+                  {canonPercentage}
                   %)
                 </span>
               </div>

@@ -133,7 +133,8 @@ export async function createHighlightAction(
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  if (!session) return { success: false, error: "Please sign in to save highlights." };
+  if (!session)
+    return { success: false, error: "Please sign in to save highlights." };
 
   const parsed = v.safeParse(CreateHighlightSchema, params);
   if (!parsed.success) {
@@ -211,8 +212,7 @@ export async function updateHighlightColorAction(
 }
 
 export type DeleteHighlightResult =
-  | { success: true; highlightId: string }
-  | { success: false; error: string };
+  { success: true; highlightId: string } | { success: false; error: string };
 
 export async function deleteHighlightAction(
   params: DeleteHighlightInput

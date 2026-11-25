@@ -92,13 +92,13 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
     // Close picker and mark Chapter 1 in Genesis for this Ethiopian tracker
     await sheet.getByRole("button", { name: "Close" }).click();
     await expect(sheet).not.toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("button", { name: "Mark Read" })).toBeVisible({
+      timeout: 15000,
+    });
     await page.getByRole("button", { name: "Mark Read" }).click();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     // 7. Switch back to Tracker 1 ("Personal Reading" - 66 books) from top navbar
     await switcherBtn.click();

@@ -163,8 +163,10 @@ export function extractHighlightRangeFromSelection({
     for (const seg of info.segments) {
       const overlap = getSegmentOverlap({ range, seg });
       if (!overlap) continue;
-      verseMin = verseMin === null ? overlap.start : Math.min(verseMin, overlap.start);
-      verseMax = verseMax === null ? overlap.end : Math.max(verseMax, overlap.end);
+      verseMin =
+        verseMin === null ? overlap.start : Math.min(verseMin, overlap.start);
+      verseMax =
+        verseMax === null ? overlap.end : Math.max(verseMax, overlap.end);
     }
 
     if (verseMin !== null && verseMax !== null && verseMin < verseMax) {
@@ -332,8 +334,7 @@ function wrapVerseSlice({
       continue;
     }
 
-    const sliceStart =
-      info.verse === startVerse ? Math.max(0, startOffset) : 0;
+    const sliceStart = info.verse === startVerse ? Math.max(0, startOffset) : 0;
     const sliceEnd =
       info.verse === endVerse
         ? Math.min(info.totalLength, endOffset)

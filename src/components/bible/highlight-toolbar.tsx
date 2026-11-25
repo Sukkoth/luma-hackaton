@@ -1,7 +1,10 @@
 "use client";
 
 import { Trash2, X } from "lucide-react";
-import { HIGHLIGHT_COLORS, type HighlightColor } from "@/lib/schemas/highlights";
+import {
+  HIGHLIGHT_COLORS,
+  type HighlightColor,
+} from "@/lib/schemas/highlights";
 
 const SWATCH_STYLES: Record<
   HighlightColor,
@@ -71,7 +74,9 @@ export function HighlightToolbar({
               aria-pressed={isSelected}
               onClick={() => onSelectColor({ color })}
               className={`h-6 w-6 rounded-full transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 ${swatch.dotClass} ${
-                isSelected ? "ring-2 ring-foreground ring-offset-2 ring-offset-card" : ""
+                isSelected
+                  ? "ring-2 ring-foreground ring-offset-2 ring-offset-card"
+                  : ""
               }`}
             />
           );

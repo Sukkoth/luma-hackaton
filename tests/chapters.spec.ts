@@ -77,9 +77,9 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     const markRead1 = page.getByRole("button", { name: "Mark Read" });
     await expect(markRead1).toHaveAttribute("aria-pressed", "false");
     await markRead1.click();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     await page.getByRole("button", { name: "Next chapter" }).click();
     await expect(
@@ -89,9 +89,9 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       timeout: 15000,
     });
     await page.getByRole("button", { name: "Mark Read" }).click();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     await page.getByRole("button", { name: "Next chapter" }).click();
     await expect(
@@ -101,9 +101,9 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       timeout: 15000,
     });
     await page.getByRole("button", { name: "Mark Read" }).click();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     const dbUser = await db.query.user.findFirst({
       where: eq(user.email, testUser.email),
@@ -136,9 +136,9 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     });
 
     // 6. Verify Genesis 3 still hides Mark Read after reload and picker shows 3/50
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     await page.getByRole("button", { name: "Choose book and chapter" }).click();
     const sheet = page.getByRole("dialog");

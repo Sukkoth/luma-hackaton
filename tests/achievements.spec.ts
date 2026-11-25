@@ -127,9 +127,9 @@ test.describe("Achievements & Milestones E2E", () => {
     await expect(markReadBtn).toBeVisible({ timeout: 15000 });
     await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
     await markReadBtn.click();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     const [uRecord] = await db
       .select()

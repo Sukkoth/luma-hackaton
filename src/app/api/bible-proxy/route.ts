@@ -536,8 +536,7 @@ async function fetchYouVersionPassage({
       };
     } catch (err) {
       lastError = err;
-      const isNonRetryable =
-        err instanceof BibleProxyError && !err.retryable;
+      const isNonRetryable = err instanceof BibleProxyError && !err.retryable;
       if (isNonRetryable || attempt >= retryDelaysMs.length) {
         throw err;
       }

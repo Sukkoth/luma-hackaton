@@ -30,8 +30,7 @@ export function BookChaptersModal({
   const progressPercent = Math.round((readCount / book.chapters) * 100);
   const isAllComplete = readCount >= book.chapters && book.chapters > 0;
   const canRead = Boolean(
-    onReadChapter &&
-      isBookSupportedInSixtySixBookVersions({ bookId: book.id })
+    onReadChapter && isBookSupportedInSixtySixBookVersions({ bookId: book.id })
   );
   const nextUnreadChapter =
     Array.from({ length: book.chapters }, (_, i) => i + 1).find(

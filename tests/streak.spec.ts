@@ -266,9 +266,9 @@ test.describe("Streak UI & Modal E2E", () => {
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
     await expect(markReadBtn).toBeVisible({ timeout: 15000 });
     await markReadBtn.click();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     // Top navbar streak button now shows 1
     await expect(streakBtn).toContainText("1");

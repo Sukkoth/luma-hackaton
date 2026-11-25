@@ -106,7 +106,9 @@ export function PlanReadingFlow({
     const timer = setTimeout(() => {
       const defaultVersion = detectDefaultVersion({});
       for (const reading of activeSession.readings) {
-        if (!isBookSupportedInSixtySixBookVersions({ bookId: reading.bookId })) {
+        if (
+          !isBookSupportedInSixtySixBookVersions({ bookId: reading.bookId })
+        ) {
           continue;
         }
         const path = buildBibleComPath({

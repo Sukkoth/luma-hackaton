@@ -76,7 +76,9 @@ test.describe("Bible Passage Highlighting E2E", () => {
 
     // 2) Part of a single verse (verse 2: "formless and empty")
     await page.evaluate(() => {
-      const v2Marker = document.querySelector(".luma-bible-passage span[v='2']");
+      const v2Marker = document.querySelector(
+        ".luma-bible-passage span[v='2']"
+      );
       const v2Label = v2Marker?.nextElementSibling;
       const textNode = v2Label?.nextSibling as Text | null;
       if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
@@ -102,7 +104,9 @@ test.describe("Bible Passage Highlighting E2E", () => {
     await page.evaluate(() => {
       const pi = document.querySelector(".luma-bible-passage .pi");
       const v2Last = pi?.lastChild as Text | null;
-      const v3Marker = document.querySelector(".luma-bible-passage span[v='3']");
+      const v3Marker = document.querySelector(
+        ".luma-bible-passage span[v='3']"
+      );
       const v3Label = v3Marker?.nextElementSibling;
       const v3Text = v3Label?.nextSibling as Text | null;
       if (!v2Last || !v3Text) throw new Error("Missing v2/v3 text");

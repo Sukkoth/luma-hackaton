@@ -269,9 +269,7 @@ export function BibleReaderCore({
     return { prev, next };
   }, [planContext, bookId, chapter]);
 
-  const hasPrev = planContext
-    ? currentIndex > 0
-    : Boolean(standaloneNav.prev);
+  const hasPrev = planContext ? currentIndex > 0 : Boolean(standaloneNav.prev);
   const hasNext = planContext
     ? currentIndex >= 0 && currentIndex < flattenedReadings.length - 1
     : Boolean(standaloneNav.next);
@@ -543,66 +541,66 @@ export function BibleReaderCore({
           {/* Version Selector Dropdown (hidden for books outside the 66-book versions) */}
           {isBookSupported && (
             <div ref={versionMenuRef} className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setIsVersionDropdownOpen(!isVersionDropdownOpen);
-                setIsFontMenuOpen(false);
-              }}
-              aria-expanded={isVersionDropdownOpen}
-              aria-haspopup="listbox"
-              className="flex items-center gap-1 sm:gap-1.5 rounded-[12px] border border-border bg-surface px-2 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium text-foreground transition-all hover:border-border-strong cursor-pointer shadow-2xs"
-            >
-              <BookOpen className="size-3.5 text-primary" />
-              <span className="font-semibold">
-                {selectedVersion.abbreviation}
-              </span>
-              <ChevronDown className="size-3 text-foreground-dim" />
-            </button>
-
-            {isVersionDropdownOpen && (
-              <div
-                role="listbox"
-                className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-64 max-h-80 overflow-y-auto rounded-[16px] border border-border bg-surface p-1.5 shadow-lg"
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVersionDropdownOpen(!isVersionDropdownOpen);
+                  setIsFontMenuOpen(false);
+                }}
+                aria-expanded={isVersionDropdownOpen}
+                aria-haspopup="listbox"
+                className="flex items-center gap-1 sm:gap-1.5 rounded-[12px] border border-border bg-surface px-2 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium text-foreground transition-all hover:border-border-strong cursor-pointer shadow-2xs"
               >
-                <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
-                  Bible Version
+                <BookOpen className="size-3.5 text-primary" />
+                <span className="font-semibold">
+                  {selectedVersion.abbreviation}
+                </span>
+                <ChevronDown className="size-3 text-foreground-dim" />
+              </button>
+
+              {isVersionDropdownOpen && (
+                <div
+                  role="listbox"
+                  className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-64 max-h-80 overflow-y-auto rounded-[16px] border border-border bg-surface p-1.5 shadow-lg"
+                >
+                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
+                    Bible Version
+                  </div>
+                  {BIBLE_VERSIONS.map((v) => {
+                    const isSelected = v.id === selectedVersion.id;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => handleSelectVersion({ version: v })}
+                        className={`flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[12.5px] transition-colors cursor-pointer ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground font-semibold"
+                            : "text-foreground hover:bg-surface-elevated font-normal"
+                        }`}
+                      >
+                        <div className="flex flex-col min-w-0 pr-2">
+                          <span className="truncate">{v.name}</span>
+                          <span
+                            className={`text-[10.5px] ${
+                              isSelected
+                                ? "text-primary-foreground/80"
+                                : "text-foreground-dim"
+                            }`}
+                          >
+                            {v.abbreviation} • {v.language.toUpperCase()}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <Check className="size-4 shrink-0 text-primary-foreground" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                {BIBLE_VERSIONS.map((v) => {
-                  const isSelected = v.id === selectedVersion.id;
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={() => handleSelectVersion({ version: v })}
-                      className={`flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[12.5px] transition-colors cursor-pointer ${
-                        isSelected
-                          ? "bg-primary text-primary-foreground font-semibold"
-                          : "text-foreground hover:bg-surface-elevated font-normal"
-                      }`}
-                    >
-                      <div className="flex flex-col min-w-0 pr-2">
-                        <span className="truncate">{v.name}</span>
-                        <span
-                          className={`text-[10.5px] ${
-                            isSelected
-                              ? "text-primary-foreground/80"
-                              : "text-foreground-dim"
-                          }`}
-                        >
-                          {v.abbreviation} • {v.language.toUpperCase()}
-                        </span>
-                      </div>
-                      {isSelected && (
-                        <Check className="size-4 shrink-0 text-primary-foreground" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+              )}
             </div>
           )}
 
