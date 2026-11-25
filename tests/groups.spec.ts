@@ -201,7 +201,9 @@ test.describe("Groups & Community Fellowship E2E", () => {
     await expect(
       page.getByRole("heading", { name: /Active Reading Plans \(1\)/i })
     ).toBeVisible();
-    await expect(page.getByText("Synchronized Cohort Pace")).toBeVisible();
+    await expect(
+      page.getByLabel("Plan lifecycle status: active")
+    ).toBeVisible();
 
     // 5. Enroll in the group plan with personal tracker
     await page
@@ -432,10 +434,10 @@ test.describe("Groups & Community Fellowship E2E", () => {
     // Redirects to personal plan instance
     await page.waitForURL(/\/plans\/[a-zA-Z0-9_-]+/, { timeout: 15000 });
 
-    // 3. Navigate back to Fellowship Leaderboard tab
-    await page.goto(`${groupUrl}?tab=leaderboard`);
+    // 3. Navigate back to group Plans tab and verify per-plan Leaderboard
+    await page.goto(groupUrl);
     await expect(
-      page.getByRole("heading", { name: "Fellowship Leaderboard" })
+      page.getByRole("heading", { name: "Plan Leaderboard" })
     ).toBeVisible();
     await expect(page.getByText("1 reader", { exact: true })).toBeVisible();
 
