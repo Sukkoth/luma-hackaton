@@ -53,14 +53,6 @@ const COLOR_DOT_CLASSES: Record<HighlightColor, string> = {
   purple: "bg-purple-400",
 };
 
-const COLOR_BAR_CLASSES: Record<HighlightColor, string> = {
-  amber: "bg-amber-400",
-  green: "bg-emerald-400",
-  blue: "bg-sky-400",
-  rose: "bg-rose-400",
-  purple: "bg-purple-400",
-};
-
 const COLOR_LABELS: Record<HighlightColor, string> = {
   amber: "Amber",
   green: "Green",
@@ -546,12 +538,8 @@ export function HighlightsSheet({
                   return (
                     <div
                       key={note.id}
-                      className="group relative rounded-r-xl rounded-l-none border border-border bg-card py-3.5 pr-3.5 pl-4 transition-colors hover:bg-muted/40"
+                      className="group rounded-xl border border-border bg-card p-3.5 transition-colors hover:bg-muted/40"
                     >
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-y-0 left-0 w-[2px] bg-primary"
-                      />
                       <div className="flex items-start justify-between gap-2">
                         <button
                           type="button"
@@ -651,12 +639,8 @@ export function HighlightsSheet({
               return (
                 <div
                   key={item.id}
-                  className="group relative rounded-r-xl rounded-l-none border border-border bg-card py-3.5 pr-3.5 pl-4 transition-colors hover:bg-muted/40"
+                  className="group rounded-xl border border-border bg-card p-3.5 transition-colors hover:bg-muted/40"
                 >
-                  <span
-                    aria-hidden="true"
-                    className={`absolute inset-y-0 left-0 w-[2px] ${COLOR_BAR_CLASSES[item.color]}`}
-                  />
                   <div className="flex items-start justify-between gap-2">
                     <button
                       type="button"
@@ -671,6 +655,10 @@ export function HighlightsSheet({
                       className="flex-1 text-left focus:outline-none"
                     >
                       <div className="flex items-center gap-2">
+                        <span
+                          aria-hidden="true"
+                          className={`size-2 shrink-0 rounded-full ${COLOR_DOT_CLASSES[item.color]}`}
+                        />
                         <span className="text-xs font-bold text-foreground">
                           {title}
                         </span>
