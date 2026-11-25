@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookOpen, Search, ChevronLeft, ChevronRight, ChevronDown, Check, CheckCircle2, Loader2, Minus, Plus, RotateCcw, X, ArrowLeft } from "lucide-react";
+import { BookOpen, Search, ChevronLeft, ChevronRight, ChevronDown, Check, CheckCircle2, Loader2, Minus, Plus, RotateCcw, X, ArrowLeft, CaseSensitive, Highlighter } from "lucide-react";
 import {
   type BibleCanon,
   type BibleBook,
@@ -37,6 +37,7 @@ import {
   type PassageHighlightRange,
 } from "@/lib/bible-highlights";
 import { HighlightToolbar } from "@/components/bible/highlight-toolbar";
+import { HighlightsSheet } from "@/components/bible/highlights-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -106,15 +107,16 @@ function computeHighlightToolbarPosition({
 }): { top: number; left: number } | null {
   if (typeof window === "undefined") return null;
   if (rect.width === 0 && rect.height === 0) return null;
+
   const padding = 136;
   const left = Math.min(
     window.innerWidth - padding,
     Math.max(padding, rect.left + rect.width / 2)
   );
   const top =
-    rect.top < 120
-      ? Math.min(window.innerHeight - 64, rect.bottom + 10)
-      : Math.max(68, rect.top - 48);
+    rect.bottom + 72 <= window.innerHeight
+      ? Math.max(68, rect.bottom + 14)
+      : Math.max(68, rect.top - 52);
   return { top, left };
 }
 
@@ -287,6 +289,7 @@ export function BibleWorkspace({
   const [planContext, setPlanContext] = useState<PlanContextData | null>(null);
   const [isTogglingPlan, setIsTogglingPlan] = useState(false);
   const [highlights, setHighlights] = useState<BibleHighlightDetail[]>([]);
+  const [isHighlightsSheetOpen, setIsHighlightsSheetOpen] = useState(false);
   const [highlightPrompt, setHighlightPrompt] =
     useState<ActiveHighlightPrompt | null>(null);
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
@@ -451,7 +454,7 @@ export function BibleWorkspace({
       for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
         try {
           const res = await fetch(
-            `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&format=json`,
+            `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&format=json&cv=2`,
             { signal: controller.signal }
           );
 
@@ -1160,16 +1163,16 @@ export function BibleWorkspace({
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="default"
                 onClick={openBookPicker}
                 aria-label="Choose book and chapter"
-                className="h-8 gap-1.5 px-3 text-xs font-semibold shrink-0"
+                className="h-9.5 gap-1.5 rounded-lg px-3.5 text-xs sm:text-sm font-medium shadow-xs shrink-0"
               >
                 <BookOpen className="size-3.5 text-primary" />
                 <span>
                   {activeBook.name} {activeChapter}
                 </span>
-                <ChevronDown className="size-3 text-foreground-dim" />
+                <ChevronDown className="size-3.5 text-foreground-dim" />
               </Button>
             )}
 
@@ -1177,10 +1180,10 @@ export function BibleWorkspace({
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="default"
                 onClick={() => router.push(`/plans/${planContext.plan.id}`)}
                 aria-label="Back to reading plan"
-                className="h-8 px-2.5 text-xs gap-1 shrink-0"
+                className="h-9.5 rounded-lg px-3 text-xs sm:text-sm font-medium gap-1.5 shadow-xs shrink-0"
               >
                 <ArrowLeft className="size-3.5" />
                 <span className="hidden sm:inline max-w-[140px] truncate">
@@ -1210,7 +1213,7 @@ export function BibleWorkspace({
               >
                 <SelectTrigger
                   aria-label="Bible version"
-                  className="h-8 w-auto sm:min-w-[96px] gap-1.5 rounded-[12px] px-2.5 text-xs font-semibold"
+                  className="h-9.5 w-auto sm:min-w-[96px] gap-1.5 rounded-lg px-3 text-xs sm:text-sm font-medium shadow-xs"
                 >
                   <BookOpen className="size-3.5 text-primary shrink-0" />
                   <SelectValue>{selectedVersion.abbreviation}</SelectValue>
@@ -1235,12 +1238,12 @@ export function BibleWorkspace({
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="default"
                   aria-label="Adjust font size"
-                  className="h-8 px-2.5 gap-1 text-xs"
+                  className="h-9.5 rounded-lg px-3 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
                 >
-                  <span className="font-serif font-bold">Aa</span>
-                  <span className="hidden sm:inline text-[11px] text-foreground-dim">
+                  <CaseSensitive className="size-4 text-primary" />
+                  <span className="hidden sm:inline text-xs text-foreground-dim">
                     {fontSize}
                   </span>
                 </Button>
@@ -1298,15 +1301,27 @@ export function BibleWorkspace({
               </PopoverContent>
             </Popover>
 
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              onClick={() => setIsHighlightsSheetOpen(true)}
+              aria-label="View highlights"
+              className="h-9.5 rounded-lg px-2.5 sm:px-3 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
+            >
+              <Highlighter className="size-3.5 text-primary" />
+              <span className="hidden sm:inline">Highlights</span>
+            </Button>
+
             {isPlanMode && activePlanReading && (
               <Button
                 type="button"
-                size="sm"
+                size="default"
                 variant={activePlanReading.isCompleted ? "outline" : "primary"}
                 onClick={handleTogglePlanReading}
                 disabled={isTogglingPlan}
                 aria-pressed={activePlanReading.isCompleted}
-                className="h-8 px-2.5 sm:px-3 gap-1.5 text-xs"
+                className="h-9.5 rounded-lg px-3 sm:px-3.5 gap-1.5 text-xs sm:text-sm shadow-xs"
               >
                 <Check className="size-3.5 stroke-[2.5]" />
                 <span className="hidden sm:inline">
@@ -1318,7 +1333,7 @@ export function BibleWorkspace({
             {!isPlanMode && onToggleTrackerChapter && isBookSupported && (
               <Button
                 type="button"
-                size="sm"
+                size="default"
                 variant={isCurrentChapterRead ? "outline" : "primary"}
                 onClick={() =>
                   onToggleTrackerChapter({
@@ -1328,7 +1343,7 @@ export function BibleWorkspace({
                   })
                 }
                 aria-pressed={isCurrentChapterRead}
-                className="h-8 px-2.5 sm:px-3 gap-1.5 text-xs"
+                className="h-9.5 rounded-lg px-3 sm:px-3.5 gap-1.5 text-xs sm:text-sm shadow-xs"
               >
                 <Check className="size-3.5 stroke-[2.5]" />
                 <span className="hidden sm:inline">
@@ -1452,11 +1467,11 @@ export function BibleWorkspace({
         <Button
           type="button"
           variant="outline"
-          size="sm"
+          size="default"
           onClick={handlePrev}
           disabled={!hasPrev}
           aria-label={isPlanMode ? "Previous plan reading" : "Previous chapter"}
-          className="h-8 gap-1.5 text-xs"
+          className="h-9.5 rounded-lg px-3.5 gap-1.5 text-xs sm:text-sm shadow-xs"
         >
           <ChevronLeft className="size-3.5" />
           <span>Previous</span>
@@ -1483,11 +1498,11 @@ export function BibleWorkspace({
         <Button
           type="button"
           variant="outline"
-          size="sm"
+          size="default"
           onClick={handleNext}
           disabled={!hasNext}
           aria-label={isPlanMode ? "Next plan reading" : "Next chapter"}
-          className="h-8 gap-1.5 text-xs"
+          className="h-9.5 rounded-lg px-3.5 gap-1.5 text-xs sm:text-sm shadow-xs"
         >
           <span>Next</span>
           <ChevronRight className="size-3.5" />
@@ -1776,6 +1791,31 @@ export function BibleWorkspace({
           </SheetContent>
         </Sheet>
       )}
+
+      <HighlightsSheet
+        open={isHighlightsSheetOpen}
+        onOpenChange={setIsHighlightsSheetOpen}
+        currentBookId={currentBookId}
+        currentBookName={activeBook.name}
+        onNavigateToHighlight={({ bookId, chapter, versionId }) => {
+          saveSelectedVersion({ versionId });
+          setStoredVersionId(versionId);
+          updateReaderQuery({
+            book: bookId,
+            ch: chapter,
+            v: versionId,
+            plan: null,
+            readingId: null,
+            startVerse: null,
+            endVerse: null,
+          });
+        }}
+        onHighlightDeleted={({ highlightId }) => {
+          setHighlights((prev) =>
+            prev.filter((item) => item.id !== highlightId)
+          );
+        }}
+      />
     </div>
   );
 }

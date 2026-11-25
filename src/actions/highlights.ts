@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import * as v from "valibot";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
@@ -98,6 +98,24 @@ export async function getChapterHighlightsAction(
       asc(bibleHighlights.startOffset),
       asc(bibleHighlights.createdAt)
     );
+
+  return {
+    success: true,
+    highlights: rows.map((row) => mapHighlightRow({ row })),
+  };
+}
+
+export async function getAllUserHighlightsAction(): Promise<GetChapterHighlightsResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const rows = await db
+    .select()
+    .from(bibleHighlights)
+    .where(eq(bibleHighlights.userId, session.user.id))
+    .orderBy(desc(bibleHighlights.updatedAt));
 
   return {
     success: true,

@@ -31,7 +31,7 @@ type VerseInfo = {
 };
 
 const EXCLUDED_TEXT_ANCESTOR_SELECTOR =
-  ".yv-vlbl, .s, .s1, .s2, .s3, .ms, .mr, .r, .d";
+  ".yv-vlbl, .yv-h, .s, .s1, .s2, .s3, .ms, .mr, .r, .d";
 
 function isExcludedTextNode({ node }: { node: Node }): boolean {
   const el =
