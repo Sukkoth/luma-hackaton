@@ -349,6 +349,8 @@ export function BibleWorkspace({
   const [isTogglingPlan, setIsTogglingPlan] = useState(false);
   const [highlights, setHighlights] = useState<BibleHighlightDetail[]>([]);
   const [chapterNotes, setChapterNotes] = useState<NoteDetail[]>([]);
+  const [highlightsRevision, setHighlightsRevision] = useState(0);
+  const [notesRevision, setNotesRevision] = useState(0);
   const [isHighlightsSheetOpen, setIsHighlightsSheetOpen] = useState(false);
   const [isZenMode, setIsZenMode] = useState(false);
   const [highlightPrompt, setHighlightPrompt] =
@@ -1060,6 +1062,7 @@ export function BibleWorkspace({
             return;
           }
           setHighlights((prev) => [...prev, result.highlight]);
+          setHighlightsRevision((prev) => prev + 1);
           window.getSelection()?.removeAllRanges();
           setHighlightPrompt(null);
           return;
@@ -1078,6 +1081,7 @@ export function BibleWorkspace({
             item.id === result.highlight.id ? result.highlight : item
           )
         );
+        setHighlightsRevision((prev) => prev + 1);
         setHighlightPrompt(null);
       } finally {
         setIsSavingHighlight(false);
@@ -1106,6 +1110,7 @@ export function BibleWorkspace({
       setHighlights((prev) =>
         prev.filter((item) => item.id !== result.highlightId)
       );
+      setHighlightsRevision((prev) => prev + 1);
       setHighlightPrompt(null);
     } finally {
       setIsSavingHighlight(false);
@@ -1784,11 +1789,13 @@ export function BibleWorkspace({
                       ? [note, ...prev]
                       : prev.map((item) => (item.id === note.id ? note : item))
                   );
+                  setNotesRevision((prev) => prev + 1);
                 }}
                 onNoteDeleted={({ noteId }) => {
                   setChapterNotes((prev) =>
                     prev.filter((item) => item.id !== noteId)
                   );
+                  setNotesRevision((prev) => prev + 1);
                 }}
               />
             ) : null}
@@ -2209,6 +2216,8 @@ export function BibleWorkspace({
         currentBookId={currentBookId}
         currentBookName={activeBook.name}
         currentChapter={currentChapter}
+        highlightsRevision={highlightsRevision}
+        notesRevision={notesRevision}
         onNavigateToHighlight={({ bookId, chapter, versionId }) => {
           saveSelectedVersion({ versionId });
           setStoredVersionId(versionId);

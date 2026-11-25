@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   BookOpen,
@@ -114,6 +114,8 @@ export type HighlightsSheetProps = {
   currentBookId: string;
   currentBookName: string;
   currentChapter: number;
+  highlightsRevision?: number;
+  notesRevision?: number;
   onNavigateToHighlight: (params: {
     bookId: string;
     chapter: number;
@@ -130,6 +132,8 @@ export function HighlightsSheet({
   currentBookId,
   currentBookName,
   currentChapter,
+  highlightsRevision = 0,
+  notesRevision = 0,
   onNavigateToHighlight,
   onHighlightDeleted,
   onSelectNote,
@@ -159,8 +163,46 @@ export function HighlightsSheet({
   const [colorFilter, setColorFilter] = useState<HighlightColor | "all">("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const loadedHighlightsRevisionRef = useRef<number | null>(null);
+  const notesCacheRef = useRef<
+    Map<
+      string,
+      {
+        notes: NoteDetail[];
+        totalCount: number;
+        hasMore: boolean;
+        page: number;
+      }
+    >
+  >(new Map());
+  const cachedNotesRevisionRef = useRef<number>(notesRevision);
+
+  const notesQueryKey = useMemo(
+    () =>
+      JSON.stringify({
+        scope: noteScopeFilter,
+        bookId:
+          noteScopeFilter === "chapter" ? currentBookId.toLowerCase() : null,
+        chapter: noteScopeFilter === "chapter" ? currentChapter : null,
+        q: deferredSearchQuery.trim(),
+        sortBy: noteSortBy,
+        sortDir: noteSortDir,
+      }),
+    [
+      noteScopeFilter,
+      currentBookId,
+      currentChapter,
+      deferredSearchQuery,
+      noteSortBy,
+      noteSortDir,
+    ]
+  );
+
   useEffect(() => {
     if (!open || activeTab !== "highlights") return;
+    if (loadedHighlightsRevisionRef.current === highlightsRevision) {
+      return;
+    }
     let isCancelled = false;
 
     async function fetchHighlights() {
@@ -179,6 +221,7 @@ export function HighlightsSheet({
         setItems([]);
         return;
       }
+      loadedHighlightsRevisionRef.current = highlightsRevision;
       setItems(highlightsResult.highlights);
     }
 
@@ -186,10 +229,27 @@ export function HighlightsSheet({
     return () => {
       isCancelled = true;
     };
-  }, [open, activeTab]);
+  }, [open, activeTab, highlightsRevision]);
 
   useEffect(() => {
     if (!open || activeTab !== "notes") return;
+
+    if (cachedNotesRevisionRef.current !== notesRevision) {
+      notesCacheRef.current.clear();
+      cachedNotesRevisionRef.current = notesRevision;
+    }
+
+    const cached = notesCacheRef.current.get(notesQueryKey);
+    if (cached) {
+      setNotesList(cached.notes);
+      setNotesTotalCount(cached.totalCount);
+      setHasMoreNotes(cached.hasMore);
+      setNotesPage(cached.page);
+      setIsUnauthorized(false);
+      setIsLoading(false);
+      return;
+    }
+
     let isCancelled = false;
 
     async function fetchFirstNotesPage() {
@@ -220,6 +280,19 @@ export function HighlightsSheet({
         return;
       }
 
+      if (notesCacheRef.current.size >= 25) {
+        const oldestKey = notesCacheRef.current.keys().next().value;
+        if (oldestKey !== undefined) {
+          notesCacheRef.current.delete(oldestKey);
+        }
+      }
+      notesCacheRef.current.set(notesQueryKey, {
+        notes: result.notes,
+        totalCount: result.totalCount,
+        hasMore: result.hasMore,
+        page: 1,
+      });
+
       setNotesList(result.notes);
       setNotesTotalCount(result.totalCount);
       setHasMoreNotes(result.hasMore);
@@ -233,6 +306,8 @@ export function HighlightsSheet({
   }, [
     open,
     activeTab,
+    notesRevision,
+    notesQueryKey,
     noteScopeFilter,
     currentBookId,
     currentChapter,
@@ -284,7 +359,14 @@ export function HighlightsSheet({
       setNotesList((prev) => {
         const seen = new Set(prev.map((n) => n.id));
         const appended = result.notes.filter((n) => !seen.has(n.id));
-        return [...prev, ...appended];
+        const nextNotes = [...prev, ...appended];
+        notesCacheRef.current.set(notesQueryKey, {
+          notes: nextNotes,
+          totalCount: result.totalCount,
+          hasMore: result.hasMore,
+          page: nextPage,
+        });
+        return nextNotes;
       });
       setNotesTotalCount(result.totalCount);
       setHasMoreNotes(result.hasMore);
@@ -317,7 +399,11 @@ export function HighlightsSheet({
         toast.error(result.error);
         return;
       }
-      setNotesList((prev) => prev.filter((item) => item.id !== noteId));
+      setNotesList((prev) => {
+        const nextNotes = prev.filter((item) => item.id !== noteId);
+        return nextNotes;
+      });
+      notesCacheRef.current.clear();
       setNotesTotalCount((prev) => Math.max(0, prev - 1));
       onNoteDeleted({ noteId });
       toast.success("Note deleted");
