@@ -702,16 +702,18 @@ export function SettingsView({
                         <Check className="size-3" />
                         <span>Enabled</span>
                       </span>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={isTestingPush}
-                        onClick={handleSendTestAlert}
-                        className="text-[11px] h-6 px-2 text-foreground-secondary hover:text-foreground"
-                      >
-                        {isTestingPush ? "Sending..." : "Test Alert"}
-                      </Button>
+                      {process.env.NODE_ENV !== "production" && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={isTestingPush}
+                          onClick={handleSendTestAlert}
+                          className="text-[11px] h-6 px-2 text-foreground-secondary hover:text-foreground"
+                        >
+                          {isTestingPush ? "Sending..." : "Test Alert"}
+                        </Button>
+                      )}
                     </div>
                   ) : notificationPermission === "denied" ? (
                     <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 border border-destructive/20 px-2 py-0.5 text-[11px] font-semibold text-destructive">
