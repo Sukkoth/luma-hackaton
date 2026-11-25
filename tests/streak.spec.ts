@@ -262,7 +262,7 @@ test.describe("Streak UI & Modal E2E", () => {
     await expect(modalTitle).not.toBeVisible();
 
     // 4. Navigate to /books, mark a chapter, verify streak updates
-    await page.goto("/books");
+    await page.goto("/bible");
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
     await expect(markReadBtn).toBeVisible();
     await markReadBtn.click();

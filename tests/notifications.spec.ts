@@ -724,7 +724,7 @@ test.describe("In-App Notification System", () => {
           type: "streak_alert",
           title: "Streak Reminder",
           body: "Keep your daily rhythm active!",
-          actionUrl: "/books",
+          actionUrl: "/bible",
           isRead: false,
         },
         {

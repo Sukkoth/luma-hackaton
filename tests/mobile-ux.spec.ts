@@ -63,7 +63,7 @@ test.describe("Mobile Navigation & Filter UX", () => {
 
     // 4. Test navigation to Bible via bottom nav
     await mobileNav.getByRole("link", { name: "Bible" }).click();
-    await page.waitForURL("/books", { timeout: 10000 });
+    await page.waitForURL("/bible", { timeout: 10000 });
 
     // Verify Book & Chapter picker trigger is visible on mobile
     await expect(

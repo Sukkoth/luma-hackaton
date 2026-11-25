@@ -76,7 +76,7 @@ test.describe("Multi-Tracker Engine & Navigation E2E", () => {
     await expect(page.getByText("0 of 1927")).toBeVisible();
 
     // 6. Navigate to /books and verify active canon filtering (81 books)
-    await page.goto("/books");
+    await page.goto("/bible");
     await page.getByRole("button", { name: "Choose book and chapter" }).click();
     const sheet = page.getByRole("dialog");
     await expect(sheet).toBeVisible();

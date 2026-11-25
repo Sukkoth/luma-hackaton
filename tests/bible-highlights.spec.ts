@@ -47,7 +47,7 @@ test.describe("Bible Passage Highlighting E2E", () => {
       .click();
     await page.waitForURL("/home", { timeout: 10000 });
 
-    await page.goto("/books");
+    await page.goto("/bible");
     await expect(
       page.locator(".luma-bible-passage .yv-vlbl").first()
     ).toBeVisible();
@@ -180,6 +180,23 @@ test.describe("Bible Passage Highlighting E2E", () => {
     );
     await page.locator("footer").click();
     await expect(toolbar).toHaveCount(0);
+
+    // 7) Open Highlights drawer and verify saved highlights are listed, scoped & searchable
+    await page.getByRole("button", { name: "View highlights" }).click();
+    await expect(
+      page.getByRole("heading", { name: /Highlights/i })
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "All Books" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /This Book \(Genesis\)/i })
+    ).toBeVisible();
+    await page.getByRole("button", { name: /This Book \(Genesis\)/i }).click();
+    await expect(page.getByText("Genesis 1:1")).toBeVisible();
+    await expect(page.getByText("Genesis 1:2–3")).toBeVisible();
+
+    await page.getByLabel("Search highlights").fill("heavens");
+    await expect(page.getByText("Genesis 1:1")).toBeVisible();
+    await expect(page.getByText("Genesis 1:2–3")).toHaveCount(0);
 
     // Cleanup test user and highlights
     const [createdUser] = await db

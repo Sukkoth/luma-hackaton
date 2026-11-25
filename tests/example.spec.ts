@@ -93,7 +93,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     ).toBeVisible();
 
     // 4. Books page is public to browse
-    await page.goto("/books");
+    await page.goto("/bible");
     await expect(
       page.getByRole("button", { name: "Choose book and chapter" })
     ).toContainText("Genesis 1");
@@ -120,7 +120,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     );
 
     // 2. On Books page, clicking Mark Read prompts to sign in
-    await page.goto("/books");
+    await page.goto("/bible");
     await page.getByRole("button", { name: "Mark Read" }).click();
     await expect(
       page.getByRole("dialog", { name: "Sign In to Log Progress" })
@@ -312,7 +312,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(page.getByText(testUser.email).first()).toBeVisible();
 
     // 4. Verify user can now mark chapters on Books page
-    await page.goto("/books?book=rom&ch=9");
+    await page.goto("/bible?book=rom&ch=9");
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
     await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
     await markReadBtn.click();

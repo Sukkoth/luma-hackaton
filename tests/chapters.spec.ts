@@ -21,7 +21,7 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
   test("unauthenticated guest sees auth guard modal when attempting to mark a chapter", async ({
     page,
   }) => {
-    await page.goto("/books");
+    await page.goto("/bible");
     await expect(
       page.getByRole("button", { name: "Choose book and chapter" })
     ).toContainText("Genesis 1");
@@ -62,7 +62,7 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     await page.waitForURL("/home", { timeout: 10000 });
 
     // 2. Navigate to /books
-    await page.goto("/books");
+    await page.goto("/bible");
     await expect(
       page.getByRole("button", { name: "Choose book and chapter" })
     ).toContainText("Genesis 1");
@@ -233,7 +233,7 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .where(eq(readingTrackers.userId, uRecord!.id));
 
     // Navigate to /books and open Ruth (4 chapters) inside the picker Sheet
-    await page.goto("/books");
+    await page.goto("/bible");
     await page.getByRole("button", { name: "Choose book and chapter" }).click();
     const sheet1 = page.getByRole("dialog");
     await sheet1.getByPlaceholder("Search books...").fill("Ruth");

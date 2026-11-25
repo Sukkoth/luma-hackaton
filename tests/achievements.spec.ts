@@ -122,7 +122,7 @@ test.describe("Achievements & Milestones E2E", () => {
     });
 
     // 2. Mark first Bible chapter (Genesis 1) as read
-    await page.goto("/books");
+    await page.goto("/bible");
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
     await expect(markReadBtn).toBeVisible();
     await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");

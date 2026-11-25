@@ -69,7 +69,7 @@ test.describe("Insights & Visualisations E2E", () => {
     await expect(page.getByText("Completion Rate")).toBeVisible();
 
     // 5. Navigate to /books and mark Genesis Chapter 1 as read
-    await page.goto("/books");
+    await page.goto("/bible");
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
     await expect(markReadBtn).toBeVisible();
     await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
