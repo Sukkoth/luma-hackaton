@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, X } from "lucide-react";
+import { StickyNote, Trash2, X } from "lucide-react";
 import {
   HIGHLIGHT_COLORS,
   type HighlightColor,
@@ -24,6 +24,7 @@ export type HighlightToolbarProps = {
   isBusy: boolean;
   position: { top: number; left: number } | null;
   onSelectColor: (params: { color: HighlightColor }) => void;
+  onAddNote?: () => void;
   onDelete?: () => void;
   onClose: () => void;
 };
@@ -35,6 +36,7 @@ export function HighlightToolbar({
   isBusy,
   position,
   onSelectColor,
+  onAddNote,
   onDelete,
   onClose,
 }: HighlightToolbarProps) {
@@ -53,15 +55,15 @@ export function HighlightToolbar({
       onMouseDown={(e) => e.preventDefault()}
       className={
         position
-          ? "fixed z-[60] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 shadow-lg backdrop-blur-md"
-          : "fixed bottom-20 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 shadow-lg backdrop-blur-md"
+          ? "fixed z-[60] flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center gap-1 sm:gap-1.5 rounded-full border border-border bg-card/95 px-2.5 sm:px-3 py-1.5 shadow-lg backdrop-blur-md"
+          : "fixed bottom-20 left-1/2 z-[60] flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center gap-1 sm:gap-1.5 rounded-full border border-border bg-card/95 px-2.5 sm:px-3 py-1.5 shadow-lg backdrop-blur-md"
       }
     >
-      <span className="mr-1 text-xs font-medium text-foreground-dim">
+      <span className="mr-0.5 sm:mr-1 text-[11px] sm:text-xs font-medium text-foreground-dim whitespace-nowrap">
         {verseLabel}
       </span>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1 sm:gap-1.5">
         {HIGHLIGHT_COLORS.map((color) => {
           const swatch = SWATCH_STYLES[color];
           const isSelected = activeColor === color;
@@ -73,7 +75,7 @@ export function HighlightToolbar({
               aria-label={swatch.label}
               aria-pressed={isSelected}
               onClick={() => onSelectColor({ color })}
-              className={`h-6 w-6 rounded-full transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 ${swatch.dotClass} ${
+              className={`size-5 sm:size-6 shrink-0 rounded-full transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 ${swatch.dotClass} ${
                 isSelected
                   ? "ring-2 ring-foreground ring-offset-2 ring-offset-card"
                   : ""
@@ -83,9 +85,26 @@ export function HighlightToolbar({
         })}
       </div>
 
+      {onAddNote ? (
+        <>
+          <div className="mx-0.5 sm:mx-1 h-4 w-px bg-border" />
+          <button
+            type="button"
+            disabled={isBusy}
+            aria-label="Add note"
+            title="Add note"
+            onClick={onAddNote}
+            className="flex h-7 items-center gap-1 rounded-full px-2 text-xs font-medium text-foreground-dim transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+          >
+            <StickyNote className="size-3.5 text-primary" />
+            <span className="hidden sm:inline">Note</span>
+          </button>
+        </>
+      ) : null}
+
       {isEditing && onDelete ? (
         <>
-          <div className="mx-1 h-4 w-px bg-border" />
+          <div className="mx-0.5 h-4 w-px bg-border" />
           <button
             type="button"
             disabled={isBusy}

@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   BookOpen,
@@ -45,6 +46,7 @@ import {
   updateHighlightColorAction,
   type BibleHighlightDetail,
 } from "@/actions/highlights";
+import { getChapterNotesAction, type NoteDetail } from "@/actions/notes";
 import type { HighlightColor } from "@/lib/schemas/highlights";
 import {
   applyHighlightsToPassageDom,
@@ -53,9 +55,19 @@ import {
   getVerseAtPoint,
   selectVerseInDom,
   type PassageHighlightRange,
+  type RenderableNoteAnchor,
 } from "@/lib/bible-highlights";
 import { HighlightToolbar } from "@/components/bible/highlight-toolbar";
 import { HighlightsSheet } from "@/components/bible/highlights-sheet";
+import type { PassageNoteAnchor } from "@/components/bible/passage-note-sheet";
+
+const PassageNoteSheet = dynamic(
+  () =>
+    import("@/components/bible/passage-note-sheet").then(
+      (mod) => mod.PassageNoteSheet
+    ),
+  { ssr: false }
+);
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -309,10 +321,20 @@ export function BibleWorkspace({
   const [planContext, setPlanContext] = useState<PlanContextData | null>(null);
   const [isTogglingPlan, setIsTogglingPlan] = useState(false);
   const [highlights, setHighlights] = useState<BibleHighlightDetail[]>([]);
+  const [chapterNotes, setChapterNotes] = useState<NoteDetail[]>([]);
   const [isHighlightsSheetOpen, setIsHighlightsSheetOpen] = useState(false);
   const [isZenMode, setIsZenMode] = useState(false);
   const [highlightPrompt, setHighlightPrompt] =
     useState<ActiveHighlightPrompt | null>(null);
+  const [noteSheetState, setNoteSheetState] = useState<{
+    open: boolean;
+    anchor: PassageNoteAnchor | null;
+    existingNote: NoteDetail | null;
+  }>({
+    open: false,
+    anchor: null,
+    existingNote: null,
+  });
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
 
   const hasHydratedPrefsRef = useRef(false);
@@ -419,6 +441,10 @@ export function BibleWorkspace({
   const currentBookId = activePlanReading
     ? activePlanReading.bookId.toLowerCase()
     : normalizedBookId;
+  const currentBookName =
+    PROTESTANT_BIBLE_BOOKS.find((b) => b.id === currentBookId)?.name ??
+    activePlanReading?.bookName ??
+    currentBookId.toUpperCase();
   const currentChapter = activePlanReading
     ? activePlanReading.chapter
     : activeChapter;
@@ -535,36 +561,67 @@ export function BibleWorkspace({
     return () => controller.abort();
   }, [biblePath, passageRetryNonce]);
 
-  // Load saved highlights for the active translation + book + chapter
+  // Load saved highlights & passage notes for the active translation + book + chapter
   useEffect(() => {
     setHighlightPrompt(null);
     if (!isBookSupported) {
       setHighlights([]);
+      setChapterNotes([]);
       return;
     }
 
     let isCancelled = false;
-    async function loadHighlights() {
-      const result = await getChapterHighlightsAction({
-        versionId: selectedVersion.id,
-        bookId: currentBookId,
-        chapter: currentChapter,
-      });
+    async function loadChapterAnnotations() {
+      const [highlightsResult, notesResult] = await Promise.all([
+        getChapterHighlightsAction({
+          versionId: selectedVersion.id,
+          bookId: currentBookId,
+          chapter: currentChapter,
+        }),
+        getChapterNotesAction({
+          versionId: selectedVersion.id,
+          bookId: currentBookId,
+          chapter: currentChapter,
+        }),
+      ]);
       if (isCancelled) return;
-      if (result.success) {
-        setHighlights(result.highlights);
-      } else {
-        setHighlights([]);
-      }
+      setHighlights(
+        highlightsResult.success ? highlightsResult.highlights : []
+      );
+      setChapterNotes(notesResult.success ? notesResult.notes : []);
     }
 
-    void loadHighlights();
+    void loadChapterAnnotations();
     return () => {
       isCancelled = true;
     };
   }, [isBookSupported, selectedVersion.id, currentBookId, currentChapter]);
 
-  // Apply highlights to the rendered passage DOM
+  const notedRanges = useMemo<RenderableNoteAnchor[]>(
+    () =>
+      chapterNotes.flatMap((note) => {
+        if (
+          note.startVerse === null ||
+          note.startOffset === null ||
+          note.endVerse === null ||
+          note.endOffset === null
+        ) {
+          return [];
+        }
+        return [
+          {
+            id: note.id,
+            startVerse: note.startVerse,
+            startOffset: note.startOffset,
+            endVerse: note.endVerse,
+            endOffset: note.endOffset,
+          },
+        ];
+      }),
+    [chapterNotes]
+  );
+
+  // Apply highlights and note underlines to the rendered passage DOM
   useEffect(() => {
     if (
       passageState.status !== "success" ||
@@ -577,8 +634,9 @@ export function BibleWorkspace({
     applyHighlightsToPassageDom({
       container: passageArticleRef.current,
       highlights,
+      notedRanges,
     });
-  }, [passageState, biblePath, highlights]);
+  }, [passageState, biblePath, highlights, notedRanges]);
 
   const handlePassageSelectionEnd = useCallback(() => {
     window.setTimeout(() => {
@@ -715,6 +773,33 @@ export function BibleWorkspace({
         return;
       }
 
+      // Tap on an existing passage note underline -> open note sheet
+      const noteEl = target.closest<HTMLElement>("span[data-note-id]");
+      if (noteEl) {
+        const noteId = noteEl.dataset.noteId;
+        const match = chapterNotes.find((item) => item.id === noteId);
+        if (match) {
+          setHighlightPrompt(null);
+          setNoteSheetState({
+            open: true,
+            anchor: {
+              versionId: selectedVersion.id,
+              versionAbbr: selectedVersion.abbreviation,
+              bookId: currentBookId,
+              bookName: currentBookName,
+              chapter: currentChapter,
+              startVerse: match.startVerse ?? 1,
+              startOffset: match.startOffset ?? 0,
+              endVerse: match.endVerse ?? match.startVerse ?? 1,
+              endOffset: match.endOffset ?? 1,
+              selectedText: match.selectedText ?? "",
+            },
+            existingNote: match,
+          });
+          return;
+        }
+      }
+
       // Tap on an existing highlight -> open edit/remove toolbar
       const markEl = target.closest<HTMLElement>("mark[data-highlight-id]");
       if (markEl) {
@@ -772,8 +857,62 @@ export function BibleWorkspace({
 
       setHighlightPrompt(null);
     },
-    [highlights]
+    [
+      highlights,
+      chapterNotes,
+      selectedVersion.id,
+      selectedVersion.abbreviation,
+      currentBookId,
+      currentBookName,
+      currentChapter,
+    ]
   );
+
+  const handleOpenNoteFromToolbar = useCallback(() => {
+    if (!highlightPrompt) return;
+    const range =
+      highlightPrompt.mode === "create"
+        ? highlightPrompt.range
+        : {
+            startVerse: highlightPrompt.highlight.startVerse,
+            startOffset: highlightPrompt.highlight.startOffset,
+            endVerse: highlightPrompt.highlight.endVerse,
+            endOffset: highlightPrompt.highlight.endOffset,
+            selectedText: highlightPrompt.highlight.selectedText,
+          };
+
+    const existingMatch =
+      chapterNotes.find(
+        (item) =>
+          item.startVerse === range.startVerse &&
+          item.startOffset === range.startOffset &&
+          item.endVerse === range.endVerse &&
+          item.endOffset === range.endOffset
+      ) ?? null;
+
+    window.getSelection()?.removeAllRanges();
+    setHighlightPrompt(null);
+    setNoteSheetState({
+      open: true,
+      anchor: {
+        versionId: selectedVersion.id,
+        versionAbbr: selectedVersion.abbreviation,
+        bookId: currentBookId,
+        bookName: currentBookName,
+        chapter: currentChapter,
+        ...range,
+      },
+      existingNote: existingMatch,
+    });
+  }, [
+    highlightPrompt,
+    chapterNotes,
+    selectedVersion.id,
+    selectedVersion.abbreviation,
+    currentBookId,
+    currentBookName,
+    currentChapter,
+  ]);
 
   const handleSelectHighlightColor = useCallback(
     async ({ color }: { color: HighlightColor }) => {
@@ -1485,6 +1624,7 @@ export function BibleWorkspace({
                 isBusy={isSavingHighlight}
                 position={highlightPrompt.position}
                 onSelectColor={handleSelectHighlightColor}
+                onAddNote={handleOpenNoteFromToolbar}
                 onDelete={
                   highlightPrompt.mode === "edit"
                     ? handleDeleteHighlight
@@ -1493,6 +1633,33 @@ export function BibleWorkspace({
                 onClose={() => {
                   window.getSelection()?.removeAllRanges();
                   setHighlightPrompt(null);
+                }}
+              />
+            ) : null}
+
+            {noteSheetState.anchor || noteSheetState.existingNote ? (
+              <PassageNoteSheet
+                open={noteSheetState.open}
+                onOpenChange={(open) =>
+                  setNoteSheetState((prev) => ({ ...prev, open }))
+                }
+                anchor={noteSheetState.anchor}
+                existingNote={noteSheetState.existingNote}
+                planInstanceId={planContext?.plan.id ?? null}
+                planDayNumber={
+                  activePlanReading ? activePlanReading.sessionIndex + 1 : null
+                }
+                onNoteSaved={({ note, isNew }) => {
+                  setChapterNotes((prev) =>
+                    isNew
+                      ? [note, ...prev]
+                      : prev.map((item) => (item.id === note.id ? note : item))
+                  );
+                }}
+                onNoteDeleted={({ noteId }) => {
+                  setChapterNotes((prev) =>
+                    prev.filter((item) => item.id !== noteId)
+                  );
                 }}
               />
             ) : null}
@@ -1887,6 +2054,7 @@ export function BibleWorkspace({
         onOpenChange={setIsHighlightsSheetOpen}
         currentBookId={currentBookId}
         currentBookName={activeBook.name}
+        currentChapter={currentChapter}
         onNavigateToHighlight={({ bookId, chapter, versionId }) => {
           saveSelectedVersion({ versionId });
           setStoredVersionId(versionId);
@@ -1904,6 +2072,63 @@ export function BibleWorkspace({
           setHighlights((prev) =>
             prev.filter((item) => item.id !== highlightId)
           );
+        }}
+        onSelectNote={({ note }) => {
+          if (!note.bookId || !note.chapter) {
+            router.push(`/notes?noteId=${note.id}`);
+            return;
+          }
+
+          const targetVersionId = note.versionId ?? selectedVersion.id;
+          const isDifferentPassage =
+            note.bookId.toLowerCase() !== currentBookId.toLowerCase() ||
+            note.chapter !== currentChapter ||
+            targetVersionId !== selectedVersion.id;
+
+          if (isDifferentPassage) {
+            saveSelectedVersion({ versionId: targetVersionId });
+            setStoredVersionId(targetVersionId);
+            updateReaderQuery({
+              book: note.bookId,
+              ch: note.chapter,
+              v: targetVersionId,
+              plan: null,
+              readingId: null,
+              startVerse: null,
+              endVerse: null,
+            });
+          }
+
+          const targetBook = PROTESTANT_BIBLE_BOOKS.find(
+            (b) => b.id === note.bookId?.toLowerCase()
+          );
+          const targetVersion = BIBLE_VERSIONS.find(
+            (v) => v.id === targetVersionId
+          );
+          setNoteSheetState({
+            open: true,
+            anchor:
+              note.startVerse !== null
+                ? {
+                    versionId: targetVersionId,
+                    versionAbbr:
+                      targetVersion?.abbreviation ??
+                      selectedVersion.abbreviation,
+                    bookId: note.bookId,
+                    bookName: targetBook?.name ?? note.bookId.toUpperCase(),
+                    chapter: note.chapter,
+                    startVerse: note.startVerse,
+                    startOffset: note.startOffset ?? 0,
+                    endVerse: note.endVerse ?? note.startVerse,
+                    endOffset: note.endOffset ?? 1,
+                    selectedText: note.selectedText ?? "",
+                  }
+                : null,
+            existingNote: note,
+          });
+        }}
+        onNoteDeleted={({ noteId }) => {
+          setChapterNotes((prev) => prev.filter((item) => item.id !== noteId));
         }}
       />
     </div>
