@@ -260,7 +260,14 @@ export function BibleWorkspace({
     setReaderQuery((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  // Sync URL bar after commit so Next.js Router never updates during render
+  const prevSyncedLocationRef = useRef<{
+    book: string;
+    ch: number;
+    plan: string | null;
+    readingId: string | null;
+  } | null>(null);
+
+  // Sync URL bar after commit via Next.js router so Back/Forward and useSearchParams() stay in sync
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -292,10 +299,30 @@ export function BibleWorkspace({
       ? `${window.location.pathname}?${qs}`
       : window.location.pathname;
     const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+    const prevLocation = prevSyncedLocationRef.current;
+    const isLocationChange =
+      prevLocation !== null &&
+      (prevLocation.book !== readerQuery.book ||
+        prevLocation.ch !== readerQuery.ch ||
+        prevLocation.plan !== readerQuery.plan ||
+        prevLocation.readingId !== readerQuery.readingId);
+
+    prevSyncedLocationRef.current = {
+      book: readerQuery.book,
+      ch: readerQuery.ch,
+      plan: readerQuery.plan,
+      readingId: readerQuery.readingId,
+    };
+
     if (nextUrl !== currentUrl) {
-      window.history.replaceState(null, "", nextUrl);
+      if (isLocationChange) {
+        router.push(nextUrl, { scroll: false });
+      } else {
+        router.replace(nextUrl, { scroll: false });
+      }
     }
-  }, [readerQuery]);
+  }, [readerQuery, router]);
 
   const {
     book: bookParam,
@@ -374,7 +401,11 @@ export function BibleWorkspace({
     const timer = setTimeout(() => {
       hasHydratedPrefsRef.current = true;
       setFontSize(getStoredFontSize());
-      setStoredVersionId(detectDefaultVersion({}).id);
+      const detected = detectDefaultVersion({});
+      setStoredVersionId(detected.id);
+      setReaderQuery((prev) =>
+        prev.v == null ? { ...prev, v: detected.id } : prev
+      );
     }, 0);
     return () => clearTimeout(timer);
   }, []);
@@ -1767,7 +1798,11 @@ export function BibleWorkspace({
 
       {/* ── Unified Book & Progress Picker Sheet ── */}
       {!hideBookSelector && (
-        <Sheet open={isBookPickerOpen} onOpenChange={setIsBookPickerOpen}>
+        <Sheet
+          open={isBookPickerOpen}
+          onOpenChange={setIsBookPickerOpen}
+          closeOnBack={false}
+        >
           <SheetContent
             side="left"
             className="w-[90vw] sm:max-w-[440px] p-0 flex flex-col gap-0"
