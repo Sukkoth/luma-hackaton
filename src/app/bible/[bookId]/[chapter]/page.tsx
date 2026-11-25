@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+export const instant = false;
+
 type Props = {
   params: Promise<{ bookId: string; chapter: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
