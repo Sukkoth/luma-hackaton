@@ -448,6 +448,18 @@ async function fetchYouVersionPassage({
   versionId: number;
   reference: string;
 }): Promise<CachedPassage> {
+  if (process.env.E2E_MOCK_BIBLE_API === "true") {
+    const version = BIBLE_VERSIONS.find((item) => item.id === versionId);
+    const mockHtml = `<div><div class="s1 yv-h">${escapeHtml({ text: reference })}</div><div class="p"><span class="yv-v" v="1"></span><span class="yv-vlbl">1</span>In the beginning God created the heavens and the earth. <span class="yv-v" v="2"></span><span class="yv-vlbl">2</span>Now the earth was formless and empty, darkness was over the surface of the deep.</div></div>`;
+    return {
+      reference,
+      contentHtml: sanitizePassageHtml({ html: mockHtml }),
+      versionLabel: version?.abbreviation ?? String(versionId),
+      copyright: "Mock Scripture Copyright. Used for E2E testing.",
+      timestamp: Date.now(),
+    };
+  }
+
   const appKey = process.env.APP_KEY;
   if (!appKey) {
     throw new BibleProxyError({
