@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import * as v from "valibot";
 import { READING_PLANS, isPlanCanonCompatible } from "@/data/readingPlans";
+import { computeGroupPlanEndDate } from "@/lib/plans/group-plan-schedule";
 import type { BibleCanon } from "@/data/bibleData";
 import { ScheduleGroupPlanSchema } from "@/lib/schemas/groups";
 import {
@@ -209,6 +210,12 @@ export function GroupSchedulePlanModal({
         totalChapters: planTemplate?.totalChapters || 0,
         userEnrolledInstanceId: null,
         enrolledMembersCount: 0,
+        expectedEndDate: computeGroupPlanEndDate({
+          scheduledStartDate: new Date(parsed.output.scheduledStartDate),
+          totalChapters: planTemplate?.totalChapters || 0,
+          dailyChapterTarget: parsed.output.dailyChapterTarget,
+          activeWeekdaysMask: parsed.output.activeWeekdaysMask,
+        }),
         createdAt: new Date(),
       });
       onClose();
