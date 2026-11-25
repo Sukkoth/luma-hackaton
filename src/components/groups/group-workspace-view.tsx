@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,7 +16,6 @@ import {
   Globe,
   ArrowLeft,
   BookOpen,
-  Trophy,
   Share2,
   LogOut,
   Pin,
@@ -32,17 +32,43 @@ import type {
 import { leaveGroupAction } from "@/actions/groups";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { GroupPlansTab } from "@/components/groups/group-plans-tab";
-import { GroupLeaderboardTab } from "@/components/groups/group-leaderboard-tab";
 import { GroupMembersTab } from "@/components/groups/group-members-tab";
-import { GroupAdminTab } from "@/components/groups/group-admin-tab";
-import { GroupSchedulePlanModal } from "@/components/groups/group-schedule-plan-modal";
-import { GroupInviteModal } from "@/components/groups/group-invite-modal";
 import { GroupPinnedBulletin } from "@/components/groups/group-pinned-bulletin";
-import { GroupPinnedNoticeModal } from "@/components/groups/group-pinned-notice-modal";
-import { GroupJoinConfirmModal } from "@/components/groups/group-join-confirm-modal";
 import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { toast } from "@/components/ui/sonner";
+
+const GroupAdminTab = dynamic(() =>
+  import("@/components/groups/group-admin-tab").then((mod) => mod.GroupAdminTab)
+);
+const GroupSchedulePlanModal = dynamic(
+  () =>
+    import("@/components/groups/group-schedule-plan-modal").then(
+      (mod) => mod.GroupSchedulePlanModal
+    ),
+  { ssr: false }
+);
+const GroupInviteModal = dynamic(
+  () =>
+    import("@/components/groups/group-invite-modal").then(
+      (mod) => mod.GroupInviteModal
+    ),
+  { ssr: false }
+);
+const GroupPinnedNoticeModal = dynamic(
+  () =>
+    import("@/components/groups/group-pinned-notice-modal").then(
+      (mod) => mod.GroupPinnedNoticeModal
+    ),
+  { ssr: false }
+);
+const GroupJoinConfirmModal = dynamic(
+  () =>
+    import("@/components/groups/group-join-confirm-modal").then(
+      (mod) => mod.GroupJoinConfirmModal
+    ),
+  { ssr: false }
+);
 
 export type GroupWorkspaceViewProps = {
   group: GroupDetails;
@@ -53,7 +79,7 @@ export type GroupWorkspaceViewProps = {
   activeTrackerId?: string;
 };
 
-const WORKSPACE_TABS = ["plans", "leaderboard", "members", "admin"] as const;
+const WORKSPACE_TABS = ["plans", "members", "admin"] as const;
 type WorkspaceTab = (typeof WORKSPACE_TABS)[number];
 
 export function GroupWorkspaceView({
@@ -357,11 +383,6 @@ export function GroupWorkspaceView({
             icon: <BookOpen className="size-3.5" />,
           },
           {
-            id: "leaderboard",
-            label: "Leaderboard",
-            icon: <Trophy className="size-3.5" />,
-          },
-          {
             id: "members",
             label: `Members (${group.memberCount})`,
             icon: <Users className="size-3.5" />,
@@ -382,13 +403,16 @@ export function GroupWorkspaceView({
 
       {/* ── Active Tab Display ── */}
       <section className="w-full space-y-6 pt-1">
-        {/* Tab 1: Plans */}
+        {/* Tab 1: Plans (with per-plan Leaderboards & Lifecycle) */}
         {activeTab === "plans" && (
           <GroupPlansTab
             groupId={group.id}
             activePlans={currentActivePlans}
             scheduledPlans={group.scheduledPlans}
             completedPlans={group.completedPlans}
+            leaderboardsByPlanId={leaderboardsByPlanId}
+            currentUserHideProgress={group.currentUserHideProgress}
+            currentUserPrivacyUpdatedAt={group.currentUserPrivacyUpdatedAt}
             trackers={trackers}
             activeTrackerId={activeTrackerId}
             isAdmin={isAdmin}
@@ -400,27 +424,7 @@ export function GroupWorkspaceView({
           />
         )}
 
-        {/* Tab 2: Leaderboard */}
-        {activeTab === "leaderboard" && (
-          <GroupLeaderboardTab
-            groupId={group.id}
-            activePlans={currentActivePlans}
-            leaderboardsByPlanId={leaderboardsByPlanId}
-            currentUserHideProgress={group.currentUserHideProgress}
-            currentUserPrivacyUpdatedAt={group.currentUserPrivacyUpdatedAt}
-            isMember={isMember}
-            onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
-            onCopyInvite={
-              canInvite ? () => setIsInviteModalOpen(true) : undefined
-            }
-            onSelectPlanForEnroll={(plan) => {
-              setSelectedPlanForEnroll(plan);
-              setActiveTab("plans");
-            }}
-          />
-        )}
-
-        {/* Tab 3: Members */}
+        {/* Tab 2: Members */}
         {activeTab === "members" && (
           <GroupMembersTab
             groupId={group.id}

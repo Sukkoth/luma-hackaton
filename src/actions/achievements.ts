@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import * as v from "valibot";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
@@ -10,12 +10,16 @@ import {
   trackerChapterProgress,
   planInstances,
   unlockedAchievements,
+  groupMembers,
+  groupMemberEnrollments,
+  notes,
 } from "@/db/schema";
 import { createNotificationAction } from "@/actions/notifications";
 import {
   ACHIEVEMENTS,
   type Achievement,
   type AchievementCategory,
+  type GroupAchievementStats,
   type SerializableAchievement,
   toSerializableAchievement,
 } from "@/data/achievements";
@@ -57,6 +61,62 @@ export type GetUserAchievementsDataParams = {
   userId: string;
 };
 
+async function fetchGroupAchievementStats({
+  userId,
+}: {
+  userId: string;
+}): Promise<GroupAchievementStats> {
+  const [memberships, enrollments, sharedNotesRes] = await Promise.all([
+    db
+      .select({ role: groupMembers.role })
+      .from(groupMembers)
+      .where(
+        and(eq(groupMembers.userId, userId), eq(groupMembers.status, "active"))
+      ),
+    db
+      .select({ status: planInstances.status })
+      .from(groupMemberEnrollments)
+      .innerJoin(
+        planInstances,
+        eq(groupMemberEnrollments.planInstanceId, planInstances.id)
+      )
+      .where(eq(groupMemberEnrollments.userId, userId)),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(notes)
+      .where(
+        and(
+          eq(notes.userId, userId),
+          eq(notes.isSharedWithCommunity, true),
+          isNotNull(notes.planInstanceId),
+          eq(notes.isArchived, false)
+        )
+      ),
+  ]);
+
+  let ledGroupsCount = 0;
+  for (const m of memberships) {
+    if (m.role === "owner" || m.role === "admin") {
+      ledGroupsCount++;
+    }
+  }
+
+  let completedGroupPlansCount = 0;
+  for (const e of enrollments) {
+    if (e.status === "completed" || e.status === "finished") {
+      completedGroupPlansCount++;
+    }
+  }
+
+  return {
+    activeMembershipsCount: memberships.length,
+    ledGroupsCount,
+    enrolledGroupPlansCount: enrollments.length,
+    completedGroupPlansCount,
+    sharedReflectionsCount: Number(sharedNotesRes[0]?.count ?? 0),
+  };
+}
+
 export async function getUserAchievementsData({
   userId,
 }: GetUserAchievementsDataParams): Promise<UserAchievementsData> {
@@ -66,8 +126,8 @@ export async function getUserAchievementsData({
   });
   const trackerIds = userTrackers.map((t) => t.id);
 
-  // 2. Fetch progress, completed plans, already unlocked achievements, and streak in parallel
-  const [progressRows, completedPlans, unlockedRows, streak] =
+  // 2. Fetch progress, completed plans, already unlocked achievements, streak, and group stats in parallel
+  const [progressRows, completedPlans, unlockedRows, streak, groupStats] =
     await Promise.all([
       trackerIds.length > 0
         ? db.query.trackerChapterProgress.findMany({
@@ -84,6 +144,7 @@ export async function getUserAchievementsData({
         where: eq(unlockedAchievements.userId, userId),
       }),
       syncUserStreak({ userId }),
+      fetchGroupAchievementStats({ userId }),
     ]);
 
   // 3. Assemble global progress map (bookId -> list of chapter numbers)
@@ -120,7 +181,8 @@ export async function getUserAchievementsData({
       trackerCount,
       totalChaptersRead,
       streakCount,
-      completedPlansCount
+      completedPlansCount,
+      groupStats
     );
 
     const isUnlocked = !!existing || evalResult.unlocked;
@@ -216,7 +278,7 @@ export async function evaluateAndUnlockAchievementsAction({
   });
   const trackerIds = userTrackers.map((t) => t.id);
 
-  const [progressRows, completedPlans, unlockedRows, streak] =
+  const [progressRows, completedPlans, unlockedRows, streak, groupStats] =
     await Promise.all([
       trackerIds.length > 0
         ? db.query.trackerChapterProgress.findMany({
@@ -233,6 +295,7 @@ export async function evaluateAndUnlockAchievementsAction({
         where: eq(unlockedAchievements.userId, userId),
       }),
       syncUserStreak({ userId }),
+      fetchGroupAchievementStats({ userId }),
     ]);
 
   const globalProgress: Record<string, number[]> = {};
@@ -266,7 +329,8 @@ export async function evaluateAndUnlockAchievementsAction({
       trackerCount,
       totalChaptersRead,
       streakCount,
-      completedPlansCount
+      completedPlansCount,
+      groupStats
     );
 
     if (evalResult.unlocked) {

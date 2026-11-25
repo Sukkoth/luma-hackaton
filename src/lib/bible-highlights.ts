@@ -294,21 +294,29 @@ const HIGHLIGHT_MARK_CLASSES: Record<HighlightColor, string> = {
   purple: "bg-purple-300/55 dark:bg-purple-500/55",
 };
 
+export type RenderableNoteAnchor = {
+  id: string;
+  startVerse: number;
+  startOffset: number;
+  endVerse: number;
+  endOffset: number;
+};
+
 export function clearHighlightsFromPassageDom({
   container,
 }: {
   container: HTMLElement;
 }): void {
-  const marks = container.querySelectorAll<HTMLElement>(
-    "mark[data-highlight-id]"
+  const nodes = container.querySelectorAll<HTMLElement>(
+    "mark[data-highlight-id], span[data-note-id]"
   );
-  for (const mark of marks) {
-    const parent = mark.parentNode;
+  for (const node of nodes) {
+    const parent = node.parentNode;
     if (!parent) continue;
-    while (mark.firstChild) {
-      parent.insertBefore(mark.firstChild, mark);
+    while (node.firstChild) {
+      parent.insertBefore(node.firstChild, node);
     }
-    parent.removeChild(mark);
+    parent.removeChild(node);
   }
   container.normalize();
 }
@@ -327,7 +335,8 @@ function wrapVerseSlice({
   endVerse: number;
   endOffset: number;
   createWrapper: () => HTMLElement;
-}): void {
+}): HTMLElement[] {
+  const created: HTMLElement[] = [];
   const verseInfos = collectVerseInfos({ container });
   for (const info of verseInfos) {
     if (info.verse < startVerse || info.verse > endVerse) {
@@ -356,16 +365,20 @@ function wrapVerseSlice({
 
       const wrapper = createWrapper();
       targetRange.surroundContents(wrapper);
+      created.push(wrapper);
     }
   }
+  return created;
 }
 
 export function applyHighlightsToPassageDom({
   container,
   highlights,
+  notedRanges = [],
 }: {
   container: HTMLElement;
   highlights: ReadonlyArray<RenderableHighlight>;
+  notedRanges?: ReadonlyArray<RenderableNoteAnchor>;
 }): void {
   clearHighlightsFromPassageDom({ container });
 
@@ -384,5 +397,24 @@ export function applyHighlightsToPassageDom({
         return mark;
       },
     });
+  }
+
+  for (const noteAnchor of notedRanges) {
+    const wrappers = wrapVerseSlice({
+      container,
+      startVerse: noteAnchor.startVerse,
+      startOffset: noteAnchor.startOffset,
+      endVerse: noteAnchor.endVerse,
+      endOffset: noteAnchor.endOffset,
+      createWrapper: () => {
+        const span = document.createElement("span");
+        span.dataset.noteId = noteAnchor.id;
+        return span;
+      },
+    });
+    const lastWrapper = wrappers[wrappers.length - 1];
+    if (lastWrapper) {
+      lastWrapper.dataset.noteEnd = "true";
+    }
   }
 }

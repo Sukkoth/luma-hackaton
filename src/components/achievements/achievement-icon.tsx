@@ -19,6 +19,7 @@ import {
   Flag,
   Grid,
   FolderPlus,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -43,6 +44,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   flag: Flag,
   grid: Grid,
   "folder-plus": FolderPlus,
+  users: Users,
 };
 
 export type AchievementIconProps = {

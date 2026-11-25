@@ -14,7 +14,58 @@ export const CreateNoteSchema = v.object({
   planInstanceId: v.optional(v.nullable(v.string())),
   planDayNumber: v.optional(v.nullable(v.number())),
   planSessionId: v.optional(v.nullable(v.number())),
+  versionId: v.optional(
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1)))
+  ),
+  bookId: v.optional(
+    v.nullable(v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(16)))
+  ),
+  chapter: v.optional(
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1)))
+  ),
+  startVerse: v.optional(
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1)))
+  ),
+  startOffset: v.optional(
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(0)))
+  ),
+  endVerse: v.optional(
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1)))
+  ),
+  endOffset: v.optional(
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1)))
+  ),
+  selectedText: v.optional(v.nullable(v.pipe(v.string(), v.maxLength(8000)))),
 });
+
+export const GetChapterNotesSchema = v.object({
+  versionId: v.pipe(v.number(), v.integer(), v.minValue(1)),
+  bookId: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(16)),
+  chapter: v.pipe(v.number(), v.integer(), v.minValue(1)),
+});
+
+export type GetChapterNotesInput = v.InferOutput<typeof GetChapterNotesSchema>;
+
+export const GetPaginatedNotesSchema = v.object({
+  page: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
+  limit: v.optional(
+    v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(50)),
+    20
+  ),
+  bookId: v.optional(
+    v.nullable(v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(16)))
+  ),
+  chapter: v.optional(
+    v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1)))
+  ),
+  searchQuery: v.optional(v.pipe(v.string(), v.maxLength(200))),
+  sortBy: v.optional(v.picklist(["createdAt", "book"]), "createdAt"),
+  sortDir: v.optional(v.picklist(["asc", "desc"]), "desc"),
+});
+
+export type GetPaginatedNotesInput = v.InferOutput<
+  typeof GetPaginatedNotesSchema
+>;
 
 export type CreateNoteInput = v.InferOutput<typeof CreateNoteSchema>;
 

@@ -8,6 +8,7 @@ import {
   useCallback,
   useDeferredValue,
 } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
 import {
@@ -58,7 +59,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
 import { cn } from "@/lib/utils";
+
+function getNoteScriptureBadge({
+  note,
+}: {
+  note: NoteDetail;
+}): { label: string; href: string } | null {
+  if (!note.bookId || !note.chapter || !note.startVerse) {
+    return null;
+  }
+  const book = PROTESTANT_BIBLE_BOOKS.find(
+    (b) => b.id === note.bookId?.toLowerCase()
+  );
+  const bookName = book?.name ?? note.bookId.toUpperCase();
+  const versePart =
+    note.endVerse && note.endVerse !== note.startVerse
+      ? `${note.startVerse}–${note.endVerse}`
+      : `${note.startVerse}`;
+  const versionParam = note.versionId ? `&v=${note.versionId}` : "";
+  return {
+    label: `${bookName} ${note.chapter}:${versePart}`,
+    href: `/bible?book=${encodeURIComponent(note.bookId)}&ch=${note.chapter}${versionParam}`,
+  };
+}
 
 export type NotesManagerProps = {
   initialNotes: NoteDetail[];
@@ -1207,6 +1232,25 @@ export function NotesManager({
                             <span className="truncate">{note.planTitle}</span>
                           </span>
                         )}
+
+                        {(() => {
+                          const scriptureBadge = getNoteScriptureBadge({
+                            note,
+                          });
+                          if (!scriptureBadge) return null;
+                          return (
+                            <Link
+                              href={scriptureBadge.href}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 rounded-md bg-muted/80 hover:bg-muted border border-border/70 px-1.5 py-0.5 text-[10px] font-semibold text-foreground/85 truncate max-w-[140px] transition-colors"
+                            >
+                              <BookOpen className="size-2.5 text-primary shrink-0" />
+                              <span className="truncate">
+                                {scriptureBadge.label}
+                              </span>
+                            </Link>
+                          );
+                        })()}
                       </div>
                     </div>
                   );
@@ -1275,6 +1319,25 @@ export function NotesManager({
                         <span className="truncate">{activeNote.planTitle}</span>
                       </span>
                     )}
+
+                    {(() => {
+                      const scriptureBadge = getNoteScriptureBadge({
+                        note: activeNote,
+                      });
+                      if (!scriptureBadge) return null;
+                      return (
+                        <Link
+                          href={scriptureBadge.href}
+                          className="inline-flex h-8 sm:h-8.5 items-center gap-1.5 rounded-lg sm:rounded-xl border border-border/80 bg-muted/60 hover:bg-muted px-2.5 text-xs font-semibold text-foreground truncate max-w-[160px] transition-colors"
+                          title={`Open ${scriptureBadge.label} in Bible Reader`}
+                        >
+                          <BookOpen className="size-3 text-primary shrink-0" />
+                          <span className="truncate">
+                            {scriptureBadge.label}
+                          </span>
+                        </Link>
+                      );
+                    })()}
                   </div>
 
                   {/* Right: Actions (Autosave, Pin, Archive, Delete) */}

@@ -80,6 +80,14 @@ function unregisterSheet({ id, poppedByHistory }: UnregisterSheetParams): void {
   }
 
   if (!poppedByHistory) {
+    const currentState =
+      typeof window.history.state === "object" && window.history.state !== null
+        ? (window.history.state as Record<string, unknown>)
+        : null;
+    if (currentState?.__sheet_id !== id) {
+      return;
+    }
+
     isProgrammaticBackInProgress = true;
     if (programmaticBackTimeoutId) {
       clearTimeout(programmaticBackTimeoutId);

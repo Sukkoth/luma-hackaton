@@ -7,7 +7,7 @@ if (fs.existsSync(".env")) {
 }
 
 import { db } from "../src/db";
-import { bibleHighlights, user } from "../src/db/schema";
+import { bibleHighlights, notes, user } from "../src/db/schema";
 
 const SAMPLE_PASSAGE_HTML = `<div><div class="pi"><span class="yv-v" v="1"></span><span class="yv-vlbl">1</span>In the beginning God created the heavens and the earth. <span class="yv-v" v="2"></span><span class="yv-vlbl">2</span>Now the earth was formless and empty, darkness was over the surface of the deep.</div><div class="li1"><span class="yv-v" v="3"></span><span class="yv-vlbl">3</span>And God said, Let there be light, and there was light.</div></div>`;
 
@@ -47,6 +47,9 @@ test.describe("Bible Passage Highlighting E2E", () => {
       .getByRole("button", { name: "Complete Onboarding & Begin" })
       .click();
     await page.waitForURL("/home", { timeout: 10000 });
+    await expect(
+      page.getByRole("heading", { name: /Good (morning|afternoon|evening)/i })
+    ).toBeVisible();
 
     await page.goto("/bible");
     await expect(
@@ -229,6 +232,172 @@ test.describe("Bible Passage Highlighting E2E", () => {
       await db
         .delete(bibleHighlights)
         .where(eq(bibleHighlights.userId, createdUser.id));
+      await db.delete(user).where(eq(user.id, createdUser.id));
+    }
+  });
+
+  test("supports creating, persisting, editing passage-anchored notes and viewing them in /notes", async ({
+    page,
+  }) => {
+    const testId = Date.now();
+    const testEmail = `noter_${testId}@example.com`;
+    const testPassword = "TestPassword123!";
+
+    await page.route("**/api/bible-proxy**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          reference: "Genesis 1",
+          contentHtml: SAMPLE_PASSAGE_HTML,
+          versionLabel: "NIV",
+          copyright: "Copyright © Biblica, Inc. Used by Permission.",
+        }),
+      });
+    });
+
+    await page.goto("/signup");
+    await page.getByLabel("Full Name").fill(`Noter ${testId}`);
+    await page.getByLabel("Email address").fill(testEmail);
+    await page.locator("#signup-password").fill(testPassword);
+    await page.getByRole("checkbox", { name: /agree/i }).check();
+    await page.getByRole("button", { name: "Create Account" }).click();
+
+    await page.waitForURL("/onboarding", { timeout: 10000 });
+    await page.getByRole("button", { name: "Skip to Setup" }).click();
+    await page
+      .getByRole("button", { name: "Complete Onboarding & Begin" })
+      .click();
+    await page.waitForURL("/home", { timeout: 10000 });
+    await expect(
+      page.getByRole("heading", { name: /Good (morning|afternoon|evening)/i })
+    ).toBeVisible();
+
+    await page.goto("/bible");
+    await expect(
+      page.locator(".luma-bible-passage .yv-vlbl").first()
+    ).toBeVisible();
+
+    // Select "formless and empty" in verse 2
+    await page.evaluate(() => {
+      const v2Marker = document.querySelector(
+        ".luma-bible-passage span[v='2']"
+      );
+      const v2Label = v2Marker?.nextElementSibling;
+      const textNode = v2Label?.nextSibling as Text | null;
+      if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+        throw new Error("Missing v2 text node");
+      }
+      const idx = textNode.data.indexOf("formless and empty");
+      const range = document.createRange();
+      range.setStart(textNode, idx);
+      range.setEnd(textNode, idx + "formless and empty".length);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    });
+    await page.locator(".luma-bible-passage").dispatchEvent("mouseup");
+
+    const toolbar = page.getByRole("toolbar", {
+      name: "Passage highlight actions",
+    });
+    await toolbar.getByRole("button", { name: "Add note" }).click();
+
+    await expect(
+      page.getByRole("heading", { name: "New Passage Note" })
+    ).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(
+      "Genesis 1:2"
+    );
+    await page
+      .getByRole("textbox", { name: "Note" })
+      .fill("God brings order out of chaos.");
+    await page.getByRole("button", { name: "Save Note" }).click();
+
+    const noteSpan = page.locator(".luma-bible-passage span[data-note-id]");
+    await expect(noteSpan).toContainText("formless and empty");
+    await expect(page).toHaveURL(/\/bible/);
+    await expect(
+      page.getByRole("heading", { name: "New Passage Note" })
+    ).toHaveCount(0);
+
+    // Reload and verify note indicator persists
+    await page.goto("/bible");
+    await expect(
+      page.locator(".luma-bible-passage span[data-note-id]")
+    ).toContainText("formless and empty");
+
+    // Click the noted span to edit
+    await page.locator(".luma-bible-passage span[data-note-id]").click();
+    await expect(
+      page.getByRole("heading", { name: "Edit Passage Note" })
+    ).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Note" })).toHaveValue(
+      "God brings order out of chaos."
+    );
+    await page
+      .getByRole("textbox", { name: "Note" })
+      .fill("God brings order and light.");
+    await page.getByRole("button", { name: "Save Changes" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Edit Passage Note" })
+    ).toHaveCount(0);
+    await expect(page).toHaveURL(/\/bible/);
+
+    // Open Highlights drawer, switch to Notes tab, check current chapter, All Notes, and sort dropdowns
+    await page.getByRole("button", { name: "View highlights" }).click();
+    await expect(
+      page.getByRole("combobox", { name: "Filter by highlight color" })
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Notes", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Genesis 1", exact: true })
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "All Notes" })).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "Sort notes by" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "Sort direction" })
+    ).toBeVisible();
+    await expect(page.getByText("God brings order and light.")).toBeVisible();
+    await page.getByRole("combobox", { name: "Sort notes by" }).click();
+    await page.getByRole("option", { name: "Sort: Book" }).click();
+    await page.getByRole("combobox", { name: "Sort direction" }).click();
+    await page.getByRole("option", { name: "Order: Asc" }).click();
+    await page.getByRole("button", { name: "All Notes" }).click();
+    await expect(page.getByText("God brings order and light.")).toBeVisible();
+    await page.getByRole("link", { name: "Open Studio" }).click();
+    await expect(page).toHaveURL(/\/notes/);
+
+    // Verify shared verse link shows "Read full chapter" button and expands to full chapter
+    await page.goto("/bible?book=gen&ch=1&v=111&startVerse=1&endVerse=1");
+    const expandBtn = page.getByRole("button", {
+      name: "Read full chapter (Genesis 1)",
+    });
+    await expect(expandBtn).toBeVisible();
+    await expandBtn.click();
+    await expect(expandBtn).toHaveCount(0);
+    await expect(page).not.toHaveURL(/startVerse=/);
+
+    await page.goto("/notes");
+
+    // Verify note and clickable scripture badge appear in /notes
+    const scriptureLink = page
+      .getByRole("link", { name: "Genesis 1:2" })
+      .first();
+    await expect(scriptureLink).toBeVisible();
+    await expect(scriptureLink).toHaveAttribute(
+      "href",
+      /\/bible\?book=gen&ch=1/
+    );
+
+    const [createdUser] = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.email, testEmail));
+    if (createdUser) {
+      await db.delete(notes).where(eq(notes.userId, createdUser.id));
       await db.delete(user).where(eq(user.id, createdUser.id));
     }
   });

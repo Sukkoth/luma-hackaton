@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Lock, Share2 } from "lucide-react";
+import { Lock, LockOpen, Share2 } from "lucide-react";
 import type { UserAchievementItem } from "@/actions/achievements";
 import { AchievementIcon } from "./achievement-icon";
 import { cn } from "@/lib/utils";
@@ -75,9 +75,12 @@ export function AchievementCard({
           <div className="flex items-center gap-1.5">
             {isUnlocked ? (
               <div className="flex items-center gap-1.5">
-                <span className="flex items-center gap-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                  <Check className="size-3" strokeWidth={2.5} />
-                  <span>Unlocked</span>
+                <span
+                  title="Unlocked"
+                  aria-label="Unlocked"
+                  className="flex size-6 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary"
+                >
+                  <LockOpen className="size-3.5" />
                 </span>
                 <span
                   title="Share Milestone"

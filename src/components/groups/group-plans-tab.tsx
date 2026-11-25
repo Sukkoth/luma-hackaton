@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -21,7 +22,7 @@ import {
   AlertTriangle,
   UserPlus,
 } from "lucide-react";
-import type { GroupPlanSummary } from "@/actions/groups";
+import type { GroupPlanSummary, LeaderboardEntry } from "@/actions/groups";
 import {
   leaveGroupPlanAction,
   updateGroupPlanStatusAction,
@@ -29,15 +30,80 @@ import {
 } from "@/actions/groups";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { Button } from "@/components/ui/button";
-import { GroupPlanEnrollModal } from "@/components/groups/group-plan-enroll-modal";
+import { PlanLeaderboardPanel } from "@/components/groups/plan-leaderboard-panel";
+import { GROUP_PLAN_GRACE_MS } from "@/lib/plans/group-plan-schedule";
 import { toast } from "@/components/ui/sonner";
 import { parseLocalDate } from "@/lib/timezone";
+
+const GroupPlanEnrollModal = dynamic(
+  () =>
+    import("@/components/groups/group-plan-enroll-modal").then(
+      (mod) => mod.GroupPlanEnrollModal
+    ),
+  { ssr: false }
+);
+
+type LifecycleFilter = "all" | "active" | "scheduled" | "archive";
+
+function PlanLifecycleStepper({
+  status,
+}: {
+  status: GroupPlanSummary["status"];
+}) {
+  const isCancelled = status === "cancelled";
+  const steps: ReadonlyArray<{
+    key: "scheduled" | "active" | "completed";
+    label: string;
+  }> = [
+    { key: "scheduled", label: "Scheduled" },
+    { key: "active", label: "Active" },
+    { key: "completed", label: isCancelled ? "Cancelled" : "Completed" },
+  ];
+  const currentIdx = status === "scheduled" ? 0 : status === "active" ? 1 : 2;
+
+  return (
+    <div
+      className="inline-flex items-center gap-1.5 rounded-lg bg-muted/50 border border-border/60 px-2.5 py-1 text-[11px]"
+      aria-label={`Plan lifecycle status: ${status}`}
+    >
+      {steps.map((step, idx) => {
+        const isCurrent = idx === currentIdx;
+        const isDone = idx < currentIdx && !isCancelled;
+        return (
+          <div key={step.key} className="flex items-center gap-1.5">
+            {idx > 0 ? (
+              <span className="text-muted-foreground/50" aria-hidden="true">
+                →
+              </span>
+            ) : null}
+            <span
+              className={
+                isCurrent
+                  ? isCancelled
+                    ? "font-semibold text-destructive"
+                    : "font-semibold text-primary"
+                  : isDone
+                    ? "font-medium text-foreground"
+                    : "text-muted-foreground/70"
+              }
+            >
+              {step.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export type GroupPlansTabProps = {
   groupId: string;
   activePlans: ReadonlyArray<GroupPlanSummary>;
   scheduledPlans: ReadonlyArray<GroupPlanSummary>;
   completedPlans?: ReadonlyArray<GroupPlanSummary>;
+  leaderboardsByPlanId: Record<string, ReadonlyArray<LeaderboardEntry>>;
+  currentUserHideProgress: boolean;
+  currentUserPrivacyUpdatedAt?: string | null;
   trackers: ReadonlyArray<UserTrackerSummary>;
   activeTrackerId?: string;
   isAdmin: boolean;
@@ -53,6 +119,9 @@ export function GroupPlansTab({
   activePlans,
   scheduledPlans,
   completedPlans = [],
+  leaderboardsByPlanId,
+  currentUserHideProgress,
+  currentUserPrivacyUpdatedAt,
   trackers,
   activeTrackerId,
   isAdmin,
@@ -63,6 +132,9 @@ export function GroupPlansTab({
   onJoinGroupClick,
 }: GroupPlansTabProps) {
   const router = useRouter();
+  const [lifecycleFilter, setLifecycleFilter] =
+    useState<LifecycleFilter>("all");
+  const [mountTimestamp] = useState(() => Date.now());
   const [internalSelectedPlan, setInternalSelectedPlan] =
     useState<GroupPlanSummary | null>(null);
   const [planToLeave, setPlanToLeave] = useState<GroupPlanSummary | null>(null);
@@ -199,10 +271,72 @@ export function GroupPlansTab({
     }
   }
 
+  const totalPlansCount =
+    activePlans.length + scheduledPlans.length + completedPlans.length;
+  const showActive = lifecycleFilter === "all" || lifecycleFilter === "active";
+  const showScheduled =
+    lifecycleFilter === "all" || lifecycleFilter === "scheduled";
+  const showArchive =
+    lifecycleFilter === "all" || lifecycleFilter === "archive";
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
+      {/* ── Plan Lifecycle Filter & Schedule Header ── */}
+      {totalPlansCount > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div
+            role="tablist"
+            aria-label="Filter plans by lifecycle stage"
+            className="inline-flex items-center gap-1 rounded-xl border border-border bg-muted/40 p-1 overflow-x-auto max-w-full"
+          >
+            {(
+              [
+                { key: "all", label: `All (${totalPlansCount})` },
+                { key: "active", label: `Active (${activePlans.length})` },
+                {
+                  key: "scheduled",
+                  label: `Scheduled (${scheduledPlans.length})`,
+                },
+                {
+                  key: "archive",
+                  label: `Archive (${completedPlans.length})`,
+                },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                role="tab"
+                aria-selected={lifecycleFilter === item.key}
+                onClick={() => setLifecycleFilter(item.key)}
+                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                  lifecycleFilter === item.key
+                    ? "bg-card text-foreground shadow-2xs border border-border/60"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {isAdmin && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onOpenScheduleModal}
+              leftIcon={<Plus className="size-3.5" />}
+              className="self-start sm:self-auto shrink-0 whitespace-nowrap"
+            >
+              Add Plan
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* ── Active Plans Section ── */}
-      {activePlans.length === 0 ? (
+      {showActive && activePlans.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 p-12 text-center">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 mb-3 shadow-2xs">
             <BookOpen className="size-6" />
@@ -227,52 +361,35 @@ export function GroupPlansTab({
             </Button>
           )}
         </div>
-      ) : (
+      ) : showActive && activePlans.length > 0 ? (
         <div className="space-y-6">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="text-base sm:text-lg font-bold text-foreground truncate">
-                Active Reading Plans ({activePlans.length})
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                Curricula currently active and synchronized across all cohort
-                readers.
-              </p>
-            </div>
-
-            {isAdmin && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onOpenScheduleModal}
-                leftIcon={<Plus className="size-3.5" />}
-                className="shrink-0 whitespace-nowrap"
-              >
-                Add Plan
-              </Button>
-            )}
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-foreground truncate">
+              Active Reading Plans ({activePlans.length})
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+              Curricula currently active with dedicated cohort leaderboards.
+            </p>
           </div>
 
           <div className="space-y-5">
             {activePlans.map((plan) => {
               const isEnrolled = Boolean(plan.userEnrolledInstanceId);
+              const planEntries = leaderboardsByPlanId[plan.id] || [];
 
               return (
                 <div
                   key={plan.id}
                   className="rounded-2xl border border-border bg-card p-6 sm:p-7 space-y-6 shadow-xs relative overflow-hidden transition-all hover:border-border-strong"
                 >
-                  {/* Top Bar: Eyebrow & Cadence */}
+                  {/* Top Bar: Lifecycle & Cadence */}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/20 px-2.5 py-1 text-xs font-semibold text-primary">
                         <BookOpen className="size-3.5" />
                         <span>Active Curriculum</span>
                       </span>
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Synchronized Cohort Pace
-                      </span>
+                      <PlanLifecycleStepper status={plan.status} />
                     </div>
 
                     <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
@@ -306,10 +423,10 @@ export function GroupPlansTab({
                             variant="ghost"
                             size="sm"
                             onClick={() => setPlanToCancel(plan)}
-                            className="text-xs text-muted-foreground hover:text-destructive h-8 px-2 rounded-lg"
-                            title="Cancel Plan"
+                            className="text-xs text-muted-foreground hover:text-destructive h-8 px-2.5 rounded-lg"
+                            leftIcon={<XCircle className="size-3.5" />}
                           >
-                            <XCircle className="size-3.5" />
+                            Cancel
                           </Button>
                         </div>
                       )}
@@ -370,13 +487,63 @@ export function GroupPlansTab({
 
                     <div>
                       <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground block mb-0.5">
-                        Sync Rhythm
+                        Target End Date
                       </span>
                       <div className="text-sm sm:text-base font-bold text-foreground">
-                        Daily Lockstep
+                        {new Date(plan.expectedEndDate).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
                       </div>
                     </div>
                   </div>
+
+                  {/* Wrap-up / Grace Period Notice when schedule end date has passed */}
+                  {(() => {
+                    const endTime = new Date(plan.expectedEndDate).getTime();
+                    if (mountTimestamp <= endTime) return null;
+                    const daysLeft = Math.max(
+                      1,
+                      Math.ceil(
+                        (endTime + GROUP_PLAN_GRACE_MS - mountTimestamp) /
+                          (1000 * 60 * 60 * 24)
+                      )
+                    );
+                    return (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-4 py-3 text-xs">
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Clock className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                          <span>
+                            Scheduled reading ended • Auto-completes in{" "}
+                            <strong>
+                              {daysLeft} {daysLeft === 1 ? "day" : "days"}
+                            </strong>
+                            {isAdmin
+                              ? ", or mark complete now."
+                              : " (grace window open for finishing chapters)."}
+                          </span>
+                        </div>
+                        {isAdmin ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPlanToComplete(plan)}
+                            leftIcon={
+                              <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                            }
+                            className="h-8 text-xs shrink-0 self-start sm:self-auto"
+                          >
+                            Mark Complete
+                          </Button>
+                        ) : null}
+                      </div>
+                    );
+                  })()}
 
                   {/* Reading Status & Action Area */}
                   {isEnrolled ? (
@@ -460,15 +627,26 @@ export function GroupPlansTab({
                       )}
                     </div>
                   )}
+
+                  {/* Per-Plan Leaderboard */}
+                  <PlanLeaderboardPanel
+                    groupId={groupId}
+                    planTitle={plan.templateTitle}
+                    entries={planEntries}
+                    currentUserHideProgress={currentUserHideProgress}
+                    currentUserPrivacyUpdatedAt={currentUserPrivacyUpdatedAt}
+                    isMember={isMember}
+                    defaultExpanded={activePlans.length === 1}
+                  />
                 </div>
               );
             })}
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* ── Upcoming Scheduled Plans ("Cohort Horizon") ── */}
-      {scheduledPlans.length > 0 && (
+      {showScheduled && scheduledPlans.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-border/60">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-foreground">
@@ -589,10 +767,10 @@ export function GroupPlansTab({
                         size="sm"
                         disabled={isUpdatingStatus}
                         onClick={() => setPlanToCancel(plan)}
-                        className="text-xs text-muted-foreground hover:text-destructive h-8 px-2"
-                        title="Cancel Schedule"
+                        leftIcon={<XCircle className="size-3.5" />}
+                        className="text-xs text-muted-foreground hover:text-destructive h-8 px-2.5"
                       >
-                        <XCircle className="size-3.5" />
+                        Cancel
                       </Button>
                     </div>
                   )}
@@ -604,7 +782,7 @@ export function GroupPlansTab({
       )}
 
       {/* ── Completed & Archived Plans ── */}
-      {completedPlans.length > 0 && (
+      {showArchive && completedPlans.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-border/60">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-foreground">
@@ -677,10 +855,10 @@ export function GroupPlansTab({
                         size="sm"
                         disabled={isUpdatingStatus}
                         onClick={() => setPlanToDelete(plan)}
-                        className="text-xs text-muted-foreground hover:text-destructive h-8 px-2"
-                        title="Delete Plan"
+                        leftIcon={<Trash2 className="size-3.5" />}
+                        className="text-xs text-muted-foreground hover:text-destructive h-8 px-2.5"
                       >
-                        <Trash2 className="size-3.5" />
+                        Delete
                       </Button>
                     </div>
                   )}

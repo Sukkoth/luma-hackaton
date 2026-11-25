@@ -8,6 +8,10 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { generateRandomInviteCode } from "@/lib/tokens";
 import {
+  computeGroupPlanEndDate,
+  GROUP_PLAN_GRACE_MS,
+} from "@/lib/plans/group-plan-schedule";
+import {
   groups,
   groupMembers,
   groupPlans,
@@ -25,6 +29,7 @@ import {
   type GroupMembershipStatus,
 } from "@/db/schema";
 import { createNotificationAction } from "@/actions/notifications";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import {
   CreateGroupSchema,
   UpdateGroupSettingsSchema,
@@ -71,6 +76,7 @@ export type GroupPlanSummary = {
   totalChapters: number;
   userEnrolledInstanceId: string | null;
   enrolledMembersCount: number;
+  expectedEndDate: Date;
   createdAt: Date;
 };
 
@@ -211,6 +217,8 @@ export async function createGroupAction({
       },
     });
 
+    await evaluateAndUnlockAchievementsAction({ userId: session.user.id });
+
     revalidatePath("/groups");
     return { success: true, groupId: newGroup.id };
   } catch (err) {
@@ -273,13 +281,15 @@ export async function getGroupDetailsAction({
       ),
     });
 
-    for (const p of scheduledToActivate) {
-      if (new Date(p.scheduledStartDate) <= now) {
-        await db
-          .update(groupPlans)
-          .set({ status: "active", activatedAt: now })
-          .where(eq(groupPlans.id, p.id));
-      }
+    const duePlanIds = scheduledToActivate
+      .filter((p) => new Date(p.scheduledStartDate) <= now)
+      .map((p) => p.id);
+
+    if (duePlanIds.length > 0) {
+      await db
+        .update(groupPlans)
+        .set({ status: "active", activatedAt: now })
+        .where(inArray(groupPlans.id, duePlanIds));
     }
 
     // Count active members
@@ -294,43 +304,115 @@ export async function getGroupDetailsAction({
       );
     const memberCount = Number(membersCountRes[0]?.count || 0);
 
-    // Fetch all group plans
+    // Fetch all group plans without loading every enrollment row into memory
     const allPlans = await db.query.groupPlans.findMany({
       where: eq(groupPlans.groupId, groupId),
       with: {
         template: true,
-        enrollments: true,
       },
       orderBy: [desc(groupPlans.createdAt)],
     });
+
+    // Lazy on-read lifecycle transition: auto-complete active plans
+    // 7 days after their scheduled end date (respecting recent Reopen via updatedAt)
+    const graceCompletedIds: string[] = [];
+    const expectedEndByPlanId = new Map<string, Date>();
+
+    for (const p of allPlans) {
+      const totalChapters = p.template?.totalChapters || 0;
+      const expectedEndDate = computeGroupPlanEndDate({
+        scheduledStartDate: p.scheduledStartDate,
+        totalChapters,
+        dailyChapterTarget: p.dailyChapterTarget,
+        activeWeekdaysMask: p.activeWeekdaysMask,
+      });
+      expectedEndByPlanId.set(p.id, expectedEndDate);
+
+      if (
+        p.status === "active" &&
+        totalChapters > 0 &&
+        now.getTime() >= expectedEndDate.getTime() + GROUP_PLAN_GRACE_MS &&
+        now.getTime() - new Date(p.updatedAt).getTime() >= GROUP_PLAN_GRACE_MS
+      ) {
+        graceCompletedIds.push(p.id);
+      }
+    }
+
+    if (graceCompletedIds.length > 0) {
+      await db
+        .update(groupPlans)
+        .set({ status: "completed", completedAt: now })
+        .where(inArray(groupPlans.id, graceCompletedIds));
+    }
+
+    const graceCompletedSet = new Set(graceCompletedIds);
+    const planIds = allPlans.map((p) => p.id);
+    const [enrollmentCounts, userEnrollments] =
+      planIds.length > 0
+        ? await Promise.all([
+            db
+              .select({
+                groupPlanId: groupMemberEnrollments.groupPlanId,
+                count: sql<number>`count(*)`,
+              })
+              .from(groupMemberEnrollments)
+              .where(inArray(groupMemberEnrollments.groupPlanId, planIds))
+              .groupBy(groupMemberEnrollments.groupPlanId),
+            db
+              .select({
+                groupPlanId: groupMemberEnrollments.groupPlanId,
+                planInstanceId: groupMemberEnrollments.planInstanceId,
+              })
+              .from(groupMemberEnrollments)
+              .where(
+                and(
+                  inArray(groupMemberEnrollments.groupPlanId, planIds),
+                  eq(groupMemberEnrollments.userId, session.user.id)
+                )
+              ),
+          ])
+        : [[], []];
+
+    const enrollmentCountByPlan = new Map(
+      enrollmentCounts.map((row) => [row.groupPlanId, Number(row.count || 0)])
+    );
+    const userInstanceByPlan = new Map(
+      userEnrollments.map((row) => [row.groupPlanId, row.planInstanceId])
+    );
 
     const activePlans: GroupPlanSummary[] = [];
     const scheduledPlans: GroupPlanSummary[] = [];
     const completedPlans: GroupPlanSummary[] = [];
 
     for (const p of allPlans) {
-      const userEnrollment = p.enrollments.find(
-        (e) => e.userId === session.user.id
-      );
+      const effectiveStatus = (
+        graceCompletedSet.has(p.id) ? "completed" : p.status
+      ) as GroupPlanStatus;
+      const expectedEndDate =
+        expectedEndByPlanId.get(p.id) ?? p.scheduledStartDate;
 
       const summary: GroupPlanSummary = {
         id: p.id,
         planTemplateId: p.planTemplateId,
         templateTitle: p.template?.title || "Reading Plan",
         scheduledStartDate: p.scheduledStartDate,
-        status: p.status as GroupPlanStatus,
+        status: effectiveStatus,
         lateJoinPolicy: p.lateJoinPolicy as GroupLateJoinPolicy,
         dailyChapterTarget: p.dailyChapterTarget,
         activeWeekdaysMask: p.activeWeekdaysMask,
         totalChapters: p.template?.totalChapters || 0,
-        userEnrolledInstanceId: userEnrollment?.planInstanceId || null,
-        enrolledMembersCount: p.enrollments.length,
+        userEnrolledInstanceId: userInstanceByPlan.get(p.id) || null,
+        enrolledMembersCount: enrollmentCountByPlan.get(p.id) || 0,
+        expectedEndDate,
         createdAt: p.createdAt,
       };
 
-      if (p.status === "active") activePlans.push(summary);
-      else if (p.status === "scheduled") scheduledPlans.push(summary);
-      else if (p.status === "completed" || p.status === "cancelled")
+      if (effectiveStatus === "active") activePlans.push(summary);
+      else if (effectiveStatus === "scheduled") scheduledPlans.push(summary);
+      else if (
+        effectiveStatus === "completed" ||
+        effectiveStatus === "cancelled"
+      )
         completedPlans.push(summary);
     }
 
@@ -894,6 +976,9 @@ export async function getGroupMembersAction({
       };
     }
 
+    const isCallerAdmin =
+      callerMembership.role === "owner" || callerMembership.role === "admin";
+
     const membersRecords = await db
       .select({
         id: groupMembers.id,
@@ -915,11 +1000,12 @@ export async function getGroupMembersAction({
     const pendingMembers: GroupMemberSummary[] = [];
 
     for (const m of membersRecords) {
+      const canSeeEmail = isCallerAdmin || m.userId === session.user.id;
       const summary: GroupMemberSummary = {
         id: m.id,
         userId: m.userId,
         name: m.name || "Reader",
-        email: m.email || "",
+        email: canSeeEmail ? m.email || "" : "",
         image: m.image || null,
         role: m.role as GroupRole,
         status: m.status as GroupMembershipStatus,
@@ -928,7 +1014,8 @@ export async function getGroupMembersAction({
       };
 
       if (m.status === "active") members.push(summary);
-      else if (m.status === "pending_approval") pendingMembers.push(summary);
+      else if (isCallerAdmin && m.status === "pending_approval")
+        pendingMembers.push(summary);
     }
 
     return { success: true, members, pendingMembers };
@@ -1760,6 +1847,8 @@ export async function enrollInGroupPlanAction({
       planInstanceId: startResult.instanceId,
     });
 
+    await evaluateAndUnlockAchievementsAction({ userId: session.user.id });
+
     revalidatePath(`/groups/${groupPlan.groupId}`);
     revalidatePath("/plans");
 
@@ -1796,6 +1885,29 @@ export async function getGroupLeaderboardAction({
       where: eq(groupPlans.id, groupPlanId),
     });
     if (!groupPlan) return { success: false, error: "Group plan not found." };
+
+    const groupRecord = await db.query.groups.findFirst({
+      where: eq(groups.id, groupPlan.groupId),
+      columns: { isPrivate: true },
+    });
+    if (!groupRecord) return { success: false, error: "Group not found." };
+
+    // Fetch members to check hideProgress flag & caller membership
+    const members = await db.query.groupMembers.findMany({
+      where: eq(groupMembers.groupId, groupPlan.groupId),
+    });
+    const callerMembership = members.find((m) => m.userId === session.user.id);
+    const isCallerMember = Boolean(
+      callerMembership && callerMembership.status === "active"
+    );
+
+    if (groupRecord.isPrivate && !isCallerMember) {
+      return {
+        success: false,
+        error:
+          "This group is private. You must be an active member to view the leaderboard.",
+      };
+    }
 
     const enrollments = await db
       .select({
@@ -1834,16 +1946,9 @@ export async function getGroupLeaderboardAction({
       readingsByInstance.set(r.instanceId, list);
     }
 
-    // Fetch members to check hideProgress flag
-    const members = await db.query.groupMembers.findMany({
-      where: eq(groupMembers.groupId, groupPlan.groupId),
-    });
+    // Reuse members fetched above to check hideProgress flag
     const hideProgressMap = new Map<string, boolean>();
     members.forEach((m) => hideProgressMap.set(m.userId, m.hideProgress));
-
-    const callerMembership = members.find((m) => m.userId === session.user.id);
-    const isCallerMember =
-      callerMembership && callerMembership.status === "active";
 
     const currentUserHideProgress =
       hideProgressMap.get(session.user.id) ?? false;
@@ -1982,6 +2087,43 @@ export async function getGroupSessionNotesAction({
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
+    const groupPlan = await db.query.groupPlans.findFirst({
+      where: eq(groupPlans.id, groupPlanId),
+      columns: { id: true, groupId: true },
+    });
+    if (!groupPlan) {
+      return { success: false, error: "Group plan not found." };
+    }
+
+    const [groupRecord, callerMembership] = await Promise.all([
+      db.query.groups.findFirst({
+        where: eq(groups.id, groupPlan.groupId),
+        columns: { isPrivate: true },
+      }),
+      db.query.groupMembers.findFirst({
+        where: and(
+          eq(groupMembers.groupId, groupPlan.groupId),
+          eq(groupMembers.userId, session.user.id)
+        ),
+        columns: { status: true },
+      }),
+    ]);
+
+    if (!groupRecord) {
+      return { success: false, error: "Group not found." };
+    }
+
+    if (
+      groupRecord.isPrivate &&
+      (!callerMembership || callerMembership.status !== "active")
+    ) {
+      return {
+        success: false,
+        error:
+          "This group is private. You must be an active member to view shared reflections.",
+      };
+    }
+
     // 1. Get all plan instances enrolled in this group plan
     const enrollments = await db.query.groupMemberEnrollments.findMany({
       where: eq(groupMemberEnrollments.groupPlanId, groupPlanId),

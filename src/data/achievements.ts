@@ -8,12 +8,21 @@ import {
 export type AchievementCategory =
   | "Daily Streaks"
   | "Reading Plans"
+  | "Fellowships"
   | "Bible Volumes"
   | "Old Testament"
   | "New Testament"
   | "Wisdom & Poetry"
   | "Deuterocanon & Heritage"
   | "Trackers";
+
+export type GroupAchievementStats = {
+  activeMembershipsCount: number;
+  ledGroupsCount: number;
+  enrolledGroupPlansCount: number;
+  completedGroupPlansCount: number;
+  sharedReflectionsCount: number;
+};
 
 export interface Achievement {
   id: string;
@@ -28,7 +37,8 @@ export interface Achievement {
     trackerCount: number,
     totalChaptersRead: number,
     streakCount?: number,
-    completedPlansCount?: number
+    completedPlansCount?: number,
+    groupStats?: GroupAchievementStats
   ) => {
     unlocked: boolean;
     current: number;
@@ -869,6 +879,152 @@ export const ACHIEVEMENTS: Achievement[] = [
         unlocked: trackerCount >= 3,
         current: Math.min(trackerCount, 3),
         total: 3,
+      };
+    },
+  },
+
+  // --- FELLOWSHIPS & GROUP PLANS ---
+  {
+    id: "fellowship_joiner",
+    title: "Circle of Faith",
+    description: "Join or create your first active reading fellowship",
+    category: "Fellowships",
+    iconName: "users",
+    accentColor: "#D97706",
+    bgLight: "#261E14",
+    checkUnlocked: (
+      _progress,
+      _trackerCount,
+      _totalChaptersRead,
+      _streakCount,
+      _completedPlansCount,
+      groupStats
+    ) => {
+      const count = groupStats?.activeMembershipsCount ?? 0;
+      return {
+        unlocked: count >= 1,
+        current: Math.min(count, 1),
+        total: 1,
+      };
+    },
+  },
+  {
+    id: "fellowship_leader",
+    title: "Shepherd's Heart",
+    description: "Lead or co-lead a fellowship group as Owner or Admin",
+    category: "Fellowships",
+    iconName: "shield",
+    accentColor: "#B45309",
+    bgLight: "#261E14",
+    checkUnlocked: (
+      _progress,
+      _trackerCount,
+      _totalChaptersRead,
+      _streakCount,
+      _completedPlansCount,
+      groupStats
+    ) => {
+      const count = groupStats?.ledGroupsCount ?? 0;
+      return {
+        unlocked: count >= 1,
+        current: Math.min(count, 1),
+        total: 1,
+      };
+    },
+  },
+  {
+    id: "group_plan_enrolled",
+    title: "Walking Together",
+    description: "Enroll in your first fellowship group reading plan",
+    category: "Fellowships",
+    iconName: "compass",
+    accentColor: "#0EA5E9",
+    bgLight: "#14222B",
+    checkUnlocked: (
+      _progress,
+      _trackerCount,
+      _totalChaptersRead,
+      _streakCount,
+      _completedPlansCount,
+      groupStats
+    ) => {
+      const count = groupStats?.enrolledGroupPlansCount ?? 0;
+      return {
+        unlocked: count >= 1,
+        current: Math.min(count, 1),
+        total: 1,
+      };
+    },
+  },
+  {
+    id: "group_plan_completed_1",
+    title: "Shared Finish Line",
+    description: "Complete 1 fellowship group reading plan",
+    category: "Fellowships",
+    iconName: "flag",
+    accentColor: "#10B981",
+    bgLight: "#142620",
+    checkUnlocked: (
+      _progress,
+      _trackerCount,
+      _totalChaptersRead,
+      _streakCount,
+      _completedPlansCount,
+      groupStats
+    ) => {
+      const count = groupStats?.completedGroupPlansCount ?? 0;
+      return {
+        unlocked: count >= 1,
+        current: Math.min(count, 1),
+        total: 1,
+      };
+    },
+  },
+  {
+    id: "group_plan_completed_3",
+    title: "Faithful Companion",
+    description: "Complete 3 fellowship group reading plans",
+    category: "Fellowships",
+    iconName: "award",
+    accentColor: "#F59E0B",
+    bgLight: "#261E14",
+    checkUnlocked: (
+      _progress,
+      _trackerCount,
+      _totalChaptersRead,
+      _streakCount,
+      _completedPlansCount,
+      groupStats
+    ) => {
+      const count = groupStats?.completedGroupPlansCount ?? 0;
+      return {
+        unlocked: count >= 3,
+        current: Math.min(count, 3),
+        total: 3,
+      };
+    },
+  },
+  {
+    id: "fellowship_scribe",
+    title: "Iron Sharpens Iron",
+    description: "Share 5 study reflections with your fellowship",
+    category: "Fellowships",
+    iconName: "feather",
+    accentColor: "#8B5CF6",
+    bgLight: "#201C2B",
+    checkUnlocked: (
+      _progress,
+      _trackerCount,
+      _totalChaptersRead,
+      _streakCount,
+      _completedPlansCount,
+      groupStats
+    ) => {
+      const count = groupStats?.sharedReflectionsCount ?? 0;
+      return {
+        unlocked: count >= 5,
+        current: Math.min(count, 5),
+        total: 5,
       };
     },
   },
