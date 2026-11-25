@@ -20,7 +20,6 @@ import {
   User,
   Download,
   Smartphone,
-  WifiOff,
   Sparkles,
 } from "lucide-react";
 import { usePwa } from "@/components/pwa/pwa-provider";
@@ -231,7 +230,7 @@ export function SettingsView({
   const [isCreateTrackerOpen, setIsCreateTrackerOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isTrackerListExpanded, setIsTrackerListExpanded] = useState(false);
-  const { isInstallable, isInstalled, isOffline, promptInstall } = usePwa();
+  const { isInstallable, isInstalled, promptInstall } = usePwa();
 
   // Settings local state
   const [settings, setSettings] = useState<UserSettingsState>(initialSettings);
@@ -807,19 +806,7 @@ export function SettingsView({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div className="p-3.5 rounded-xl border border-border bg-surface-elevated space-y-1">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                    <WifiOff className="size-3.5 text-amber-500" />
-                    <span>Offline Cache Status</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    {isOffline
-                      ? "You are currently offline. Cached readings and study notes remain active."
-                      : "Service Worker cache is active. Scripture books and marginalia are precached for offline study."}
-                  </p>
-                </div>
-
+              <div className="pt-1">
                 <div className="p-3.5 rounded-xl border border-border bg-surface-elevated space-y-1">
                   <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
                     <Sparkles className="size-3.5 text-primary" />

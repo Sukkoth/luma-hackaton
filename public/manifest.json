@@ -55,7 +55,7 @@
       "name": "Canonical Books",
       "short_name": "Books",
       "description": "Browse Scripture canon and matrix completion",
-      "url": "/books",
+      "url": "/bible",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {

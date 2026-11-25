@@ -1,5 +1,7 @@
-import { X, CheckCircle2, RotateCcw } from "lucide-react";
+import { X, CheckCircle2, RotateCcw, BookOpen } from "lucide-react";
 import type { BibleBook } from "@/data/bibleData";
+import { isBookSupportedInSixtySixBookVersions } from "@/lib/bible-versions";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   book: BibleBook;
@@ -12,6 +14,7 @@ type Props = {
   }) => void;
   onMarkAll: (params: { book: BibleBook }) => void;
   onClearAll: (params: { bookId: string }) => void;
+  onReadChapter?: (params: { bookId: string; chapter: number }) => void;
 };
 
 export function BookChaptersModal({
@@ -21,10 +24,18 @@ export function BookChaptersModal({
   onToggleChapter,
   onMarkAll,
   onClearAll,
+  onReadChapter,
 }: Props) {
   const readCount = readChapters.length;
   const progressPercent = Math.round((readCount / book.chapters) * 100);
   const isAllComplete = readCount >= book.chapters && book.chapters > 0;
+  const canRead = Boolean(
+    onReadChapter && isBookSupportedInSixtySixBookVersions({ bookId: book.id })
+  );
+  const nextUnreadChapter =
+    Array.from({ length: book.chapters }, (_, i) => i + 1).find(
+      (ch) => !readChapters.includes(ch)
+    ) ?? 1;
 
   return (
     <div
@@ -72,7 +83,25 @@ export function BookChaptersModal({
           <span className="text-[12px] font-medium text-foreground-dim">
             Tap chapter to toggle
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {canRead && onReadChapter && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  onClose();
+                  onReadChapter({
+                    bookId: book.id,
+                    chapter: nextUnreadChapter,
+                  });
+                }}
+                className="gap-1.5 h-8 text-xs"
+              >
+                <BookOpen className="size-3.5 text-primary" />
+                <span>Read Ch. {nextUnreadChapter}</span>
+              </Button>
+            )}
             <button
               type="button"
               onClick={() => onMarkAll({ book })}

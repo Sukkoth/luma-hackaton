@@ -45,8 +45,8 @@ export type AppShellProps = {
 
 const MENU_ITEMS = [
   { label: "Home", href: "/home", icon: LayoutDashboard },
-  { label: "Books", href: "/books", icon: BookOpen },
   { label: "Plans", href: "/plans", icon: Calendar },
+  { label: "Bible", href: "/bible", icon: BookOpen },
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Notes", href: "/notes", icon: FileText },
   { label: "Achievements", href: "/achievements", icon: Award },
@@ -97,8 +97,8 @@ export function AppShell({
 
   // Derive page title for desktop top bar header
   let viewTitle = "Reading Hub";
-  if (pathname.startsWith("/books")) {
-    viewTitle = "Bible Books & Chapters";
+  if (pathname.startsWith("/bible") || pathname.startsWith("/books")) {
+    viewTitle = "Bible";
   } else if (pathname.startsWith("/plans")) {
     viewTitle = "Reading Plans";
   } else if (pathname.startsWith("/groups")) {

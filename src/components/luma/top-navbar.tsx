@@ -48,7 +48,7 @@ export function TopNavbar({
   const NAV_TABS = isAuthenticated
     ? [
         { label: "Overview", href: "/home", icon: Home },
-        { label: "Books", href: "/books", icon: BookOpen },
+        { label: "Bible", href: "/bible", icon: BookOpen },
         { label: "Plans", href: "/plans", icon: Calendar },
         { label: "Notes", href: "/notes", icon: FileText },
         { label: "Achievements", href: "/achievements", icon: Award },

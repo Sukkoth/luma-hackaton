@@ -93,11 +93,16 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     ).toBeVisible();
 
     // 4. Books page is public to browse
-    await page.goto("/books");
-    await expect(page.getByText("Verse of the Day")).toBeVisible();
-    await expect(page.getByText("All Books")).toBeVisible();
-    await expect(page.getByText("Genesis", { exact: true })).toBeVisible();
-    await expect(page.getByText("Matthew", { exact: true })).toBeVisible();
+    await page.goto("/bible");
+    await expect(
+      page.getByRole("button", { name: "Choose book and chapter" })
+    ).toContainText("Genesis 1");
+    await expect(
+      page.getByRole("button", { name: "Previous chapter" })
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Next chapter" })
+    ).toBeEnabled();
   });
 
   test("unauthenticated users are guarded when attempting protected actions", async ({
@@ -114,16 +119,9 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
       "/login?redirect=/plans/templates/the_four_gospels_30"
     );
 
-    // 2. On Books page, clicking a chapter to mark as read prompts to sign in
-    await page.goto("/books");
-    await page
-      .getByRole("button", { name: /Romans Pauline Epistles/i })
-      .click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-
-    // Clicking chapter 9 prompts auth modal
-    const ch9Button = page.getByRole("button", { name: "9", exact: true });
-    await ch9Button.click();
+    // 2. On Books page, clicking Mark Read prompts to sign in
+    await page.goto("/bible");
+    await page.getByRole("button", { name: "Mark Read" }).click();
     await expect(
       page.getByRole("dialog", { name: "Sign In to Log Progress" })
     ).toBeVisible();
@@ -314,16 +312,14 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(page.getByText(testUser.email).first()).toBeVisible();
 
     // 4. Verify user can now mark chapters on Books page
-    await page.goto("/books");
-    await page
-      .getByRole("button", { name: /Romans Pauline Epistles/i })
-      .click();
-    const ch9Button = page.getByRole("button", { name: "9", exact: true });
-    await expect(ch9Button).toHaveAttribute("aria-pressed", "false");
-    await ch9Button.click();
-    await expect(ch9Button).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByText("1 of 16 chapters read")).toBeVisible();
-    await page.getByRole("button", { name: "Done" }).click();
+    await page.goto("/bible?book=rom&ch=9");
+    const markReadBtn = page.getByRole("button", { name: "Mark Read" });
+    await expect(markReadBtn).toBeVisible({ timeout: 15000 });
+    await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
+    await markReadBtn.click();
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     // 5. Verify Sign Out redirects to landing page
     await page.goto("/settings");

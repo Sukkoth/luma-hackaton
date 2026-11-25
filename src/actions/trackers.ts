@@ -93,7 +93,7 @@ export async function createTrackerAction({
     });
 
     revalidatePath("/home");
-    revalidatePath("/books");
+    revalidatePath("/bible");
     revalidatePath("/insights");
     revalidatePath("/achievements");
     revalidatePath("/notes");
@@ -168,7 +168,7 @@ export async function updateTrackerAction({
       .where(eq(readingTrackers.id, existing.id));
 
     revalidatePath("/home");
-    revalidatePath("/books");
+    revalidatePath("/bible");
     revalidatePath("/insights");
     revalidatePath("/achievements");
     revalidatePath("/notes");
@@ -236,7 +236,7 @@ export async function switchTrackerAction({
       .where(eq(userSettings.userId, session.user.id));
 
     revalidatePath("/home");
-    revalidatePath("/books");
+    revalidatePath("/bible");
     revalidatePath("/insights");
     revalidatePath("/achievements");
     revalidatePath("/notes");

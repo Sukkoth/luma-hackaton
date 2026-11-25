@@ -262,25 +262,13 @@ test.describe("Streak UI & Modal E2E", () => {
     await expect(modalTitle).not.toBeVisible();
 
     // 4. Navigate to /books, mark a chapter, verify streak updates
-    await page.goto("/books");
-    await page
-      .getByRole("button", { name: /Genesis/i })
-      .first()
-      .click();
-    await expect(page.locator("#chapter-dialog-title")).toHaveText("Genesis");
-
-    // Toggle Chapter 1
-    const ch1 = page
-      .getByRole("dialog")
-      .getByRole("button", { name: "1", exact: true });
-    await ch1.click();
-    await expect(ch1).toHaveAttribute("aria-pressed", "true");
-
-    // Close chapters modal
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "Done" })
-      .click();
+    await page.goto("/bible");
+    const markReadBtn = page.getByRole("button", { name: "Mark Read" });
+    await expect(markReadBtn).toBeVisible({ timeout: 15000 });
+    await markReadBtn.click();
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     // Top navbar streak button now shows 1
     await expect(streakBtn).toContainText("1");

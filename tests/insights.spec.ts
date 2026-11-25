@@ -69,34 +69,14 @@ test.describe("Insights & Visualisations E2E", () => {
     await expect(page.getByText("Completion Rate")).toBeVisible();
 
     // 5. Navigate to /books and mark Genesis Chapter 1 as read
-    await page.goto("/books");
-    await expect(
-      page.getByRole("heading", { name: "All Books" })
-    ).toBeVisible();
-
-    const genesisCard = page.getByText("Genesis").first();
-    await genesisCard.click();
-
-    const chaptersDialog = page.getByRole("dialog");
-    await expect(chaptersDialog).toBeVisible();
-    await expect(
-      chaptersDialog.getByRole("heading", { name: "Genesis" })
-    ).toBeVisible();
-
-    // Click chapter 1 button to mark as read
-    const ch1Btn = chaptersDialog.getByRole("button", {
-      name: "1",
-      exact: true,
-    });
-    await expect(ch1Btn).toBeVisible();
-    await ch1Btn.click();
-    await expect(ch1Btn).toHaveAttribute("aria-pressed", "true");
-
-    // Close chapters modal
-    await chaptersDialog
-      .getByRole("button", { name: "Close chapter sheet" })
-      .click();
-    await expect(chaptersDialog).not.toBeVisible();
+    await page.goto("/bible");
+    const markReadBtn = page.getByRole("button", { name: "Mark Read" });
+    await expect(markReadBtn).toBeVisible({ timeout: 15000 });
+    await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
+    await markReadBtn.click();
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     const [uRecord] = await db.select().from(user).where(eq(user.email, email));
     const [userTracker] = await db

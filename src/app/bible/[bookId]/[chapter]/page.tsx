@@ -1,16 +1,29 @@
-import { Suspense } from "react";
-import { BibleReaderPageClient } from "./bible-reader-page-client";
+import { redirect } from "next/navigation";
 
-export default function BibleReaderPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex h-full items-center justify-center">
-          <div className="size-8 animate-spin rounded-full border-2 border-black/10 border-t-black dark:border-white/10 dark:border-t-white" />
-        </div>
-      }
-    >
-      <BibleReaderPageClient />
-    </Suspense>
-  );
+export const instant = false;
+
+type Props = {
+  params: Promise<{ bookId: string; chapter: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function LegacyBibleReaderRedirect({
+  params,
+  searchParams,
+}: Props) {
+  const { bookId, chapter } = await params;
+  const query = await searchParams;
+  const nextParams = new URLSearchParams();
+
+  nextParams.set("book", bookId.toLowerCase());
+  nextParams.set("ch", chapter);
+
+  for (const key of ["v", "plan", "readingId", "startVerse", "endVerse"]) {
+    const value = query[key];
+    if (typeof value === "string" && value.length > 0) {
+      nextParams.set(key, value);
+    }
+  }
+
+  redirect(`/bible?${nextParams.toString()}`);
 }

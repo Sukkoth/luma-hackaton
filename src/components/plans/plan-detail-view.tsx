@@ -35,6 +35,7 @@ import { PlanPausedLockModal } from "./plan-paused-lock-modal";
 import { celebratePlanCompletion } from "@/lib/confetti";
 import { RechartsPlanGauge } from "./recharts-plan-gauge";
 import { parseLocalDate } from "@/lib/timezone";
+import { isBookSupportedInSixtySixBookVersions } from "@/lib/bible-versions";
 
 type PlanDetailViewProps = {
   plan: PlanInstanceDetail;
@@ -71,8 +72,17 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     setNotes(plan.notes);
   }
 
-  // Refresh server data when navigating back via browser back/forward cache
+  // Refresh server data when navigating back from reader after toggling items or bfcache
   useEffect(() => {
+    try {
+      if (sessionStorage.getItem("luma-plan-dirty") === plan.id) {
+        sessionStorage.removeItem("luma-plan-dirty");
+        router.refresh();
+      }
+    } catch {
+      // Ignore storage restrictions
+    }
+
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
         router.refresh();
@@ -80,7 +90,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     };
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
-  }, [router]);
+  }, [router, plan.id]);
 
   // Determine initial focus session (first uncompleted session, or session 1)
   const initialFocusSession =
@@ -268,9 +278,12 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     });
   };
 
-  // Build Bible reader URL for dedicated reading route
+  // Build unified Bible reader URL
   const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
     const params = new URLSearchParams();
+    params.set("view", "read");
+    params.set("book", reading.bookId.toLowerCase());
+    params.set("ch", reading.chapter.toString());
     params.set("plan", currentPlan.id);
     params.set("readingId", reading.id);
     if (reading.startVerse != null) {
@@ -279,7 +292,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     if (reading.endVerse != null) {
       params.set("endVerse", reading.endVerse.toString());
     }
-    return `/bible/${reading.bookId.toLowerCase()}/${reading.chapter}?${params.toString()}`;
+    return `/bible?${params.toString()}`;
   };
 
   return (
@@ -647,10 +660,23 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                     )
                                   )}
                                 </button>
-                                {isScheduledFuture ? (
+                                {isScheduledFuture ||
+                                !isBookSupportedInSixtySixBookVersions({
+                                  bookId: reading.bookId,
+                                }) ? (
                                   <span
-                                    className="truncate text-foreground-dim select-none cursor-not-allowed text-xs"
-                                    title={`Locked until cohort start date (${formattedPlanStartDate})`}
+                                    className={`truncate text-xs ${
+                                      isScheduledFuture
+                                        ? "text-foreground-dim select-none cursor-not-allowed"
+                                        : reading.isCompleted
+                                          ? "text-foreground-muted line-through"
+                                          : "text-foreground font-medium"
+                                    }`}
+                                    title={
+                                      isScheduledFuture
+                                        ? `Locked until cohort start date (${formattedPlanStartDate})`
+                                        : "Reader unavailable: this book is outside the 66-book Bible versions"
+                                    }
                                   >
                                     {reading.displayText ||
                                       `${reading.bookName} ${reading.chapter}`}
@@ -679,14 +705,18 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
                                   <Lock className="size-2.5" />
                                 </span>
                               ) : (
-                                <Link
-                                  href={readerUrl}
-                                  onClick={(e) => e.stopPropagation()}
-                                  aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
-                                  className="flex size-5 shrink-0 items-center justify-center rounded text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors"
-                                >
-                                  <BookOpen className="size-3" />
-                                </Link>
+                                isBookSupportedInSixtySixBookVersions({
+                                  bookId: reading.bookId,
+                                }) && (
+                                  <Link
+                                    href={readerUrl}
+                                    onClick={(e) => e.stopPropagation()}
+                                    aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                                    className="flex size-5 shrink-0 items-center justify-center rounded text-foreground-dim hover:text-foreground hover:bg-surface-elevated transition-colors"
+                                  >
+                                    <BookOpen className="size-3" />
+                                  </Link>
+                                )
                               )}
                             </div>
                           );

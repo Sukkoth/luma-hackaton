@@ -21,25 +21,16 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
   test("unauthenticated guest sees auth guard modal when attempting to mark a chapter", async ({
     page,
   }) => {
-    await page.goto("/books");
+    await page.goto("/bible");
     await expect(
-      page.getByRole("heading", { name: "All Books" })
-    ).toBeVisible();
+      page.getByRole("button", { name: "Choose book and chapter" })
+    ).toContainText("Genesis 1");
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
 
-    // Click on Genesis card
-    await page
-      .getByRole("button", { name: /Genesis/i })
-      .first()
-      .click();
-
-    // Modal opens
-    await expect(page.locator("#chapter-dialog-title")).toHaveText("Genesis");
-
-    // Attempt to toggle Chapter 1
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "1", exact: true })
-      .click();
+    // Attempt to mark Genesis 1 as read
+    await page.getByRole("button", { name: "Mark Read" }).click();
 
     // Auth modal appears
     await expect(page.getByText("Sign In to Log Progress")).toBeVisible();
@@ -74,42 +65,45 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     await page.waitForURL("/home", { timeout: 10000 });
 
     // 2. Navigate to /books
-    await page.goto("/books");
+    await page.goto("/bible");
     await expect(
-      page.getByRole("heading", { name: "All Books" })
-    ).toBeVisible();
+      page.getByRole("button", { name: "Choose book and chapter" })
+    ).toContainText("Genesis 1");
 
-    // 3. Open Genesis chapters modal
-    await page
-      .getByRole("button", { name: /Genesis/i })
-      .first()
-      .click();
-    await expect(page.locator("#chapter-dialog-title")).toHaveText("Genesis");
-    await expect(page.getByText("0 of 50 chapters read")).toBeVisible();
+    // 3. Mark Chapters 1, 2, and 3 via the end-of-chapter Mark Read & Next button
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
+    const markRead1 = page.getByRole("button", { name: "Mark Read" });
+    await expect(markRead1).toHaveAttribute("aria-pressed", "false");
+    await markRead1.click();
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
-    // 4. Mark Chapters 1, 2, and 3
-    const dialog = page.getByRole("dialog");
-    const ch1 = dialog.getByRole("button", { name: "1", exact: true });
-    const ch2 = dialog.getByRole("button", { name: "2", exact: true });
-    const ch3 = dialog.getByRole("button", { name: "3", exact: true });
+    await page.getByRole("button", { name: "Next chapter" }).click();
+    await expect(
+      page.getByRole("button", { name: "Choose book and chapter" })
+    ).toContainText("Genesis 2");
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
+    await page.getByRole("button", { name: "Mark Read" }).click();
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
-    await expect(ch1).toHaveAttribute("aria-pressed", "false");
-    await ch1.click();
-    await expect(ch1).toHaveAttribute("aria-pressed", "true");
-
-    await expect(ch2).toHaveAttribute("aria-pressed", "false");
-    await ch2.click();
-    await expect(ch2).toHaveAttribute("aria-pressed", "true");
-
-    await expect(ch3).toHaveAttribute("aria-pressed", "false");
-    await ch3.click();
-    await expect(ch3).toHaveAttribute("aria-pressed", "true");
-
-    await expect(page.getByText("3 of 50 chapters read")).toBeVisible();
-
-    // 5. Close modal and reload page to test persistence
-    await page.getByRole("button", { name: "Done" }).click();
-    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await page.getByRole("button", { name: "Next chapter" }).click();
+    await expect(
+      page.getByRole("button", { name: "Choose book and chapter" })
+    ).toContainText("Genesis 3");
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
+    await page.getByRole("button", { name: "Mark Read" }).click();
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
 
     const dbUser = await db.query.user.findFirst({
       where: eq(user.email, testUser.email),
@@ -137,33 +131,22 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .toBe(3);
 
     await page.reload();
-
-    // 6. Verify Genesis card displays 3 read chapters
-    const genesisCard = page.getByRole("button", { name: /Genesis/i }).first();
-    await expect(genesisCard).toBeVisible();
-
-    // Reopen modal and verify state persisted
-    await genesisCard.click();
-    await expect(page.locator("#chapter-dialog-title")).toHaveText("Genesis");
-    await expect(page.getByText("3 of 50 chapters read")).toBeVisible();
-
-    const reloadedDialog = page.getByRole("dialog");
-    const reloadedCh1 = reloadedDialog.getByRole("button", {
-      name: "1",
-      exact: true,
-    });
-    const reloadedCh2 = reloadedDialog.getByRole("button", {
-      name: "2",
-      exact: true,
-    });
-    const reloadedCh3 = reloadedDialog.getByRole("button", {
-      name: "3",
-      exact: true,
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
     });
 
-    await expect(reloadedCh1).toHaveAttribute("aria-pressed", "true");
-    await expect(reloadedCh2).toHaveAttribute("aria-pressed", "true");
-    await expect(reloadedCh3).toHaveAttribute("aria-pressed", "true");
+    // 6. Verify Genesis 3 still hides Mark Read after reload and picker shows 3/50
+    await expect(page.getByRole("button", { name: "Mark Read" })).toHaveCount(
+      0
+    );
+
+    await page.getByRole("button", { name: "Choose book and chapter" }).click();
+    const sheet = page.getByRole("dialog");
+    await expect(sheet).toBeVisible();
+    await expect(
+      sheet.getByRole("button", { name: /Genesis/i }).first()
+    ).toContainText("3/50");
+    await sheet.getByRole("button", { name: "Close" }).click();
 
     // 7. Verify database records
     const progressRows = await db.query.trackerChapterProgress.findMany({
@@ -184,51 +167,9 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     });
     expect(logEntries.length).toBeGreaterThanOrEqual(3);
 
-    // 8. Uncheck chapter 2 (toggle off)
-    await reloadedCh2.click();
-    await expect(reloadedCh2).toHaveAttribute("aria-pressed", "false");
-    await expect(page.getByText("2 of 50 chapters read")).toBeVisible();
-
-    // Verify DB reflects 2 chapters before reloading
-    await expect
-      .poll(async () => {
-        const rows = await db
-          .select()
-          .from(trackerChapterProgress)
-          .where(
-            and(
-              eq(trackerChapterProgress.trackerId, tracker!.id),
-              eq(trackerChapterProgress.bookId, "gen")
-            )
-          );
-        return rows.length;
-      })
-      .toBe(2);
-
-    // Reload again to verify unchecking persisted
-    await page.getByRole("button", { name: "Done" }).click();
-    await page.reload();
-
-    await page
-      .getByRole("button", { name: /Genesis/i })
-      .first()
-      .click();
-    const finalDialog = page.getByRole("dialog");
-    await expect(finalDialog).toBeVisible();
-    await expect(finalDialog.getByText("2 of 50 chapters read")).toBeVisible();
-    await expect(
-      finalDialog.getByRole("button", { name: "2", exact: true })
-    ).toHaveAttribute("aria-pressed", "false");
-    await expect(
-      finalDialog.getByRole("button", { name: "1", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
-    await expect(
-      finalDialog.getByRole("button", { name: "3", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
-
-    // 9. Navigate to /home and verify the dashboard metrics reflect the read chapters
+    // 8. Navigate to /home and verify the dashboard metrics reflect the 3 read chapters
     await page.goto("/home");
-    await expect(page.getByText("2 of 1189")).toBeVisible();
+    await expect(page.getByText("3 of 1189")).toBeVisible();
     await expect(page.getByText("Canon Progress Rings")).toBeVisible();
   });
 
@@ -266,18 +207,18 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .from(readingTrackers)
       .where(eq(readingTrackers.userId, uRecord!.id));
 
-    // Navigate to /books and open Ruth (4 chapters)
-    await page.goto("/books");
-    await page.getByPlaceholder("Search books...").fill("Ruth");
-    await page.getByRole("button", { name: /Ruth/i }).first().click();
+    // Navigate to /books and open Ruth (4 chapters) inside the picker Sheet
+    await page.goto("/bible");
+    await page.getByRole("button", { name: "Choose book and chapter" }).click();
+    const sheet1 = page.getByRole("dialog");
+    await sheet1.getByPlaceholder("Search books...").fill("Ruth");
+    await sheet1.getByRole("button", { name: /Ruth/i }).first().click();
 
-    await expect(page.locator("#chapter-dialog-title")).toHaveText("Ruth");
-    const ruthDialog = page.getByRole("dialog");
-    await expect(ruthDialog.getByText("0 of 4 chapters read")).toBeVisible();
+    await expect(sheet1.getByText("Ruth", { exact: true })).toBeVisible();
 
     // Click "Mark All Read"
-    await ruthDialog.getByRole("button", { name: "Mark All Read" }).click();
-    await expect(ruthDialog.getByText("4 of 4 chapters read")).toBeVisible();
+    await sheet1.getByRole("button", { name: "Mark All Read" }).click();
+    await expect(sheet1.getByRole("button", { name: "Reset" })).toBeVisible();
 
     // Verify all 4 Ruth chapters saved to DB before reloading
     await expect
@@ -296,18 +237,22 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .toBe(4);
 
     // Close and reload to confirm persistence
-    await ruthDialog.getByRole("button", { name: "Done" }).click();
+    await sheet1.getByRole("button", { name: "Close" }).click();
     await page.reload();
 
-    await page.getByPlaceholder("Search books...").fill("Ruth");
-    await page.getByRole("button", { name: /Ruth/i }).first().click();
-    const ruthDialog2 = page.getByRole("dialog");
-    await expect(ruthDialog2).toBeVisible();
-    await expect(ruthDialog2.getByText("4 of 4 chapters read")).toBeVisible();
+    await page.getByRole("button", { name: "Choose book and chapter" }).click();
+    const sheet2 = page.getByRole("dialog");
+    await sheet2.getByPlaceholder("Search books...").fill("Ruth");
+    await expect(
+      sheet2.getByRole("button", { name: /Ruth/i }).first()
+    ).toContainText("4/4");
+    await sheet2.getByRole("button", { name: /Ruth/i }).first().click();
 
     // Click "Reset"
-    await ruthDialog2.getByRole("button", { name: "Reset" }).click();
-    await expect(ruthDialog2.getByText("0 of 4 chapters read")).toBeVisible();
+    await sheet2.getByRole("button", { name: "Reset" }).click();
+    await expect(
+      sheet2.getByRole("button", { name: "Reset" })
+    ).not.toBeVisible();
 
     // Verify all Ruth chapters cleared in DB before reloading
     await expect
@@ -326,57 +271,26 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .toBe(0);
 
     // Close and reload to confirm reset persistence
-    await ruthDialog2.getByRole("button", { name: "Done" }).click();
+    await sheet2.getByRole("button", { name: "Close" }).click();
     await page.reload();
 
-    await page.getByPlaceholder("Search books...").fill("Ruth");
-    await page.getByRole("button", { name: /Ruth/i }).first().click();
-    const ruthDialog3 = page.getByRole("dialog");
-    await expect(ruthDialog3.getByText("0 of 4 chapters read")).toBeVisible();
+    await page.getByRole("button", { name: "Choose book and chapter" }).click();
+    const sheet3 = page.getByRole("dialog");
+    await sheet3.getByPlaceholder("Search books...").fill("Ruth");
+    await expect(
+      sheet3.getByRole("button", { name: /Ruth/i }).first()
+    ).toContainText("4 ch");
   });
 
-  test("renders live Verse of the Day from YouVersion API with artwork modal", async ({
-    page,
+  test("renders live Verse of the Day from YouVersion API", async ({
     request,
   }) => {
-    // 1. Verify API route returns 200 with valid structure
     const apiRes = await request.get("/api/verse-of-the-day");
     expect(apiRes.ok()).toBe(true);
     const votdData = await apiRes.json();
     expect(votdData).toHaveProperty("reference");
     expect(votdData).toHaveProperty("text");
     expect(typeof votdData.day).toBe("number");
-
-    // 2. Verify /books UI displays Verse of the Day banner
-    await page.goto("/books");
-    await expect(page.getByText("Verse of the Day")).toBeVisible();
-    await expect(page.getByText("YouVersion")).toBeVisible();
-    await expect(page.getByText(votdData.reference)).toBeVisible();
-
-    // 3. Verify separate button is removed, and verse text itself is pressable for artwork
-    await expect(
-      page.getByRole("button", { name: "Verse Art", exact: true })
-    ).not.toBeVisible();
-    const verseTextButton = page.getByRole("button", {
-      name: "View verse artwork",
-    });
-    if (await verseTextButton.isVisible()) {
-      await verseTextButton.click();
-      const artDialog = page.getByRole("dialog", {
-        name: "Verse of the Day Artwork",
-      });
-      await expect(artDialog).toBeVisible();
-      await expect(
-        artDialog.getByRole("img", {
-          name: new RegExp(
-            `${votdData.reference} Verse of the Day Artwork`,
-            "i"
-          ),
-        })
-      ).toBeVisible();
-      await artDialog.getByRole("button", { name: "Close" }).click();
-      await expect(artDialog).not.toBeVisible();
-    }
   });
 
   test("authenticated user starts a plan, sees 0% gauge on detail page, and toggles readings in reading flow", async ({

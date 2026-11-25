@@ -49,30 +49,26 @@ test.describe("Mobile Navigation & Filter UX", () => {
     await expect(
       mobileNav.getByRole("link", { name: /home|overview/i })
     ).toBeVisible();
-    await expect(mobileNav.getByRole("link", { name: "Books" })).toBeVisible();
+    await expect(mobileNav.getByRole("link", { name: "Bible" })).toBeVisible();
     await expect(mobileNav.getByRole("link", { name: "Plans" })).toBeVisible();
     await expect(
       mobileNav.getByRole("link", { name: "Achievements" })
     ).toBeVisible();
     await expect(mobileNav.getByRole("link", { name: "Notes" })).toBeVisible();
 
-    // Verify "Bible Books" is NOT used as label, only "Books"
+    // Verify "Bible Books" is NOT used as label, only "Bible"
     await expect(
       mobileNav.getByRole("link", { name: "Bible Books" })
     ).not.toBeVisible();
 
-    // 4. Test navigation to Books via bottom nav
-    await mobileNav.getByRole("link", { name: "Books" }).click();
-    await page.waitForURL("/books", { timeout: 10000 });
+    // 4. Test navigation to Bible via bottom nav
+    await mobileNav.getByRole("link", { name: "Bible" }).click();
+    await page.waitForURL("/bible", { timeout: 10000 });
 
-    // Verify category filter pills on Books page are horizontally scrollable (do not wrap)
-    const booksCategoryFilter = page.getByTestId("books-category-filter");
-    await expect(booksCategoryFilter).toBeVisible();
-    const hasHorizontalScroll = await booksCategoryFilter.evaluate((el) => {
-      const style = window.getComputedStyle(el);
-      return style.overflowX === "auto" || style.overflowX === "scroll";
-    });
-    expect(hasHorizontalScroll).toBe(true);
+    // Verify Book & Chapter picker trigger is visible on mobile
+    await expect(
+      page.getByRole("button", { name: "Choose book and chapter" })
+    ).toBeVisible();
 
     // 5. Test navigation to Plans via bottom nav
     await mobileNav.getByRole("link", { name: "Plans" }).click();

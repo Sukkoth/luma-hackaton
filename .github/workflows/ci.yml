@@ -26,6 +26,7 @@ env:
   VAPID_PRIVATE_KEY: "M8NMbCjypV1NzimWqvBwKdomAzjXycYrOK83Ll-YHak"
   VAPID_SUBJECT: "mailto:notifications@luma-scripture.app"
   CRON_API_KEY: "luma-cronjob-secret-key"
+  E2E_MOCK_BIBLE_API: "true"
 
 jobs:
   validate:

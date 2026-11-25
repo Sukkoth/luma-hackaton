@@ -17,7 +17,11 @@ import type {
   PlanNoteDetail,
 } from "@/actions/plans";
 import { useTheme } from "@/components/theme/theme-provider";
-import { buildBibleComPath, detectDefaultVersion } from "@/lib/bible-versions";
+import {
+  buildBibleComPath,
+  detectDefaultVersion,
+  isBookSupportedInSixtySixBookVersions,
+} from "@/lib/bible-versions";
 import { PlanSessionNotes } from "./plan-session-notes";
 
 type PlanReadingFlowProps = {
@@ -102,6 +106,11 @@ export function PlanReadingFlow({
     const timer = setTimeout(() => {
       const defaultVersion = detectDefaultVersion({});
       for (const reading of activeSession.readings) {
+        if (
+          !isBookSupportedInSixtySixBookVersions({ bookId: reading.bookId })
+        ) {
+          continue;
+        }
         const path = buildBibleComPath({
           versionId: defaultVersion.id,
           bookId: reading.bookId,
@@ -142,16 +151,19 @@ export function PlanReadingFlow({
     }
   };
 
-  // Build Bible reader URL for a reading
+  // Build unified Bible reader URL for a reading
   const buildReaderUrl = (reading: PlanSessionDetail["readings"][0]) => {
     const params = new URLSearchParams();
+    params.set("view", "read");
+    params.set("book", reading.bookId.toLowerCase());
+    params.set("ch", reading.chapter.toString());
     params.set("plan", instanceId);
     params.set("readingId", reading.id);
     if (reading.startVerse != null)
       params.set("startVerse", reading.startVerse.toString());
     if (reading.endVerse != null)
       params.set("endVerse", reading.endVerse.toString());
-    return `/bible/${reading.bookId.toLowerCase()}/${reading.chapter}?${params.toString()}`;
+    return `/bible?${params.toString()}`;
   };
 
   return (
@@ -361,15 +373,19 @@ export function PlanReadingFlow({
                         </span>
                       </div>
 
-                      {/* Read Passage Book Button - now a Link */}
-                      <Link
-                        href={readerUrl}
-                        aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
-                        title="Read passage"
-                        className="flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent text-foreground-dim transition-all hover:border-border hover:bg-surface hover:text-foreground active:scale-95 cursor-pointer"
-                      >
-                        <BookOpen className="size-3.5" />
-                      </Link>
+                      {/* Read Passage Book Button - only for 66-book supported books */}
+                      {isBookSupportedInSixtySixBookVersions({
+                        bookId: reading.bookId,
+                      }) && (
+                        <Link
+                          href={readerUrl}
+                          aria-label={`Read ${reading.displayText || `${reading.bookName} ${reading.chapter}`}`}
+                          title="Read passage"
+                          className="flex size-6 shrink-0 items-center justify-center rounded-md border border-transparent text-foreground-dim transition-all hover:border-border hover:bg-surface hover:text-foreground active:scale-95 cursor-pointer"
+                        >
+                          <BookOpen className="size-3.5" />
+                        </Link>
+                      )}
                     </div>
                   );
                 })}

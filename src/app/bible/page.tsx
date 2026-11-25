@@ -1,21 +1,39 @@
-import { Suspense } from "react";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { unstable_noStore } from "next/cache";
+import { connection } from "next/server";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
 import { auth } from "@/lib/auth";
-import { AppShell } from "@/components/navigation/app-shell";
-import { getUserTrackersData } from "@/actions/trackers";
+import { trackerChapterProgress } from "@/db/schema";
+import { BooksView } from "@/components/books/books-view";
 import { syncUserStreak } from "@/lib/streak-service";
-import { BibleLandingPage } from "@/components/bible/bible-landing-page";
+import { getUserTrackersData } from "@/actions/trackers";
+import { getVerseOfTheDay } from "@/lib/youversion";
+import type { BibleCanon } from "@/data/bibleData";
 
 export const instant = false;
 
 export default async function BiblePage() {
-  unstable_noStore();
-  const session = await auth.api.getSession({ headers: await headers() });
+  await connection();
+  const sessionPromise = auth.api.getSession({
+    headers: await headers(),
+  });
+  const versePromise = getVerseOfTheDay();
+
+  const [session, verseOfTheDay] = await Promise.all([
+    sessionPromise,
+    versePromise,
+  ]);
 
   if (!session) {
-    redirect(`/login?redirect=/bible`);
+    return (
+      <BooksView
+        initialReadData={{}}
+        activeTrackerId={null}
+        canon="protestant"
+        userName={null}
+        verseOfTheDay={verseOfTheDay}
+      />
+    );
   }
 
   const [trackersData, streak] = await Promise.all([
@@ -23,28 +41,37 @@ export default async function BiblePage() {
     syncUserStreak({ userId: session.user.id }),
   ]);
 
-  const displayName = session.user.name || "Reader";
+  const activeTracker = trackersData.activeTracker;
+  const canon = (activeTracker?.canon as BibleCanon) || "protestant";
+
+  const progress = activeTracker
+    ? await db.query.trackerChapterProgress.findMany({
+        where: eq(trackerChapterProgress.trackerId, activeTracker.id),
+      })
+    : [];
+
+  const initialReadData: Record<string, number[]> = {};
+  for (const item of progress) {
+    if (!initialReadData[item.bookId]) {
+      initialReadData[item.bookId] = [];
+    }
+    initialReadData[item.bookId].push(item.chapter);
+  }
+
+  const displayName =
+    session.user.name.split(" ")[0] || session.user.name || "Reader";
 
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen w-full items-center justify-center p-8">
-          <div className="size-8 animate-spin rounded-full border-2 border-black/10 border-t-black dark:border-white/10 dark:border-t-white" />
-        </div>
-      }
-    >
-      <AppShell
-        userName={displayName}
-        userEmail={session.user.email}
-        userImage={session.user.image ?? undefined}
-        streak={streak}
-        trackers={trackersData.trackers}
-        activeTrackerId={trackersData.activeTracker?.id}
-      >
-        <div className="w-full max-w-[1440px] mx-auto pb-16">
-          <BibleLandingPage />
-        </div>
-      </AppShell>
-    </Suspense>
+    <BooksView
+      key={activeTracker?.id ?? "guest"}
+      initialReadData={initialReadData}
+      activeTrackerId={activeTracker?.id ?? null}
+      trackerName={activeTracker?.name ?? null}
+      canon={canon}
+      trackers={trackersData.trackers}
+      userName={displayName}
+      streak={streak}
+      verseOfTheDay={verseOfTheDay}
+    />
   );
 }

@@ -36,6 +36,8 @@ export default defineConfig({
     timeout: 120 * 1000,
     env: {
       DISABLE_RATE_LIMIT: "true",
+      E2E_MOCK_BIBLE_API:
+        process.env.CI || !process.env.YOUVERSION_APP_KEY ? "true" : "false",
     },
   },
 });

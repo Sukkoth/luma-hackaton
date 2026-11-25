@@ -1,9 +1,7 @@
-// Luma Progressive Web App Service Worker (v2)
-const CACHE_NAME = "luma-pwa-v2";
+// Luma Progressive Web App Service Worker (v3)
+const CACHE_NAME = "luma-pwa-v3";
 
 const PRECACHE_ASSETS = [
-  "/",
-  "/home",
   "/offline",
   "/manifest.json",
   "/favicon.ico",
@@ -67,51 +65,29 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // In development mode, never intercept or cache requests
+  if (isDev) {
+    return;
+  }
+
   // Bypass API and auth calls directly to network
   if (url.pathname.startsWith("/api/")) {
     return;
   }
 
-  // In development mode, bypass caching for Next.js chunks, HMR, and webpack/turbopack runtime
-  // to prevent stale JS client bundles from causing React hydration mismatches
-  if (
-    isDev &&
-    (url.pathname.startsWith("/_next/") ||
-      url.pathname.includes("__turbopack") ||
-      url.pathname.includes("hot-update"))
-  ) {
-    return;
-  }
-
-  // 1. Navigation requests (HTML pages) -> Network-First with Offline Fallback
+  // 1. Navigation requests (HTML pages) -> Network-only with Offline Fallback
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(async () => {
-          // Check if page was cached
-          const cachedResponse = await caches.match(request);
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Fallback to offline page
-          const offlineFallback = await caches.match("/offline");
-          if (offlineFallback) {
-            return offlineFallback;
-          }
-          return new Response("Offline", {
-            status: 503,
-            statusText: "Offline",
-          });
-        })
+      fetch(request).catch(async () => {
+        const offlineFallback = await caches.match("/offline");
+        if (offlineFallback) {
+          return offlineFallback;
+        }
+        return new Response("Offline", {
+          status: 503,
+          statusText: "Offline",
+        });
+      })
     );
     return;
   }
@@ -137,11 +113,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Static Media / Icons / Fonts -> Stale-While-Revalidate
-  if (
-    url.pathname.match(/\.(png|jpg|jpeg|svg|webp|ico|woff2?|css)$/) ||
-    url.origin === self.location.origin
-  ) {
+  // 3. Static Media / Icons / Fonts / CSS -> Stale-While-Revalidate
+  if (url.pathname.match(/\.(png|jpg|jpeg|svg|webp|ico|woff2?|css)$/)) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
         const fetchPromise = fetch(request)

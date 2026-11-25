@@ -45,7 +45,7 @@ export default function OfflinePage() {
           </Link>
 
           <Link
-            href="/books"
+            href="/bible"
             className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/70 bg-card hover:bg-muted/60 transition-colors text-xs font-semibold text-foreground group"
           >
             <BookOpen className="size-4 mb-1.5 text-primary group-hover:scale-110 transition-transform" />

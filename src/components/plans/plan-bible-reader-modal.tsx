@@ -23,6 +23,7 @@ import {
   detectDefaultVersion,
   saveSelectedVersion,
   buildBibleComPath,
+  isBookSupportedInSixtySixBookVersions,
 } from "@/lib/bible-versions";
 
 export type PlanBibleReaderModalProps = {
@@ -205,16 +206,21 @@ export function PlanBibleReaderModal({
   const hasNext =
     currentIndex >= 0 && currentIndex < flattenedReadings.length - 1;
 
+  const isBookSupported = currentReading
+    ? isBookSupportedInSixtySixBookVersions({ bookId: currentReading.bookId })
+    : false;
+
   // Bible proxy path and active src (decoupled from theme changes to prevent iframe remounting)
-  const biblePath = currentReading
-    ? buildBibleComPath({
-        versionId: selectedVersion.id,
-        bookId: currentReading.bookId,
-        chapter: currentReading.chapter,
-        startVerse: currentReading.startVerse,
-        endVerse: currentReading.endVerse,
-      })
-    : "";
+  const biblePath =
+    currentReading && isBookSupported
+      ? buildBibleComPath({
+          versionId: selectedVersion.id,
+          bookId: currentReading.bookId,
+          chapter: currentReading.chapter,
+          startVerse: currentReading.startVerse,
+          endVerse: currentReading.endVerse,
+        })
+      : "";
 
   const iframeSrc = biblePath
     ? `/api/bible-proxy?path=${encodeURIComponent(biblePath)}`
@@ -243,13 +249,19 @@ export function PlanBibleReaderModal({
       } else if (e.key === "ArrowLeft" && hasPrev) {
         e.preventDefault();
         const prevItem = flattenedReadings[currentIndex - 1];
-        if (prevItem) {
+        if (
+          prevItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: prevItem.bookId })
+        ) {
           onSelectReadingAction(prevItem.id);
         }
       } else if (e.key === "ArrowRight" && hasNext) {
         e.preventDefault();
         const nextItem = flattenedReadings[currentIndex + 1];
-        if (nextItem) {
+        if (
+          nextItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: nextItem.bookId })
+        ) {
           onSelectReadingAction(nextItem.id);
         }
       } else if (
@@ -301,7 +313,10 @@ export function PlanBibleReaderModal({
     if (hasNext) {
       nextTimer = setTimeout(() => {
         const nextItem = flattenedReadings[currentIndex + 1];
-        if (nextItem) {
+        if (
+          nextItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: nextItem.bookId })
+        ) {
           const path = buildBibleComPath({
             versionId: selectedVersion.id,
             bookId: nextItem.bookId,
@@ -321,7 +336,10 @@ export function PlanBibleReaderModal({
     if (hasPrev) {
       prevTimer = setTimeout(() => {
         const prevItem = flattenedReadings[currentIndex - 1];
-        if (prevItem) {
+        if (
+          prevItem &&
+          isBookSupportedInSixtySixBookVersions({ bookId: prevItem.bookId })
+        ) {
           const path = buildBibleComPath({
             versionId: selectedVersion.id,
             bookId: prevItem.bookId,
@@ -441,68 +459,70 @@ export function PlanBibleReaderModal({
         {/* Center: Version Selector & Font Size Controls */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Version Selector Dropdown */}
-          <div ref={versionMenuRef} className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setIsVersionDropdownOpen(!isVersionDropdownOpen);
-                setIsFontMenuOpen(false);
-              }}
-              aria-expanded={isVersionDropdownOpen}
-              aria-haspopup="listbox"
-              className="flex items-center gap-1 sm:gap-1.5 rounded-[12px] border border-border bg-surface px-2 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium text-foreground transition-all hover:border-border-strong cursor-pointer shadow-2xs"
-            >
-              <BookOpen className="size-3.5 text-primary" />
-              <span className="font-semibold">
-                {selectedVersion.abbreviation}
-              </span>
-              <ChevronDown className="size-3 text-foreground-dim" />
-            </button>
-
-            {isVersionDropdownOpen && (
-              <div
-                role="listbox"
-                className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-64 max-h-80 overflow-y-auto rounded-[16px] border border-border bg-surface p-1.5 shadow-lg"
+          {isBookSupported && (
+            <div ref={versionMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVersionDropdownOpen(!isVersionDropdownOpen);
+                  setIsFontMenuOpen(false);
+                }}
+                aria-expanded={isVersionDropdownOpen}
+                aria-haspopup="listbox"
+                className="flex items-center gap-1 sm:gap-1.5 rounded-[12px] border border-border bg-surface px-2 sm:px-3 py-1.5 text-[11.5px] sm:text-[13px] font-medium text-foreground transition-all hover:border-border-strong cursor-pointer shadow-2xs"
               >
-                <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
-                  Bible Version
+                <BookOpen className="size-3.5 text-primary" />
+                <span className="font-semibold">
+                  {selectedVersion.abbreviation}
+                </span>
+                <ChevronDown className="size-3 text-foreground-dim" />
+              </button>
+
+              {isVersionDropdownOpen && (
+                <div
+                  role="listbox"
+                  className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-1.5 z-40 w-64 max-h-80 overflow-y-auto rounded-[16px] border border-border bg-surface p-1.5 shadow-lg"
+                >
+                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground-dim">
+                    Bible Version
+                  </div>
+                  {BIBLE_VERSIONS.map((v) => {
+                    const isSelected = v.id === selectedVersion.id;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => handleSelectVersion({ version: v })}
+                        className={`flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[12.5px] transition-colors cursor-pointer ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground font-semibold"
+                            : "text-foreground hover:bg-surface-elevated font-normal"
+                        }`}
+                      >
+                        <div className="flex flex-col min-w-0 pr-2">
+                          <span className="truncate">{v.name}</span>
+                          <span
+                            className={`text-[10.5px] ${
+                              isSelected
+                                ? "text-primary-foreground/80"
+                                : "text-foreground-dim"
+                            }`}
+                          >
+                            {v.abbreviation} • {v.language.toUpperCase()}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <Check className="size-4 shrink-0 text-primary-foreground" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                {BIBLE_VERSIONS.map((v) => {
-                  const isSelected = v.id === selectedVersion.id;
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={() => handleSelectVersion({ version: v })}
-                      className={`flex w-full items-center justify-between rounded-[10px] px-2.5 py-2 text-left text-[12.5px] transition-colors cursor-pointer ${
-                        isSelected
-                          ? "bg-primary text-primary-foreground font-semibold"
-                          : "text-foreground hover:bg-surface-elevated font-normal"
-                      }`}
-                    >
-                      <div className="flex flex-col min-w-0 pr-2">
-                        <span className="truncate">{v.name}</span>
-                        <span
-                          className={`text-[10.5px] ${
-                            isSelected
-                              ? "text-primary-foreground/80"
-                              : "text-foreground-dim"
-                          }`}
-                        >
-                          {v.abbreviation} • {v.language.toUpperCase()}
-                        </span>
-                      </div>
-                      {isSelected && (
-                        <Check className="size-4 shrink-0 text-primary-foreground" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* Font Size Menu */}
           <div ref={fontMenuRef} className="relative">
@@ -707,16 +727,30 @@ export function PlanBibleReaderModal({
           </div>
         )}
 
-        {/* Themed Proxy Iframe */}
-        <iframe
-          ref={iframeRef}
-          key={`${iframeSrc}-${currentReading.id}`}
-          src={iframeSrc}
-          title={`Bible reading ${readingTitle}`}
-          onLoad={handleIframeLoad}
-          className="size-full border-0 bg-background"
-          sandbox="allow-scripts allow-same-origin allow-popups"
-        />
+        {!isBookSupported ? (
+          <div className="flex size-full items-center justify-center p-6 text-center">
+            <div className="max-w-md space-y-2">
+              <BookOpen className="mx-auto size-8 text-foreground-dim" />
+              <h2 className="text-base font-semibold text-foreground">
+                Book unavailable in the reader
+              </h2>
+              <p className="text-sm text-foreground-dim">
+                {readingTitle} is outside the 66-book canon supported by the
+                available Bible translations.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            key={`${iframeSrc}-${currentReading.id}`}
+            src={iframeSrc}
+            title={`Bible reading ${readingTitle}`}
+            onLoad={handleIframeLoad}
+            className="size-full border-0 bg-background"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          />
+        )}
       </main>
 
       {/* =========================================================================

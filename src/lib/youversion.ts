@@ -130,7 +130,7 @@ export async function getVerseOfTheDay({
     return inMemoryCache.data;
   }
 
-  const appKey = process.env.APP_KEY;
+  const appKey = process.env.YOUVERSION_APP_KEY;
 
   if (!appKey) {
     return {

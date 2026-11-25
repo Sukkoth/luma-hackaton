@@ -1,569 +1,250 @@
-import dns from "node:dns";
-import fs from "node:fs/promises";
-import nodePath from "node:path";
 import crypto from "node:crypto";
 import { type NextRequest } from "next/server";
 import sanitizeHtml from "sanitize-html";
+import * as v from "valibot";
+import {
+  BIBLE_VERSIONS,
+  isBookSupportedInSixtySixBookVersions,
+} from "@/lib/bible-versions";
 
-// Force IPv4 first to prevent unreachable IPv6 timeouts in Linux environments
-dns.setDefaultResultOrder("ipv4first");
+const CONTENT_VERSION = "yvp-v3";
+const MEMORY_CACHE_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
+const MAX_MEMORY_CACHE_ENTRIES = 500;
 
-// Content version for cache invalidation — bump when extractor logic changes
-const CONTENT_VERSION = "v4";
+const ALLOWED_VERSION_IDS = new Set(BIBLE_VERSIONS.map((ver) => ver.id));
 
-type ExtractChapterContentParams = {
-  html: string;
+const YouVersionHtmlPassageSchema = v.object({
+  id: v.string(),
+  content: v.string(),
+  reference: v.string(),
+});
+
+const YouVersionBibleMetadataSchema = v.object({
+  copyright: v.optional(v.nullable(v.string())),
+});
+
+type CachedPassage = {
+  reference: string;
+  contentHtml: string;
+  versionLabel: string;
+  copyright: string | null;
+  timestamp: number;
 };
 
-function extractChapterContent({
-  html,
-}: ExtractChapterContentParams): string | null {
-  // 1. Full chapter pages contain data-testid="chapter-content"
-  const startTag = 'data-testid="chapter-content"';
-  const startIdx = html.indexOf(startTag);
-  if (startIdx !== -1) {
-    const divStart = html.lastIndexOf("<div", startIdx);
-    if (divStart !== -1) {
-      let depth = 0;
-      let pos = divStart;
-      let endPos = -1;
+const passageCache = new Map<string, CachedPassage>();
+const inFlightFetches = new Map<string, Promise<CachedPassage>>();
+const versionCopyrightCache = new Map<
+  number,
+  { copyright: string | null; timestamp: number }
+>();
+const inFlightCopyrightFetches = new Map<number, Promise<string | null>>();
 
-      while (pos < html.length) {
-        const nextOpen = html.indexOf("<div", pos);
-        const nextClose = html.indexOf("</div>", pos);
+const STANDARD_HEADERS = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+} as const;
 
-        if (nextClose === -1) break;
-
-        if (nextOpen !== -1 && nextOpen < nextClose) {
-          depth++;
-          pos = nextOpen + 4;
-        } else {
-          depth--;
-          if (depth === 0) {
-            endPos = nextClose + 6;
-            break;
-          }
-          pos = nextClose + 6;
-        }
-      }
-
-      if (endPos !== -1) {
-        return html.substring(divStart, endPos);
-      }
-    }
-  }
-
-  // 2. Verse range pages (e.g. /bible/1/MRK.1.10-15.KJV or JHN.3.16.NIV)
-  // Use sanitize-html to parse and extract only the passage content,
-  // filtering out ads, images, navigation, and other junk.
-  const sanitized = sanitizeHtml(html, {
-    allowedTags: [
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "p",
-      "span",
-      "a",
-      "br",
-      "strong",
-      "em",
-      "b",
-      "i",
-      "sup",
-      "div",
-    ],
-    allowedAttributes: {
-      h1: ["class"],
-      h2: ["class"],
-      h3: ["class"],
-      h4: ["class"],
-      p: ["class"],
-      span: ["class", "data-usfm"],
-      a: ["href"],
-      div: ["class"],
-    },
-    allowedSchemes: ["http", "https", "mailto"],
-    allowedSchemesByTag: { a: ["http", "https"] },
-    allowProtocolRelative: false,
-    transformTags: {
-      a: sanitizeHtml.simpleTransform("a", {
-        target: "_blank",
-        rel: "noopener noreferrer",
-      }),
-    },
-    exclusiveFilter: (frame) => {
-      // Aggressively filter out ads, images, navigation, promo content
-      const tag = frame.tag;
-      const className = frame.attribs?.class || "";
-      const id = frame.attribs?.id || "";
-      const role = frame.attribs?.role || "";
-      const style = frame.attribs?.style || "";
-      const src = frame.attribs?.src || "";
-      const dataSrc = frame.attribs?.["data-src"] || "";
-      const backgroundImage = frame.attribs?.["background-image"] || "";
-
-      // Also check for background-image in style attribute
-      const hasBackgroundImage =
-        style.includes("background-image") || backgroundImage !== "";
-
-      return (
-        tag === "img" ||
-        tag === "picture" ||
-        tag === "source" ||
-        tag === "svg" ||
-        tag === "canvas" ||
-        tag === "video" ||
-        tag === "audio" ||
-        tag === "iframe" ||
-        tag === "script" ||
-        tag === "style" ||
-        tag === "nav" ||
-        tag === "header" ||
-        tag === "footer" ||
-        tag === "aside" ||
-        tag === "button" ||
-        tag === "form" ||
-        hasBackgroundImage ||
-        src.includes("ad") ||
-        dataSrc.includes("ad") ||
-        className.includes("Ad") ||
-        className.includes("ad-") ||
-        className.includes("Banner") ||
-        className.includes("banner") ||
-        className.includes("Promo") ||
-        className.includes("promo") ||
-        className.includes("Sponsor") ||
-        className.includes("sponsor") ||
-        className.includes("Cookie") ||
-        className.includes("cookie") ||
-        className.includes("Modal") ||
-        className.includes("modal") ||
-        className.includes("Popup") ||
-        className.includes("popup") ||
-        className.includes("Overlay") ||
-        className.includes("overlay") ||
-        className.includes("Fullscreen") ||
-        className.includes("fullscreen") ||
-        className.includes("ImageGallery") ||
-        className.includes("image-gallery") ||
-        className.includes("Carousel") ||
-        className.includes("carousel") ||
-        className.includes("Slider") ||
-        className.includes("slider") ||
-        className.includes("Nav") ||
-        className.includes("Header") ||
-        className.includes("Footer") ||
-        className.includes("AppBanner") ||
-        className.includes("Video") ||
-        className.includes("Audio") ||
-        className.includes("Partner") ||
-        className.includes("CTA") ||
-        className.includes("cta") ||
-        className.includes("Interstitial") ||
-        className.includes("interstitial") ||
-        className.includes("Section") ||
-        className.includes("section") ||
-        className.includes("Heading") ||
-        className.includes("heading") ||
-        className.includes("ChapterTitle") ||
-        className.includes("chapter-title") ||
-        className.includes("PassageHeader") ||
-        className.includes("passage-header") ||
-        id.includes("ad") ||
-        id.includes("banner") ||
-        id.includes("cookie") ||
-        id.includes("onetrust") ||
-        id.includes("modal") ||
-        id.includes("popup") ||
-        role === "banner" ||
-        role === "navigation" ||
-        role === "contentinfo" ||
-        role === "dialog" ||
-        role === "alertdialog" ||
-        style.includes("display: none") ||
-        style.includes("visibility: hidden") ||
-        style.includes("opacity: 0")
-      );
-    },
-  });
-
-  // After sanitization, look for the verse range structure:
-  // heading (h2 with font-bold) + paragraph(s) with text-16/text-20
-  const h2Match = sanitized.match(
-    /<h2[^>]*class="[^"]*font-bold[^"]*"[^>]*>([\s\S]*?)<\/h2>/i
-  );
-  // Match ALL paragraphs with text-16 or text-20 (not just first)
-  const rawPMatches = sanitized.match(
-    /<p[^>]*class="[^"]*(?:text-16|text-20)[^"]*"[^>]*>([\s\S]*?)<\/p>/gi
-  );
-  // Filter out any "Compare All Versions" or promo helper paragraphs
-  const pMatches = rawPMatches?.filter(
-    (p) =>
-      !p.includes("Compare") &&
-      !p.includes("compare") &&
-      !p.includes("Save verses")
-  );
-  const copyrightMatch = sanitized.match(
-    /<div[^>]*class="[^"]*(?:version-copyright|copyright)[^"]*"[^>]*>[\s\S]*?<\/div>/i
-  );
-
-  if (pMatches && pMatches.length > 0) {
-    const headingHtml = h2Match
-      ? `<h2 class="luma-verse-range-title">${h2Match[1].replace(/<!--[\s\S]*?-->/g, "").trim()}</h2>`
-      : "";
-    const copyrightHtml = copyrightMatch ? copyrightMatch[0] : "";
-
-    // Join all matching paragraphs (verse content may span multiple <p>)
-    const versesHtml = pMatches.join("");
-
-    const cardHtml = `<div class="luma-verse-range-card">
-      ${headingHtml}
-      <div class="luma-verse-range-content">
-        ${versesHtml}
-      </div>
-      ${copyrightHtml}
-    </div>`;
-
-    // Heuristic: if the extracted card is too large (>15KB), it likely contains
-    // junk that slipped through (common for verse-1 starts with chapter headings).
-    // Fall back to plain-text extraction which is more aggressive.
-    if (cardHtml.length > 15000) {
-      return null; // triggers fallback to extractPlainTextContent
-    }
-
-    return cardHtml;
-  }
-
-  return null;
-}
-
-type ExtractHeadLinksParams = {
-  html: string;
+type ParsedBiblePath = {
+  versionId: number;
+  reference: string;
+  bookCode: string;
 };
 
-function extractHeadLinks({ html }: ExtractHeadLinksParams): string {
-  const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-  if (!headMatch || !headMatch[1]) return "";
-  const headContent = headMatch[1];
-  const links = headContent.match(/<link[^>]+>/gi) || [];
-  return links
-    .filter(
-      (link) =>
-        link.includes('rel="stylesheet"') ||
-        link.includes('rel="preload"') ||
-        link.includes("typekit")
-    )
-    .join("\n");
+function parseBiblePath({ path }: { path: string }): ParsedBiblePath | null {
+  const trimmed = path.trim().replace(/^\/+/, "");
+  const parts = trimmed.split("/");
+  if (parts.length !== 2) return null;
+
+  const versionId = Number.parseInt(parts[0] ?? "", 10);
+  const reference = parts[1]?.trim() ?? "";
+  if (!Number.isFinite(versionId) || !reference) return null;
+
+  const bookCode = reference.split(".")[0]?.trim() ?? "";
+  if (!bookCode || !/^[A-Za-z0-9.+-]+$/.test(reference)) return null;
+
+  return { versionId, reference, bookCode };
 }
 
-/**
- * Extracts only text content from a page — used when structured extraction fails.
- * Returns sanitized plain text + inline links, no layout/navigation markup.
- */
-function extractPlainTextContent({ html }: { html: string }): string {
-  return sanitizeHtml(html, {
-    allowedTags: [
-      "p",
-      "span",
-      "a",
-      "br",
-      "strong",
-      "em",
-      "b",
-      "i",
-      "sup",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-    ],
-    allowedAttributes: {
-      a: ["href"],
-      span: ["data-usfm"],
-      p: ["class"],
-      h1: ["class"],
-      h2: ["class"],
-      h3: ["class"],
-      h4: ["class"],
-    },
-    allowedSchemes: ["http", "https", "mailto"],
-    allowedSchemesByTag: { a: ["http", "https"] },
-    allowProtocolRelative: false,
-    transformTags: {
-      a: sanitizeHtml.simpleTransform("a", {
-        target: "_blank",
-        rel: "noopener noreferrer",
-      }),
-    },
-    exclusiveFilter: (frame) => {
-      // Drop nav, header, footer, script containers, ads, etc.
-      const tag = frame.tag;
-      const className = frame.attribs?.class || "";
-      const id = frame.attribs?.id || "";
-      const role = frame.attribs?.role || "";
-      return (
-        tag === "nav" ||
-        tag === "header" ||
-        tag === "footer" ||
-        tag === "aside" ||
-        tag === "script" ||
-        tag === "style" ||
-        tag === "button" ||
-        className.includes("Nav") ||
-        className.includes("Header") ||
-        className.includes("Footer") ||
-        className.includes("Banner") ||
-        className.includes("Cookie") ||
-        className.includes("Video") ||
-        className.includes("Audio") ||
-        className.includes("Partner") ||
-        id.includes("cookie") ||
-        id.includes("onetrust") ||
-        role === "banner" ||
-        role === "navigation" ||
-        role === "contentinfo"
-      );
-    },
-  });
-}
-
-/**
- * Sanitizes HTML for safe embedding in the reader iframe.
- * Uses sanitize-html (proper parser) instead of regex.
- */
-function sanitizeHtmlContent({ html }: { html: string }): string {
+function sanitizePassageHtml({ html }: { html: string }): string {
   return sanitizeHtml(html, {
     allowedTags: [
       "div",
+      "span",
       "p",
+      "br",
       "h1",
       "h2",
       "h3",
       "h4",
-      "span",
-      "a",
-      "em",
       "strong",
-      "br",
-      "sup",
-      "ul",
-      "ol",
-      "li",
+      "em",
       "b",
       "i",
-      "blockquote",
-      "hr",
+      "sup",
+      "sub",
     ],
     allowedAttributes: {
-      a: ["href"],
-      span: ["data-usfm", "class"],
       div: ["class"],
+      span: ["class", "v"],
       p: ["class"],
-      h2: ["class"],
-      h3: ["class"],
-      h4: ["class"],
-    },
-    allowedSchemes: ["http", "https", "mailto"],
-    allowedSchemesByTag: { a: ["http", "https"] },
-    allowProtocolRelative: false,
-    transformTags: {
-      a: sanitizeHtml.simpleTransform("a", {
-        target: "_blank",
-        rel: "noopener noreferrer",
-      }),
-    },
-    exclusiveFilter: (frame) => {
-      const tag = frame.tag;
-      const style = frame.attribs?.style || "";
-      const className = frame.attribs?.class || "";
-      // Match ad/banner as whole words or with common separators (-, _, space)
-      // to avoid false positives like "card", "heading", "sidebar", "luma-verse-range-card"
-      const adRegex = /\b(ad|banner)\b/i;
-      const hasAdClass = adRegex.test(className);
-      return (
-        tag === "img" ||
-        tag === "picture" ||
-        tag === "source" ||
-        tag === "svg" ||
-        tag === "canvas" ||
-        tag === "video" ||
-        tag === "audio" ||
-        tag === "iframe" ||
-        style.includes("background-image") ||
-        hasAdClass
-      );
     },
   });
 }
 
-type BuildCleanReaderDocumentParams = {
-  chapterContent: string;
-  headLinks: string;
-  theme: "light" | "dark";
-  fontSize?: number;
-};
+function escapeHtml({ text }: { text: string }): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
-function buildCleanReaderDocument({
-  chapterContent,
-  headLinks,
+function renderHtmlDocument({
+  reference,
+  contentHtml,
   theme,
-  fontSize = 22,
-}: BuildCleanReaderDocumentParams): string {
+  fontSize,
+}: {
+  reference: string;
+  contentHtml: string;
+  theme: "dark" | "light";
+  fontSize: number;
+}): string {
   const isDark = theme === "dark";
-  const clampedSize = Math.min(32, Math.max(20, fontSize));
-  const safeContent = sanitizeHtmlContent({ html: chapterContent });
+  const safeReference = escapeHtml({ text: reference });
 
   return `<!DOCTYPE html>
-<html lang="en" class="${theme}" style="--bible-font-size: ${clampedSize}px;">
+<html lang="en" class="${theme}" style="--bible-font-size: ${fontSize}px;">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://www.bible.com https://use.typekit.net; img-src 'self' https: data:; font-src 'self' https: data:; style-src 'self' 'unsafe-inline' https:; form-action 'none'; frame-ancestors 'self';" />
-  <base href="https://www.bible.com" />
-  ${headLinks}
-  <style id="luma-native-theme">
-    :root {
-      --bible-font-size: ${clampedSize}px;
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${safeReference}</title>
+  <style>
+    :root, html.light, body.light {
+      --luma-bg: #ffffff;
+      --luma-text: #1c1917;
+      --luma-heading: #1c1917;
+      --luma-muted: #78716c;
+      --luma-accent: #d97706;
+      --luma-border: #e7e5e0;
+      --luma-scroll: rgba(28, 25, 23, 0.16);
+    }
+
+    html.dark, body.dark {
+      --luma-bg: #111110;
+      --luma-text: #e4e4e7;
+      --luma-heading: #ffffff;
+      --luma-muted: #a1a1aa;
+      --luma-accent: #f59e0b;
+      --luma-border: rgba(255, 255, 255, 0.1);
+      --luma-scroll: rgba(255, 255, 255, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    *::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background-color: var(--luma-scroll);
+      border-radius: 9999px;
     }
 
     html, body {
-      background-color: var(--luma-bg, ${isDark ? "#050505" : "#f8fafc"}) !important;
-      color: var(--luma-text, ${isDark ? "#f1f5f9" : "#1e293b"}) !important;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-      margin: 0 !important;
-      padding: 0 !important;
+      margin: 0;
+      padding: 0;
+      background-color: var(--luma-bg, ${isDark ? "#111110" : "#ffffff"});
+      color: var(--luma-text, ${isDark ? "#e4e4e7" : "#1c1917"});
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Ethiopic", "Nyala", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden !important;
+      text-rendering: optimizeLegibility;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    html.dark {
-      --luma-bg: #050505;
-      --luma-text: #f1f5f9;
-      --luma-title: #ffffff;
-      --luma-muted: #71717a;
-      --luma-note: #a1a1aa;
-      --luma-border: rgba(255, 255, 255, 0.1);
-      --luma-link: #94a3b8;
+    .luma-reader {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 5rem;
+      font-size: var(--bible-font-size, ${fontSize}px);
+      line-height: 1.95;
+      letter-spacing: 0.01em;
+      word-spacing: 0.04em;
     }
 
-    html.light {
-      --luma-bg: #f8fafc;
-      --luma-text: #1e293b;
-      --luma-title: #0f172a;
-      --luma-muted: #64748b;
-      --luma-note: #64748b;
-      --luma-border: #e2e8f0;
-      --luma-link: #475569;
+    @media (max-width: 639px) {
+      .luma-reader {
+        padding: 1.5rem 1.25rem 4rem;
+      }
     }
 
-    .luma-reader-wrapper {
-      max-width: 680px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 2rem 1.25rem 6rem 1.25rem;
-      box-sizing: border-box;
-      width: 100%;
+    .luma-passage .p,
+    .luma-passage .pi,
+    .luma-passage .m,
+    .luma-passage .mi,
+    .luma-passage .pc,
+    .luma-passage .li1 {
+      margin: 0 0 1.35em;
     }
 
-    /* Verses & Paragraphs */
-    [class*="chapter"], 
-    [class*="passage"], 
-    [class*="verse"], 
-    [class*="content"],
-    [class*="reader"],
-    [class*="ChapterContent"],
-    [data-usfm] {
-      color: var(--luma-text, ${isDark ? "#f1f5f9" : "#1e293b"}) !important;
-      background: transparent !important;
-      line-height: 1.85 !important;
-      font-size: var(--bible-font-size, ${clampedSize}px) !important;
+    .luma-passage .pi {
+      text-indent: 1.25em;
     }
 
-    /* Chapter Titles & Headings */
-    h1, h2, h3, h4, 
-    [class*="heading"], 
-    [class*="section_title"] {
-      color: var(--luma-title, ${isDark ? "#ffffff" : "#0f172a"}) !important;
-      font-weight: 700 !important;
-      letter-spacing: -0.015em !important;
-      margin-top: 1.5rem !important;
-      margin-bottom: 0.75rem !important;
-      line-height: 1.3 !important;
-      font-size: calc(var(--bible-font-size, ${clampedSize}px) * 1.35) !important;
+    .luma-passage .q1,
+    .luma-passage .q2,
+    .luma-passage .q3 {
+      margin: 0.35em 0;
+      padding-left: 1.25em;
+      line-height: 1.85;
     }
 
-    /* Verse Number Badges */
-    [class*="label"], 
-    [class*="verse_number"], 
-    [class*="v-num"] {
-      color: var(--luma-muted, ${isDark ? "#71717a" : "#64748b"}) !important;
-      font-weight: 600 !important;
-      font-size: calc(var(--bible-font-size, ${clampedSize}px) * 0.7) !important;
-      margin-right: 0.25rem !important;
-      vertical-align: baseline !important;
-      user-select: none !important;
+    .luma-passage .q2,
+    .luma-passage .q3 {
+      padding-left: 2.25em;
     }
 
-    /* Footnotes & Cross references */
-    [class*="note"], 
-    [class*="footnote"] {
-      color: var(--luma-note, ${isDark ? "#a1a1aa" : "#64748b"}) !important;
-      font-size: calc(var(--bible-font-size, ${clampedSize}px) * 0.8) !important;
+    .luma-passage .d {
+      margin: 0 0 1.1em;
+      font-style: italic;
+      color: var(--luma-muted);
+      font-size: 0.92em;
     }
 
-    /* Verse Range Presentation */
-    .luma-verse-range-card {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      padding-top: 1rem;
+    .luma-passage .s,
+    .luma-passage .s1,
+    .luma-passage .s2 {
+      margin: 1.75em 0 0.65em;
+      font-size: 1em;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--luma-heading);
     }
 
-    .luma-verse-range-title {
-      font-size: 1.25rem !important;
-      font-weight: 700 !important;
-      color: var(--luma-title, ${isDark ? "#ffffff" : "#0f172a"}) !important;
-      margin-bottom: 0.5rem !important;
+    .luma-passage .yv-vlbl {
+      font-size: 0.62em;
+      font-weight: 700;
+      color: var(--luma-accent);
+      vertical-align: super;
+      line-height: 0;
+      margin-right: 0.4em;
+      margin-left: 0.25em;
+      user-select: none;
     }
 
-    .luma-verse-range-content p {
-      font-size: var(--bible-font-size, ${clampedSize}px) !important;
-      line-height: 1.85 !important;
-      color: var(--luma-text, ${isDark ? "#f1f5f9" : "#1e293b"}) !important;
-      margin: 0 !important;
+    .luma-passage .nd {
+      font-variant: small-caps;
     }
 
-    /* Disable links inside reader from jumping externally */
-    a {
-      color: inherit !important;
-      text-decoration: none !important;
-      pointer-events: none !important;
-    }
-
-    /* Hide Compare, Share, Sign-in prompts, app icons, buttons & SVGs */
-    button,
-    svg,
-    img,
-    [class*="canvas-secondary"] {
-      display: none !important;
-    }
-
-    /* Version Copyright Footer */
-    [class*="version-copyright"],
-    [class*="copyright"] {
-      margin-top: 3rem !important;
-      padding-top: 1.5rem !important;
-      border-top: 1px solid var(--luma-border, ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}) !important;
-      color: var(--luma-muted, ${isDark ? "#71717a" : "#64748b"}) !important;
-      font-size: 0.8rem !important;
-      line-height: 1.5 !important;
-    }
-
-    [class*="version-copyright"] a {
-      color: var(--luma-link, ${isDark ? "#94a3b8" : "#475569"}) !important;
-      text-decoration: underline !important;
-      pointer-events: none !important;
+    .luma-passage .b {
+      height: 1.1em;
     }
   </style>
   <script>
@@ -572,7 +253,7 @@ function buildCleanReaderDocument({
       if (e.data.type === "SET_FONT_SIZE") {
         var size = Number(e.data.fontSize);
         if (!isNaN(size)) {
-          var clamped = Math.min(32, Math.max(20, size));
+          var clamped = Math.min(32, Math.max(16, size));
           document.documentElement.style.setProperty("--bible-font-size", clamped + "px");
           if (document.body) {
             document.body.style.setProperty("--bible-font-size", clamped + "px");
@@ -588,352 +269,483 @@ function buildCleanReaderDocument({
     });
   </script>
 </head>
-<body class="${theme}">
-  <div class="luma-reader-wrapper">
-    ${safeContent}
-  </div>
+<body class="${theme}" style="--bible-font-size: ${fontSize}px;">
+  <main class="luma-reader">
+    <article class="luma-passage">${contentHtml}</article>
+  </main>
 </body>
 </html>`;
 }
 
-type ExtractedPassageData = {
-  chapterContent: string;
-  headLinks: string;
-};
-
-type FinalizeResponseParams = {
-  data: ExtractedPassageData;
-  theme: "light" | "dark";
-  fontSize: number;
-};
-
-/**
- * Single point of truth for building the final HTML response.
- * Handles both extracted fragments (run through buildCleanReaderDocument)
- * and already-complete documents (fallback plain-text shell).
- */
-function finalizeResponse({
-  data,
+function renderMessagePage({
+  title,
+  message,
   theme,
-  fontSize,
-}: FinalizeResponseParams): string {
-  return data.chapterContent.includes("<!DOCTYPE html>")
-    ? data.chapterContent
-    : buildCleanReaderDocument({
-        chapterContent: data.chapterContent,
-        headLinks: data.headLinks,
-        theme,
-        fontSize,
-      });
-}
+  showRetry = false,
+}: {
+  title: string;
+  message: string;
+  theme: "dark" | "light";
+  showRetry?: boolean;
+}): Response {
+  const isDark = theme === "dark";
+  const retryHtml = showRetry
+    ? '<button type="button" onclick="window.location.reload()">Retry Passage</button>'
+    : "";
 
-const DISK_CACHE_DIR = nodePath.join(process.cwd(), ".cache", "bible-passages");
-
-type ReadDiskCacheParams = {
-  pathKey: string;
-};
-
-async function readDiskCache({
-  pathKey,
-}: ReadDiskCacheParams): Promise<ExtractedPassageData | null> {
-  try {
-    const safeName = `${CONTENT_VERSION}-${pathKey.replace(/[^A-Za-z0-9._-]/g, "_")}.json`;
-    const filePath = nodePath.join(DISK_CACHE_DIR, safeName);
-    const raw = await fs.readFile(filePath, "utf-8");
-    const parsed = JSON.parse(raw) as ExtractedPassageData;
-    if (parsed && typeof parsed.chapterContent === "string") {
-      return parsed;
-    }
-  } catch {
-    // Disk cache miss or read error
-  }
-  return null;
-}
-
-type WriteDiskCacheParams = {
-  pathKey: string;
-  data: ExtractedPassageData;
-};
-
-async function writeDiskCache({
-  pathKey,
-  data,
-}: WriteDiskCacheParams): Promise<void> {
-  try {
-    await fs.mkdir(DISK_CACHE_DIR, { recursive: true });
-    const safeName = `${CONTENT_VERSION}-${pathKey.replace(/[^A-Za-z0-9._-]/g, "_")}.json`;
-    const filePath = nodePath.join(DISK_CACHE_DIR, safeName);
-    await fs.writeFile(filePath, JSON.stringify(data), "utf-8");
-  } catch {
-    // Silently ignore disk write error in restricted filesystems
-  }
-}
-
-function getCacheKey(path: string): string {
-  return `${CONTENT_VERSION}:${path}`;
-}
-
-function getETag(path: string): string {
-  // Simple content-versioned ETag — stable across deploys unless CONTENT_VERSION changes
-  return `"${CONTENT_VERSION}-${crypto.createHash("md5").update(path).digest("hex").slice(0, 12)}"`;
-}
-
-type FetchBibleComHtmlWithRetryParams = {
-  path: string;
-};
-
-async function fetchBibleComHtmlWithRetry({
-  path,
-}: FetchBibleComHtmlWithRetryParams): Promise<string> {
-  const targetUrl = `https://www.bible.com/bible/${path}`;
-  const maxAttempts = 3;
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const timeoutMs = attempt === 1 ? 12000 : attempt === 2 ? 15000 : 20000;
-    try {
-      const res = await fetch(targetUrl, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-          Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-        signal: AbortSignal.timeout(timeoutMs),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Bible.com returned HTTP ${res.status}`);
-      }
-
-      return await res.text();
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      if (attempt < maxAttempts) {
-        // Short backoff before retry (300ms, 600ms)
-        await new Promise((resolve) => setTimeout(resolve, attempt * 300));
-      }
-    }
-  }
-
-  throw lastError ?? new Error("Failed to fetch passage after retries");
-}
-
-// In-memory cache and in-flight deduplication
-type CacheEntry = {
-  data: ExtractedPassageData;
-  timestamp: number;
-};
-
-const passageCache = new Map<string, CacheEntry>();
-const inFlightFetches = new Map<string, Promise<ExtractedPassageData>>();
-const MEMORY_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes — short for correctness
-const DISK_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-const STANDARD_HEADERS = {
-  "Content-Type": "text/html; charset=utf-8",
-  "Cache-Control": "no-cache, must-revalidate",
-  "X-Frame-Options": "SAMEORIGIN",
-  "X-Content-Type-Options": "nosniff",
-} as const;
-
-export async function GET(request: NextRequest): Promise<Response> {
-  const { searchParams } = new URL(request.url);
-  const path = searchParams.get("path");
-  const themeParam = searchParams.get("theme");
-  const theme: "light" | "dark" = themeParam === "dark" ? "dark" : "light";
-  const fontSizeParam = searchParams.get("fontSize");
-  const fontSize = fontSizeParam
-    ? Math.min(32, Math.max(20, Number.parseInt(fontSizeParam, 10) || 22))
-    : 22;
-
-  if (!path) {
-    return new Response("Missing path parameter", { status: 400 });
-  }
-
-  // Strict validation to prevent SSRF and path traversal:
-  // Must match {versionId}/{USFM_BOOK}.{chapter} or {versionId}/{USFM_BOOK}.{chapter}.{verses}
-  // Example: 114/HEB.1 or 3867/GEN.1 or 111/JHN.3.16-17
-  const isValidPath =
-    /^[0-9]{1,6}\/[1-3]?[A-Za-z]{2,5}\.[0-9]{1,3}(?:\.[0-9]{1,3}(?:-[0-9]{1,3})?)?$/.test(
-      path
-    );
-  if (!isValidPath) {
-    return new Response("Invalid Bible reference path format", { status: 400 });
-  }
-
-  // ETag support for conditional requests
-  const etag = getETag(path);
-  const ifNoneMatch = request.headers.get("if-none-match");
-  if (ifNoneMatch && ifNoneMatch === etag) {
-    return new Response(null, {
-      status: 304,
-      headers: {
-        ...STANDARD_HEADERS,
-        ETag: etag,
-        "X-Cache": "REVALIDATED",
-      },
-    });
-  }
-
-  // 1. In-memory Cache check (< 0.1ms)
-  const cacheKey = getCacheKey(path);
-  const cached = passageCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < MEMORY_CACHE_TTL_MS) {
-    const finalHtml = finalizeResponse({
-      data: cached.data,
-      theme,
-      fontSize,
-    });
-
-    return new Response(finalHtml, {
+  return new Response(
+    `<!DOCTYPE html>
+    <html lang="en" class="${theme}">
+    <head>
+      <meta charset="utf-8" />
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          background-color: ${isDark ? "#050505" : "#f8fafc"};
+          color: ${isDark ? "#f1f5f9" : "#1e293b"};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          margin: 0;
+          text-align: center;
+          padding: 1rem;
+          box-sizing: border-box;
+        }
+        .box { max-width: 420px; }
+        h3 { font-size: 1.05rem; margin-bottom: 0.5rem; }
+        p { font-size: 0.875rem; color: ${isDark ? "#a1a1aa" : "#64748b"}; line-height: 1.5; margin: 0.5rem 0; }
+        button {
+          margin-top: 1rem;
+          padding: 0.5rem 1.25rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          border-radius: 0.75rem;
+          border: none;
+          background-color: ${isDark ? "#ffffff" : "#1e293b"};
+          color: ${isDark ? "#050505" : "#ffffff"};
+          cursor: pointer;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="box">
+        <h3>${escapeHtml({ text: title })}</h3>
+        <p>${escapeHtml({ text: message })}</p>
+        ${retryHtml}
+      </div>
+    </body>
+    </html>`,
+    {
       status: 200,
-      headers: {
-        ...STANDARD_HEADERS,
-        ETag: etag,
-        "X-Cache": "HIT",
-      },
-    });
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    }
+  );
+}
+
+type BibleProxyErrorParams = {
+  message: string;
+  userMessage: string;
+  status: number;
+  retryable: boolean;
+};
+
+class BibleProxyError extends Error {
+  readonly userMessage: string;
+  readonly status: number;
+  readonly retryable: boolean;
+
+  constructor({
+    message,
+    userMessage,
+    status,
+    retryable,
+  }: BibleProxyErrorParams) {
+    super(message);
+    this.name = "BibleProxyError";
+    this.userMessage = userMessage;
+    this.status = status;
+    this.retryable = retryable;
+  }
+}
+
+function mapPassageError({ error }: { error: unknown }): {
+  status: number;
+  userMessage: string;
+} {
+  if (error instanceof BibleProxyError) {
+    return { status: error.status, userMessage: error.userMessage };
   }
 
-  // 2. Persistent Disk Cache check (< 0.5ms)
-  const diskCached = await readDiskCache({ pathKey: path });
-  if (diskCached) {
-    // Check disk cache age
-    try {
-      const safeName = `${CONTENT_VERSION}-${path.replace(/[^A-Za-z0-9._-]/g, "_")}.json`;
-      const filePath = nodePath.join(DISK_CACHE_DIR, safeName);
-      const stat = await fs.stat(filePath);
-      if (Date.now() - stat.mtimeMs < DISK_CACHE_TTL_MS) {
-        passageCache.set(cacheKey, {
-          data: diskCached,
+  if (error instanceof Error && error.name === "TimeoutError") {
+    return {
+      status: 504,
+      userMessage:
+        "Loading this passage took too long. Please check your connection and try again.",
+    };
+  }
+
+  return {
+    status: 502,
+    userMessage:
+      "We couldn't reach the Bible service right now. Please check your connection and try again.",
+  };
+}
+
+async function fetchYouVersionCopyright({
+  versionId,
+  appKey,
+}: {
+  versionId: number;
+  appKey: string;
+}): Promise<string | null> {
+  const cached = versionCopyrightCache.get(versionId);
+  if (cached && Date.now() - cached.timestamp < MEMORY_CACHE_TTL_MS) {
+    return cached.copyright;
+  }
+
+  let promise = inFlightCopyrightFetches.get(versionId);
+  if (!promise) {
+    promise = (async () => {
+      try {
+        const res = await fetch(
+          `https://api.youversion.com/v1/bibles/${versionId}`,
+          {
+            headers: {
+              "X-YVP-App-Key": appKey,
+              Accept: "application/json",
+            },
+            signal: AbortSignal.timeout(6000),
+          }
+        );
+        if (!res.ok) return null;
+        const raw: unknown = await res.json();
+        const parsed = v.safeParse(YouVersionBibleMetadataSchema, raw);
+        const copyright = parsed.success
+          ? parsed.output.copyright?.trim() || null
+          : null;
+        versionCopyrightCache.set(versionId, {
+          copyright,
           timestamp: Date.now(),
         });
+        return copyright;
+      } catch {
+        return null;
+      } finally {
+        inFlightCopyrightFetches.delete(versionId);
+      }
+    })();
+    inFlightCopyrightFetches.set(versionId, promise);
+  }
 
-        const finalHtml = finalizeResponse({
-          data: diskCached,
-          theme,
-          fontSize,
-        });
+  return promise;
+}
 
-        return new Response(finalHtml, {
-          status: 200,
-          headers: {
-            ...STANDARD_HEADERS,
-            ETag: etag,
-            "X-Cache": "DISK-HIT",
-          },
+async function fetchYouVersionPassage({
+  versionId,
+  reference,
+}: {
+  versionId: number;
+  reference: string;
+}): Promise<CachedPassage> {
+  if (process.env.E2E_MOCK_BIBLE_API === "true") {
+    const version = BIBLE_VERSIONS.find((item) => item.id === versionId);
+    const mockHtml = `<div><div class="s1 yv-h">${escapeHtml({ text: reference })}</div><div class="p"><span class="yv-v" v="1"></span><span class="yv-vlbl">1</span>In the beginning God created the heavens and the earth. <span class="yv-v" v="2"></span><span class="yv-vlbl">2</span>Now the earth was formless and empty, darkness was over the surface of the deep.</div></div>`;
+    return {
+      reference,
+      contentHtml: sanitizePassageHtml({ html: mockHtml }),
+      versionLabel: version?.abbreviation ?? String(versionId),
+      copyright: "Mock Scripture Copyright. Used for E2E testing.",
+      timestamp: Date.now(),
+    };
+  }
+
+  const appKey = process.env.YOUVERSION_APP_KEY;
+  if (!appKey) {
+    throw new BibleProxyError({
+      message: "YouVersion API key (YOUVERSION_APP_KEY) is not configured.",
+      userMessage:
+        "The Bible reader is temporarily unavailable. Please try again later.",
+      status: 503,
+      retryable: false,
+    });
+  }
+
+  const copyrightPromise = fetchYouVersionCopyright({ versionId, appKey });
+  const url = `https://api.youversion.com/v1/bibles/${versionId}/passages/${encodeURIComponent(reference)}?format=html&include_headings=true`;
+  const retryDelaysMs = [250, 600];
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "X-YVP-App-Key": appKey,
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(12000),
+      });
+
+      if (response.status >= 500) {
+        throw new BibleProxyError({
+          message: `YouVersion API returned ${response.status}`,
+          userMessage:
+            "The Bible service is having trouble right now. Please try again in a moment.",
+          status: 502,
+          retryable: true,
         });
       }
-    } catch {
-      // Stat failed, treat as miss
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new BibleProxyError({
+            message: `YouVersion API returned 404 for ${versionId}/${reference}`,
+            userMessage:
+              "This passage isn't available in the selected translation. Try another translation or chapter.",
+            status: 404,
+            retryable: false,
+          });
+        }
+        if (response.status === 429) {
+          throw new BibleProxyError({
+            message: "YouVersion API returned 429 (rate limited)",
+            userMessage:
+              "The Bible service is busy right now. Please wait a moment and try again.",
+            status: 503,
+            retryable: false,
+          });
+        }
+        throw new BibleProxyError({
+          message: `YouVersion API returned ${response.status}`,
+          userMessage:
+            "This passage couldn't be loaded right now. Try another translation or try again.",
+          status: 502,
+          retryable: false,
+        });
+      }
+
+      const rawJson: unknown = await response.json();
+      const parsed = v.safeParse(YouVersionHtmlPassageSchema, rawJson);
+      if (!parsed.success) {
+        throw new BibleProxyError({
+          message: "Invalid passage response from YouVersion API.",
+          userMessage:
+            "We received an unexpected response for this passage. Please try again.",
+          status: 502,
+          retryable: false,
+        });
+      }
+
+      const version = BIBLE_VERSIONS.find((item) => item.id === versionId);
+      const copyright = await copyrightPromise;
+
+      return {
+        reference: parsed.output.reference,
+        contentHtml: sanitizePassageHtml({ html: parsed.output.content }),
+        versionLabel: version?.abbreviation ?? String(versionId),
+        copyright,
+        timestamp: Date.now(),
+      };
+    } catch (err) {
+      lastError = err;
+      const isNonRetryable = err instanceof BibleProxyError && !err.retryable;
+      if (isNonRetryable || attempt >= retryDelaysMs.length) {
+        throw err;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, retryDelaysMs[attempt])
+      );
     }
   }
 
-  try {
-    // 3. In-flight request deduplication to prevent duplicate concurrent network calls to Bible.com
-    let fetchPromise = inFlightFetches.get(path);
-    if (!fetchPromise) {
-      fetchPromise = (async () => {
-        const originalHtml = await fetchBibleComHtmlWithRetry({ path });
-        const chapterContent = extractChapterContent({ html: originalHtml });
-        if (chapterContent) {
-          const headLinks = extractHeadLinks({ html: originalHtml });
-          const result: ExtractedPassageData = { chapterContent, headLinks };
-          void writeDiskCache({ pathKey: path, data: result });
-          return result;
-        }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Failed to fetch passage");
+}
 
-        // If extraction tag not found, fall back to clean plain-text extraction
-        const plainText = extractPlainTextContent({ html: originalHtml });
-        return {
-          chapterContent: plainText,
-          headLinks: "",
-        };
-      })();
-      inFlightFetches.set(path, fetchPromise);
+export async function GET(request: NextRequest): Promise<Response> {
+  const path = request.nextUrl.searchParams.get("path") ?? "";
+  const format = request.nextUrl.searchParams.get("format");
+  const isJson = format === "json";
+  const theme =
+    request.nextUrl.searchParams.get("theme") === "dark" ? "dark" : "light";
+  const fontSizeParam = Number(
+    request.nextUrl.searchParams.get("fontSize") || "18"
+  );
+  const fontSize = Math.min(
+    32,
+    Math.max(16, Number.isNaN(fontSizeParam) ? 18 : fontSizeParam)
+  );
+
+  const parsedPath = parseBiblePath({ path });
+  if (!parsedPath) {
+    if (isJson) {
+      return Response.json(
+        { error: "The requested passage reference could not be parsed." },
+        { status: 400 }
+      );
     }
-
-    let extractedData: ExtractedPassageData;
-    try {
-      extractedData = await fetchPromise;
-    } finally {
-      inFlightFetches.delete(path);
-    }
-
-    // Save extracted raw data to memory cache
-    passageCache.set(cacheKey, {
-      data: extractedData,
-      timestamp: Date.now(),
-    });
-
-    const finalHtml = finalizeResponse({
-      data: extractedData,
+    return renderMessagePage({
+      title: "Invalid passage request",
+      message: "The requested passage reference could not be parsed.",
       theme,
-      fontSize,
     });
+  }
 
-    return new Response(finalHtml, {
-      status: 200,
-      headers: {
-        ...STANDARD_HEADERS,
-        ETag: etag,
-        "X-Cache": "MISS",
-      },
+  const { versionId, reference, bookCode } = parsedPath;
+
+  if (!ALLOWED_VERSION_IDS.has(versionId)) {
+    if (isJson) {
+      return Response.json(
+        { error: "This Bible version is not enabled." },
+        { status: 400 }
+      );
+    }
+    return renderMessagePage({
+      title: "Bible version unavailable",
+      message:
+        "This Bible version is not enabled. Please select one of the available translations.",
+      theme,
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+  }
+
+  if (!isBookSupportedInSixtySixBookVersions({ bookId: bookCode })) {
+    if (isJson) {
+      return Response.json(
+        {
+          error:
+            "The available Bible translations only include the 66-book canon.",
+        },
+        { status: 400 }
+      );
+    }
+    return renderMessagePage({
+      title: "Book not available in this version",
+      message:
+        "The available Bible translations only include the 66-book canon, so this book cannot be opened in the reader.",
+      theme,
+    });
+  }
+
+  const cacheKey = `${CONTENT_VERSION}:${versionId}:${reference}`;
+  const etag = `"${crypto
+    .createHash("sha256")
+    .update(`${cacheKey}:${isJson ? "json" : `${theme}:${fontSize}`}`)
+    .digest("hex")
+    .slice(0, 16)}"`;
+
+  if (request.headers.get("if-none-match") === etag) {
+    return new Response(null, { status: 304, headers: { ETag: etag } });
+  }
+
+  const memCached = passageCache.get(cacheKey);
+  if (memCached && Date.now() - memCached.timestamp < MEMORY_CACHE_TTL_MS) {
+    if (isJson) {
+      return Response.json(
+        {
+          reference: memCached.reference,
+          contentHtml: memCached.contentHtml,
+          versionLabel: memCached.versionLabel,
+          copyright: memCached.copyright,
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": STANDARD_HEADERS["Cache-Control"],
+            ETag: etag,
+            "X-Cache": "HIT",
+          },
+        }
+      );
+    }
     return new Response(
-      `<!DOCTYPE html>
-      <html lang="en" class="${theme}">
-      <head>
-        <meta charset="utf-8" />
-        <style>
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: ${theme === "dark" ? "#050505" : "#f8fafc"};
-            color: ${theme === "dark" ? "#f1f5f9" : "#1e293b"};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            padding: 1rem;
-            box-sizing: border-box;
-          }
-          .box {
-            max-width: 400px;
-          }
-          h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
-          p { font-size: 0.875rem; color: ${theme === "dark" ? "#a1a1aa" : "#64748b"}; line-height: 1.4; margin: 0.5rem 0; }
-          button {
-            margin-top: 1rem;
-            padding: 0.5rem 1.25rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border-radius: 0.75rem;
-            border: none;
-            background-color: ${theme === "dark" ? "#ffffff" : "#1e293b"};
-            color: ${theme === "dark" ? "#050505" : "#ffffff"};
-            cursor: pointer;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="box">
-          <h3>Unable to load passage</h3>
-          <p>${message}</p>
-          <p>Please check your connection or tap below to retry.</p>
-          <button type="button" onclick="window.location.reload()">Retry Passage</button>
-        </div>
-      </body>
-      </html>`,
+      renderHtmlDocument({
+        reference: memCached.reference,
+        contentHtml: memCached.contentHtml,
+        theme,
+        fontSize,
+      }),
       {
         status: 200,
-        headers: { "Content-Type": "text/html; charset=utf-8" },
+        headers: {
+          ...STANDARD_HEADERS,
+          ETag: etag,
+          "X-Cache": "HIT",
+        },
       }
     );
+  }
+
+  try {
+    let fetchPromise = inFlightFetches.get(cacheKey);
+    if (!fetchPromise) {
+      fetchPromise = fetchYouVersionPassage({ versionId, reference });
+      inFlightFetches.set(cacheKey, fetchPromise);
+    }
+
+    let passage: CachedPassage;
+    try {
+      passage = await fetchPromise;
+    } finally {
+      inFlightFetches.delete(cacheKey);
+    }
+
+    if (passageCache.size >= MAX_MEMORY_CACHE_ENTRIES) {
+      const oldestKey = passageCache.keys().next().value;
+      if (oldestKey) passageCache.delete(oldestKey);
+    }
+    passageCache.set(cacheKey, passage);
+
+    if (isJson) {
+      return Response.json(
+        {
+          reference: passage.reference,
+          contentHtml: passage.contentHtml,
+          versionLabel: passage.versionLabel,
+          copyright: passage.copyright,
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": STANDARD_HEADERS["Cache-Control"],
+            ETag: etag,
+            "X-Cache": "MISS",
+          },
+        }
+      );
+    }
+
+    return new Response(
+      renderHtmlDocument({
+        reference: passage.reference,
+        contentHtml: passage.contentHtml,
+        theme,
+        fontSize,
+      }),
+      {
+        status: 200,
+        headers: {
+          ...STANDARD_HEADERS,
+          ETag: etag,
+          "X-Cache": "MISS",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("[bible-proxy] Failed to load passage", {
+      versionId,
+      reference,
+      error,
+    });
+    const { status, userMessage } = mapPassageError({ error });
+    if (isJson) {
+      return Response.json({ error: userMessage }, { status });
+    }
+    return renderMessagePage({
+      title: "Unable to load passage",
+      message: userMessage,
+      theme,
+      showRetry: true,
+    });
   }
 }
