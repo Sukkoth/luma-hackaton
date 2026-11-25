@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BookOpen, Search, ChevronLeft, ChevronRight, ChevronDown, Check, CheckCircle2, Loader2, Minus, Plus, RotateCcw, X, ArrowLeft, CaseSensitive, Highlighter } from "lucide-react";
+import { BookOpen, Search, ChevronLeft, ChevronRight, ChevronDown, Check, CheckCircle2, Loader2, Minus, Plus, RotateCcw, X, ArrowLeft, CaseSensitive, Highlighter, Maximize2, Minimize2 } from "lucide-react";
 import {
   type BibleCanon,
   type BibleBook,
@@ -86,7 +86,12 @@ type PlanContextData = {
 type PassageState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "success"; path: string; contentHtml: string };
+  | {
+      status: "success";
+      path: string;
+      contentHtml: string;
+      copyright: string | null;
+    };
 
 type ActiveHighlightPrompt =
   | {
@@ -290,12 +295,14 @@ export function BibleWorkspace({
   const [isTogglingPlan, setIsTogglingPlan] = useState(false);
   const [highlights, setHighlights] = useState<BibleHighlightDetail[]>([]);
   const [isHighlightsSheetOpen, setIsHighlightsSheetOpen] = useState(false);
+  const [isZenMode, setIsZenMode] = useState(false);
   const [highlightPrompt, setHighlightPrompt] =
     useState<ActiveHighlightPrompt | null>(null);
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
 
   const hasHydratedPrefsRef = useRef(false);
   const passageArticleRef = useRef<HTMLElement | null>(null);
+  const zenContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Resolve active book & chapter (from 66-book readable canon)
   const normalizedBookId = bookParam.toLowerCase();
@@ -454,7 +461,7 @@ export function BibleWorkspace({
       for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
         try {
           const res = await fetch(
-            `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&format=json&cv=2`,
+            `/api/bible-proxy?path=${encodeURIComponent(biblePath)}&format=json&cv=3`,
             { signal: controller.signal }
           );
 
@@ -467,6 +474,7 @@ export function BibleWorkspace({
 
           const data = (await res.json().catch(() => null)) as {
             contentHtml?: string;
+            copyright?: string | null;
             error?: string;
           } | null;
 
@@ -485,8 +493,10 @@ export function BibleWorkspace({
             status: "success",
             path: biblePath,
             contentHtml: data.contentHtml,
+            copyright: data.copyright ?? null,
           });
           window.scrollTo({ top: 0, behavior: "instant" });
+          zenContainerRef.current?.scrollTo({ top: 0, behavior: "instant" });
           return;
         } catch (err) {
           if (controller.signal.aborted) return;
@@ -823,6 +833,18 @@ export function BibleWorkspace({
     }
   }, [highlightPrompt, isSavingHighlight]);
 
+  // Exit Zen mode on Escape key
+  useEffect(() => {
+    if (!isZenMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsZenMode(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isZenMode]);
+
   // Standalone previous / next targets
   const standaloneNav = useMemo(() => {
     const bookIdx = activeBookIndex >= 0 ? activeBookIndex : 0;
@@ -1153,8 +1175,30 @@ export function BibleWorkspace({
   };
 
   return (
-    <div className="flex w-full flex-col min-h-[calc(100dvh-10.5rem)] lg:min-h-[calc(100dvh-6.75rem)]">
+    <div
+      ref={zenContainerRef}
+      className={
+        isZenMode
+          ? "fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background px-3 sm:px-6 lg:px-8"
+          : "flex w-full flex-col min-h-[calc(100dvh-10.5rem)] lg:min-h-[calc(100dvh-6.75rem)]"
+      }
+    >
+      {isZenMode ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setIsZenMode(false)}
+          aria-label="Exit Zen mode"
+          className="fixed top-4 right-4 z-[55] h-8.5 rounded-lg px-2.5 gap-1.5 text-xs font-medium bg-card/85 backdrop-blur-md shadow-xs opacity-75 hover:opacity-100 transition-opacity"
+        >
+          <Minimize2 className="size-3.5 text-primary" />
+          <span>Exit Zen</span>
+        </Button>
+      ) : null}
+
       {/* ── Sticky Reader Toolbar ── */}
+      {!isZenMode ? (
       <header className="sticky top-0 z-20 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 border-b border-border/70 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-[820px] items-center justify-between gap-2">
           {/* Left: Book & Chapter Picker Trigger / Plan Context */}
@@ -1313,47 +1357,22 @@ export function BibleWorkspace({
               <span className="hidden sm:inline">Highlights</span>
             </Button>
 
-            {isPlanMode && activePlanReading && (
-              <Button
-                type="button"
-                size="default"
-                variant={activePlanReading.isCompleted ? "outline" : "primary"}
-                onClick={handleTogglePlanReading}
-                disabled={isTogglingPlan}
-                aria-pressed={activePlanReading.isCompleted}
-                className="h-9.5 rounded-lg px-3 sm:px-3.5 gap-1.5 text-xs sm:text-sm shadow-xs"
-              >
-                <Check className="size-3.5 stroke-[2.5]" />
-                <span className="hidden sm:inline">
-                  {activePlanReading.isCompleted ? "Completed" : "Mark Read"}
-                </span>
-              </Button>
-            )}
-
-            {!isPlanMode && onToggleTrackerChapter && isBookSupported && (
-              <Button
-                type="button"
-                size="default"
-                variant={isCurrentChapterRead ? "outline" : "primary"}
-                onClick={() =>
-                  onToggleTrackerChapter({
-                    bookId: currentBookId,
-                    bookName: activeBook.name,
-                    chapter: currentChapter,
-                  })
-                }
-                aria-pressed={isCurrentChapterRead}
-                className="h-9.5 rounded-lg px-3 sm:px-3.5 gap-1.5 text-xs sm:text-sm shadow-xs"
-              >
-                <Check className="size-3.5 stroke-[2.5]" />
-                <span className="hidden sm:inline">
-                  {isCurrentChapterRead ? "Read" : "Mark Read"}
-                </span>
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              onClick={() => setIsZenMode(true)}
+              aria-label="Enter Zen mode"
+              title="Zen mode"
+              className="h-9.5 rounded-lg px-2.5 gap-1.5 text-xs sm:text-sm font-medium shadow-xs"
+            >
+              <Maximize2 className="size-3.5 text-primary" />
+              <span className="hidden md:inline">Zen</span>
+            </Button>
           </div>
         </div>
       </header>
+      ) : null}
 
       {/* ── Open Editorial Reading Column ── */}
       <div className="mx-auto w-full max-w-[760px] flex-1 px-2 sm:px-6 py-6 sm:py-10">
@@ -1457,6 +1476,55 @@ export function BibleWorkspace({
                   setHighlightPrompt(null);
                 }}
               />
+            ) : null}
+
+            {/* ── End-of-chapter Mark Read / Completed Action ── */}
+            {isPlanMode && activePlanReading ? (
+              <div className="mt-8 flex justify-center">
+                <Button
+                  type="button"
+                  size="default"
+                  variant={activePlanReading.isCompleted ? "outline" : "primary"}
+                  onClick={handleTogglePlanReading}
+                  disabled={isTogglingPlan}
+                  aria-pressed={activePlanReading.isCompleted}
+                  className="h-9.5 rounded-lg px-4 gap-1.5 text-xs sm:text-sm shadow-xs"
+                >
+                  <Check className="size-3.5 stroke-[2.5]" />
+                  <span>
+                    {activePlanReading.isCompleted ? "Completed" : "Mark Read"}
+                  </span>
+                </Button>
+              </div>
+            ) : !isPlanMode &&
+              onToggleTrackerChapter &&
+              isBookSupported &&
+              !isCurrentChapterRead ? (
+              <div className="mt-8 flex justify-center">
+                <Button
+                  type="button"
+                  size="default"
+                  variant="primary"
+                  onClick={() =>
+                    onToggleTrackerChapter({
+                      bookId: currentBookId,
+                      bookName: activeBook.name,
+                      chapter: currentChapter,
+                    })
+                  }
+                  aria-pressed={false}
+                  className="h-9.5 rounded-lg px-4 gap-1.5 text-xs sm:text-sm shadow-xs"
+                >
+                  <Check className="size-3.5 stroke-[2.5]" />
+                  <span>Mark Read</span>
+                </Button>
+              </div>
+            ) : null}
+
+            {passageState.copyright ? (
+              <p className="mt-8 border-t border-border/50 pt-4 text-center text-[11px] leading-relaxed whitespace-pre-line text-foreground-dim/80">
+                {passageState.copyright}
+              </p>
             ) : null}
           </>
         ) : null}

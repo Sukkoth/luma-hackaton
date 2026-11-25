@@ -50,8 +50,8 @@ export function HighlightToolbar({
       onMouseDown={(e) => e.preventDefault()}
       className={
         position
-          ? "fixed z-50 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 shadow-lg backdrop-blur-md"
-          : "fixed bottom-20 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 shadow-lg backdrop-blur-md"
+          ? "fixed z-[60] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 shadow-lg backdrop-blur-md"
+          : "fixed bottom-20 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 shadow-lg backdrop-blur-md"
       }
     >
       <span className="mr-1 text-xs font-medium text-foreground-dim">

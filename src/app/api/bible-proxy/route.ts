@@ -7,7 +7,7 @@ import {
   isBookSupportedInSixtySixBookVersions,
 } from "@/lib/bible-versions";
 
-const CONTENT_VERSION = "yvp-v2";
+const CONTENT_VERSION = "yvp-v3";
 const MEMORY_CACHE_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
 const MAX_MEMORY_CACHE_ENTRIES = 500;
 
@@ -19,15 +19,25 @@ const YouVersionHtmlPassageSchema = v.object({
   reference: v.string(),
 });
 
+const YouVersionBibleMetadataSchema = v.object({
+  copyright: v.optional(v.nullable(v.string())),
+});
+
 type CachedPassage = {
   reference: string;
   contentHtml: string;
   versionLabel: string;
+  copyright: string | null;
   timestamp: number;
 };
 
 const passageCache = new Map<string, CachedPassage>();
 const inFlightFetches = new Map<string, Promise<CachedPassage>>();
+const versionCopyrightCache = new Map<
+  number,
+  { copyright: string | null; timestamp: number }
+>();
+const inFlightCopyrightFetches = new Map<number, Promise<string | null>>();
 
 const STANDARD_HEADERS = {
   "Content-Type": "text/html; charset=utf-8",
@@ -382,6 +392,55 @@ function mapPassageError({ error }: { error: unknown }): {
   };
 }
 
+async function fetchYouVersionCopyright({
+  versionId,
+  appKey,
+}: {
+  versionId: number;
+  appKey: string;
+}): Promise<string | null> {
+  const cached = versionCopyrightCache.get(versionId);
+  if (cached && Date.now() - cached.timestamp < MEMORY_CACHE_TTL_MS) {
+    return cached.copyright;
+  }
+
+  let promise = inFlightCopyrightFetches.get(versionId);
+  if (!promise) {
+    promise = (async () => {
+      try {
+        const res = await fetch(
+          `https://api.youversion.com/v1/bibles/${versionId}`,
+          {
+            headers: {
+              "X-YVP-App-Key": appKey,
+              Accept: "application/json",
+            },
+            signal: AbortSignal.timeout(6000),
+          }
+        );
+        if (!res.ok) return null;
+        const raw: unknown = await res.json();
+        const parsed = v.safeParse(YouVersionBibleMetadataSchema, raw);
+        const copyright = parsed.success
+          ? parsed.output.copyright?.trim() || null
+          : null;
+        versionCopyrightCache.set(versionId, {
+          copyright,
+          timestamp: Date.now(),
+        });
+        return copyright;
+      } catch {
+        return null;
+      } finally {
+        inFlightCopyrightFetches.delete(versionId);
+      }
+    })();
+    inFlightCopyrightFetches.set(versionId, promise);
+  }
+
+  return promise;
+}
+
 async function fetchYouVersionPassage({
   versionId,
   reference,
@@ -400,6 +459,7 @@ async function fetchYouVersionPassage({
     });
   }
 
+  const copyrightPromise = fetchYouVersionCopyright({ versionId, appKey });
   const url = `https://api.youversion.com/v1/bibles/${versionId}/passages/${encodeURIComponent(reference)}?format=html&include_headings=true`;
   const retryDelaysMs = [250, 600];
   let lastError: unknown = null;
@@ -465,11 +525,13 @@ async function fetchYouVersionPassage({
       }
 
       const version = BIBLE_VERSIONS.find((item) => item.id === versionId);
+      const copyright = await copyrightPromise;
 
       return {
         reference: parsed.output.reference,
         contentHtml: sanitizePassageHtml({ html: parsed.output.content }),
         versionLabel: version?.abbreviation ?? String(versionId),
+        copyright,
         timestamp: Date.now(),
       };
     } catch (err) {
@@ -573,6 +635,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           reference: memCached.reference,
           contentHtml: memCached.contentHtml,
           versionLabel: memCached.versionLabel,
+          copyright: memCached.copyright,
         },
         {
           status: 200,
@@ -628,6 +691,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           reference: passage.reference,
           contentHtml: passage.contentHtml,
           versionLabel: passage.versionLabel,
+          copyright: passage.copyright,
         },
         {
           status: 200,
