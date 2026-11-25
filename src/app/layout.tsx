@@ -6,7 +6,10 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AchievementCelebrationListener } from "@/components/achievements/achievement-celebration-listener";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { getSiteUrl } from "@/lib/seo";
 import "./globals.css";
+
+const siteUrl = getSiteUrl();
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -25,10 +28,25 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Luma: Bible Tracker & Plans",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Bible Reading Tracker, Plans & Study Notes | Luma",
+    template: "%s | Luma",
+  },
   description:
-    "Aesthetic, habit-forming Bible reading companion and study journal.",
+    "Track your daily Bible reading, follow customizable reading plans, highlight verses, and capture passage-anchored study notes in one calm sanctuary.",
+  keywords: [
+    "Bible reading tracker",
+    "Bible reading plans",
+    "Bible study notes",
+    "Scripture reading journal",
+    "Bible highlight app",
+    "Luma Bible",
+  ],
   applicationName: "Luma: Bible Tracker & Plans",
+  alternates: {
+    canonical: "/",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -50,10 +68,27 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   openGraph: {
+    type: "website",
+    url: "/",
     siteName: "Luma",
-    title: "Luma: Bible Tracker & Plans",
+    title: "Bible Reading Tracker, Plans & Study Notes | Luma",
     description:
-      "Aesthetic, habit-forming Bible reading companion and study journal.",
+      "Track your daily Bible reading, follow customizable reading plans, highlight verses, and capture passage-anchored study notes in one calm sanctuary.",
+    images: [
+      {
+        url: "/icon-512.png",
+        width: 512,
+        height: 512,
+        alt: "Luma Bible Reading Tracker",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Bible Reading Tracker, Plans & Study Notes | Luma",
+    description:
+      "Track your daily Bible reading, follow customizable reading plans, highlight verses, and capture passage-anchored study notes.",
+    images: ["/icon-512.png"],
   },
 };
 

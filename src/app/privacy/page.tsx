@@ -12,9 +12,12 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LumaIcon } from "@/components/ui/luma-icon";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Luma Scripture Tracker",
+  title: "Privacy Policy",
   description:
     "A simple, honest overview of how Luma handles your account, reading plans, and notes.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 export default function PrivacyPolicyPage() {
