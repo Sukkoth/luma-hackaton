@@ -5,13 +5,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsString } from "nuqs";
 import {
+  Calendar,
+  Lock,
   Search,
   Shield,
   ShieldCheck,
   UserCheck,
-  UserX,
-  Lock,
   UserPlus,
+  UserX,
 } from "lucide-react";
 import type { GroupMemberSummary } from "@/actions/groups";
 import {
@@ -21,6 +22,22 @@ import {
 } from "@/actions/groups";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
+
+function getInitials({ name }: { name: string }): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+const ROLE_SORT_ORDER: Record<string, number> = {
+  owner: 0,
+  admin: 1,
+  member: 2,
+};
 
 export type GroupMembersTabProps = {
   groupId: string;
@@ -119,54 +136,56 @@ export function GroupMembersTab({
     );
   }
 
-  const filtered = members.filter(
-    (m) =>
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filtered = members
+    .filter(
+      (m) =>
+        m.name.toLowerCase().includes(normalizedQuery) ||
+        m.email.toLowerCase().includes(normalizedQuery)
+    )
+    .slice()
+    .sort(
+      (a, b) => (ROLE_SORT_ORDER[a.role] ?? 2) - (ROLE_SORT_ORDER[b.role] ?? 2)
+    );
 
   return (
     <div className="space-y-6">
       {/* ── Pending Join Requests (Admins / Owner Only) ── */}
       {isAdmin && pendingMembers.length > 0 && (
-        <section className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 sm:p-5 space-y-3.5 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25">
-              <UserCheck className="size-4" />
-            </span>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">
-                Pending Join Requests ({pendingMembers.length})
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Readers who requested to join this fellowship cohort and require
-                approval.
-              </p>
+        <section className="rounded-2xl border border-amber-500/25 bg-amber-500/[0.04] p-4 sm:p-5 space-y-3.5 shadow-xs">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="flex size-8 items-center justify-center rounded-xl bg-amber-500/12 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                <UserCheck className="size-4" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">
+                  Pending Join Requests ({pendingMembers.length})
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Readers awaiting approval to join this fellowship.
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card divide-y divide-border/60 overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {pendingMembers.map((member) => {
-              const initials = member.name
-                .split(" ")
-                .map((w) => w[0])
-                .slice(0, 2)
-                .join("")
-                .toUpperCase();
+              const initials = getInitials({ name: member.name });
 
               return (
                 <div
                   key={member.userId}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3.5 gap-3 text-xs"
+                  className="flex items-center justify-between rounded-xl border border-border bg-card p-3.5 gap-3 text-xs shadow-2xs"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted border border-border text-xs font-semibold text-foreground overflow-hidden shadow-2xs">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted/80 border border-border text-xs font-bold text-foreground overflow-hidden">
                       {member.image ? (
                         <Image
                           src={member.image}
                           alt={member.name}
-                          width={36}
-                          height={36}
+                          width={40}
+                          height={40}
                           className="size-full object-cover"
                         />
                       ) : (
@@ -177,20 +196,22 @@ export function GroupMembersTab({
                       <span className="font-semibold text-foreground block text-xs sm:text-sm truncate">
                         {member.name}
                       </span>
-                      <span className="text-xs text-muted-foreground block truncate">
-                        {member.email}
-                      </span>
+                      {member.email ? (
+                        <span className="text-xs text-muted-foreground block truncate">
+                          {member.email}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       disabled={loadingUserId === member.userId}
                       onClick={() => handleReject(member.userId)}
-                      className="h-8 text-xs"
+                      className="h-8 text-xs px-2.5"
                     >
                       Reject
                     </Button>
@@ -200,7 +221,7 @@ export function GroupMembersTab({
                       size="sm"
                       disabled={loadingUserId === member.userId}
                       onClick={() => handleApprove(member.userId)}
-                      className="h-8 text-xs"
+                      className="h-8 text-xs px-3"
                     >
                       Approve
                     </Button>
@@ -214,10 +235,10 @@ export function GroupMembersTab({
 
       {/* ── Active Members Section ── */}
       <div className="space-y-4">
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        {/* Search & Header Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 pb-1">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-foreground">
+            <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
               Fellowship Directory
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -232,8 +253,11 @@ export function GroupMembersTab({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name or email..."
-              className="w-full h-9 rounded-xl border border-border bg-background pl-9 pr-3.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary transition-all"
+              placeholder={
+                isAdmin ? "Search by name or email..." : "Search readers..."
+              }
+              aria-label="Search fellowship members"
+              className="w-full h-9.5 rounded-xl border border-border bg-card pl-9 pr-3.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-2xs transition-all"
             />
           </div>
         </div>
@@ -249,15 +273,9 @@ export function GroupMembersTab({
             </p>
           </div>
         ) : (
-          <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border/60 shadow-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {filtered.map((member) => {
-              const initials = member.name
-                .split(" ")
-                .map((w) => w[0])
-                .slice(0, 2)
-                .join("")
-                .toUpperCase();
-
+              const initials = getInitials({ name: member.name });
               const isOwner = member.role === "owner";
               const isAdminRole = member.role === "admin";
               const joinedStr = new Date(member.joinedAt).toLocaleDateString(
@@ -272,66 +290,80 @@ export function GroupMembersTab({
               return (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-muted/30 transition-colors gap-3"
+                  className={`group flex flex-col justify-between gap-3 rounded-2xl border p-4 transition-all shadow-2xs hover:shadow-xs ${
+                    isOwner
+                      ? "border-primary/25 bg-primary/[0.03] hover:border-primary/40"
+                      : "border-border/80 bg-card hover:border-border"
+                  }`}
                 >
-                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted border border-border text-xs sm:text-sm font-semibold text-foreground overflow-hidden shadow-2xs">
-                      {member.image ? (
-                        <Image
-                          src={member.image}
-                          alt={member.name}
-                          width={40}
-                          height={40}
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <span>{initials}</span>
-                      )}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                        <span className="font-semibold text-foreground text-xs sm:text-sm truncate">
-                          {member.name}
-                        </span>
-                        {isOwner ? (
-                          <span className="inline-flex items-center gap-1 rounded-lg bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs font-semibold text-primary shrink-0">
-                            <Shield className="size-3" />
-                            Owner
-                          </span>
-                        ) : isAdminRole ? (
-                          <span className="inline-flex items-center gap-1 rounded-lg bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs font-semibold text-primary shrink-0">
-                            <ShieldCheck className="size-3" />
-                            Admin
-                          </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div
+                        className={`flex size-11 shrink-0 items-center justify-center rounded-xl border text-xs sm:text-sm font-bold overflow-hidden ${
+                          isOwner || isAdminRole
+                            ? "bg-primary/10 text-primary border-primary/20"
+                            : "bg-muted/80 text-foreground border-border"
+                        }`}
+                      >
+                        {member.image ? (
+                          <Image
+                            src={member.image}
+                            alt={member.name}
+                            width={44}
+                            height={44}
+                            className="size-full object-cover"
+                          />
                         ) : (
-                          <span className="inline-flex items-center rounded-lg bg-muted border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
-                            Member
-                          </span>
+                          <span>{initials}</span>
                         )}
                       </div>
-                      <span className="text-xs text-muted-foreground block mt-0.5 truncate">
-                        {member.email}
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                    <span className="text-right text-xs text-muted-foreground hidden sm:inline">
-                      Joined {joinedStr}
-                    </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-foreground text-sm truncate">
+                            {member.name}
+                          </span>
+                          {isOwner ? (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-primary/12 border border-primary/25 px-2 py-0.5 text-[11px] font-semibold text-primary shrink-0">
+                              <Shield className="size-3" />
+                              Owner
+                            </span>
+                          ) : isAdminRole ? (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-secondary border border-border px-2 py-0.5 text-[11px] font-semibold text-foreground shrink-0">
+                              <ShieldCheck className="size-3 text-primary" />
+                              Admin
+                            </span>
+                          ) : null}
+                        </div>
+
+                        {member.email ? (
+                          <span className="text-xs text-muted-foreground block mt-0.5 truncate">
+                            {member.email}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
                     {isAdmin && !isOwner && (
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => setMemberToKick(member)}
-                        className="text-muted-foreground hover:text-destructive hover:border-destructive/40 text-xs transition-colors shrink-0 px-2.5 sm:px-3 h-8"
+                        aria-label={`Remove ${member.name}`}
+                        className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 transition-all shrink-0"
                         leftIcon={<UserX className="size-3.5" />}
                       >
                         Remove
                       </Button>
                     )}
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-border/50 pt-2.5 text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar className="size-3 opacity-75" />
+                      <span>Joined {joinedStr}</span>
+                    </span>
                   </div>
                 </div>
               );
