@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Compass, LogIn, Play, Plus, Upload } from "lucide-react";
+import { Compass, LogIn, Play, Plus, Sparkles, Upload } from "lucide-react";
 import type { useSession } from "@/lib/auth-client";
 import { READING_PLANS } from "@/data/readingPlans";
 import {
@@ -76,6 +76,13 @@ export function PlanActiveBanner({
             />
           ) : (
             <>
+              <HeaderActionButton
+                type="secondary"
+                href="/ai?mode=plan"
+                testId="open-ai-plan-generator-btn"
+                icon={<Sparkles className="size-4 text-primary" />}
+                label="Luma AI"
+              />
               {onImportPlan && (
                 <HeaderActionButton
                   type="secondary"

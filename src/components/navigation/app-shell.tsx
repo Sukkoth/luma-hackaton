@@ -16,6 +16,7 @@ import {
   Loader2,
   Users,
   Award,
+  Sparkles,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -50,6 +51,11 @@ const MENU_ITEMS = [
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Notes", href: "/notes", icon: FileText },
   { label: "Achievements", href: "/achievements", icon: Award },
+] as const;
+
+const DESKTOP_MENU_ITEMS = [
+  ...MENU_ITEMS,
+  { label: "Luma AI", href: "/ai", icon: Sparkles },
 ] as const;
 
 export function AppShell({
@@ -219,7 +225,7 @@ export function AppShell({
               Navigation
             </span>
             <nav aria-label="Main Navigation" className="flex flex-col gap-1">
-              {MENU_ITEMS.map((tab) => {
+              {DESKTOP_MENU_ITEMS.map((tab) => {
                 const targetHref = tab.label === "Plans" ? plansHref : tab.href;
                 const isActive =
                   tab.href === "/home"
