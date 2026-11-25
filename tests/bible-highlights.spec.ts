@@ -344,22 +344,27 @@ test.describe("Bible Passage Highlighting E2E", () => {
     ).toHaveCount(0);
     await expect(page).toHaveURL(/\/bible/);
 
-    // Open Highlights drawer, switch to Notes tab, check current chapter, All Notes, and sort controls
+    // Open Highlights drawer, switch to Notes tab, check current chapter, All Notes, and sort dropdowns
     await page.getByRole("button", { name: "View highlights" }).click();
+    await expect(
+      page.getByRole("combobox", { name: "Filter by highlight color" })
+    ).toBeVisible();
     await page.getByRole("button", { name: "Notes", exact: true }).click();
     await expect(
       page.getByRole("button", { name: "Genesis 1", exact: true })
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "All Notes" })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Sort: Created" })
+      page.getByRole("combobox", { name: "Sort notes by" })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Sort: Book" })
+      page.getByRole("combobox", { name: "Sort direction" })
     ).toBeVisible();
     await expect(page.getByText("God brings order and light.")).toBeVisible();
-    await page.getByRole("button", { name: "Sort: Book" }).click();
-    await page.getByRole("button", { name: /Sort descending/i }).click();
+    await page.getByRole("combobox", { name: "Sort notes by" }).click();
+    await page.getByRole("option", { name: "Sort: Book" }).click();
+    await page.getByRole("combobox", { name: "Sort direction" }).click();
+    await page.getByRole("option", { name: "Order: Asc" }).click();
     await page.getByRole("button", { name: "All Notes" }).click();
     await expect(page.getByText("God brings order and light.")).toBeVisible();
     await page.getByRole("link", { name: "Open Studio" }).click();
