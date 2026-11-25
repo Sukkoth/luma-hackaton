@@ -37,7 +37,7 @@ export default defineConfig({
     env: {
       DISABLE_RATE_LIMIT: "true",
       E2E_MOCK_BIBLE_API:
-        process.env.CI || !process.env.APP_KEY ? "true" : "false",
+        process.env.CI || !process.env.YOUVERSION_APP_KEY ? "true" : "false",
     },
   },
 });

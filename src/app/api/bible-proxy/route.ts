@@ -460,10 +460,10 @@ async function fetchYouVersionPassage({
     };
   }
 
-  const appKey = process.env.APP_KEY;
+  const appKey = process.env.YOUVERSION_APP_KEY;
   if (!appKey) {
     throw new BibleProxyError({
-      message: "YouVersion API key (APP_KEY) is not configured.",
+      message: "YouVersion API key (YOUVERSION_APP_KEY) is not configured.",
       userMessage:
         "The Bible reader is temporarily unavailable. Please try again later.",
       status: 503,
