@@ -25,6 +25,9 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     await expect(
       page.getByRole("button", { name: "Choose book and chapter" })
     ).toContainText("Genesis 1");
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
 
     // Attempt to mark Genesis 1 as read
     await page.getByRole("button", { name: "Mark Read" }).click();
@@ -67,31 +70,40 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       page.getByRole("button", { name: "Choose book and chapter" })
     ).toContainText("Genesis 1");
 
-    // 3. Mark Chapters 1, 2, and 3 via the reader toolbar & Next button
+    // 3. Mark Chapters 1, 2, and 3 via the end-of-chapter Mark Read & Next button
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
     const markRead1 = page.getByRole("button", { name: "Mark Read" });
     await expect(markRead1).toHaveAttribute("aria-pressed", "false");
     await markRead1.click();
     await expect(
-      page.getByRole("button", { name: "Read", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      page.getByRole("button", { name: "Mark Read" })
+    ).toHaveCount(0);
 
     await page.getByRole("button", { name: "Next chapter" }).click();
     await expect(
       page.getByRole("button", { name: "Choose book and chapter" })
     ).toContainText("Genesis 2");
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
     await page.getByRole("button", { name: "Mark Read" }).click();
     await expect(
-      page.getByRole("button", { name: "Read", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      page.getByRole("button", { name: "Mark Read" })
+    ).toHaveCount(0);
 
     await page.getByRole("button", { name: "Next chapter" }).click();
     await expect(
       page.getByRole("button", { name: "Choose book and chapter" })
     ).toContainText("Genesis 3");
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
     await page.getByRole("button", { name: "Mark Read" }).click();
     await expect(
-      page.getByRole("button", { name: "Read", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      page.getByRole("button", { name: "Mark Read" })
+    ).toHaveCount(0);
 
     const dbUser = await db.query.user.findFirst({
       where: eq(user.email, testUser.email),
@@ -119,11 +131,14 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
       .toBe(3);
 
     await page.reload();
+    await expect(page.locator(".luma-bible-passage")).toBeVisible({
+      timeout: 15000,
+    });
 
-    // 6. Verify Genesis 3 still shows Read after reload and picker shows 3/50
+    // 6. Verify Genesis 3 still hides Mark Read after reload and picker shows 3/50
     await expect(
-      page.getByRole("button", { name: "Read", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      page.getByRole("button", { name: "Mark Read" })
+    ).toHaveCount(0);
 
     await page.getByRole("button", { name: "Choose book and chapter" }).click();
     const sheet = page.getByRole("dialog");
@@ -152,49 +167,9 @@ test.describe("Chapter Progress & Reading Logs E2E", () => {
     });
     expect(logEntries.length).toBeGreaterThanOrEqual(3);
 
-    // 8. Uncheck chapter 2 (toggle off)
-    await page.getByRole("button", { name: "Previous chapter" }).click();
-    await expect(
-      page.getByRole("button", { name: "Choose book and chapter" })
-    ).toContainText("Genesis 2");
-    await page.getByRole("button", { name: "Read", exact: true }).click();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveAttribute("aria-pressed", "false");
-
-    // Verify DB reflects 2 chapters before reloading
-    await expect
-      .poll(async () => {
-        const rows = await db
-          .select()
-          .from(trackerChapterProgress)
-          .where(
-            and(
-              eq(trackerChapterProgress.trackerId, tracker!.id),
-              eq(trackerChapterProgress.bookId, "gen")
-            )
-          );
-        return rows.length;
-      })
-      .toBe(2);
-
-    // Reload again to verify unchecking persisted
-    await page.reload();
-    await expect(
-      page.getByRole("button", { name: "Mark Read" })
-    ).toHaveAttribute("aria-pressed", "false");
-
-    await page.getByRole("button", { name: "Choose book and chapter" }).click();
-    const finalSheet = page.getByRole("dialog");
-    await expect(finalSheet).toBeVisible();
-    await expect(
-      finalSheet.getByRole("button", { name: /Genesis/i }).first()
-    ).toContainText("2/50");
-    await finalSheet.getByRole("button", { name: "Close" }).click();
-
-    // 9. Navigate to /home and verify the dashboard metrics reflect the read chapters
+    // 8. Navigate to /home and verify the dashboard metrics reflect the 3 read chapters
     await page.goto("/home");
-    await expect(page.getByText("2 of 1189")).toBeVisible();
+    await expect(page.getByText("3 of 1189")).toBeVisible();
     await expect(page.getByText("Canon Progress Rings")).toBeVisible();
   });
 

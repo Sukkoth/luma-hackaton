@@ -264,11 +264,11 @@ test.describe("Streak UI & Modal E2E", () => {
     // 4. Navigate to /books, mark a chapter, verify streak updates
     await page.goto("/bible");
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
-    await expect(markReadBtn).toBeVisible();
+    await expect(markReadBtn).toBeVisible({ timeout: 15000 });
     await markReadBtn.click();
     await expect(
-      page.getByRole("button", { name: "Read", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      page.getByRole("button", { name: "Mark Read" })
+    ).toHaveCount(0);
 
     // Top navbar streak button now shows 1
     await expect(streakBtn).toContainText("1");

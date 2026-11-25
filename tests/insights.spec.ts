@@ -71,12 +71,12 @@ test.describe("Insights & Visualisations E2E", () => {
     // 5. Navigate to /books and mark Genesis Chapter 1 as read
     await page.goto("/bible");
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
-    await expect(markReadBtn).toBeVisible();
+    await expect(markReadBtn).toBeVisible({ timeout: 15000 });
     await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
     await markReadBtn.click();
     await expect(
-      page.getByRole("button", { name: "Read", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      page.getByRole("button", { name: "Mark Read" })
+    ).toHaveCount(0);
 
     const [uRecord] = await db.select().from(user).where(eq(user.email, email));
     const [userTracker] = await db

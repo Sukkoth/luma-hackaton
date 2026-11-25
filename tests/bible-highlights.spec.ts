@@ -28,6 +28,7 @@ test.describe("Bible Passage Highlighting E2E", () => {
           reference: "Genesis 1",
           contentHtml: SAMPLE_PASSAGE_HTML,
           versionLabel: "NIV",
+          copyright: "Copyright © Biblica, Inc. Used by Permission.",
         }),
       });
     });
@@ -50,6 +51,9 @@ test.describe("Bible Passage Highlighting E2E", () => {
     await page.goto("/bible");
     await expect(
       page.locator(".luma-bible-passage .yv-vlbl").first()
+    ).toBeVisible();
+    await expect(
+      page.getByText("Copyright © Biblica, Inc. Used by Permission.")
     ).toBeVisible();
 
     // 1) Full single verse via clicking verse label 1
@@ -197,6 +201,20 @@ test.describe("Bible Passage Highlighting E2E", () => {
     await page.getByLabel("Search highlights").fill("heavens");
     await expect(page.getByText("Genesis 1:1")).toBeVisible();
     await expect(page.getByText("Genesis 1:2–3")).toHaveCount(0);
+
+    // Close Highlights drawer and test Zen mode toggle + Escape exit
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Enter Zen mode" }).click();
+    await expect(
+      page.getByRole("button", { name: "Exit Zen mode" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "View highlights" })
+    ).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("button", { name: "View highlights" })
+    ).toBeVisible();
 
     // Cleanup test user and highlights
     const [createdUser] = await db

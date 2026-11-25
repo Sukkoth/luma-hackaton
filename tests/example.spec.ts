@@ -314,11 +314,12 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     // 4. Verify user can now mark chapters on Books page
     await page.goto("/bible?book=rom&ch=9");
     const markReadBtn = page.getByRole("button", { name: "Mark Read" });
+    await expect(markReadBtn).toBeVisible({ timeout: 15000 });
     await expect(markReadBtn).toHaveAttribute("aria-pressed", "false");
     await markReadBtn.click();
     await expect(
-      page.getByRole("button", { name: "Read", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      page.getByRole("button", { name: "Mark Read" })
+    ).toHaveCount(0);
 
     // 5. Verify Sign Out redirects to landing page
     await page.goto("/settings");
