@@ -365,6 +365,18 @@ test.describe("Bible Passage Highlighting E2E", () => {
     await page.getByRole("link", { name: "Open Studio" }).click();
     await expect(page).toHaveURL(/\/notes/);
 
+    // Verify shared verse link shows "Read full chapter" button and expands to full chapter
+    await page.goto("/bible?book=gen&ch=1&v=111&startVerse=1&endVerse=1");
+    const expandBtn = page.getByRole("button", {
+      name: "Read full chapter (Genesis 1)",
+    });
+    await expect(expandBtn).toBeVisible();
+    await expandBtn.click();
+    await expect(expandBtn).toHaveCount(0);
+    await expect(page).not.toHaveURL(/startVerse=/);
+
+    await page.goto("/notes");
+
     // Verify note and clickable scripture badge appear in /notes
     const scriptureLink = page
       .getByRole("link", { name: "Genesis 1:2" })
