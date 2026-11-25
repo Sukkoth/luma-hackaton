@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { eq, and, desc, sql, ilike, or } from "drizzle-orm";
+import { eq, and, asc, desc, sql, ilike, or, count } from "drizzle-orm";
 import * as v from "valibot";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
@@ -13,12 +13,17 @@ import {
   DeleteNoteSchema,
   CreateFolderSchema,
   DeleteFolderSchema,
+  GetChapterNotesSchema,
+  GetPaginatedNotesSchema,
   type CreateNoteInput,
   type UpdateNoteInput,
   type DeleteNoteInput,
   type CreateFolderInput,
   type DeleteFolderInput,
+  type GetChapterNotesInput,
+  type GetPaginatedNotesInput,
 } from "@/lib/schemas/notes";
+import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
 import { getReadingPlanById } from "@/data/readingPlans";
 
 export type NoteDetail = {
@@ -31,6 +36,14 @@ export type NoteDetail = {
   planTitle: string | null;
   planSessionId: number | null;
   planDayNumber: number | null;
+  versionId: number | null;
+  bookId: string | null;
+  chapter: number | null;
+  startVerse: number | null;
+  startOffset: number | null;
+  endVerse: number | null;
+  endOffset: number | null;
+  selectedText: string | null;
   title: string;
   bodyHtml: string;
   plainTextSnippet: string;
@@ -150,6 +163,14 @@ export async function getUserNotesAction({
       planTitle,
       planSessionId: n.planSessionId,
       planDayNumber: n.planDayNumber,
+      versionId: n.versionId,
+      bookId: n.bookId,
+      chapter: n.chapter,
+      startVerse: n.startVerse,
+      startOffset: n.startOffset,
+      endVerse: n.endVerse,
+      endOffset: n.endOffset,
+      selectedText: n.selectedText,
       title: n.title,
       bodyHtml: n.bodyHtml,
       plainTextSnippet: n.plainTextSnippet,
@@ -209,6 +230,14 @@ export async function getSingleNoteAction({
       planTitle,
       planSessionId: note.planSessionId,
       planDayNumber: note.planDayNumber,
+      versionId: note.versionId,
+      bookId: note.bookId,
+      chapter: note.chapter,
+      startVerse: note.startVerse,
+      startOffset: note.startOffset,
+      endVerse: note.endVerse,
+      endOffset: note.endOffset,
+      selectedText: note.selectedText,
       title: note.title,
       bodyHtml: note.bodyHtml,
       plainTextSnippet: note.plainTextSnippet,
@@ -234,6 +263,14 @@ export async function createNoteAction({
   planInstanceId,
   planDayNumber,
   planSessionId,
+  versionId,
+  bookId,
+  chapter,
+  startVerse,
+  startOffset,
+  endVerse,
+  endOffset,
+  selectedText,
 }: CreateNoteParams): Promise<CreateNoteResult> {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -249,6 +286,14 @@ export async function createNoteAction({
     planInstanceId,
     planDayNumber,
     planSessionId,
+    versionId,
+    bookId,
+    chapter,
+    startVerse,
+    startOffset,
+    endVerse,
+    endOffset,
+    selectedText,
   });
 
   if (!parsed.success) {
@@ -310,6 +355,14 @@ export async function createNoteAction({
       planInstanceId: parsed.output.planInstanceId || null,
       planDayNumber: parsed.output.planDayNumber || null,
       planSessionId: parsed.output.planSessionId || null,
+      versionId: parsed.output.versionId ?? null,
+      bookId: parsed.output.bookId ?? null,
+      chapter: parsed.output.chapter ?? null,
+      startVerse: parsed.output.startVerse ?? null,
+      startOffset: parsed.output.startOffset ?? null,
+      endVerse: parsed.output.endVerse ?? null,
+      endOffset: parsed.output.endOffset ?? null,
+      selectedText: parsed.output.selectedText ?? null,
     })
     .returning();
 
@@ -354,6 +407,14 @@ export async function createNoteAction({
       planTitle,
       planSessionId: inserted.planSessionId,
       planDayNumber: inserted.planDayNumber,
+      versionId: inserted.versionId,
+      bookId: inserted.bookId,
+      chapter: inserted.chapter,
+      startVerse: inserted.startVerse,
+      startOffset: inserted.startOffset,
+      endVerse: inserted.endVerse,
+      endOffset: inserted.endOffset,
+      selectedText: inserted.selectedText,
       title: inserted.title,
       bodyHtml: inserted.bodyHtml,
       plainTextSnippet: inserted.plainTextSnippet,
@@ -478,6 +539,14 @@ export async function updateNoteAction({
       planTitle,
       planSessionId: updated.planSessionId,
       planDayNumber: updated.planDayNumber,
+      versionId: updated.versionId,
+      bookId: updated.bookId,
+      chapter: updated.chapter,
+      startVerse: updated.startVerse,
+      startOffset: updated.startOffset,
+      endVerse: updated.endVerse,
+      endOffset: updated.endOffset,
+      selectedText: updated.selectedText,
       title: updated.title,
       bodyHtml: updated.bodyHtml,
       plainTextSnippet: updated.plainTextSnippet,
@@ -626,4 +695,209 @@ export async function deleteFolderAction({
 
   revalidatePath("/notes");
   return { success: true };
+}
+
+export type GetChapterNotesResult =
+  { success: true; notes: NoteDetail[] } | { success: false; error: string };
+
+export async function getChapterNotesAction(
+  params: GetChapterNotesInput
+): Promise<GetChapterNotesResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(GetChapterNotesSchema, params);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message ?? "Invalid passage query",
+    };
+  }
+
+  const { versionId, bookId, chapter } = parsed.output;
+  const rows = await db.query.notes.findMany({
+    where: and(
+      eq(notes.userId, session.user.id),
+      eq(notes.versionId, versionId),
+      eq(notes.bookId, bookId),
+      eq(notes.chapter, chapter),
+      eq(notes.isArchived, false)
+    ),
+    orderBy: [
+      asc(notes.startVerse),
+      asc(notes.startOffset),
+      desc(notes.updatedAt),
+    ],
+    with: {
+      folder: true,
+      planInstance: true,
+    },
+  });
+
+  const formatted: NoteDetail[] = rows.map((n) => {
+    let planTitle: string | null = null;
+    if (n.planInstance) {
+      const blueprint = getReadingPlanById(n.planInstance.templateId || "");
+      planTitle = blueprint?.title || "Reading Plan";
+    }
+    return {
+      id: n.id,
+      userId: n.userId,
+      trackerId: n.trackerId,
+      folderId: n.folderId,
+      folderName: n.folder?.name ?? null,
+      planInstanceId: n.planInstanceId,
+      planTitle,
+      planSessionId: n.planSessionId,
+      planDayNumber: n.planDayNumber,
+      versionId: n.versionId,
+      bookId: n.bookId,
+      chapter: n.chapter,
+      startVerse: n.startVerse,
+      startOffset: n.startOffset,
+      endVerse: n.endVerse,
+      endOffset: n.endOffset,
+      selectedText: n.selectedText,
+      title: n.title,
+      bodyHtml: n.bodyHtml,
+      plainTextSnippet: n.plainTextSnippet,
+      isPinned: n.isPinned,
+      isArchived: n.isArchived,
+      createdAt: n.createdAt.toISOString(),
+      updatedAt: n.updatedAt.toISOString(),
+    };
+  });
+
+  return { success: true, notes: formatted };
+}
+
+export type GetPaginatedNotesParams = Partial<GetPaginatedNotesInput>;
+
+export type GetPaginatedNotesResult =
+  | {
+      success: true;
+      notes: NoteDetail[];
+      totalCount: number;
+      hasMore: boolean;
+    }
+  | { success: false; error: string };
+
+const CANONICAL_BOOK_ORDER_SQL = sql<number>`CASE LOWER(${notes.bookId}) ${sql.join(
+  PROTESTANT_BIBLE_BOOKS.map((book) => sql`WHEN ${book.id} THEN ${book.order}`),
+  sql` `
+)} ELSE 999 END`;
+
+export async function getPaginatedNotesAction(
+  params: GetPaginatedNotesParams = {}
+): Promise<GetPaginatedNotesResult> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  const parsed = v.safeParse(GetPaginatedNotesSchema, params);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.issues[0]?.message ?? "Invalid notes query",
+    };
+  }
+
+  const { page, limit, bookId, chapter, searchQuery, sortBy, sortDir } =
+    parsed.output;
+  const offset = (page - 1) * limit;
+
+  const conditions = [
+    eq(notes.userId, session.user.id),
+    eq(notes.isArchived, false),
+  ];
+
+  if (bookId) {
+    conditions.push(eq(notes.bookId, bookId.toLowerCase()));
+  }
+  if (chapter) {
+    conditions.push(eq(notes.chapter, chapter));
+  }
+  if (searchQuery && searchQuery.trim().length > 0) {
+    const term = `%${searchQuery.trim()}%`;
+    conditions.push(
+      or(
+        ilike(notes.title, term),
+        ilike(notes.plainTextSnippet, term),
+        ilike(notes.selectedText, term),
+        ilike(notes.bookId, term)
+      )!
+    );
+  }
+
+  const whereClause = and(...conditions);
+  const dirFn = sortDir === "asc" ? asc : desc;
+  const orderBy =
+    sortBy === "book"
+      ? [
+          dirFn(CANONICAL_BOOK_ORDER_SQL),
+          dirFn(notes.chapter),
+          dirFn(notes.startVerse),
+          dirFn(notes.startOffset),
+          dirFn(notes.createdAt),
+        ]
+      : [dirFn(notes.createdAt)];
+
+  const [countRows, rows] = await Promise.all([
+    db.select({ total: count() }).from(notes).where(whereClause),
+    db.query.notes.findMany({
+      where: whereClause,
+      orderBy,
+      limit,
+      offset,
+      with: {
+        folder: true,
+        planInstance: true,
+      },
+    }),
+  ]);
+
+  const totalCount = Number(countRows[0]?.total ?? 0);
+  const formatted: NoteDetail[] = rows.map((n) => {
+    let planTitle: string | null = null;
+    if (n.planInstance) {
+      const blueprint = getReadingPlanById(n.planInstance.templateId || "");
+      planTitle = blueprint?.title || "Reading Plan";
+    }
+    return {
+      id: n.id,
+      userId: n.userId,
+      trackerId: n.trackerId,
+      folderId: n.folderId,
+      folderName: n.folder?.name ?? null,
+      planInstanceId: n.planInstanceId,
+      planTitle,
+      planSessionId: n.planSessionId,
+      planDayNumber: n.planDayNumber,
+      versionId: n.versionId,
+      bookId: n.bookId,
+      chapter: n.chapter,
+      startVerse: n.startVerse,
+      startOffset: n.startOffset,
+      endVerse: n.endVerse,
+      endOffset: n.endOffset,
+      selectedText: n.selectedText,
+      title: n.title,
+      bodyHtml: n.bodyHtml,
+      plainTextSnippet: n.plainTextSnippet,
+      isPinned: n.isPinned,
+      isArchived: n.isArchived,
+      createdAt: n.createdAt.toISOString(),
+      updatedAt: n.updatedAt.toISOString(),
+    };
+  });
+
+  return {
+    success: true,
+    notes: formatted,
+    totalCount,
+    hasMore: offset + formatted.length < totalCount,
+  };
 }

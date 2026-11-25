@@ -491,6 +491,14 @@ export const notes = pgTable(
     ),
     planDayNumber: integer("plan_day_number"),
     planSessionId: integer("plan_session_id"),
+    versionId: integer("version_id"),
+    bookId: varchar("book_id", { length: 16 }),
+    chapter: integer("chapter"),
+    startVerse: integer("start_verse"),
+    startOffset: integer("start_offset"),
+    endVerse: integer("end_verse"),
+    endOffset: integer("end_offset"),
+    selectedText: text("selected_text"),
     title: text("title").notNull(),
     bodyHtml: text("body_html").default("").notNull(),
     plainTextSnippet: text("plain_text_snippet").default("").notNull(),
@@ -515,6 +523,12 @@ export const notes = pgTable(
       table.planInstanceId,
       table.planDayNumber,
       table.isSharedWithCommunity
+    ),
+    index("idx_notes_passage").on(
+      table.userId,
+      table.versionId,
+      table.bookId,
+      table.chapter
     ),
   ]
 );
