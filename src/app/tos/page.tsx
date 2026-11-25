@@ -12,8 +12,11 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LumaIcon } from "@/components/ui/luma-icon";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Luma Scripture Tracker",
+  title: "Terms of Service",
   description: "Simple, friendly terms of service for Luma Scripture Tracker.",
+  alternates: {
+    canonical: "/tos",
+  },
 };
 
 export default function TermsOfServicePage() {

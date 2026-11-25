@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { AppShell } from "@/components/navigation/app-shell";
@@ -12,6 +13,15 @@ import type { ActivePlanInstance } from "@/components/plans/plan-active-banner";
 import type { BibleCanon } from "@/data/bibleData";
 
 export const instant = false;
+
+export const metadata: Metadata = {
+  title: "Bible Reading Plans & Custom Schedules",
+  description:
+    "Browse curated Bible reading plans, build custom schedules from any canon, import CSV or JSON plans, and track your daily reading consistency.",
+  alternates: {
+    canonical: "/plans",
+  },
+};
 
 export default async function PlansPage() {
   const session = await auth.api.getSession({

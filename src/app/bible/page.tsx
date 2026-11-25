@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { eq } from "drizzle-orm";
@@ -11,6 +12,15 @@ import { getVerseOfTheDay } from "@/lib/youversion";
 import type { BibleCanon } from "@/data/bibleData";
 
 export const instant = false;
+
+export const metadata: Metadata = {
+  title: "Bible Reader & Verse Study Notes",
+  description:
+    "Read Scripture in multiple translations, highlight key verses, save passage-anchored study notes, and track chapter progress across all 66 books.",
+  alternates: {
+    canonical: "/bible",
+  },
+};
 
 export default async function BiblePage() {
   await connection();
