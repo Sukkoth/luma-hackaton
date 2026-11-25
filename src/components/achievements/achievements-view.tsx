@@ -17,6 +17,7 @@ export type StatusFilter = "All" | "Unlocked" | "Locked";
 
 const CATEGORIES: ReadonlyArray<AchievementCategory> = [
   "Daily Streaks",
+  "Fellowships",
   "Bible Volumes",
   "Old Testament",
   "Wisdom & Poetry",

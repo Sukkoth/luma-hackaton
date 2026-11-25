@@ -29,6 +29,7 @@ import {
   type GroupMembershipStatus,
 } from "@/db/schema";
 import { createNotificationAction } from "@/actions/notifications";
+import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import {
   CreateGroupSchema,
   UpdateGroupSettingsSchema,
@@ -215,6 +216,8 @@ export async function createGroupAction({
         actionUrl: `/groups/${newGroup.id}`,
       },
     });
+
+    await evaluateAndUnlockAchievementsAction({ userId: session.user.id });
 
     revalidatePath("/groups");
     return { success: true, groupId: newGroup.id };
@@ -1843,6 +1846,8 @@ export async function enrollInGroupPlanAction({
       userId: session.user.id,
       planInstanceId: startResult.instanceId,
     });
+
+    await evaluateAndUnlockAchievementsAction({ userId: session.user.id });
 
     revalidatePath(`/groups/${groupPlan.groupId}`);
     revalidatePath("/plans");
