@@ -194,7 +194,7 @@ export function BooksView({
         <BooksAuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          onSignIn={() => router.push("/login?redirect=/books")}
+          onSignIn={() => router.push("/login?redirect=/bible")}
         />
       </div>
     </AppShell>

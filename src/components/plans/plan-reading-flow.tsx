@@ -161,7 +161,7 @@ export function PlanReadingFlow({
       params.set("startVerse", reading.startVerse.toString());
     if (reading.endVerse != null)
       params.set("endVerse", reading.endVerse.toString());
-    return `/books?${params.toString()}`;
+    return `/bible?${params.toString()}`;
   };
 
   return (

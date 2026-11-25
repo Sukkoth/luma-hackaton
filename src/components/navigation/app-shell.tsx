@@ -46,7 +46,7 @@ export type AppShellProps = {
 const MENU_ITEMS = [
   { label: "Home", href: "/home", icon: LayoutDashboard },
   { label: "Plans", href: "/plans", icon: Calendar },
-  { label: "Bible", href: "/books", icon: BookOpen },
+  { label: "Bible", href: "/bible", icon: BookOpen },
   { label: "Groups", href: "/groups", icon: Users },
   { label: "Notes", href: "/notes", icon: FileText },
   { label: "Achievements", href: "/achievements", icon: Award },

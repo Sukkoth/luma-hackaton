@@ -144,7 +144,7 @@ export function BibleLandingPage() {
         <HeaderActions>
           <HeaderActionButton
             type="secondary"
-            href="/books"
+            href="/bible"
             icon={<Compass className="size-4" />}
             label="Canon Books"
           />

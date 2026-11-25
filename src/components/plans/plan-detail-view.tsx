@@ -292,7 +292,7 @@ export function PlanDetailView({ plan }: PlanDetailViewProps) {
     if (reading.endVerse != null) {
       params.set("endVerse", reading.endVerse.toString());
     }
-    return `/books?${params.toString()}`;
+    return `/bible?${params.toString()}`;
   };
 
   return (

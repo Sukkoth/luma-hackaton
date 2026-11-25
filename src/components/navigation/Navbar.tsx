@@ -29,7 +29,7 @@ export function Navbar() {
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const isActive =
               href === "/"
-                ? pathname === "/" || pathname === "/books"
+                ? pathname === "/" || pathname === "/bible"
                 : pathname.startsWith(href);
             return (
               <Link

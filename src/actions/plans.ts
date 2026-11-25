@@ -1334,7 +1334,7 @@ export async function togglePlanReadingItemAction({
 
     revalidatePath(`/plans/${instance.id}`);
     revalidatePath("/plans");
-    revalidatePath("/books");
+    revalidatePath("/bible");
 
     return {
       success: true,
@@ -1417,7 +1417,7 @@ export async function togglePlanReadingItemAction({
 
   revalidatePath(`/plans/${instance.id}`);
   revalidatePath("/plans");
-  revalidatePath("/books");
+  revalidatePath("/bible");
 
   return {
     success: true,

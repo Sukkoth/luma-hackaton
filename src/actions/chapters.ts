@@ -92,7 +92,7 @@ export async function toggleChapterAction({
         .delete(trackerChapterProgress)
         .where(eq(trackerChapterProgress.id, existing.id));
 
-      revalidatePath("/books");
+      revalidatePath("/bible");
       revalidatePath("/home");
       revalidatePath("/insights");
       revalidatePath("/achievements");
@@ -133,7 +133,7 @@ export async function toggleChapterAction({
       userId: session.user.id,
     });
 
-    revalidatePath("/books");
+    revalidatePath("/bible");
     revalidatePath("/home");
     revalidatePath("/insights");
     revalidatePath("/achievements");
@@ -262,7 +262,7 @@ export async function markAllChaptersAction({
         userId: session.user.id,
       });
       newlyUnlocked = evalResult.newlyUnlocked;
-      revalidatePath("/books");
+      revalidatePath("/bible");
       revalidatePath("/home");
       revalidatePath("/insights");
       revalidatePath("/achievements");
@@ -337,7 +337,7 @@ export async function clearAllChaptersAction({
         )
       );
 
-    revalidatePath("/books");
+    revalidatePath("/bible");
     revalidatePath("/home");
     revalidatePath("/insights");
     revalidatePath("/achievements");
