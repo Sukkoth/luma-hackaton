@@ -1,5 +1,5 @@
-// Luma Progressive Web App Service Worker (v3)
-const CACHE_NAME = "luma-pwa-v3";
+// Luma Progressive Web App Service Worker (v4)
+const CACHE_NAME = "luma-pwa-v4";
 
 const PRECACHE_ASSETS = [
   "/offline",
@@ -15,6 +15,7 @@ const isDev =
   self.location.hostname === "localhost" ||
   self.location.hostname === "127.0.0.1" ||
   self.location.hostname.endsWith(".local") ||
+  self.location.hostname.endsWith(".ts.net") ||
   Boolean(self.location.port);
 
 // Install: precache essential shell assets and activate immediately
