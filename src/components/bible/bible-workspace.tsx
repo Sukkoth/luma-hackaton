@@ -57,8 +57,21 @@ import {
   type PassageHighlightRange,
   type RenderableNoteAnchor,
 } from "@/lib/bible-highlights";
-import { HighlightToolbar } from "@/components/bible/highlight-toolbar";
-import { HighlightsSheet } from "@/components/bible/highlights-sheet";
+const HighlightToolbar = dynamic(
+  () =>
+    import("@/components/bible/highlight-toolbar").then(
+      (mod) => mod.HighlightToolbar
+    ),
+  { ssr: false }
+);
+
+const HighlightsSheet = dynamic(
+  () =>
+    import("@/components/bible/highlights-sheet").then(
+      (mod) => mod.HighlightsSheet
+    ),
+  { ssr: false }
+);
 import type { PassageNoteAnchor } from "@/components/bible/passage-note-sheet";
 
 const PassageNoteSheet = dynamic(
@@ -194,6 +207,7 @@ export type BibleWorkspaceProps = {
   totalReadChapters?: number;
   totalChaptersAcrossCanon?: number;
   canonPercentage?: number;
+  isAuthenticated?: boolean;
   onToggleTrackerChapter?: (params: {
     bookId: string;
     bookName: string;
@@ -237,6 +251,7 @@ export function BibleWorkspace({
   totalReadChapters = 0,
   totalChaptersAcrossCanon = 1189,
   canonPercentage = 0,
+  isAuthenticated = true,
   onToggleTrackerChapter,
   onMarkAllChapters,
   onClearAllChapters,
@@ -597,7 +612,7 @@ export function BibleWorkspace({
   // Load saved highlights & passage notes for the active translation + book + chapter
   useEffect(() => {
     setHighlightPrompt(null);
-    if (!isBookSupported) {
+    if (!isAuthenticated || !isBookSupported) {
       setHighlights([]);
       setChapterNotes([]);
       return;
@@ -628,7 +643,13 @@ export function BibleWorkspace({
     return () => {
       isCancelled = true;
     };
-  }, [isBookSupported, selectedVersion.id, currentBookId, currentChapter]);
+  }, [
+    isAuthenticated,
+    isBookSupported,
+    selectedVersion.id,
+    currentBookId,
+    currentChapter,
+  ]);
 
   const notedRanges = useMemo<RenderableNoteAnchor[]>(
     () =>
@@ -2227,90 +2248,94 @@ export function BibleWorkspace({
         </Sheet>
       )}
 
-      <HighlightsSheet
-        open={isHighlightsSheetOpen}
-        onOpenChange={setIsHighlightsSheetOpen}
-        currentBookId={currentBookId}
-        currentBookName={activeBook.name}
-        currentChapter={currentChapter}
-        highlightsRevision={highlightsRevision}
-        notesRevision={notesRevision}
-        onNavigateToHighlight={({ bookId, chapter, versionId }) => {
-          saveSelectedVersion({ versionId });
-          setStoredVersionId(versionId);
-          updateReaderQuery({
-            book: bookId,
-            ch: chapter,
-            v: versionId,
-            plan: null,
-            readingId: null,
-            startVerse: null,
-            endVerse: null,
-          });
-        }}
-        onHighlightDeleted={({ highlightId }) => {
-          setHighlights((prev) =>
-            prev.filter((item) => item.id !== highlightId)
-          );
-        }}
-        onSelectNote={({ note }) => {
-          if (!note.bookId || !note.chapter) {
-            router.push(`/notes?noteId=${note.id}`);
-            return;
-          }
-
-          const targetVersionId = note.versionId ?? selectedVersion.id;
-          const isDifferentPassage =
-            note.bookId.toLowerCase() !== currentBookId.toLowerCase() ||
-            note.chapter !== currentChapter ||
-            targetVersionId !== selectedVersion.id;
-
-          if (isDifferentPassage) {
-            saveSelectedVersion({ versionId: targetVersionId });
-            setStoredVersionId(targetVersionId);
+      {isHighlightsSheetOpen && (
+        <HighlightsSheet
+          open={isHighlightsSheetOpen}
+          onOpenChange={setIsHighlightsSheetOpen}
+          currentBookId={currentBookId}
+          currentBookName={activeBook.name}
+          currentChapter={currentChapter}
+          highlightsRevision={highlightsRevision}
+          notesRevision={notesRevision}
+          onNavigateToHighlight={({ bookId, chapter, versionId }) => {
+            saveSelectedVersion({ versionId });
+            setStoredVersionId(versionId);
             updateReaderQuery({
-              book: note.bookId,
-              ch: note.chapter,
-              v: targetVersionId,
+              book: bookId,
+              ch: chapter,
+              v: versionId,
               plan: null,
               readingId: null,
               startVerse: null,
               endVerse: null,
             });
-          }
+          }}
+          onHighlightDeleted={({ highlightId }) => {
+            setHighlights((prev) =>
+              prev.filter((item) => item.id !== highlightId)
+            );
+          }}
+          onSelectNote={({ note }) => {
+            if (!note.bookId || !note.chapter) {
+              router.push(`/notes?noteId=${note.id}`);
+              return;
+            }
 
-          const targetBook = PROTESTANT_BIBLE_BOOKS.find(
-            (b) => b.id === note.bookId?.toLowerCase()
-          );
-          const targetVersion = BIBLE_VERSIONS.find(
-            (v) => v.id === targetVersionId
-          );
-          setNoteSheetState({
-            open: true,
-            anchor:
-              note.startVerse !== null
-                ? {
-                    versionId: targetVersionId,
-                    versionAbbr:
-                      targetVersion?.abbreviation ??
-                      selectedVersion.abbreviation,
-                    bookId: note.bookId,
-                    bookName: targetBook?.name ?? note.bookId.toUpperCase(),
-                    chapter: note.chapter,
-                    startVerse: note.startVerse,
-                    startOffset: note.startOffset ?? 0,
-                    endVerse: note.endVerse ?? note.startVerse,
-                    endOffset: note.endOffset ?? 1,
-                    selectedText: note.selectedText ?? "",
-                  }
-                : null,
-            existingNote: note,
-          });
-        }}
-        onNoteDeleted={({ noteId }) => {
-          setChapterNotes((prev) => prev.filter((item) => item.id !== noteId));
-        }}
-      />
+            const targetVersionId = note.versionId ?? selectedVersion.id;
+            const isDifferentPassage =
+              note.bookId.toLowerCase() !== currentBookId.toLowerCase() ||
+              note.chapter !== currentChapter ||
+              targetVersionId !== selectedVersion.id;
+
+            if (isDifferentPassage) {
+              saveSelectedVersion({ versionId: targetVersionId });
+              setStoredVersionId(targetVersionId);
+              updateReaderQuery({
+                book: note.bookId,
+                ch: note.chapter,
+                v: targetVersionId,
+                plan: null,
+                readingId: null,
+                startVerse: null,
+                endVerse: null,
+              });
+            }
+
+            const targetBook = PROTESTANT_BIBLE_BOOKS.find(
+              (b) => b.id === note.bookId?.toLowerCase()
+            );
+            const targetVersion = BIBLE_VERSIONS.find(
+              (v) => v.id === targetVersionId
+            );
+            setNoteSheetState({
+              open: true,
+              anchor:
+                note.startVerse !== null
+                  ? {
+                      versionId: targetVersionId,
+                      versionAbbr:
+                        targetVersion?.abbreviation ??
+                        selectedVersion.abbreviation,
+                      bookId: note.bookId,
+                      bookName: targetBook?.name ?? note.bookId.toUpperCase(),
+                      chapter: note.chapter,
+                      startVerse: note.startVerse,
+                      startOffset: note.startOffset ?? 0,
+                      endVerse: note.endVerse ?? note.startVerse,
+                      endOffset: note.endOffset ?? 1,
+                      selectedText: note.selectedText ?? "",
+                    }
+                  : null,
+              existingNote: note,
+            });
+          }}
+          onNoteDeleted={({ noteId }) => {
+            setChapterNotes((prev) =>
+              prev.filter((item) => item.id !== noteId)
+            );
+          }}
+        />
+      )}
     </div>
   );
 }

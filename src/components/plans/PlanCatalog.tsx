@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo, useSyncExternalStore } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
@@ -20,11 +21,13 @@ import {
   Coffee,
 } from "lucide-react";
 import {
-  READING_PLANS,
+  type PlanCatalogSummary,
   type PlanFilterType,
   isPlanMatchingFilter,
   isPlanCanonCompatible,
-} from "@/data/readingPlans";
+  toPlanCatalogSummary,
+} from "@/data/planCatalogTypes";
+import type { ReadingPlanTemplate } from "@/data/readingPlans";
 import type { BibleCanon } from "@/data/bibleData";
 import { useSession } from "@/lib/auth-client";
 import { PlanCard } from "./plan-card";
@@ -34,13 +37,29 @@ import {
   PlanActiveBanner,
   type ActivePlanInstance,
 } from "./plan-active-banner";
-import { PlanSetupModal } from "./plan-setup-modal";
-import { CustomPlanWizardModal } from "./custom-plan-wizard-modal";
-import { ImportPlanModal } from "./import-plan-modal";
 import { Button } from "@/components/ui/button";
-import type { ReadingPlanTemplate } from "@/data/readingPlans";
-import { celebratePlanCompletion } from "@/lib/confetti";
-import { updatePlanSettingsAction } from "@/actions/plans";
+import {
+  updatePlanSettingsAction,
+  getPlanTemplateDetailsAction,
+} from "@/actions/plans";
+
+const PlanSetupModal = dynamic(
+  () => import("./plan-setup-modal").then((mod) => mod.PlanSetupModal),
+  { ssr: false }
+);
+
+const CustomPlanWizardModal = dynamic(
+  () =>
+    import("./custom-plan-wizard-modal").then(
+      (mod) => mod.CustomPlanWizardModal
+    ),
+  { ssr: false }
+);
+
+const ImportPlanModal = dynamic(
+  () => import("./import-plan-modal").then((mod) => mod.ImportPlanModal),
+  { ssr: false }
+);
 
 const EMPTY_PLAN_INSTANCES: ReadonlyArray<ActivePlanInstance> = [];
 
@@ -51,7 +70,8 @@ type Props = {
   activePlanInstances?: ReadonlyArray<ActivePlanInstance>;
   pausedPlanInstances?: ReadonlyArray<ActivePlanInstance>;
   finishedPlanInstances?: ReadonlyArray<ActivePlanInstance>;
-  customPlans?: ReadonlyArray<ReadingPlanTemplate>;
+  curatedPlans?: ReadonlyArray<PlanCatalogSummary>;
+  customPlans?: ReadonlyArray<PlanCatalogSummary>;
   activeTrackerId?: string;
   trackerName?: string;
   trackerCanon?: BibleCanon;
@@ -62,6 +82,7 @@ export function PlanCatalog({
   activePlanInstances = EMPTY_PLAN_INSTANCES,
   pausedPlanInstances = EMPTY_PLAN_INSTANCES,
   finishedPlanInstances = EMPTY_PLAN_INSTANCES,
+  curatedPlans = [],
   customPlans = [],
   activeTrackerId,
   trackerName,
@@ -70,7 +91,7 @@ export function PlanCatalog({
   const router = useRouter();
   const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
-  const [allCustomPlans, setAllCustomPlans] = useState<ReadingPlanTemplate[]>(
+  const [allCustomPlans, setAllCustomPlans] = useState<PlanCatalogSummary[]>(
     () => [...(customPlans || [])]
   );
   const [isCustomWizardOpen, setIsCustomWizardOpen] = useState(false);
@@ -136,10 +157,21 @@ export function PlanCatalog({
     });
   };
 
-  const allTemplates: ReadingPlanTemplate[] = useMemo(
-    () => [...allCustomPlans, ...READING_PLANS],
-    [allCustomPlans]
+  const allTemplates: ReadonlyArray<PlanCatalogSummary> = useMemo(
+    () => [...allCustomPlans, ...curatedPlans],
+    [allCustomPlans, curatedPlans]
   );
+
+  const handleOpenStartPlan = (planSummary: PlanCatalogSummary) => {
+    startTransition(async () => {
+      const details = await getPlanTemplateDetailsAction({
+        templateId: planSummary.id,
+      });
+      if (details) {
+        setSelectedPlanForEnrollment(details);
+      }
+    });
+  };
 
   const availablePlans = allTemplates.filter((plan) => {
     // 1. Hide templates that already have an active or paused instance in this tracker
@@ -156,7 +188,10 @@ export function PlanCatalog({
   });
 
   const filteredPlans = availablePlans.filter((plan) => {
-    const matchesFilter = isPlanMatchingFilter(plan, selectedFilter);
+    const matchesFilter = isPlanMatchingFilter({
+      plan,
+      filter: selectedFilter,
+    });
     const matchesQuery =
       searchQuery.trim() === "" ||
       plan.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -171,6 +206,7 @@ export function PlanCatalog({
       <PlanActiveBanner
         session={session}
         activePlanInstances={activePlanInstances}
+        curatedCount={curatedPlans.length}
         onCreateCustom={() => setIsCustomWizardOpen(true)}
         onImportPlan={() => setIsImportModalOpen(true)}
       />
@@ -254,7 +290,7 @@ export function PlanCatalog({
                     key={plan.id}
                     plan={plan}
                     isEnrolled={enrolledTemplateIds.has(plan.id)}
-                    onStartPlanAction={(p) => setSelectedPlanForEnrollment(p)}
+                    onStartPlanAction={handleOpenStartPlan}
                   />
                 ))}
               </div>
@@ -591,7 +627,11 @@ export function PlanCatalog({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => celebratePlanCompletion()}
+                      onClick={() => {
+                        void import("@/lib/confetti").then((m) =>
+                          m.celebratePlanCompletion()
+                        );
+                      }}
                       leftIcon={<Sparkles className="size-3.5" />}
                       className="cursor-pointer font-medium"
                     >
@@ -634,15 +674,17 @@ export function PlanCatalog({
           onCloseAction={() => setIsCustomWizardOpen(false)}
           activeTrackerCanon={trackerCanon}
           onPlanCreatedAction={(plan) => {
+            const summary = toPlanCatalogSummary({ plan });
             setAllCustomPlans((prev) => [
-              plan,
-              ...prev.filter((p) => p.id !== plan.id),
+              summary,
+              ...prev.filter((p) => p.id !== summary.id),
             ]);
           }}
           onPlanCreatedAndStartAction={(plan) => {
+            const summary = toPlanCatalogSummary({ plan });
             setAllCustomPlans((prev) => [
-              plan,
-              ...prev.filter((p) => p.id !== plan.id),
+              summary,
+              ...prev.filter((p) => p.id !== summary.id),
             ]);
             setSelectedPlanForEnrollment(plan);
           }}
@@ -655,15 +697,17 @@ export function PlanCatalog({
           isOpen={isImportModalOpen}
           onCloseAction={() => setIsImportModalOpen(false)}
           onPlanImportedAction={(plan) => {
+            const summary = toPlanCatalogSummary({ plan });
             setAllCustomPlans((prev) => [
-              plan,
-              ...prev.filter((p) => p.id !== plan.id),
+              summary,
+              ...prev.filter((p) => p.id !== summary.id),
             ]);
           }}
           onPlanImportedAndStartAction={(plan) => {
+            const summary = toPlanCatalogSummary({ plan });
             setAllCustomPlans((prev) => [
-              plan,
-              ...prev.filter((p) => p.id !== plan.id),
+              summary,
+              ...prev.filter((p) => p.id !== summary.id),
             ]);
             setSelectedPlanForEnrollment(plan);
           }}

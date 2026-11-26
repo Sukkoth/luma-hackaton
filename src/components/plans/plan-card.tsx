@@ -11,11 +11,14 @@ import {
   Check,
   Sparkles,
 } from "lucide-react";
-import { type ReadingPlanTemplate, isPlanFeatured } from "@/data/readingPlans";
+import {
+  type PlanCatalogSummary,
+  isPlanFeatured,
+} from "@/data/planCatalogTypes";
 
 type Props = {
-  plan: ReadingPlanTemplate;
-  onStartPlanAction?: (plan: ReadingPlanTemplate) => void;
+  plan: PlanCatalogSummary;
+  onStartPlanAction?: (plan: PlanCatalogSummary) => void;
   isEnrolled?: boolean;
 };
 

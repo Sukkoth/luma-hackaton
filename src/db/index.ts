@@ -16,7 +16,7 @@ const conn =
     max: 10,
   });
 
-if (process.env.NODE_ENV !== "production") {
+if (!globalForDb.conn) {
   globalForDb.conn = conn;
 }
 

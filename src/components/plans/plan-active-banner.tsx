@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Compass, LogIn, Play, Plus, Upload } from "lucide-react";
 import { LumaIcon } from "@/components/ui/luma-icon";
 import type { useSession } from "@/lib/auth-client";
-import { READING_PLANS } from "@/data/readingPlans";
 import {
   HeaderActions,
   HeaderActionButton,
@@ -29,6 +28,7 @@ type SessionData = ReturnType<typeof useSession>["data"];
 type Props = {
   session: SessionData;
   activePlanInstances: ReadonlyArray<ActivePlanInstance>;
+  curatedCount?: number;
   onBrowseCatalog?: () => void;
   onCreateCustom?: () => void;
   onImportPlan?: () => void;
@@ -37,6 +37,7 @@ type Props = {
 export function PlanActiveBanner({
   session,
   activePlanInstances,
+  curatedCount = 10,
   onCreateCustom,
   onImportPlan,
 }: Props) {
@@ -128,7 +129,7 @@ export function PlanActiveBanner({
                     </span>
                   </div>
                   <span className="text-[11px] font-medium text-muted-foreground">
-                    {READING_PLANS.length} Curated Plans
+                    {curatedCount} Curated Plans
                   </span>
                 </div>
 
@@ -249,7 +250,7 @@ export function PlanActiveBanner({
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
-                  <span>{READING_PLANS.length} blueprints available below</span>
+                  <span>{curatedCount} blueprints available below</span>
                   <span className="text-xs font-semibold text-primary">
                     Select a plan below to start ↓
                   </span>
@@ -275,7 +276,7 @@ export function PlanActiveBanner({
             <div className="space-y-1">
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground tabular-nums">
-                  {READING_PLANS.length}
+                  {curatedCount}
                 </span>
                 <span className="text-xs font-semibold text-muted-foreground">
                   Curated Catalog Templates
