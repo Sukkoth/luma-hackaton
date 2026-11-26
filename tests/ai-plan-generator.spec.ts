@@ -296,6 +296,24 @@ test.describe("AI Plan Generator", () => {
         expect(syncJson.unchanged).toBe(true);
         await expect(page.getByText("Exodus Study")).toBeVisible();
         await expect(page.getByText("Explain Romans 8:28")).toBeVisible();
+        await expect(
+          page.getByRole("button", { name: "Save to Notes" })
+        ).toBeVisible();
+
+        // Archive the conversation and verify Archived section appears
+        await page
+          .getByRole("button", { name: "Actions for Romans 8 Study" })
+          .click();
+        await page
+          .getByRole("button", { name: "Archive", exact: true })
+          .click();
+        await expect(page.getByText("Archived (1)")).toBeVisible();
+
+        // Verify ?prompt= prefills composer
+        await page.goto("/ai?mode=chat&prompt=Explain%20Romans%208%3A28");
+        await expect(page.getByLabel("Luma AI prompt")).toHaveValue(
+          "Explain Romans 8:28"
+        );
       }
     }
 
