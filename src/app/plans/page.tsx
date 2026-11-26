@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getCachedUserSettings } from "@/lib/request-cache";
 import { AppShell } from "@/components/navigation/app-shell";
 import { PlanCatalog } from "@/components/plans/PlanCatalog";
 import { getUserTrackersData } from "@/actions/trackers";
 import {
-  getUserPlansAction,
-  getUserCustomPlanTemplatesAction,
-} from "@/actions/plans";
+  getUserPlansForTracker,
+  getUserCustomPlanSummaries,
+} from "@/lib/plans/queries";
 import { syncUserStreak } from "@/lib/streak-service";
 import type { ActivePlanInstance } from "@/components/plans/plan-active-banner";
 import type { BibleCanon } from "@/data/bibleData";
+import { READING_PLANS } from "@/data/readingPlans";
+import { toPlanCatalogSummary } from "@/data/planCatalogTypes";
+
+const CURATED_PLAN_SUMMARIES = READING_PLANS.map((plan) =>
+  toPlanCatalogSummary({ plan })
+);
 
 export const instant = false;
 
@@ -28,19 +35,35 @@ export default async function PlansPage() {
     headers: await headers(),
   });
 
-  const [trackersData, streak, customPlans] = session
+  const settings = session
+    ? await getCachedUserSettings({ userId: session.user.id })
+    : null;
+
+  const prefetchedTrackerId = settings?.activeTrackerId;
+
+  const [trackersData, streak, customPlans, prefetchedPlans] = session
     ? await Promise.all([
         getUserTrackersData({ userId: session.user.id }),
         syncUserStreak({ userId: session.user.id }),
-        getUserCustomPlanTemplatesAction({ userId: session.user.id }),
+        getUserCustomPlanSummaries({ userId: session.user.id }),
+        prefetchedTrackerId
+          ? getUserPlansForTracker({
+              trackerId: prefetchedTrackerId,
+              userId: session.user.id,
+            })
+          : Promise.resolve(null),
       ])
-    : [{ trackers: [], activeTracker: null }, undefined, []];
+    : [{ trackers: [], activeTracker: null }, undefined, [], null];
 
   const rawPlans =
     session && trackersData.activeTracker?.id
-      ? await getUserPlansAction({
-          trackerId: trackersData.activeTracker.id,
-        })
+      ? prefetchedPlans &&
+        trackersData.activeTracker.id === prefetchedTrackerId
+        ? prefetchedPlans
+        : await getUserPlansForTracker({
+            trackerId: trackersData.activeTracker.id,
+            userId: session.user.id,
+          })
       : [];
 
   const activePlanInstances: ReadonlyArray<ActivePlanInstance> = rawPlans
@@ -115,6 +138,7 @@ export default async function PlansPage() {
           activePlanInstances={activePlanInstances}
           pausedPlanInstances={pausedPlanInstances}
           finishedPlanInstances={finishedPlanInstances}
+          curatedPlans={CURATED_PLAN_SUMMARIES}
           customPlans={customPlans}
           activeTrackerId={trackersData.activeTracker?.id}
           trackerName={trackersData.activeTracker?.name}
