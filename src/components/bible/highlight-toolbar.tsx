@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy, Share2, StickyNote, Trash2, X } from "lucide-react";
+import { LumaIcon } from "@/components/ui/luma-icon";
 import {
   HIGHLIGHT_COLORS,
   type HighlightColor,
@@ -25,6 +26,7 @@ export type HighlightToolbarProps = {
   position: { top: number; left: number } | null;
   onSelectColor: (params: { color: HighlightColor }) => void;
   onAddNote?: () => void;
+  onAskAi?: () => void;
   onCopy?: () => void;
   onShare?: () => void;
   onDelete?: () => void;
@@ -39,6 +41,7 @@ export function HighlightToolbar({
   position,
   onSelectColor,
   onAddNote,
+  onAskAi,
   onCopy,
   onShare,
   onDelete,
@@ -89,8 +92,22 @@ export function HighlightToolbar({
         })}
       </div>
 
-      {onAddNote || onCopy || onShare ? (
+      {onAddNote || onAskAi || onCopy || onShare ? (
         <div className="mx-0.5 sm:mx-1 h-4 w-px bg-border" />
+      ) : null}
+
+      {onAskAi ? (
+        <button
+          type="button"
+          disabled={isBusy}
+          aria-label="Ask Luma AI"
+          title="Ask Luma AI about this passage"
+          onClick={onAskAi}
+          className="flex h-7 items-center gap-1 rounded-full px-1.5 sm:px-2 text-xs font-medium text-foreground-dim transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          <LumaIcon className="size-3.5" size={14} />
+          <span className="hidden sm:inline">Ask AI</span>
+        </button>
       ) : null}
 
       {onAddNote ? (
