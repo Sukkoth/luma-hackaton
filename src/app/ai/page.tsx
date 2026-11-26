@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import * as v from "valibot";
-import { auth } from "@/lib/auth";
+import { getAiSidebarData } from "@/actions/ai-history";
 import { getUserTrackersData } from "@/actions/trackers";
-import { syncUserStreak } from "@/lib/streak-service";
-import type { BibleCanon } from "@/data/bibleData";
-import { AiStudioModeSchema, type AiStudioMode } from "@/lib/schemas/ai-plans";
 import { AppShell } from "@/components/navigation/app-shell";
 import { AiPlanStudio } from "@/components/plans/ai-plan-studio";
+import type { BibleCanon } from "@/data/bibleData";
+import { auth } from "@/lib/auth";
+import { AiStudioModeSchema, type AiStudioMode } from "@/lib/schemas/ai-plans";
+import { syncUserStreak } from "@/lib/streak-service";
 
 export const instant = false;
 
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 type LumaAiPageProps = {
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; chat?: string }>;
 };
 
 export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
@@ -43,9 +44,16 @@ export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
     ? parsedMode.output
     : "plan";
 
-  const [trackersData, streak] = await Promise.all([
+  const initialConversationId =
+    typeof resolvedSearchParams.chat === "string" &&
+    resolvedSearchParams.chat.trim().length > 0
+      ? resolvedSearchParams.chat.trim()
+      : null;
+
+  const [trackersData, streak, sidebarData] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
+    getAiSidebarData({ userId: session.user.id }),
   ]);
 
   const activeTrackerCanon: BibleCanon =
@@ -62,8 +70,12 @@ export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
     >
       <div className="w-full max-w-[1440px] mx-auto">
         <AiPlanStudio
+          userId={session.user.id}
           activeTrackerCanon={activeTrackerCanon}
           initialMode={initialMode}
+          initialConversationId={initialConversationId}
+          initialFolders={sidebarData.folders}
+          initialConversations={sidebarData.conversations}
         />
       </div>
     </AppShell>

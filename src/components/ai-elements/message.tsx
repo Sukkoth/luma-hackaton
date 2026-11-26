@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  BibleVerseHoverLink,
+  parseBibleHref,
+} from "@/components/ai-elements/bible-verse-link";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import {
@@ -377,6 +381,30 @@ function getLumaMermaidOptions() {
   };
 }
 
+const streamdownComponents: ComponentProps<typeof Streamdown>["components"] = {
+  a: ({ href, children, className, ...props }) => {
+    const parsedBible = parseBibleHref({ href });
+    if (parsedBible) {
+      return (
+        <BibleVerseHoverLink parsed={parsedBible} className={className}>
+          {children}
+        </BibleVerseHoverLink>
+      );
+    }
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  },
+};
+
 export const MessageResponse = memo(
   ({ className, ...props }: MessageResponseProps) => {
     const mermaidOptions = useMemo(() => getLumaMermaidOptions(), []);
@@ -387,6 +415,8 @@ export const MessageResponse = memo(
           "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
           className
         )}
+        components={streamdownComponents}
+        linkSafety={{ enabled: false }}
         mermaid={mermaidOptions}
         plugins={streamdownPlugins}
         {...props}

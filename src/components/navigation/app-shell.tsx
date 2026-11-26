@@ -16,7 +16,6 @@ import {
   Loader2,
   Users,
   Award,
-  Sparkles,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -53,9 +52,18 @@ const MENU_ITEMS = [
   { label: "Achievements", href: "/achievements", icon: Award },
 ] as const;
 
+function LumaAiNavIcon({
+  className,
+}: {
+  className?: string;
+  strokeWidth?: number;
+}) {
+  return <LumaIcon className={className} size={18} />;
+}
+
 const DESKTOP_MENU_ITEMS = [
   ...MENU_ITEMS,
-  { label: "Luma AI", href: "/ai", icon: Sparkles },
+  { label: "Luma AI", href: "/ai", icon: LumaAiNavIcon },
 ] as const;
 
 export function AppShell({

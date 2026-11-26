@@ -528,6 +528,11 @@ input.ui-input-icon-both {
   animation: drift-slow 12s ease-in-out infinite;
 }
 
+.luma-thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
 .luma-thin-scroll::-webkit-scrollbar {
   width: 4px;
   height: 4px;
