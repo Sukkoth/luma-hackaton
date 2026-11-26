@@ -38,9 +38,14 @@ import {
   type ReadingPlanTemplate,
   type PlanCategory,
 } from "@/data/readingPlans";
+import type { PlanCatalogSummary } from "@/data/planCatalogTypes";
 import { type BibleCanon, getBibleBookById } from "@/data/bibleData";
 import { syncUserStreak } from "@/lib/streak-service";
 import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
+import {
+  getUserPlansForTracker,
+  getUserCustomPlanSummaries,
+} from "@/lib/plans/queries";
 import { createNotificationAction } from "@/actions/notifications";
 import type { SerializableAchievement } from "@/data/achievements";
 
@@ -678,42 +683,9 @@ export async function getUserPlansAction({
 
   if (!session) return [];
 
-  const instances = await db.query.planInstances.findMany({
-    where: and(
-      eq(planInstances.trackerId, trackerId),
-      eq(planInstances.userId, session.user.id),
-      inArray(planInstances.status, ["active", "paused", "completed"])
-    ),
-    with: {
-      completedReadings: true,
-    },
-    orderBy: [desc(planInstances.startDate)],
-  });
-
-  return instances.map((inst) => {
-    const completedChapters = inst.completedReadings.length;
-    const totalChapters = inst.totalChapters || 1;
-    const progressPercent = Math.min(
-      100,
-      Math.round((completedChapters / totalChapters) * 100)
-    );
-
-    return {
-      id: inst.id,
-      templateId: inst.templateId,
-      title: inst.title,
-      status: inst.status as "active" | "paused" | "completed" | "archived",
-      mode: inst.mode,
-      paceType: inst.paceType,
-      dailyTarget: inst.dailyTarget,
-      totalChapters: inst.totalChapters,
-      completedChapters,
-      progressPercent,
-      startDate: inst.startDate,
-      targetEndDate: inst.targetEndDate,
-      completedAt: inst.completedAt,
-      activeDaysMask: inst.activeDaysMask,
-    };
+  return getUserPlansForTracker({
+    trackerId,
+    userId: session.user.id,
   });
 }
 
@@ -2087,21 +2059,18 @@ export type GetUserCustomPlanTemplatesActionParams = {
   userId?: string;
 };
 
-export async function getUserCustomPlanTemplatesAction({
-  userId,
-}: GetUserCustomPlanTemplatesActionParams = {}): Promise<
+export async function getUserCustomPlanTemplatesAction(): Promise<
   ReadingPlanTemplate[]
 > {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  const effectiveUserId = userId || session?.user?.id;
-  if (!effectiveUserId) return [];
+  if (!session) return [];
 
   const dbTemplates = await db.query.planTemplates.findMany({
     where: and(
       eq(planTemplates.isCustom, true),
-      eq(planTemplates.authorId, effectiveUserId)
+      eq(planTemplates.authorId, session.user.id)
     ),
     with: {
       sections: true,
@@ -2147,4 +2116,91 @@ export async function getUserCustomPlanTemplatesAction({
       dayNumber: r.dayNumber ?? undefined,
     })),
   }));
+}
+
+export async function getUserCustomPlanSummariesAction(): Promise<
+  PlanCatalogSummary[]
+> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) return [];
+
+  return getUserCustomPlanSummaries({ userId: session.user.id });
+}
+
+export type GetPlanTemplateDetailsParams = {
+  templateId: string;
+};
+
+const TemplateIdSchema = v.pipe(v.string(), v.trim(), v.minLength(1));
+
+export async function getPlanTemplateDetailsAction({
+  templateId,
+}: GetPlanTemplateDetailsParams): Promise<ReadingPlanTemplate | null> {
+  const parsed = v.safeParse(TemplateIdSchema, templateId);
+  if (!parsed.success) return null;
+
+  const staticPlan = getReadingPlanById(parsed.output);
+  if (staticPlan) {
+    return staticPlan;
+  }
+
+  const dbTemplate = await db.query.planTemplates.findFirst({
+    where: eq(planTemplates.id, parsed.output),
+    with: {
+      sections: true,
+      readings: {
+        orderBy: [planReadingItems.orderIndex],
+      },
+    },
+  });
+
+  if (!dbTemplate) return null;
+
+  if (dbTemplate.isCustom) {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!session || dbTemplate.authorId !== session.user.id) {
+      return null;
+    }
+  }
+
+  return {
+    id: dbTemplate.id,
+    title: dbTemplate.title,
+    subtitle: dbTemplate.subtitle,
+    description: dbTemplate.description,
+    category: (dbTemplate.category as PlanCategory) || "Custom",
+    icon: dbTemplate.icon,
+    accentColor: dbTemplate.accentColor,
+    totalChapters: dbTemplate.totalChapters,
+    defaultDailyTarget: dbTemplate.defaultDailyTarget,
+    recommendedDays: dbTemplate.targetDays,
+    allowCustomPace: dbTemplate.allowCustomPace,
+    allowSelfPaced: dbTemplate.allowSelfPaced,
+    canonCompatibility:
+      (dbTemplate.canonCompatibility as BibleCanon) || undefined,
+    sections: dbTemplate.sections.map((s) => ({
+      title: s.title,
+      subtitle: s.subtitle,
+      chaptersCount: s.chaptersCount,
+      booksDescription: s.booksDescription,
+    })),
+    readings: dbTemplate.readings.map((r) => ({
+      id: r.id,
+      bookId: r.bookId,
+      bookName: getBibleBookById(r.bookId)?.name || r.bookId,
+      chapter: r.chapter,
+      startVerse: r.startVerse ?? undefined,
+      endVerse: r.endVerse ?? undefined,
+      verseRange: r.verseRange ?? undefined,
+      versesLabel: r.versesLabel ?? undefined,
+      track: r.track ?? undefined,
+      displayText: r.displayText ?? undefined,
+      order: r.orderIndex,
+      dayNumber: r.dayNumber ?? undefined,
+    })),
+  };
 }
