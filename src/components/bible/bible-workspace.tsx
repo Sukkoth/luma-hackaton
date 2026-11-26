@@ -1757,6 +1757,23 @@ export function BibleWorkspace({
                 position={highlightPrompt.position}
                 onSelectColor={handleSelectHighlightColor}
                 onAddNote={handleOpenNoteFromToolbar}
+                onAskAi={() => {
+                  const startV =
+                    highlightPrompt.mode === "create"
+                      ? highlightPrompt.range.startVerse
+                      : highlightPrompt.highlight.startVerse;
+                  const endV =
+                    highlightPrompt.mode === "create"
+                      ? highlightPrompt.range.endVerse
+                      : highlightPrompt.highlight.endVerse;
+                  const verseRef =
+                    endV > startV ? `${startV}-${endV}` : `${startV}`;
+                  const prompt = `Explain ${currentBookName} ${currentChapter}:${verseRef}`;
+                  setHighlightPrompt(null);
+                  router.push(
+                    `/ai?mode=chat&prompt=${encodeURIComponent(prompt)}`
+                  );
+                }}
                 onCopy={handleCopyFromToolbar}
                 onShare={handleShareFromToolbar}
                 onDelete={

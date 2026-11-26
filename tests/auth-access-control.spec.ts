@@ -177,7 +177,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(modal.getByText("Daily Reminder")).toBeVisible();
     await expect(modal.getByText("Study Journal Folder")).toBeVisible();
     await expect(
-      modal.getByRole("button", { name: "Confirm & Start Plan" })
+      modal.getByRole("link", { name: "Sign Up to Start Plan" })
     ).toBeVisible();
 
     // Close modal
@@ -228,6 +228,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 

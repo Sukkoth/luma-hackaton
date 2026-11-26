@@ -4,6 +4,7 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -1021,4 +1022,133 @@ export const bibleHighlightsRelations = relations(
       references: [user.id],
     }),
   })
+);
+
+// --- Luma AI Folders, Conversations & Messages ---
+export const aiFolders = pgTable(
+  "ai_folders",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    isPinned: boolean("is_pinned").default(false).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("idx_ai_folders_user").on(table.userId)]
+);
+
+export const aiFoldersRelations = relations(aiFolders, ({ one, many }) => ({
+  user: one(user, {
+    fields: [aiFolders.userId],
+    references: [user.id],
+  }),
+  conversations: many(aiConversations),
+}));
+
+export const aiConversations = pgTable(
+  "ai_conversations",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    folderId: text("folder_id").references(() => aiFolders.id, {
+      onDelete: "set null",
+    }),
+    mode: varchar("mode", { length: 16 }).default("plan").notNull(),
+    canon: varchar("canon", { length: 32 }).default("protestant").notNull(),
+    title: text("title").notNull(),
+    isPinned: boolean("is_pinned").default(false).notNull(),
+    isArchived: boolean("is_archived").default(false).notNull(),
+    messageCount: integer("message_count").default(0).notNull(),
+    lastMessageSequence: integer("last_message_sequence").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("idx_ai_conversations_user_updated").on(
+      table.userId,
+      table.updatedAt
+    ),
+    index("idx_ai_conversations_folder").on(table.folderId),
+  ]
+);
+
+export const aiConversationsRelations = relations(
+  aiConversations,
+  ({ one, many }) => ({
+    user: one(user, {
+      fields: [aiConversations.userId],
+      references: [user.id],
+    }),
+    folder: one(aiFolders, {
+      fields: [aiConversations.folderId],
+      references: [aiFolders.id],
+    }),
+    messages: many(aiMessages),
+  })
+);
+
+export const aiMessages = pgTable(
+  "ai_messages",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    conversationId: text("conversation_id")
+      .notNull()
+      .references(() => aiConversations.id, { onDelete: "cascade" }),
+    parentMessageId: text("parent_message_id"),
+    sequence: integer("sequence").notNull(),
+    role: varchar("role", { length: 16 }).notNull(),
+    content: text("content").notNull(),
+    provider: text("provider"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_ai_messages_conv_seq").on(table.conversationId, table.sequence),
+  ]
+);
+
+export const aiMessagesRelations = relations(aiMessages, ({ one }) => ({
+  conversation: one(aiConversations, {
+    fields: [aiMessages.conversationId],
+    references: [aiConversations.id],
+  }),
+}));
+
+export const aiRateLimits = pgTable(
+  "ai_rate_limits",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    bucketKey: text("bucket_key").notNull(),
+    count: integer("count").default(1).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.bucketKey] }),
+    index("idx_ai_rate_limits_expires").on(table.expiresAt),
+  ]
 );

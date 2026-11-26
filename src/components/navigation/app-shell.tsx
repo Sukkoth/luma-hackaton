@@ -52,6 +52,30 @@ const MENU_ITEMS = [
   { label: "Achievements", href: "/achievements", icon: Award },
 ] as const;
 
+function LumaAiNavIcon({
+  className,
+}: {
+  className?: string;
+  strokeWidth?: number;
+}) {
+  return <LumaIcon className={className} size={18} />;
+}
+
+const DESKTOP_MENU_ITEMS = [
+  ...MENU_ITEMS,
+  { label: "Luma AI", href: "/ai", icon: LumaAiNavIcon },
+] as const;
+
+const MOBILE_MENU_ITEMS = [
+  MENU_ITEMS[0],
+  MENU_ITEMS[1],
+  MENU_ITEMS[2],
+  { label: "Luma AI", href: "/ai", icon: LumaAiNavIcon },
+  MENU_ITEMS[3],
+  MENU_ITEMS[4],
+  MENU_ITEMS[5],
+] as const;
+
 export function AppShell({
   children,
   userName = "Reader",
@@ -219,7 +243,7 @@ export function AppShell({
               Navigation
             </span>
             <nav aria-label="Main Navigation" className="flex flex-col gap-1">
-              {MENU_ITEMS.map((tab) => {
+              {DESKTOP_MENU_ITEMS.map((tab) => {
                 const targetHref = tab.label === "Plans" ? plansHref : tab.href;
                 const isActive =
                   tab.href === "/home"
@@ -424,8 +448,8 @@ export function AppShell({
         aria-label="Mobile Navigation"
         className="lg:hidden fixed bottom-4 inset-x-0 z-40 flex items-center justify-center pointer-events-none pb-[env(safe-area-inset-bottom)] px-3 sm:px-4"
       >
-        <div className="pointer-events-auto flex items-center justify-around w-[calc(100%-1.5rem)] max-w-[400px] rounded-full border border-border/80 bg-background/90 dark:bg-card/90 backdrop-blur-xl px-2 py-1.5 shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-          {MENU_ITEMS.map((tab) => {
+        <div className="pointer-events-auto flex items-center justify-around w-[calc(100%-1.5rem)] max-w-[400px] rounded-full border border-border/80 bg-background/90 dark:bg-card/90 backdrop-blur-xl px-1.5 py-1.5 shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
+          {MOBILE_MENU_ITEMS.map((tab) => {
             const targetHref = tab.label === "Plans" ? plansHref : tab.href;
             const isActive =
               tab.href === "/home"
@@ -439,7 +463,7 @@ export function AppShell({
                 href={targetHref}
                 aria-label={tab.label}
                 className={cn(
-                  "relative flex size-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95",
+                  "relative flex size-10 sm:size-11 items-center justify-center rounded-full transition-all duration-200 active:scale-95",
                   isActive
                     ? "bg-primary text-primary-foreground font-semibold shadow-xs"
                     : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"

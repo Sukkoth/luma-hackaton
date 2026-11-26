@@ -84,6 +84,7 @@ test.describe("Push Notifications & 30-Minute Reminders E2E", () => {
     await page.getByLabel("Full Name").fill(`Notif Test User ${testId}`);
     await page.getByLabel("Email address").fill(testEmail);
     await page.locator("#signup-password").fill("Password123!");
+    await page.locator("#signup-confirm-password").fill("Password123!");
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 

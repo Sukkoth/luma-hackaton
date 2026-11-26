@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useTransition, useMemo, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
 
 const emptySubscribe = () => () => {};
 function useIsClient(): boolean {
@@ -99,6 +101,7 @@ export function PlanSetupModal({
   onSuccessAction,
 }: Props) {
   const router = useRouter();
+  const { data: session } = useSession();
   const isClient = useIsClient();
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<WizardStep>("overview");
@@ -1431,21 +1434,30 @@ export function PlanSetupModal({
                     <span>Extract to PDF</span>
                   </button>
 
-                  <button
-                    key="btn-modal-submit"
-                    type="submit"
-                    disabled={isPending || isPlanAlreadyExpired}
-                    className="ui-btn-primary ui-btn-sm gap-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    {isPending ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin" />
-                        <span>Enrolling Plan...</span>
-                      </>
-                    ) : (
-                      <span>Confirm & Start Plan</span>
-                    )}
-                  </button>
+                  {!session ? (
+                    <Link
+                      href={`/signup?redirect=${encodeURIComponent("/plans")}`}
+                      className="ui-btn-primary ui-btn-sm gap-2"
+                    >
+                      <span>Sign Up to Start Plan</span>
+                    </Link>
+                  ) : (
+                    <button
+                      key="btn-modal-submit"
+                      type="submit"
+                      disabled={isPending || isPlanAlreadyExpired}
+                      className="ui-btn-primary ui-btn-sm gap-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin" />
+                          <span>Enrolling Plan...</span>
+                        </>
+                      ) : (
+                        <span>Confirm & Start Plan</span>
+                      )}
+                    </button>
+                  )}
                 </div>
               </form>
             )}

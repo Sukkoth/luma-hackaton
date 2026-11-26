@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Compass, LogIn, Play, Plus, Upload } from "lucide-react";
+import { LumaIcon } from "@/components/ui/luma-icon";
 import type { useSession } from "@/lib/auth-client";
 import { READING_PLANS } from "@/data/readingPlans";
 import {
@@ -76,6 +77,13 @@ export function PlanActiveBanner({
             />
           ) : (
             <>
+              <HeaderActionButton
+                type="secondary"
+                href="/ai?mode=plan"
+                testId="open-ai-plan-generator-btn"
+                icon={<LumaIcon className="size-4" size={16} />}
+                label="Luma AI"
+              />
               {onImportPlan && (
                 <HeaderActionButton
                   type="secondary"

@@ -36,6 +36,7 @@ test.describe("Onboarding Experience via New User E2E", () => {
     await page.getByLabel("Full Name").fill(newUser.fullName);
     await page.getByLabel("Email address").fill(newUser.email);
     await page.locator("#signup-password").fill(newUser.password);
+    await page.locator("#signup-confirm-password").fill(newUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -209,6 +210,7 @@ test.describe("Onboarding Experience via New User E2E", () => {
     await page.getByLabel("Full Name").fill(fastUser.fullName);
     await page.getByLabel("Email address").fill(fastUser.email);
     await page.locator("#signup-password").fill(fastUser.password);
+    await page.locator("#signup-confirm-password").fill(fastUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 

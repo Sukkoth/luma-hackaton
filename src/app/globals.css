@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../node_modules/streamdown/dist/*.js";
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -527,6 +528,11 @@ input.ui-input-icon-both {
   animation: drift-slow 12s ease-in-out infinite;
 }
 
+.luma-thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
 .luma-thin-scroll::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -703,4 +709,23 @@ input.ui-input-icon-both {
 
 .luma-bible-passage .b {
   height: 1.1em;
+}
+
+/* Streamdown Mermaid block alignment & Luma theme tokens */
+[data-streamdown="mermaid-block"] {
+  background-color: var(--card);
+  border-color: var(--border);
+}
+
+[data-streamdown="mermaid-block"]
+  > div:has(> [data-streamdown="mermaid-block-actions"]) {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  left: auto;
+}
+
+[data-streamdown="mermaid-block-actions"] {
+  background-color: var(--surface-elevated);
+  border-color: var(--border);
 }

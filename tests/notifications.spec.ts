@@ -40,6 +40,7 @@ async function createAndOnboardUser({
   await page.getByLabel("Full Name").fill(fullName);
   await page.getByLabel("Email address").fill(email);
   await page.locator("#signup-password").fill(password);
+  await page.locator("#signup-confirm-password").fill(password);
   await page.getByRole("checkbox", { name: /agree/i }).check();
   await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -708,6 +709,7 @@ test.describe("In-App Notification System", () => {
       await page.getByLabel("Full Name").fill(testUser.fullName);
       await page.getByLabel("Email address").fill(testUser.email);
       await page.locator("#signup-password").fill(testUser.password);
+      await page.locator("#signup-confirm-password").fill(testUser.password);
       await page.getByRole("checkbox", { name: /agree/i }).check();
       await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -797,6 +799,7 @@ test.describe("In-App Notification System", () => {
       await page.getByLabel("Full Name").fill(testUser.fullName);
       await page.getByLabel("Email address").fill(testUser.email);
       await page.locator("#signup-password").fill(testUser.password);
+      await page.locator("#signup-confirm-password").fill(testUser.password);
       await page.getByRole("checkbox", { name: /agree/i }).check();
       await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -848,6 +851,7 @@ test.describe("In-App Notification System", () => {
       await pageA.getByLabel("Full Name").fill(userA.fullName);
       await pageA.getByLabel("Email address").fill(userA.email);
       await pageA.locator("#signup-password").fill(userA.password);
+      await pageA.locator("#signup-confirm-password").fill(userA.password);
       await pageA.getByRole("checkbox", { name: /agree/i }).check();
       await pageA.getByRole("button", { name: "Create Account" }).click();
 
@@ -899,6 +903,7 @@ test.describe("In-App Notification System", () => {
       await pageB.getByLabel("Full Name").fill(userB.fullName);
       await pageB.getByLabel("Email address").fill(userB.email);
       await pageB.locator("#signup-password").fill(userB.password);
+      await pageB.locator("#signup-confirm-password").fill(userB.password);
       await pageB.getByRole("checkbox", { name: /agree/i }).check();
       await pageB.getByRole("button", { name: "Create Account" }).click();
 
@@ -963,6 +968,7 @@ test.describe("In-App Notification System", () => {
       await page.getByLabel("Full Name").fill(userA.fullName);
       await page.getByLabel("Email address").fill(userA.email);
       await page.locator("#signup-password").fill(userA.password);
+      await page.locator("#signup-confirm-password").fill(userA.password);
       await page.getByRole("checkbox", { name: /agree/i }).check();
       await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -1009,6 +1015,7 @@ test.describe("In-App Notification System", () => {
       await page.getByLabel("Full Name").fill(userB.fullName);
       await page.getByLabel("Email address").fill(userB.email);
       await page.locator("#signup-password").fill(userB.password);
+      await page.locator("#signup-confirm-password").fill(userB.password);
       await page.getByRole("checkbox", { name: /agree/i }).check();
       await page.getByRole("button", { name: "Create Account" }).click();
 
