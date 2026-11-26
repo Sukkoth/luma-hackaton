@@ -13,6 +13,7 @@ import { PROTESTANT_BIBLE_BOOKS } from "../src/data/canons/protestant";
 import { distributeBlueprintToPlan } from "../src/lib/ai/plan-generator";
 import { AiBlueprintRangeSchema } from "../src/lib/schemas/ai-plans";
 import { parseBibleHref } from "../src/components/ai-elements/bible-verse-link";
+import { convertMarkdownToTipTapHtml } from "../src/lib/ai/markdown-to-html";
 
 test.describe("AI Plan Generator", () => {
   test("distributeBlueprintToPlan distributes a 1-year whole-Bible blueprint across 365 days without invalid chapters", () => {
@@ -177,6 +178,28 @@ test.describe("AI Plan Generator", () => {
       parseBibleHref({ href: "https://example.com/bible/rom/8" })
     ).not.toBeNull(); // In Node (no window), same-origin check is skipped; relative & external paths still require /bible/:book/:ch
     expect(parseBibleHref({ href: "https://example.com/other" })).toBeNull();
+  });
+
+  test("convertMarkdownToTipTapHtml converts Markdown headings, lists, and inline marks to TipTap HTML", () => {
+    const html = convertMarkdownToTipTapHtml({
+      markdown: [
+        "## Context",
+        "",
+        "Paul writes **with confidence** in [Romans 8:28](/bible/rom/8?startVerse=28&endVerse=28).",
+        "",
+        "- First point",
+        "- Second *italic* point",
+      ].join("\n"),
+    });
+
+    expect(html).toContain("<h2>Context</h2>");
+    expect(html).toContain("<strong>with confidence</strong>");
+    expect(html).toContain(
+      '<a href="/bible/rom/8?startVerse=28&amp;endVerse=28">Romans 8:28</a>'
+    );
+    expect(html).toContain(
+      "<ul><li><p>First point</p></li><li><p>Second <em>italic</em> point</p></li></ul>"
+    );
   });
 
   test("authenticated user can navigate to /plans/ai, use presets, validate prompt, and switch mobile panes", async ({
