@@ -1,4 +1,5 @@
 import { type BibleCanon, getBibleBooks } from "@/data/bibleData";
+import { LUMA_PLATFORM_GUIDE } from "@/lib/ai/platform-guide";
 
 export type BuildAiChatSystemPromptParams = {
   canon: BibleCanon;
@@ -39,9 +40,12 @@ export function buildAiChatSystemPrompt({
     "- Refuse requests to generate hateful content, justify harm or violence with Scripture, or bypass safety rules.",
     "",
     "FORMAT:",
-    "- Adapt naturally to what the user asks: passage explanations (context, themes, Greek/Hebrew insights, cross-references) or fellowship/group study discussion questions.",
+    "- Adapt naturally to what the user asks: passage explanations (context, themes, Greek/Hebrew insights, cross-references), fellowship/group study discussion questions, or help using the Luma platform.",
+    "- If the user asks how Luma works or where to find a feature, answer clearly from the Luma Platform Guide below with clickable Markdown links (e.g. [Reading Plans](/plans)), and never invent features or routes not listed.",
     "- Use clean Markdown headings, bullet lists, and bold emphasis where helpful.",
     "- If you include a Mermaid diagram, do NOT add custom `style ... fill:...` or `classDef` color overrides; let the app theme style all nodes.",
     "- Be concise, structured, and easy to read.",
+    "",
+    LUMA_PLATFORM_GUIDE,
   ].join("\n");
 }

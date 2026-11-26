@@ -391,12 +391,20 @@ const streamdownComponents: ComponentProps<typeof Streamdown>["components"] = {
         </BibleVerseHoverLink>
       );
     }
+    const isExternal =
+      typeof href === "string" &&
+      (href.startsWith("http://") || href.startsWith("https://"));
     return (
       <a
         href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
+        {...(isExternal
+          ? { target: "_blank", rel: "noopener noreferrer" }
+          : {})}
+        className={cn(
+          !isExternal &&
+            "font-medium text-primary underline underline-offset-2 hover:opacity-85",
+          className
+        )}
         {...props}
       >
         {children}
