@@ -67,7 +67,7 @@ export async function POST(request: Request): Promise<Response> {
   const streamResult = await streamAiChat({
     system,
     messages: recentMessages,
-    maxOutputTokens: 1600,
+    maxOutputTokens: 900,
     temperature: 0.4,
     tools: {
       getVerse: createGetVerseTool({ canon: parsedInput.output.canon }),

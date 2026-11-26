@@ -13,6 +13,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 type ModelCandidate = {
   name: string;
   model: LanguageModel;
+  maxOutputTokensCap?: number;
 };
 
 function getConfiguredModels(): ModelCandidate[] {
@@ -29,6 +30,9 @@ function getConfiguredModels(): ModelCandidate[] {
       candidates.push({
         name: `groq:${groqModelId}`,
         model: groqClient(groqModelId),
+        ...(groqModelId.includes("qwen3.8-27b")
+          ? { maxOutputTokensCap: 900 }
+          : {}),
       });
     }
   }
@@ -109,14 +113,26 @@ export async function generateAiJson({
     };
   }
 
+  // Prefer models without a tight token cap when generating large JSON plans
+  const orderedModels =
+    maxOutputTokens > 900
+      ? [
+          ...models.filter((m) => !m.maxOutputTokensCap),
+          ...models.filter((m) => Boolean(m.maxOutputTokensCap)),
+        ]
+      : models;
+
   let lastError = "AI provider failed to respond.";
-  for (const candidate of models) {
+  for (const candidate of orderedModels) {
     try {
+      const effectiveMaxTokens = candidate.maxOutputTokensCap
+        ? Math.min(maxOutputTokens, candidate.maxOutputTokensCap)
+        : maxOutputTokens;
       const result = await generateText({
         model: candidate.model,
         system,
         prompt,
-        maxOutputTokens,
+        maxOutputTokens: effectiveMaxTokens,
         temperature,
       });
       const parsed = extractJsonFromAiResponse({ rawText: result.text });
@@ -218,17 +234,21 @@ export async function streamAiChat({
     };
   }
 
-  let lastError = "AI provider failed to respond.";
+  const errors: string[] = [];
   for (const candidate of models) {
     if (abortSignal?.aborted) {
       return { success: false, error: "Request aborted." };
     }
     try {
+      const effectiveMaxTokens = candidate.maxOutputTokensCap
+        ? Math.min(maxOutputTokens, candidate.maxOutputTokensCap)
+        : maxOutputTokens;
+
       const result = streamText({
         model: candidate.model,
         system,
         messages: [...messages],
-        maxOutputTokens,
+        maxOutputTokens: effectiveMaxTokens,
         temperature,
         ...(tools ? { tools, stopWhen: stepCountIs(4) } : {}),
         ...(abortSignal ? { abortSignal } : {}),
@@ -245,9 +265,25 @@ export async function streamAiChat({
           : {}),
       });
 
-      const iterator = result.textStream[Symbol.asyncIterator]();
-      const firstChunk = await iterator.next();
-      if (firstChunk.done) {
+      const iterator = result.fullStream[Symbol.asyncIterator]();
+      let firstTextChunk = "";
+
+      while (true) {
+        const next = await iterator.next();
+        if (next.done) break;
+        const part = next.value;
+        if (part.type === "error") {
+          throw part.error instanceof Error
+            ? part.error
+            : new Error(String(part.error));
+        }
+        if (part.type === "text-delta" && part.text.length > 0) {
+          firstTextChunk = part.text;
+          break;
+        }
+      }
+
+      if (!firstTextChunk) {
         throw new Error("Empty response from AI provider.");
       }
 
@@ -291,11 +327,19 @@ export async function streamAiChat({
           };
 
           try {
-            emitChunk(firstChunk.value);
+            emitChunk(firstTextChunk);
             while (true) {
               const next = await iterator.next();
               if (next.done) break;
-              emitChunk(next.value);
+              const part = next.value;
+              if (part.type === "error") {
+                throw part.error instanceof Error
+                  ? part.error
+                  : new Error(String(part.error));
+              }
+              if (part.type === "text-delta" && part.text.length > 0) {
+                emitChunk(part.text);
+              }
             }
             if (!insideThink && buffer.length > 0) {
               controller.enqueue(encoder.encode(buffer));
@@ -309,12 +353,13 @@ export async function streamAiChat({
 
       return { success: true, stream, provider: candidate.name };
     } catch (err: unknown) {
-      lastError = err instanceof Error ? err.message : "AI streaming failed.";
+      const msg = err instanceof Error ? err.message : "AI streaming failed.";
+      errors.push(`${candidate.name}: ${msg}`);
     }
   }
 
   return {
     success: false,
-    error: `All configured AI providers failed: ${lastError}`,
+    error: `All configured AI providers failed: ${errors.join(" | ") || "Unknown error"}`,
   };
 }
