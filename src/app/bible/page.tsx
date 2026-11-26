@@ -8,7 +8,7 @@ import { trackerChapterProgress } from "@/db/schema";
 import { BooksView } from "@/components/books/books-view";
 import { syncUserStreak } from "@/lib/streak-service";
 import { getUserTrackersData } from "@/actions/trackers";
-import { getVerseOfTheDay } from "@/lib/youversion";
+import { getCachedUserSettings } from "@/lib/request-cache";
 import type { BibleCanon } from "@/data/bibleData";
 
 export const instant = false;
@@ -24,15 +24,9 @@ export const metadata: Metadata = {
 
 export default async function BiblePage() {
   await connection();
-  const sessionPromise = auth.api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
-  const versePromise = getVerseOfTheDay();
-
-  const [session, verseOfTheDay] = await Promise.all([
-    sessionPromise,
-    versePromise,
-  ]);
 
   if (!session) {
     return (
@@ -41,23 +35,40 @@ export default async function BiblePage() {
         activeTrackerId={null}
         canon="protestant"
         userName={null}
-        verseOfTheDay={verseOfTheDay}
       />
     );
   }
 
-  const [trackersData, streak] = await Promise.all([
+  const settings = await getCachedUserSettings({ userId: session.user.id });
+  const prefetchedTrackerId = settings?.activeTrackerId;
+
+  const [trackersData, streak, prefetchedProgress] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
+    prefetchedTrackerId
+      ? db.query.trackerChapterProgress.findMany({
+          where: eq(trackerChapterProgress.trackerId, prefetchedTrackerId),
+          columns: {
+            bookId: true,
+            chapter: true,
+          },
+        })
+      : Promise.resolve(null),
   ]);
 
   const activeTracker = trackersData.activeTracker;
   const canon = (activeTracker?.canon as BibleCanon) || "protestant";
 
   const progress = activeTracker
-    ? await db.query.trackerChapterProgress.findMany({
-        where: eq(trackerChapterProgress.trackerId, activeTracker.id),
-      })
+    ? prefetchedProgress && activeTracker.id === prefetchedTrackerId
+      ? prefetchedProgress
+      : await db.query.trackerChapterProgress.findMany({
+          where: eq(trackerChapterProgress.trackerId, activeTracker.id),
+          columns: {
+            bookId: true,
+            chapter: true,
+          },
+        })
     : [];
 
   const initialReadData: Record<string, number[]> = {};
@@ -81,7 +92,6 @@ export default async function BiblePage() {
       trackers={trackersData.trackers}
       userName={displayName}
       streak={streak}
-      verseOfTheDay={verseOfTheDay}
     />
   );
 }
