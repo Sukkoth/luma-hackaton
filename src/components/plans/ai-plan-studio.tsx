@@ -85,6 +85,10 @@ import { Input } from "@/components/ui/input";
 import { LumaIcon } from "@/components/ui/luma-icon";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  convertMarkdownToTipTapHtml,
+  stripMarkdownForSnippet,
+} from "@/lib/ai/markdown-to-html";
 import { cn } from "@/lib/utils";
 
 export type AiPlanStudioProps = {
@@ -96,21 +100,6 @@ export type AiPlanStudioProps = {
   initialFolders?: AiFolderSummary[];
   initialConversations?: AiConversationSummary[];
 };
-
-function convertMarkdownReplyToNoteHtml({
-  content,
-}: {
-  content: string;
-}): string {
-  const escaped = content
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  return escaped
-    .split(/\n{2,}/)
-    .map((block) => `<p>${block.replace(/\n/g, "<br />")}</p>`)
-    .join("");
-}
 
 type ChatMessage = {
   id: string;
@@ -1208,8 +1197,8 @@ export function AiPlanStudio({
     const title = activeConv?.title
       ? `${activeConv.title} (Luma AI)`
       : "Luma AI Study Note";
-    const bodyHtml = convertMarkdownReplyToNoteHtml({ content });
-    const plainTextSnippet = content.replace(/\s+/g, " ").trim().slice(0, 150);
+    const bodyHtml = convertMarkdownToTipTapHtml({ markdown: content });
+    const plainTextSnippet = stripMarkdownForSnippet({ markdown: content });
 
     const res = await createNoteAction({
       title,
