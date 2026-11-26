@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/navigation/app-shell";
 import {
@@ -14,11 +15,14 @@ import {
   markAllChaptersAction,
   clearAllChaptersAction,
 } from "@/actions/chapters";
-import { BooksAuthModal } from "./books-auth-modal";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import type { UserTrackerSummary } from "@/actions/trackers";
-import type { VerseOfTheDayData } from "@/lib/youversion";
 import { BibleWorkspace } from "@/components/bible/bible-workspace";
+
+const BooksAuthModal = dynamic(
+  () => import("./books-auth-modal").then((mod) => mod.BooksAuthModal),
+  { ssr: false }
+);
 
 type Props = {
   initialReadData?: Record<string, ReadonlyArray<number>>;
@@ -28,7 +32,6 @@ type Props = {
   trackers?: ReadonlyArray<UserTrackerSummary>;
   userName?: string | null;
   streak?: StreakData;
-  verseOfTheDay?: VerseOfTheDayData;
 };
 
 const DEFAULT_READ_CHAPTERS: Record<string, ReadonlyArray<number>> = {};
@@ -186,16 +189,19 @@ export function BooksView({
           totalReadChapters={totalReadChapters}
           totalChaptersAcrossCanon={totalChaptersAcrossCanon}
           canonPercentage={canonPercentage}
+          isAuthenticated={Boolean(activeTrackerId || session)}
           onToggleTrackerChapter={handleToggleChapter}
           onMarkAllChapters={handleMarkAllChapters}
           onClearAllChapters={handleClearAllChapters}
         />
 
-        <BooksAuthModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          onSignIn={() => router.push("/login?redirect=/bible")}
-        />
+        {showAuthModal && (
+          <BooksAuthModal
+            isOpen={showAuthModal}
+            onClose={() => setShowAuthModal(false)}
+            onSignIn={() => router.push("/login?redirect=/bible")}
+          />
+        )}
       </div>
     </AppShell>
   );

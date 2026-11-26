@@ -57,8 +57,21 @@ import {
   type PassageHighlightRange,
   type RenderableNoteAnchor,
 } from "@/lib/bible-highlights";
-import { HighlightToolbar } from "@/components/bible/highlight-toolbar";
-import { HighlightsSheet } from "@/components/bible/highlights-sheet";
+const HighlightToolbar = dynamic(
+  () =>
+    import("@/components/bible/highlight-toolbar").then(
+      (mod) => mod.HighlightToolbar
+    ),
+  { ssr: false }
+);
+
+const HighlightsSheet = dynamic(
+  () =>
+    import("@/components/bible/highlights-sheet").then(
+      (mod) => mod.HighlightsSheet
+    ),
+  { ssr: false }
+);
 import type { PassageNoteAnchor } from "@/components/bible/passage-note-sheet";
 
 const PassageNoteSheet = dynamic(
@@ -194,6 +207,7 @@ export type BibleWorkspaceProps = {
   totalReadChapters?: number;
   totalChaptersAcrossCanon?: number;
   canonPercentage?: number;
+  isAuthenticated?: boolean;
   onToggleTrackerChapter?: (params: {
     bookId: string;
     bookName: string;
@@ -237,6 +251,7 @@ export function BibleWorkspace({
   totalReadChapters = 0,
   totalChaptersAcrossCanon = 1189,
   canonPercentage = 0,
+  isAuthenticated = true,
   onToggleTrackerChapter,
   onMarkAllChapters,
   onClearAllChapters,
@@ -597,7 +612,7 @@ export function BibleWorkspace({
   // Load saved highlights & passage notes for the active translation + book + chapter
   useEffect(() => {
     setHighlightPrompt(null);
-    if (!isBookSupported) {
+    if (!isAuthenticated || !isBookSupported) {
       setHighlights([]);
       setChapterNotes([]);
       return;
@@ -628,7 +643,7 @@ export function BibleWorkspace({
     return () => {
       isCancelled = true;
     };
-  }, [isBookSupported, selectedVersion.id, currentBookId, currentChapter]);
+  }, [isAuthenticated, isBookSupported, selectedVersion.id, currentBookId, currentChapter]);
 
   const notedRanges = useMemo<RenderableNoteAnchor[]>(
     () =>
@@ -2227,8 +2242,9 @@ export function BibleWorkspace({
         </Sheet>
       )}
 
-      <HighlightsSheet
-        open={isHighlightsSheetOpen}
+      {isHighlightsSheetOpen && (
+        <HighlightsSheet
+          open={isHighlightsSheetOpen}
         onOpenChange={setIsHighlightsSheetOpen}
         currentBookId={currentBookId}
         currentBookName={activeBook.name}
@@ -2310,7 +2326,8 @@ export function BibleWorkspace({
         onNoteDeleted={({ noteId }) => {
           setChapterNotes((prev) => prev.filter((item) => item.id !== noteId));
         }}
-      />
+        />
+      )}
     </div>
   );
 }
