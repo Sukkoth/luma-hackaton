@@ -213,6 +213,7 @@ test.describe("AI Plan Generator", () => {
     await page.getByLabel("Full Name").fill(`AI Planner ${testId}`);
     await page.getByLabel("Email address").fill(testEmail);
     await page.locator("#signup-password").fill(testPassword);
+    await page.locator("#signup-confirm-password").fill(testPassword);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await expect(page.getByLabel("Email address")).toHaveValue(testEmail);
     await page.getByRole("button", { name: "Create Account" }).click();

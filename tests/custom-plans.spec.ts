@@ -21,6 +21,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -224,6 +225,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -349,6 +351,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -527,6 +530,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -621,6 +625,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -771,6 +776,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -863,6 +869,7 @@ test.describe("Custom Plan Creation & File Import Feature", () => {
     await page.getByLabel("Full Name").fill(testUser.fullName);
     await page.getByLabel("Email address").fill(testUser.email);
     await page.locator("#signup-password").fill(testUser.password);
+    await page.locator("#signup-confirm-password").fill(testUser.password);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 

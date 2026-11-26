@@ -17,6 +17,7 @@ async function createAndOnboardUser({
   await page.getByLabel("Full Name").fill(fullName);
   await page.getByLabel("Email address").fill(email);
   await page.locator("#signup-password").fill(password);
+  await page.locator("#signup-confirm-password").fill(password);
   await page.getByRole("checkbox", { name: /agree/i }).check();
   await page.getByRole("button", { name: "Create Account" }).click();
 

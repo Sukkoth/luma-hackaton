@@ -38,6 +38,7 @@ test.describe("Bible Passage Highlighting E2E", () => {
     await page.getByLabel("Full Name").fill(`Highlighter ${testId}`);
     await page.getByLabel("Email address").fill(testEmail);
     await page.locator("#signup-password").fill(testPassword);
+    await page.locator("#signup-confirm-password").fill(testPassword);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 
@@ -260,6 +261,7 @@ test.describe("Bible Passage Highlighting E2E", () => {
     await page.getByLabel("Full Name").fill(`Noter ${testId}`);
     await page.getByLabel("Email address").fill(testEmail);
     await page.locator("#signup-password").fill(testPassword);
+    await page.locator("#signup-confirm-password").fill(testPassword);
     await page.getByRole("checkbox", { name: /agree/i }).check();
     await page.getByRole("button", { name: "Create Account" }).click();
 

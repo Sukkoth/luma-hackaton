@@ -85,6 +85,7 @@ function SignUpContent() {
       name: formData.get("name"),
       email: formData.get("email"),
       password: formData.get("password"),
+      confirmPassword: formData.get("confirmPassword"),
       agreeTerms: formData.get("agreeTerms") === "on",
     });
 
@@ -355,6 +356,32 @@ function SignUpContent() {
                       <Eye className="size-4" />
                     )}
                   </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="signup-confirm-password"
+                    className="block text-[12px] font-bold text-foreground"
+                  >
+                    Confirm Password
+                  </label>
+                </div>
+                <div className="relative mt-1.5">
+                  <Lock className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-foreground-dim" />
+                  <input
+                    id="signup-confirm-password"
+                    name="confirmPassword"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••"
+                    style={{
+                      paddingLeft: "2.75rem",
+                      paddingRight: "2.75rem",
+                    }}
+                    className="ui-input ui-input-icon-both w-full"
+                  />
                 </div>
               </div>
 
