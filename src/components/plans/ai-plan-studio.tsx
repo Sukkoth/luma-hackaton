@@ -559,10 +559,12 @@ export function AiPlanStudio({
 
           if (!result.success) {
             setErrorMessage(result.error);
-            setLastFailedPromptByMode((prev) => ({
-              ...prev,
-              plan: parsed.output.prompt,
-            }));
+            if (!result.isRateLimited) {
+              setLastFailedPromptByMode((prev) => ({
+                ...prev,
+                plan: parsed.output.prompt,
+              }));
+            }
             setMessagesByMode((prev) => ({
               ...prev,
               plan: [
@@ -683,19 +685,28 @@ export function AiPlanStudio({
 
         if (!response.ok || !response.body) {
           let errorText = "Failed to get a response from Luma AI.";
+          let isRateLimited = response.status === 429;
           try {
-            const errorJson = (await response.json()) as { error?: unknown };
+            const errorJson = (await response.json()) as {
+              error?: unknown;
+              code?: unknown;
+            };
             if (typeof errorJson.error === "string" && errorJson.error.trim()) {
               errorText = errorJson.error;
+            }
+            if (errorJson.code === "RATE_LIMITED") {
+              isRateLimited = true;
             }
           } catch {
             // Keep default error message when body isn't JSON
           }
           setErrorMessage(errorText);
-          setLastFailedPromptByMode((prev) => ({
-            ...prev,
-            [activeMode]: trimmedPrompt,
-          }));
+          if (!isRateLimited) {
+            setLastFailedPromptByMode((prev) => ({
+              ...prev,
+              [activeMode]: trimmedPrompt,
+            }));
+          }
           setMessagesByMode((prev) => ({
             ...prev,
             [activeMode]: prev[activeMode].filter((m) => m.id !== assistantId),
@@ -1042,6 +1053,11 @@ export function AiPlanStudio({
           ) : null}
         </div>
       ) : null}
+
+      <p className="px-2 text-center text-[11px] text-muted-foreground">
+        Luma AI is a study assistant — verify verses in Scripture and consult a
+        pastor for personal guidance.
+      </p>
     </form>
   );
 
