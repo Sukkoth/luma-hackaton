@@ -1,6 +1,12 @@
 import "server-only";
 
-import { generateText, streamText, type LanguageModel } from "ai";
+import {
+  generateText,
+  stepCountIs,
+  streamText,
+  type LanguageModel,
+  type ToolSet,
+} from "ai";
 import { createGroq } from "@ai-sdk/groq";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
@@ -180,6 +186,16 @@ export async function generateAiChat({
   };
 }
 
+export type StreamAiChatParams = GenerateAiChatParams & {
+  tools?: ToolSet;
+  abortSignal?: AbortSignal;
+  onFinish?: (info: {
+    provider: string;
+    finishReason: string;
+    usage?: unknown;
+  }) => void;
+};
+
 export type StreamAiChatResult =
   | { success: true; stream: ReadableStream<Uint8Array>; provider: string }
   | { success: false; error: string };
@@ -189,7 +205,10 @@ export async function streamAiChat({
   messages,
   maxOutputTokens = 1600,
   temperature = 0.5,
-}: GenerateAiChatParams): Promise<StreamAiChatResult> {
+  tools,
+  abortSignal,
+  onFinish,
+}: StreamAiChatParams): Promise<StreamAiChatResult> {
   const models = getConfiguredModels();
   if (models.length === 0) {
     return {
@@ -201,6 +220,9 @@ export async function streamAiChat({
 
   let lastError = "AI provider failed to respond.";
   for (const candidate of models) {
+    if (abortSignal?.aborted) {
+      return { success: false, error: "Request aborted." };
+    }
     try {
       const result = streamText({
         model: candidate.model,
@@ -208,6 +230,19 @@ export async function streamAiChat({
         messages: [...messages],
         maxOutputTokens,
         temperature,
+        ...(tools ? { tools, stopWhen: stepCountIs(4) } : {}),
+        ...(abortSignal ? { abortSignal } : {}),
+        ...(onFinish
+          ? {
+              onFinish: (event) => {
+                onFinish({
+                  provider: candidate.name,
+                  finishReason: event.finishReason,
+                  usage: event.usage,
+                });
+              },
+            }
+          : {}),
       });
 
       const iterator = result.textStream[Symbol.asyncIterator]();
