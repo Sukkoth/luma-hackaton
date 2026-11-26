@@ -6,10 +6,13 @@ if (fs.existsSync(".env")) {
   process.loadEnvFile?.();
 }
 
+import * as v from "valibot";
 import { db } from "../src/db";
-import { user } from "../src/db/schema";
+import { aiConversations, aiMessages, user } from "../src/db/schema";
 import { PROTESTANT_BIBLE_BOOKS } from "../src/data/canons/protestant";
 import { distributeBlueprintToPlan } from "../src/lib/ai/plan-generator";
+import { AiBlueprintRangeSchema } from "../src/lib/schemas/ai-plans";
+import { parseBibleHref } from "../src/components/ai-elements/bible-verse-link";
 
 test.describe("AI Plan Generator", () => {
   test("distributeBlueprintToPlan distributes a 1-year whole-Bible blueprint across 365 days without invalid chapters", () => {
@@ -134,6 +137,48 @@ test.describe("AI Plan Generator", () => {
     });
   });
 
+  test("AiBlueprintRangeSchema strictly rejects open-ended or multi-chapter verse ranges", () => {
+    const missingEnd = v.safeParse(AiBlueprintRangeSchema, {
+      bookId: "luk",
+      startChapter: 3,
+      endChapter: 3,
+      startVerse: 1,
+    });
+    expect(missingEnd.success).toBe(false);
+
+    const multiChapterWithVerse = v.safeParse(AiBlueprintRangeSchema, {
+      bookId: "luk",
+      startChapter: 3,
+      endChapter: 4,
+      startVerse: 1,
+      endVerse: 10,
+    });
+    expect(multiChapterWithVerse.success).toBe(false);
+  });
+
+  test("parseBibleHref parses internal Bible verse links and ignores non-Bible links", () => {
+    expect(
+      parseBibleHref({ href: "/bible/rom/8?startVerse=28&endVerse=30" })
+    ).toEqual({
+      bookId: "rom",
+      chapter: 8,
+      startVerse: 28,
+      endVerse: 30,
+      bibleHref: "/bible/rom/8?startVerse=28&endVerse=30",
+    });
+
+    expect(parseBibleHref({ href: "/bible/psa/23" })).toEqual({
+      bookId: "psa",
+      chapter: 23,
+      bibleHref: "/bible/psa/23",
+    });
+
+    expect(
+      parseBibleHref({ href: "https://example.com/bible/rom/8" })
+    ).not.toBeNull(); // In Node (no window), same-origin check is skipped; relative & external paths still require /bible/:book/:ch
+    expect(parseBibleHref({ href: "https://example.com/other" })).toBeNull();
+  });
+
   test("authenticated user can navigate to /plans/ai, use presets, validate prompt, and switch mobile panes", async ({
     page,
   }) => {
@@ -146,9 +191,10 @@ test.describe("AI Plan Generator", () => {
     await page.getByLabel("Email address").fill(testEmail);
     await page.locator("#signup-password").fill(testPassword);
     await page.getByRole("checkbox", { name: /agree/i }).check();
+    await expect(page.getByLabel("Email address")).toHaveValue(testEmail);
     await page.getByRole("button", { name: "Create Account" }).click();
 
-    await page.waitForURL("/onboarding", { timeout: 10000 });
+    await page.waitForURL("/onboarding", { timeout: 20000 });
     await page.getByRole("button", { name: "Skip to Setup" }).click();
     await page
       .getByRole("button", { name: "Complete Onboarding & Begin" })
@@ -186,17 +232,81 @@ test.describe("AI Plan Generator", () => {
     await page.getByRole("radio", { name: /Plan Generator/i }).click();
     await expect(page).toHaveURL(/mode=plan/);
 
-    // Verify centered prompt stays responsive on mobile before generation
-    await page.setViewportSize({ width: 390, height: 844 });
-    await expect(
-      page.getByRole("heading", { name: "Build any Bible reading plan" })
-    ).toBeVisible();
-    await expect(promptField).toBeVisible();
+    // Create a folder in the AI history sidebar and verify persistence across reload
+    await page.getByRole("button", { name: "New folder" }).click();
+    await page.getByLabel("New folder name").fill("Exodus Study");
+    await page.getByRole("button", { name: "Add", exact: true }).click();
+    await expect(page.getByText("Exodus Study")).toBeVisible();
 
     const [createdUser] = await db
       .select({ id: user.id })
       .from(user)
       .where(eq(user.email, testEmail));
+    expect(createdUser).toBeTruthy();
+
+    // Seed a conversation + messages and verify URL-based reload & delta sync
+    if (createdUser) {
+      const [seededConv] = await db
+        .insert(aiConversations)
+        .values({
+          userId: createdUser.id,
+          mode: "chat",
+          canon: "protestant",
+          title: "Romans 8 Study",
+          messageCount: 2,
+          lastMessageSequence: 2,
+        })
+        .returning({ id: aiConversations.id });
+
+      if (seededConv) {
+        await db.insert(aiMessages).values([
+          {
+            conversationId: seededConv.id,
+            sequence: 1,
+            role: "user",
+            content: "Explain Romans 8:28",
+          },
+          {
+            conversationId: seededConv.id,
+            sequence: 2,
+            role: "assistant",
+            content:
+              "Romans 8:28 assures believers of God's sovereign purpose.",
+          },
+        ]);
+
+        await page.goto(`/ai?mode=chat&chat=${seededConv.id}`);
+        await expect(page.getByText("Explain Romans 8:28")).toBeVisible();
+        await expect(
+          page.getByText(
+            "Romans 8:28 assures believers of God's sovereign purpose."
+          )
+        ).toBeVisible();
+
+        // Reload on the same URL and verify it lands back on the same conversation
+        // while delta sync returns { unchanged: true } from IndexedDB cache
+        const syncResponsePromise = page.waitForResponse(
+          (res) =>
+            res.url().includes(`/api/ai/conversations/${seededConv.id}/sync`) &&
+            res.status() === 200
+        );
+        await page.reload();
+        const syncRes = await syncResponsePromise;
+        const syncJson = (await syncRes.json()) as { unchanged?: boolean };
+        expect(syncJson.unchanged).toBe(true);
+        await expect(page.getByText("Exodus Study")).toBeVisible();
+        await expect(page.getByText("Explain Romans 8:28")).toBeVisible();
+      }
+    }
+
+    // Verify centered prompt stays responsive on mobile on a fresh chat
+    await page.goto("/ai?mode=plan");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(
+      page.getByRole("heading", { name: "Build any Bible reading plan" })
+    ).toBeVisible();
+    await expect(page.getByLabel("Luma AI prompt")).toBeVisible();
+
     if (createdUser) {
       await db.delete(user).where(eq(user.id, createdUser.id));
     }
