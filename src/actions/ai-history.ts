@@ -52,17 +52,13 @@ export async function getAiSidebarData({
         canon: aiConversations.canon,
         title: aiConversations.title,
         isPinned: aiConversations.isPinned,
+        isArchived: aiConversations.isArchived,
         messageCount: aiConversations.messageCount,
         lastMessageSequence: aiConversations.lastMessageSequence,
         updatedAt: aiConversations.updatedAt,
       })
       .from(aiConversations)
-      .where(
-        and(
-          eq(aiConversations.userId, userId),
-          eq(aiConversations.isArchived, false)
-        )
-      )
+      .where(eq(aiConversations.userId, userId))
       .orderBy(desc(aiConversations.isPinned), desc(aiConversations.updatedAt)),
   ]);
 
@@ -329,6 +325,7 @@ export async function createAiConversationAction(
       canon: aiConversations.canon,
       title: aiConversations.title,
       isPinned: aiConversations.isPinned,
+      isArchived: aiConversations.isArchived,
       messageCount: aiConversations.messageCount,
       lastMessageSequence: aiConversations.lastMessageSequence,
       updatedAt: aiConversations.updatedAt,
@@ -371,6 +368,7 @@ export async function updateAiConversationAction(
     title?: string;
     folderId?: string | null;
     isPinned?: boolean;
+    isArchived?: boolean;
   } = {};
 
   if (parsed.output.title !== undefined) {
@@ -378,6 +376,9 @@ export async function updateAiConversationAction(
   }
   if (parsed.output.isPinned !== undefined) {
     updates.isPinned = parsed.output.isPinned;
+  }
+  if (parsed.output.isArchived !== undefined) {
+    updates.isArchived = parsed.output.isArchived;
   }
   if (parsed.output.folderId !== undefined) {
     if (parsed.output.folderId === null) {
@@ -415,6 +416,7 @@ export async function updateAiConversationAction(
       canon: aiConversations.canon,
       title: aiConversations.title,
       isPinned: aiConversations.isPinned,
+      isArchived: aiConversations.isArchived,
       messageCount: aiConversations.messageCount,
       lastMessageSequence: aiConversations.lastMessageSequence,
       updatedAt: aiConversations.updatedAt,
@@ -551,6 +553,7 @@ export async function appendAiTurnAction(
         canon: aiConversations.canon,
         title: aiConversations.title,
         isPinned: aiConversations.isPinned,
+        isArchived: aiConversations.isArchived,
         messageCount: aiConversations.messageCount,
         lastMessageSequence: aiConversations.lastMessageSequence,
         updatedAt: aiConversations.updatedAt,

@@ -42,6 +42,7 @@ export async function GET(
       canon: aiConversations.canon,
       title: aiConversations.title,
       isPinned: aiConversations.isPinned,
+      isArchived: aiConversations.isArchived,
       messageCount: aiConversations.messageCount,
       lastMessageSequence: aiConversations.lastMessageSequence,
       updatedAt: aiConversations.updatedAt,

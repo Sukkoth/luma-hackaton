@@ -60,6 +60,7 @@ export const UpdateAiConversationSchema = v.object({
     v.nullable(v.pipe(v.string(), v.trim(), v.minLength(1)))
   ),
   isPinned: v.optional(v.boolean()),
+  isArchived: v.optional(v.boolean()),
 });
 
 export const ConversationIdSchema = v.object({
@@ -93,6 +94,7 @@ export type AiConversationSummary = {
   canon: string;
   title: string;
   isPinned: boolean;
+  isArchived: boolean;
   messageCount: number;
   lastMessageSequence: number;
   updatedAt: string;
