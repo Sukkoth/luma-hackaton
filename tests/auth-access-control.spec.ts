@@ -177,7 +177,7 @@ test.describe("Bible Tracker Luma Authentication & Access Control E2E", () => {
     await expect(modal.getByText("Daily Reminder")).toBeVisible();
     await expect(modal.getByText("Study Journal Folder")).toBeVisible();
     await expect(
-      modal.getByRole("button", { name: "Confirm & Start Plan" })
+      modal.getByRole("link", { name: "Sign Up to Start Plan" })
     ).toBeVisible();
 
     // Close modal
