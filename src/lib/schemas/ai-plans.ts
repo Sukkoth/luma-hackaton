@@ -5,7 +5,7 @@ export type AiStudioMode = v.InferOutput<typeof AiStudioModeSchema>;
 
 export const AiChatMessageSchema = v.object({
   role: v.picklist(["user", "assistant"]),
-  content: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(4000)),
+  content: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(32000)),
 });
 
 export const AiChatRequestSchema = v.object({
@@ -59,13 +59,30 @@ export type GenerateAiPlanRequestInput = v.InferOutput<
   typeof GenerateAiPlanRequestSchema
 >;
 
-export const AiBlueprintRangeSchema = v.object({
-  bookId: v.pipe(v.string(), v.trim(), v.minLength(1)),
-  startChapter: v.pipe(v.number(), v.integer(), v.minValue(1)),
-  endChapter: v.pipe(v.number(), v.integer(), v.minValue(1)),
-  startVerse: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
-  endVerse: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
-});
+export const AiBlueprintRangeSchema = v.pipe(
+  v.object({
+    bookId: v.pipe(v.string(), v.trim(), v.minLength(1)),
+    startChapter: v.pipe(v.number(), v.integer(), v.minValue(1)),
+    endChapter: v.pipe(v.number(), v.integer(), v.minValue(1)),
+    startVerse: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+    endVerse: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+  }),
+  v.check(
+    (range) => range.endChapter >= range.startChapter,
+    "endChapter must be greater than or equal to startChapter"
+  ),
+  v.check((range) => {
+    const hasStart = range.startVerse !== undefined;
+    const hasEnd = range.endVerse !== undefined;
+    if (!hasStart && !hasEnd) return true;
+    return (
+      hasStart &&
+      hasEnd &&
+      range.startChapter === range.endChapter &&
+      (range.endVerse as number) >= (range.startVerse as number)
+    );
+  }, "Verse-level ranges must have startChapter === endChapter and both startVerse and endVerse (endVerse >= startVerse)")
+);
 
 export const AiBlueprintSectionSchema = v.object({
   title: v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(120)),

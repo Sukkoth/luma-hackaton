@@ -44,7 +44,8 @@ export function buildAiPlanSystemPrompt({
     "Rules:",
     "- Use ONLY exact bookId values from the catalog above.",
     "- Never exceed maxChapters for any book.",
-    "- Ranges support BOTH whole-chapter readings (omit startVerse/endVerse) and verse-level readings (include optional integer startVerse and endVerse).",
+    "- Ranges support BOTH whole-chapter readings (omit startVerse and endVerse) and verse-level readings (include BOTH integer startVerse and integer endVerse).",
+    "- STRICT RANGE RULES: Never use '+' or open-ended verse ranges. If you include startVerse or endVerse on a range, startChapter MUST equal endChapter, and BOTH startVerse and endVerse MUST be provided with endVerse >= startVerse. To span across chapters with verse bounds, emit separate range objects per chapter.",
     '- CRITICAL FOR VERSE-BASED & N-DAY PLANS: Each whole-chapter range expands into (endChapter - startChapter + 1) daily reading items, whereas each single-chapter verse range (startChapter === endChapter with startVerse & endVerse) creates 1 reading item. Therefore, whenever a topic spans fewer chapters than targetDays (e.g. 10 days for the 10 plagues in Exodus 7-12, 7 days in one Gospel chapter, or 14 days in a 4-chapter epistle), you MUST split those chapters into at least targetDays separate verse-range objects in "ranges" (one per event/pericope) using startVerse and endVerse.',
     "- You do NOT need to make every plan strictly chapter-based or strictly verse-based: choose whichever fits best (whole chapters for broad/multi-book/yearly plans; verse ranges for short, meditative, devotional, thematic-event, or long-chapter passages; or mix both).",
     "- If the user explicitly requests verse-based or chapter-based readings, follow their preference strictly.",
@@ -102,22 +103,20 @@ export function distributeBlueprintToPlan({
       const clampedStart = Math.max(1, Math.min(book.chapters, rawStart));
       const clampedEnd = Math.max(1, Math.min(book.chapters, rawEnd));
 
-      const hasStartVerse = range.startVerse !== undefined;
-      const hasEndVerse = range.endVerse !== undefined;
-
       for (let ch = clampedStart; ch <= clampedEnd; ch += 1) {
-        if (clampedStart === clampedEnd && range.startVerse !== undefined) {
+        if (
+          clampedStart === clampedEnd &&
+          range.startVerse !== undefined &&
+          range.endVerse !== undefined
+        ) {
           const startVerse = range.startVerse;
-          const endVerse =
-            range.endVerse !== undefined
-              ? Math.max(startVerse, range.endVerse)
-              : undefined;
+          const endVerse = Math.max(startVerse, range.endVerse);
           const verseRange =
-            endVerse !== undefined && endVerse !== startVerse
+            endVerse !== startVerse
               ? `${startVerse}-${endVerse}`
               : `${startVerse}`;
           const versesLabel =
-            endVerse !== undefined && endVerse !== startVerse
+            endVerse !== startVerse
               ? `vv. ${startVerse}-${endVerse}`
               : `v. ${startVerse}`;
           expandedReadings.push({
@@ -125,43 +124,10 @@ export function distributeBlueprintToPlan({
             bookName: book.name,
             chapter: ch,
             startVerse,
-            ...(endVerse !== undefined ? { endVerse } : {}),
+            endVerse,
             verseRange,
             versesLabel,
             displayText: `${book.name} ${ch}:${verseRange}`,
-          });
-        } else if (
-          clampedStart < clampedEnd &&
-          ch === clampedStart &&
-          hasStartVerse &&
-          range.startVerse !== undefined
-        ) {
-          const startVerse = range.startVerse;
-          expandedReadings.push({
-            bookId: book.id,
-            bookName: book.name,
-            chapter: ch,
-            startVerse,
-            verseRange: `${startVerse}+`,
-            versesLabel: `from v. ${startVerse}`,
-            displayText: `${book.name} ${ch}:${startVerse}+`,
-          });
-        } else if (
-          clampedStart < clampedEnd &&
-          ch === clampedEnd &&
-          hasEndVerse &&
-          range.endVerse !== undefined
-        ) {
-          const endVerse = range.endVerse;
-          expandedReadings.push({
-            bookId: book.id,
-            bookName: book.name,
-            chapter: ch,
-            startVerse: 1,
-            endVerse,
-            verseRange: `1-${endVerse}`,
-            versesLabel: `vv. 1-${endVerse}`,
-            displayText: `${book.name} ${ch}:1-${endVerse}`,
           });
         } else {
           expandedReadings.push({

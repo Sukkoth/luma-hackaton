@@ -32,8 +32,10 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  const baseUrl = new URL(request.url).origin;
   const system = buildAiChatSystemPrompt({
     canon: parsedInput.output.canon,
+    baseUrl,
   });
 
   const recentMessages = parsedInput.output.messages.slice(-12);
