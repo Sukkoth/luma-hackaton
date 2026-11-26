@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 type LumaAiPageProps = {
-  searchParams: Promise<{ mode?: string; chat?: string }>;
+  searchParams: Promise<{ mode?: string; chat?: string; prompt?: string }>;
 };
 
 export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
@@ -50,6 +50,12 @@ export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
       ? resolvedSearchParams.chat.trim()
       : null;
 
+  const initialPrompt =
+    typeof resolvedSearchParams.prompt === "string" &&
+    resolvedSearchParams.prompt.trim().length > 0
+      ? resolvedSearchParams.prompt.trim().slice(0, 600)
+      : undefined;
+
   const [trackersData, streak, sidebarData] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
@@ -74,6 +80,7 @@ export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
           activeTrackerCanon={activeTrackerCanon}
           initialMode={initialMode}
           initialConversationId={initialConversationId}
+          initialPrompt={initialPrompt}
           initialFolders={sidebarData.folders}
           initialConversations={sidebarData.conversations}
         />

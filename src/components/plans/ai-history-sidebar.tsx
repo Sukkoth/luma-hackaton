@@ -3,6 +3,8 @@
 import { useMemo, useState, type FormEvent } from "react";
 import * as v from "valibot";
 import {
+  Archive,
+  ArchiveRestore,
   Calendar,
   ChevronDown,
   ChevronRight,
@@ -65,6 +67,10 @@ export type AiHistorySidebarProps = {
     conversationId: string;
     isPinned: boolean;
   }) => Promise<void>;
+  onToggleConversationArchive: (params: {
+    conversationId: string;
+    isArchived: boolean;
+  }) => Promise<void>;
   onDeleteConversation: (params: { conversationId: string }) => Promise<void>;
 };
 
@@ -116,6 +122,7 @@ type ConversationRowProps = {
   onRename: (params: { title: string }) => Promise<void>;
   onMove: (params: { folderId: string | null }) => Promise<void>;
   onTogglePin: () => Promise<void>;
+  onToggleArchive: () => Promise<void>;
   onDelete: () => Promise<void>;
 };
 
@@ -130,6 +137,7 @@ function ConversationRow({
   onRename,
   onMove,
   onTogglePin,
+  onToggleArchive,
   onDelete,
 }: ConversationRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -269,7 +277,22 @@ function ConversationRow({
             </div>
           ) : null}
 
-          <div className="border-t border-border/70 pt-1 mt-1">
+          <div className="border-t border-border/70 pt-1 mt-1 space-y-0.5">
+            <button
+              type="button"
+              onClick={async () => {
+                setMenuOpen(false);
+                await onToggleArchive();
+              }}
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-foreground hover:bg-muted"
+            >
+              {conversation.isArchived ? (
+                <ArchiveRestore className="size-3.5 text-muted-foreground" />
+              ) : (
+                <Archive className="size-3.5 text-muted-foreground" />
+              )}
+              <span>{conversation.isArchived ? "Unarchive" : "Archive"}</span>
+            </button>
             <button
               type="button"
               onClick={async () => {
@@ -304,9 +327,11 @@ export function AiHistorySidebar({
   onRenameConversation,
   onMoveConversation,
   onToggleConversationPin,
+  onToggleConversationArchive,
   onDeleteConversation,
 }: AiHistorySidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
   const [showNewFolderForm, setShowNewFolderForm] = useState(false);
   const [folderFormError, setFolderFormError] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<
@@ -326,21 +351,31 @@ export function AiHistorySidebar({
     );
   }, [conversations, normalizedQuery]);
 
+  const activeConversations = useMemo(
+    () => filteredConversations.filter((c) => !c.isArchived),
+    [filteredConversations]
+  );
+
+  const archivedConversations = useMemo(
+    () => filteredConversations.filter((c) => c.isArchived),
+    [filteredConversations]
+  );
+
   const uncategorizedGroups = useMemo(() => {
-    const uncategorized = filteredConversations.filter((c) => !c.folderId);
+    const uncategorized = activeConversations.filter((c) => !c.folderId);
     return groupConversationsByTime({ conversations: uncategorized });
-  }, [filteredConversations]);
+  }, [activeConversations]);
 
   const conversationsByFolder = useMemo(() => {
     const map = new Map<string, AiConversationSummary[]>();
-    for (const conv of filteredConversations) {
+    for (const conv of activeConversations) {
       if (!conv.folderId) continue;
       const list = map.get(conv.folderId) ?? [];
       list.push(conv);
       map.set(conv.folderId, list);
     }
     return map;
-  }, [filteredConversations]);
+  }, [activeConversations]);
 
   const handleCreateFolderSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -595,6 +630,12 @@ export function AiHistorySidebar({
                                 isPinned: !conv.isPinned,
                               })
                             }
+                            onToggleArchive={async () =>
+                              onToggleConversationArchive({
+                                conversationId: conv.id,
+                                isArchived: !conv.isArchived,
+                              })
+                            }
                             onDelete={async () =>
                               onDeleteConversation({ conversationId: conv.id })
                             }
@@ -647,6 +688,12 @@ export function AiHistorySidebar({
                       isPinned: !conv.isPinned,
                     })
                   }
+                  onToggleArchive={async () =>
+                    onToggleConversationArchive({
+                      conversationId: conv.id,
+                      isArchived: !conv.isArchived,
+                    })
+                  }
                   onDelete={async () =>
                     onDeleteConversation({ conversationId: conv.id })
                   }
@@ -655,6 +702,70 @@ export function AiHistorySidebar({
             </div>
           ))
         )}
+
+        {archivedConversations.length > 0 ? (
+          <div className="pt-2 border-t border-border/60 space-y-1">
+            <button
+              type="button"
+              onClick={() => setShowArchived((prev) => !prev)}
+              className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <Archive className="size-3" />
+                <span>Archived ({archivedConversations.length})</span>
+              </span>
+              {showArchived ? (
+                <ChevronDown className="size-3" />
+              ) : (
+                <ChevronRight className="size-3" />
+              )}
+            </button>
+            {showArchived
+              ? archivedConversations.map((conv) => (
+                  <ConversationRow
+                    key={conv.id}
+                    conversation={conv}
+                    isActive={conv.id === activeConversationId}
+                    folders={folders}
+                    isEditing={editingConversationId === conv.id}
+                    onStartEditing={() => setEditingConversationId(conv.id)}
+                    onStopEditing={() => setEditingConversationId(null)}
+                    onSelect={() => {
+                      onSelectConversation({ conversation: conv });
+                      onMobileOpenChange(false);
+                    }}
+                    onRename={async ({ title }) =>
+                      onRenameConversation({
+                        conversationId: conv.id,
+                        title,
+                      })
+                    }
+                    onMove={async ({ folderId }) =>
+                      onMoveConversation({
+                        conversationId: conv.id,
+                        folderId,
+                      })
+                    }
+                    onTogglePin={async () =>
+                      onToggleConversationPin({
+                        conversationId: conv.id,
+                        isPinned: !conv.isPinned,
+                      })
+                    }
+                    onToggleArchive={async () =>
+                      onToggleConversationArchive({
+                        conversationId: conv.id,
+                        isArchived: !conv.isArchived,
+                      })
+                    }
+                    onDelete={async () =>
+                      onDeleteConversation({ conversationId: conv.id })
+                    }
+                  />
+                ))
+              : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );

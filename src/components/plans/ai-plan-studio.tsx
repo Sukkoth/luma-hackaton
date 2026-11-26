@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  FileText,
   Layers,
   Loader2,
   MessageSquare,
@@ -45,6 +46,7 @@ import {
   updateAiConversationAction,
 } from "@/actions/ai-history";
 import { generateAiPlanAction } from "@/actions/ai-plans";
+import { createNoteAction } from "@/actions/notes";
 import { createCustomPlanTemplateAction } from "@/actions/plans";
 import type { BibleCanon } from "@/data/bibleData";
 import {
@@ -90,9 +92,25 @@ export type AiPlanStudioProps = {
   activeTrackerCanon: BibleCanon;
   initialMode?: AiStudioMode;
   initialConversationId?: string | null;
+  initialPrompt?: string;
   initialFolders?: AiFolderSummary[];
   initialConversations?: AiConversationSummary[];
 };
+
+function convertMarkdownReplyToNoteHtml({
+  content,
+}: {
+  content: string;
+}): string {
+  const escaped = content
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return escaped
+    .split(/\n{2,}/)
+    .map((block) => `<p>${block.replace(/\n/g, "<br />")}</p>`)
+    .join("");
+}
 
 type ChatMessage = {
   id: string;
@@ -183,6 +201,7 @@ export function AiPlanStudio({
   activeTrackerCanon,
   initialMode = "plan",
   initialConversationId = null,
+  initialPrompt,
   initialFolders = [],
   initialConversations = [],
 }: AiPlanStudioProps) {
@@ -238,6 +257,16 @@ export function AiPlanStudio({
   const modeInfo = MODE_CONFIG[mode];
 
   const promptInputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Prefill composer when navigated via "Ask Luma AI" from Bible Reader (?prompt=...)
+  useEffect(() => {
+    if (!initialPrompt || !promptInputRef.current) return;
+    const el = promptInputRef.current;
+    el.value = initialPrompt;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 180)}px`;
+    el.focus();
+  }, [initialPrompt]);
 
   // Cache initial sidebar metadata and subscribe to cross-tab BroadcastChannel updates
   useEffect(() => {
@@ -1148,6 +1177,57 @@ export function AiPlanStudio({
     broadcastAiSync({ type: "sidebar-updated", userId });
   };
 
+  const handleToggleConversationArchive = async ({
+    conversationId,
+    isArchived,
+  }: {
+    conversationId: string;
+    isArchived: boolean;
+  }) => {
+    const res = await updateAiConversationAction({
+      conversationId,
+      isArchived,
+    });
+    if (!res.success) {
+      toast.error(res.error);
+      return;
+    }
+    setConversations((prev) =>
+      prev.map((c) => (c.id === conversationId ? res.conversation : c))
+    );
+    if (isArchived && activeChatId === conversationId) {
+      handleNewChat();
+    }
+    broadcastAiSync({ type: "sidebar-updated", userId });
+  };
+
+  const handleSaveMessageToNotes = async ({ content }: { content: string }) => {
+    const activeConv = activeChatId
+      ? conversations.find((c) => c.id === activeChatId)
+      : undefined;
+    const title = activeConv?.title
+      ? `${activeConv.title} (Luma AI)`
+      : "Luma AI Study Note";
+    const bodyHtml = convertMarkdownReplyToNoteHtml({ content });
+    const plainTextSnippet = content.replace(/\s+/g, " ").trim().slice(0, 150);
+
+    const res = await createNoteAction({
+      title,
+      bodyHtml,
+      plainTextSnippet,
+    });
+    if (!res.success) {
+      toast.error(res.error);
+      return;
+    }
+    toast.success("Saved to Notes", {
+      action: {
+        label: "Open Notes",
+        onClick: () => router.push("/notes"),
+      },
+    });
+  };
+
   const handleDeleteConversation = async ({
     conversationId,
   }: {
@@ -1187,6 +1267,7 @@ export function AiPlanStudio({
         onRenameConversation={handleRenameConversation}
         onMoveConversation={handleMoveConversation}
         onToggleConversationPin={handleToggleConversationPin}
+        onToggleConversationArchive={handleToggleConversationArchive}
         onDeleteConversation={handleDeleteConversation}
       />
 
@@ -1412,6 +1493,17 @@ export function AiPlanStudio({
                           }}
                         >
                           <Copy className="size-3.5 text-muted-foreground" />
+                        </MessageAction>
+                        <MessageAction
+                          tooltip="Save to Notes"
+                          label="Save to Notes"
+                          onClick={() =>
+                            void handleSaveMessageToNotes({
+                              content: msg.content,
+                            })
+                          }
+                        >
+                          <FileText className="size-3.5 text-muted-foreground" />
                         </MessageAction>
                         {msg.meta ? (
                           <span className="px-1 text-[11px] text-muted-foreground">
