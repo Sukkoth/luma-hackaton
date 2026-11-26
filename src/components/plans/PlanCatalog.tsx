@@ -188,7 +188,10 @@ export function PlanCatalog({
   });
 
   const filteredPlans = availablePlans.filter((plan) => {
-    const matchesFilter = isPlanMatchingFilter({ plan, filter: selectedFilter });
+    const matchesFilter = isPlanMatchingFilter({
+      plan,
+      filter: selectedFilter,
+    });
     const matchesQuery =
       searchQuery.trim() === "" ||
       plan.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

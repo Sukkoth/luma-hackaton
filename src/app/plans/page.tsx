@@ -57,8 +57,7 @@ export default async function PlansPage() {
 
   const rawPlans =
     session && trackersData.activeTracker?.id
-      ? prefetchedPlans &&
-        trackersData.activeTracker.id === prefetchedTrackerId
+      ? prefetchedPlans && trackersData.activeTracker.id === prefetchedTrackerId
         ? prefetchedPlans
         : await getUserPlansForTracker({
             trackerId: trackersData.activeTracker.id,

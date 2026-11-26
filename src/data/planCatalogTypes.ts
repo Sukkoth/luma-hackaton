@@ -1,8 +1,4 @@
-import {
-  BIBLE_BOOK_MAP,
-  type BibleCanon,
-  getBibleBooks,
-} from "./bibleData";
+import { BIBLE_BOOK_MAP, type BibleCanon, getBibleBooks } from "./bibleData";
 import type {
   PlanCategory,
   PlanFilterType,
