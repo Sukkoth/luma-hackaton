@@ -668,6 +668,14 @@ export function AiPlanStudio({
       promptInputRef.current.style.height = "auto";
       promptInputRef.current.style.overflowY = "hidden";
     }
+    if (typeof window !== "undefined") {
+      window.requestAnimationFrame(() => {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "smooth",
+        });
+      });
+    }
 
     const controller = new AbortController();
     streamAbortRef.current = controller;
@@ -1456,8 +1464,8 @@ export function AiPlanStudio({
             </p>
           </div>
         ) : mode !== "plan" ? (
-          <div className="mx-auto flex min-h-[calc(100dvh-10rem)] w-full max-w-3xl flex-col">
-            <div className="flex-1 space-y-6 py-4 pb-8">
+          <div className="mx-auto flex w-full max-w-3xl flex-col">
+            <div className="flex-1 space-y-6 py-4 pb-44 lg:pb-36">
               {messages.map((msg) => {
                 const isStreamingThis = msg.id === streamingMessageId;
                 return (
@@ -1522,8 +1530,15 @@ export function AiPlanStudio({
               })}
             </div>
 
-            <div className="sticky bottom-0 z-10 bg-background/95 pb-4 pt-2 backdrop-blur-xs">
-              {composerForm}
+            <div
+              className={cn(
+                "fixed inset-x-0 bottom-[4.75rem] lg:bottom-0 z-30 lg:left-72 pointer-events-none",
+                isDesktopSidebarOpen && "lg:pl-64"
+              )}
+            >
+              <div className="mx-auto w-full max-w-3xl px-3 sm:px-6 lg:px-8 pb-3 pt-6 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-auto">
+                {composerForm}
+              </div>
             </div>
           </div>
         ) : (
