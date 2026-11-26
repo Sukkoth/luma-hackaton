@@ -1,26 +1,19 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
 import { Bookmark, BookMarked, Play } from "lucide-react";
-import { db } from "@/db";
 import { auth } from "@/lib/auth";
-import { userSettings } from "@/db/schema";
+import { getCachedUserSettings } from "@/lib/request-cache";
 import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
-import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import { getOverviewData } from "@/actions/overview";
 import {
   HeaderActions,
   HeaderActionButton,
 } from "@/components/ui/header-action-button";
 import { ChartDefs } from "@/components/overview/chart-tokens";
-import { ActivityRingsCard } from "@/components/overview/activity-rings-card";
-import { ProgressOverTimeCard } from "@/components/overview/progress-over-time-card";
-import { StreakHeatmapCard } from "@/components/overview/streak-heatmap-card";
-import { SunburstCard } from "@/components/overview/sunburst-card";
-import { RadialClockCard } from "@/components/overview/radial-clock-card";
+import { HomeChartsGrid } from "@/components/home/home-charts-grid";
 
 export const instant = false;
 
@@ -33,24 +26,29 @@ export default async function HomePage() {
     redirect("/login?redirect=/home");
   }
 
-  const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.userId, session.user.id),
+  const settings = await getCachedUserSettings({
+    userId: session.user.id,
   });
 
   if (!settings?.hasCompletedOnboarding) {
     redirect("/onboarding");
   }
 
-  const [trackersData, streak] = await Promise.all([
+  const prefetchedTrackerId = settings.activeTrackerId;
+
+  const [trackersData, streak, prefetchedOverview] = await Promise.all([
     getUserTrackersData({
       userId: session.user.id,
     }),
     syncUserStreak({
       userId: session.user.id,
     }),
-    evaluateAndUnlockAchievementsAction({
-      userId: session.user.id,
-    }),
+    prefetchedTrackerId
+      ? getOverviewData({
+          userId: session.user.id,
+          trackerId: prefetchedTrackerId,
+        })
+      : Promise.resolve(null),
   ]);
 
   const activeTracker = trackersData.activeTracker;
@@ -58,10 +56,13 @@ export default async function HomePage() {
     redirect("/onboarding");
   }
 
-  const overviewData = await getOverviewData({
-    userId: session.user.id,
-    trackerId: activeTracker.id,
-  });
+  const overviewData =
+    prefetchedOverview && activeTracker.id === prefetchedTrackerId
+      ? prefetchedOverview
+      : await getOverviewData({
+          userId: session.user.id,
+          trackerId: activeTracker.id,
+        });
 
   const hour = new Date().getHours();
   const timeOfDay = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
@@ -242,32 +243,7 @@ export default async function HomePage() {
         <h2 className="sr-only">Overview</h2>
 
         {/* ── Deep Analytics Cards Grid ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5 pb-8">
-          {/* Card 1: Concentric Activity Rings (lg: col-span-4) */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-4 min-h-[340px]">
-            <ActivityRingsCard data={overviewData.activityRings} />
-          </div>
-
-          {/* Card 2: Stacked Progress Over Time Area (lg: col-span-8) */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-8 min-h-[340px]">
-            <ProgressOverTimeCard data={overviewData.progressOverTime} />
-          </div>
-
-          {/* Card 3: Streak Heatmap & Activity Calendar (lg: col-span-4) */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-4 min-h-[260px]">
-            <StreakHeatmapCard data={overviewData.streakHeatmap} />
-          </div>
-
-          {/* Card 4: Bible Sunburst Canon Depth (lg: col-span-4) */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-4 min-h-[260px]">
-            <SunburstCard data={overviewData.sunburst} />
-          </div>
-
-          {/* Card 5: 24-Hour Radial Clock Rhythm (lg: col-span-4) */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-4 min-h-[260px]">
-            <RadialClockCard data={overviewData.radialClock} />
-          </div>
-        </div>
+        <HomeChartsGrid overviewData={overviewData} />
       </div>
     </AppShell>
   );

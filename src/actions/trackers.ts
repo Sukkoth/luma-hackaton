@@ -7,6 +7,7 @@ import * as v from "valibot";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { readingTrackers, userSettings, planInstances } from "@/db/schema";
+import { getCachedUserSettings } from "@/lib/request-cache";
 import {
   CreateTrackerSchema,
   UpdateTrackerSchema,
@@ -274,9 +275,7 @@ export async function getUserTrackersData({
       ),
       orderBy: (readingTrackers, { asc }) => [asc(readingTrackers.createdAt)],
     }),
-    db.query.userSettings.findFirst({
-      where: eq(userSettings.userId, userId),
-    }),
+    getCachedUserSettings({ userId }),
     db.query.planInstances.findMany({
       where: and(
         eq(planInstances.userId, userId),

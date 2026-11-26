@@ -3,25 +3,50 @@ export type GetLocalDateStringParams = {
   timeZone?: string;
 };
 
+const localDateFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+function getLocalDateFormatter({
+  timeZone,
+}: {
+  timeZone: string;
+}): Intl.DateTimeFormat {
+  const key = timeZone || "UTC";
+  const cached = localDateFormatterCache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: key,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    localDateFormatterCache.set(key, formatter);
+    return formatter;
+  } catch {
+    const fallbackKey = "UTC";
+    const fallbackCached = localDateFormatterCache.get(fallbackKey);
+    if (fallbackCached) {
+      return fallbackCached;
+    }
+    const fallback = new Intl.DateTimeFormat("en-CA", {
+      timeZone: fallbackKey,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    localDateFormatterCache.set(fallbackKey, fallback);
+    return fallback;
+  }
+}
+
 export function getLocalDateString({
   date = new Date(),
   timeZone = "UTC",
 }: GetLocalDateStringParams = {}): string {
-  try {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: timeZone || "UTC",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date(date));
-  } catch {
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: "UTC",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(new Date(date));
-  }
+  return getLocalDateFormatter({ timeZone }).format(new Date(date));
 }
 
 export type ShiftDateParams = {

@@ -4,11 +4,11 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   readingTrackers,
-  userSettings,
   trackerChapterProgress,
   readingLogs,
   planInstances,
 } from "@/db/schema";
+import { getCachedUserSettings } from "@/lib/request-cache";
 import {
   type BibleCanon,
   getBibleBooks,
@@ -237,9 +237,7 @@ export async function getOverviewData({
         eq(readingTrackers.userId, userId)
       ),
     }),
-    db.query.userSettings.findFirst({
-      where: eq(userSettings.userId, userId),
-    }),
+    getCachedUserSettings({ userId }),
   ]);
 
   const canon = ((tracker?.canon as BibleCanon) || "protestant") as BibleCanon;

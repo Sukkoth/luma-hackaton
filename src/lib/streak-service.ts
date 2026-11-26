@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { userSettings, readingLogs } from "@/db/schema";
 import { createNotificationAction } from "@/actions/notifications";
+import { getCachedUserSettings } from "./request-cache";
 import { getLocalDateString } from "./timezone";
 import { evaluateUserStreak, type StreakEvaluationResult } from "./streak";
 
@@ -20,9 +21,7 @@ export async function syncUserStreak({
   userId,
   timeZoneOverride,
 }: SyncUserStreakParams): Promise<UserStreakData> {
-  const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.userId, userId),
-  });
+  const settings = await getCachedUserSettings({ userId });
 
   const timeZone = timeZoneOverride || settings?.timezone || "UTC";
   const todayStr = getLocalDateString({ timeZone });
@@ -66,24 +65,36 @@ export async function syncUserStreak({
     existingFrozenDates: frozenDates,
   });
 
-  // Persist updated streak state if settings exist
+  // Persist updated streak state only when values actually changed
   if (settings) {
     const updatedFrozenJson = JSON.stringify(result.frozenDates);
     const lastRead = result.isTodayCompleted ? todayStr : settings.lastReadDate;
 
-    await db
-      .update(userSettings)
-      .set({
-        currentStreak: result.currentStreak,
-        longestStreak: result.longestStreak,
-        streakFreezesAvailable: result.availableFreezes,
-        freezeRestorationDaysCount: result.freezeRestorationDaysCount,
-        frozenDatesJson: updatedFrozenJson,
-        lastReadDate: lastRead,
-        timezone: timeZone,
-        updatedAt: new Date(),
-      })
-      .where(eq(userSettings.userId, userId));
+    const hasStreakChanged =
+      settings.currentStreak !== result.currentStreak ||
+      settings.longestStreak !== result.longestStreak ||
+      settings.streakFreezesAvailable !== result.availableFreezes ||
+      settings.freezeRestorationDaysCount !==
+        result.freezeRestorationDaysCount ||
+      settings.frozenDatesJson !== updatedFrozenJson ||
+      settings.lastReadDate !== lastRead ||
+      settings.timezone !== timeZone;
+
+    if (hasStreakChanged) {
+      await db
+        .update(userSettings)
+        .set({
+          currentStreak: result.currentStreak,
+          longestStreak: result.longestStreak,
+          streakFreezesAvailable: result.availableFreezes,
+          freezeRestorationDaysCount: result.freezeRestorationDaysCount,
+          frozenDatesJson: updatedFrozenJson,
+          lastReadDate: lastRead,
+          timezone: timeZone,
+          updatedAt: new Date(),
+        })
+        .where(eq(userSettings.userId, userId));
+    }
 
     // Check if a streak freeze was newly consumed
     if (result.frozenDates.length > frozenDates.size) {
