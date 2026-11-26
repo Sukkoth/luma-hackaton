@@ -4,6 +4,7 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -1135,3 +1136,19 @@ export const aiMessagesRelations = relations(aiMessages, ({ one }) => ({
     references: [aiConversations.id],
   }),
 }));
+
+export const aiRateLimits = pgTable(
+  "ai_rate_limits",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    bucketKey: text("bucket_key").notNull(),
+    count: integer("count").default(1).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.bucketKey] }),
+    index("idx_ai_rate_limits_expires").on(table.expiresAt),
+  ]
+);
