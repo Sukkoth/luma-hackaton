@@ -1,9 +1,13 @@
 import { headers } from "next/headers";
 import * as v from "valibot";
 import { auth } from "@/lib/auth";
+import { createGetVerseTool } from "@/lib/ai/bible-tool";
 import { buildAiChatSystemPrompt } from "@/lib/ai/chat-prompts";
 import { streamAiChat } from "@/lib/ai/client";
+import { checkAiRateLimit } from "@/lib/ai/rate-limit";
 import { AiChatRequestSchema } from "@/lib/schemas/ai-plans";
+
+export const maxDuration = 60;
 
 export async function POST(request: Request): Promise<Response> {
   const session = await auth.api.getSession({
@@ -32,18 +36,51 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  const rateLimit = await checkAiRateLimit({
+    userId: session.user.id,
+    kind: "chat",
+  });
+  if (!rateLimit.allowed) {
+    return Response.json(
+      {
+        error: rateLimit.message,
+        code: "RATE_LIMITED",
+        retryAfterSeconds: rateLimit.retryAfterSeconds,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      }
+    );
+  }
+
   const baseUrl = new URL(request.url).origin;
   const system = buildAiChatSystemPrompt({
     canon: parsedInput.output.canon,
     baseUrl,
   });
 
+  const startedAt = Date.now();
   const recentMessages = parsedInput.output.messages.slice(-12);
   const streamResult = await streamAiChat({
     system,
     messages: recentMessages,
     maxOutputTokens: 1600,
-    temperature: 0.5,
+    temperature: 0.4,
+    tools: {
+      getVerse: createGetVerseTool({ canon: parsedInput.output.canon }),
+    },
+    abortSignal: request.signal,
+    onFinish: ({ provider, finishReason, usage }) => {
+      console.info("[luma-ai] chat stream finished", {
+        provider,
+        finishReason,
+        durationMs: Date.now() - startedAt,
+        usage,
+      });
+    },
   });
 
   if (!streamResult.success) {

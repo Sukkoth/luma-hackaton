@@ -9,6 +9,7 @@ import {
   buildAiPlanSystemPrompt,
   distributeBlueprintToPlan,
 } from "@/lib/ai/plan-generator";
+import { checkAiRateLimit } from "@/lib/ai/rate-limit";
 import {
   AiChatRequestSchema,
   AiPlanBlueprintSchema,
@@ -26,7 +27,7 @@ export type GenerateAiPlanResult =
       plan: CreateCustomPlanTemplateInput;
       provider: string;
     }
-  | { success: false; error: string };
+  | { success: false; error: string; isRateLimited?: boolean };
 
 export async function generateAiPlanAction({
   prompt,
@@ -52,6 +53,18 @@ export async function generateAiPlanAction({
     return {
       success: false,
       error: parsedInput.issues[0]?.message ?? "Invalid plan request.",
+    };
+  }
+
+  const rateLimit = await checkAiRateLimit({
+    userId: session.user.id,
+    kind: "plan",
+  });
+  if (!rateLimit.allowed) {
+    return {
+      success: false,
+      error: rateLimit.message,
+      isRateLimited: true,
     };
   }
 
