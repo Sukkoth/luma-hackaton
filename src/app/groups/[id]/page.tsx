@@ -11,6 +11,7 @@ import {
   getGroupLeaderboardAction,
   type LeaderboardEntry,
 } from "@/actions/groups";
+import { getGroupMetadataName } from "@/lib/groups/queries";
 import { GroupWorkspaceView } from "@/components/groups/group-workspace-view";
 
 export async function generateMetadata({
@@ -19,12 +20,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const res = await getGroupDetailsAction({ groupId: id });
+  const groupName = await getGroupMetadataName({ groupId: id });
   return {
-    title:
-      res.success && res.group
-        ? `${res.group.name} • Fellowship`
-        : "Fellowship • Luma",
+    title: groupName ? `${groupName} • Fellowship` : "Fellowship • Luma",
   };
 }
 

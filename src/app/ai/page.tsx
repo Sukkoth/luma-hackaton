@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import * as v from "valibot";
-import { getAiSidebarData } from "@/actions/ai-history";
+import { getAiSidebarDataForUser } from "@/lib/ai/queries";
 import { getUserTrackersData } from "@/actions/trackers";
 import { AppShell } from "@/components/navigation/app-shell";
 import { AiPlanStudio } from "@/components/plans/ai-plan-studio";
@@ -42,7 +42,7 @@ export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
   const parsedMode = v.safeParse(AiStudioModeSchema, resolvedSearchParams.mode);
   const initialMode: AiStudioMode = parsedMode.success
     ? parsedMode.output
-    : "plan";
+    : "chat";
 
   const initialConversationId =
     typeof resolvedSearchParams.chat === "string" &&
@@ -59,7 +59,7 @@ export default async function LumaAiPage({ searchParams }: LumaAiPageProps) {
   const [trackersData, streak, sidebarData] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
-    getAiSidebarData({ userId: session.user.id }),
+    getAiSidebarDataForUser({ userId: session.user.id }),
   ]);
 
   const activeTrackerCanon: BibleCanon =

@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { and, eq, desc, ilike, inArray, gte, sql } from "drizzle-orm";
+import { and, eq, desc, inArray, gte, sql } from "drizzle-orm";
 import * as v from "valibot";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
@@ -28,6 +28,7 @@ import {
   type GroupLateJoinPolicy,
   type GroupMembershipStatus,
 } from "@/db/schema";
+import { getUserGroups, searchPublicGroups } from "@/lib/groups/queries";
 import { createNotificationAction } from "@/actions/notifications";
 import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import {
@@ -690,38 +691,7 @@ export async function getUserGroupsAction(): Promise<{
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    const userMemberships = await db.query.groupMembers.findMany({
-      where: eq(groupMembers.userId, session.user.id),
-      with: {
-        group: {
-          with: {
-            members: true,
-            plans: true,
-          },
-        },
-      },
-      orderBy: [desc(groupMembers.joinedAt)],
-    });
-
-    const list: UserGroupSummary[] = userMemberships.map((m) => {
-      const activeMembers = m.group.members.filter(
-        (gm) => gm.status === "active"
-      );
-      const activePlans = m.group.plans.filter((gp) => gp.status === "active");
-
-      return {
-        id: m.group.id,
-        name: m.group.name,
-        description: m.group.description,
-        avatarUrl: m.group.avatarUrl,
-        inviteCode: m.group.inviteCode,
-        role: m.role as GroupRole,
-        status: m.status as GroupMembershipStatus,
-        memberCount: activeMembers.length,
-        activePlansCount: activePlans.length,
-      };
-    });
-
+    const list = await getUserGroups({ userId: session.user.id });
     return { success: true, groups: list };
   } catch (err) {
     const message =
@@ -757,43 +727,11 @@ export async function searchPublicGroupsAction({
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    const trimmed = query.trim();
-    const condition = trimmed
-      ? and(eq(groups.isPrivate, false), ilike(groups.name, `%${trimmed}%`))
-      : eq(groups.isPrivate, false);
-
-    const publicGroups = await db.query.groups.findMany({
-      where: condition,
-      with: {
-        members: true,
-      },
-      orderBy: [desc(groups.createdAt)],
+    const result = await searchPublicGroups({
+      userId: session.user.id,
+      query,
+      limit,
     });
-
-    const result = publicGroups
-      .filter((g) => {
-        // Exclude groups where caller is already an active or pending member
-        const isMember = g.members.some(
-          (m) =>
-            m.userId === session.user.id &&
-            (m.status === "active" || m.status === "pending_approval")
-        );
-        return !isMember;
-      })
-      .slice(0, limit)
-      .map((g) => {
-        const activeMembers = g.members.filter((m) => m.status === "active");
-        return {
-          id: g.id,
-          name: g.name,
-          description: g.description,
-          avatarUrl: g.avatarUrl,
-          memberCount: activeMembers.length,
-          requiresApproval: g.requiresApproval,
-          isEnrolled: false,
-        };
-      });
-
     return { success: true, groups: result };
   } catch (err) {
     const message =

@@ -25,6 +25,7 @@ import {
 } from "@/lib/schemas/notes";
 import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
 import { getReadingPlanById } from "@/data/readingPlans";
+import { getUserNotesForUser, getSingleNoteForUser } from "@/lib/notes/queries";
 
 export type NoteDetail = {
   id: string;
@@ -90,101 +91,18 @@ export async function getUserNotesAction({
   });
   if (!session) return { success: false, error: "Unauthorized" };
 
-  const conditions = [eq(notes.userId, session.user.id)];
-  if (!includeArchived) {
-    conditions.push(eq(notes.isArchived, false));
-  }
-
-  if (folderId) {
-    if (folderId === "uncategorized") {
-      conditions.push(sql`${notes.folderId} IS NULL`);
-    } else {
-      conditions.push(eq(notes.folderId, folderId));
-    }
-  }
-
-  if (planInstanceId) {
-    conditions.push(eq(notes.planInstanceId, planInstanceId));
-  }
-
-  if (searchQuery && searchQuery.trim().length > 0) {
-    const term = `%${searchQuery.trim()}%`;
-    conditions.push(
-      or(ilike(notes.title, term), ilike(notes.plainTextSnippet, term))!
-    );
-  }
-
-  // Fetch user notes and folders concurrently
-  const [userNotes, userFolders] = await Promise.all([
-    db.query.notes.findMany({
-      where: and(...conditions),
-      orderBy: [desc(notes.isPinned), desc(notes.updatedAt)],
-      with: {
-        folder: true,
-        planInstance: true,
-      },
-    }),
-    db.query.noteFolders.findMany({
-      where: eq(noteFolders.userId, session.user.id),
-      orderBy: [desc(noteFolders.isPinned), desc(noteFolders.updatedAt)],
-      with: {
-        notes: {
-          where: eq(notes.isArchived, false),
-        },
-      },
-    }),
-  ]);
-
-  const formattedFolders: NoteFolderDetail[] = userFolders.map((f) => ({
-    id: f.id,
-    name: f.name,
-    color: f.color,
-    icon: f.icon,
-    isPinned: f.isPinned,
-    notesCount: f.notes.length,
-    createdAt: f.createdAt.toISOString(),
-    updatedAt: f.updatedAt.toISOString(),
-  }));
-
-  const formattedNotes: NoteDetail[] = userNotes.map((n) => {
-    let planTitle: string | null = null;
-    if (n.planInstance) {
-      const blueprint = getReadingPlanById(n.planInstance.templateId || "");
-      planTitle = blueprint?.title || "Reading Plan";
-    }
-
-    return {
-      id: n.id,
-      userId: n.userId,
-      trackerId: n.trackerId,
-      folderId: n.folderId,
-      folderName: n.folder?.name ?? null,
-      planInstanceId: n.planInstanceId,
-      planTitle,
-      planSessionId: n.planSessionId,
-      planDayNumber: n.planDayNumber,
-      versionId: n.versionId,
-      bookId: n.bookId,
-      chapter: n.chapter,
-      startVerse: n.startVerse,
-      startOffset: n.startOffset,
-      endVerse: n.endVerse,
-      endOffset: n.endOffset,
-      selectedText: n.selectedText,
-      title: n.title,
-      bodyHtml: n.bodyHtml,
-      plainTextSnippet: n.plainTextSnippet,
-      isPinned: n.isPinned,
-      isArchived: n.isArchived,
-      createdAt: n.createdAt.toISOString(),
-      updatedAt: n.updatedAt.toISOString(),
-    };
+  const result = await getUserNotesForUser({
+    userId: session.user.id,
+    folderId,
+    planInstanceId,
+    searchQuery,
+    includeArchived,
   });
 
   return {
     success: true,
-    notes: formattedNotes,
-    folders: formattedFolders,
+    notes: result.notes,
+    folders: result.folders,
   };
 }
 
@@ -200,52 +118,18 @@ export async function getSingleNoteAction({
   });
   if (!session) return { success: false, error: "Unauthorized" };
 
-  const note = await db.query.notes.findFirst({
-    where: and(eq(notes.id, noteId), eq(notes.userId, session.user.id)),
-    with: {
-      folder: true,
-      planInstance: true,
-    },
+  const note = await getSingleNoteForUser({
+    userId: session.user.id,
+    noteId,
   });
 
   if (!note) {
     return { success: false, error: "Note not found" };
   }
 
-  let planTitle: string | null = null;
-  if (note.planInstance) {
-    const blueprint = getReadingPlanById(note.planInstance.templateId || "");
-    planTitle = blueprint?.title || "Reading Plan";
-  }
-
   return {
     success: true,
-    note: {
-      id: note.id,
-      userId: note.userId,
-      trackerId: note.trackerId,
-      folderId: note.folderId,
-      folderName: note.folder?.name ?? null,
-      planInstanceId: note.planInstanceId,
-      planTitle,
-      planSessionId: note.planSessionId,
-      planDayNumber: note.planDayNumber,
-      versionId: note.versionId,
-      bookId: note.bookId,
-      chapter: note.chapter,
-      startVerse: note.startVerse,
-      startOffset: note.startOffset,
-      endVerse: note.endVerse,
-      endOffset: note.endOffset,
-      selectedText: note.selectedText,
-      title: note.title,
-      bodyHtml: note.bodyHtml,
-      plainTextSnippet: note.plainTextSnippet,
-      isPinned: note.isPinned,
-      isArchived: note.isArchived,
-      createdAt: note.createdAt.toISOString(),
-      updatedAt: note.updatedAt.toISOString(),
-    },
+    note,
   };
 }
 

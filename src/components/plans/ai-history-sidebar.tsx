@@ -781,7 +781,11 @@ export function AiHistorySidebar({
         </aside>
       ) : null}
 
-      <Sheet open={isMobileOpen} onOpenChange={onMobileOpenChange}>
+      <Sheet
+        open={isMobileOpen}
+        onOpenChange={onMobileOpenChange}
+        closeOnBack={false}
+      >
         <SheetContent side="left" className="w-80 p-4 flex flex-col">
           <SheetHeader className="pb-2">
             <SheetTitle className="text-base">Luma AI History</SheetTitle>

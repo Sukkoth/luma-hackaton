@@ -5,11 +5,8 @@ import { auth } from "@/lib/auth";
 import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
-import {
-  getUserNotesAction,
-  getSingleNoteAction,
-  type NoteDetail,
-} from "@/actions/notes";
+import { type NoteDetail } from "@/actions/notes";
+import { getUserNotesForUser, getSingleNoteForUser } from "@/lib/notes/queries";
 import { NotesManager } from "@/components/notes/notes-manager";
 
 export const instant = false;
@@ -39,24 +36,25 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
   const displayName =
     session.user.name?.split(" ")[0] || session.user.name || "Reader";
 
-  const [trackersData, streak, notesData, singleNoteRes] = await Promise.all([
+  const [trackersData, streak, notesData, targetNote] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
     syncUserStreak({ userId: session.user.id }),
-    getUserNotesAction({
+    getUserNotesForUser({
+      userId: session.user.id,
       planInstanceId: resolvedParams.noteId ? undefined : resolvedParams.planId,
       folderId: resolvedParams.noteId ? undefined : resolvedParams.folderId,
       includeArchived: true,
     }),
     resolvedParams.noteId
-      ? getSingleNoteAction({ noteId: resolvedParams.noteId })
+      ? getSingleNoteForUser({
+          userId: session.user.id,
+          noteId: resolvedParams.noteId,
+        })
       : Promise.resolve(null),
   ]);
 
-  const targetNote: NoteDetail | null =
-    singleNoteRes && singleNoteRes.success ? singleNoteRes.note : null;
-
-  let initialNotes = notesData.success ? [...notesData.notes] : [];
-  const initialFolders = notesData.success ? notesData.folders : [];
+  let initialNotes: NoteDetail[] = [...notesData.notes];
+  const initialFolders = notesData.folders;
 
   if (targetNote && !initialNotes.some((n) => n.id === targetNote.id)) {
     initialNotes = [targetNote, ...initialNotes];

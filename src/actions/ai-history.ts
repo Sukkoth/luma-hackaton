@@ -1,10 +1,11 @@
 "use server";
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import * as v from "valibot";
 import { db } from "@/db";
 import { aiConversations, aiFolders, aiMessages } from "@/db/schema";
+import { getAiSidebarDataForUser } from "@/lib/ai/queries";
 import { auth } from "@/lib/auth";
 import {
   AppendAiTurnSchema,
@@ -20,61 +21,6 @@ import {
 } from "@/lib/schemas/ai-history";
 import type { AiStudioMode } from "@/lib/schemas/ai-plans";
 
-export async function getAiSidebarData({
-  userId,
-}: {
-  userId: string;
-}): Promise<{
-  folders: AiFolderSummary[];
-  conversations: AiConversationSummary[];
-}> {
-  const [folderRows, conversationRows] = await Promise.all([
-    db
-      .select({
-        id: aiFolders.id,
-        name: aiFolders.name,
-        isPinned: aiFolders.isPinned,
-        sortOrder: aiFolders.sortOrder,
-        updatedAt: aiFolders.updatedAt,
-      })
-      .from(aiFolders)
-      .where(eq(aiFolders.userId, userId))
-      .orderBy(
-        desc(aiFolders.isPinned),
-        asc(aiFolders.sortOrder),
-        asc(aiFolders.name)
-      ),
-    db
-      .select({
-        id: aiConversations.id,
-        folderId: aiConversations.folderId,
-        mode: aiConversations.mode,
-        canon: aiConversations.canon,
-        title: aiConversations.title,
-        isPinned: aiConversations.isPinned,
-        isArchived: aiConversations.isArchived,
-        messageCount: aiConversations.messageCount,
-        lastMessageSequence: aiConversations.lastMessageSequence,
-        updatedAt: aiConversations.updatedAt,
-      })
-      .from(aiConversations)
-      .where(eq(aiConversations.userId, userId))
-      .orderBy(desc(aiConversations.isPinned), desc(aiConversations.updatedAt)),
-  ]);
-
-  return {
-    folders: folderRows.map((row) => ({
-      ...row,
-      updatedAt: row.updatedAt.toISOString(),
-    })),
-    conversations: conversationRows.map((row) => ({
-      ...row,
-      mode: row.mode === "chat" ? ("chat" as const) : ("plan" as const),
-      updatedAt: row.updatedAt.toISOString(),
-    })),
-  };
-}
-
 export async function getAiSidebarDataAction(): Promise<
   | {
       success: true;
@@ -87,7 +33,7 @@ export async function getAiSidebarDataAction(): Promise<
   if (!session) {
     return { success: false, error: "Please sign in to view your AI chats." };
   }
-  const data = await getAiSidebarData({ userId: session.user.id });
+  const data = await getAiSidebarDataForUser({ userId: session.user.id });
   return { success: true, ...data };
 }
 

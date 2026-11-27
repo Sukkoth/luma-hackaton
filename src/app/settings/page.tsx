@@ -1,15 +1,16 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { eq, inArray } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { userSettings, trackerChapterProgress } from "@/db/schema";
+import { trackerChapterProgress } from "@/db/schema";
 import {
   SettingsView,
   type SettingsTab,
 } from "@/components/settings/settings-view";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
+import { getCachedUserSettings } from "@/lib/request-cache";
 import { getCanonTestamentChapters, type BibleCanon } from "@/data/bibleData";
 
 export const instant = false;
@@ -44,26 +45,27 @@ export default async function SettingsPage({
   const [trackersData, streak, settingsRecord] = await Promise.all([
     getUserTrackersData({ userId: user.id }),
     syncUserStreak({ userId: user.id }),
-    db.query.userSettings.findFirst({
-      where: eq(userSettings.userId, user.id),
-    }),
+    getCachedUserSettings({ userId: user.id }),
   ]);
 
-  // Compute real read chapters for each tracker
+  // Compute real read chapters for each tracker using SQL GROUP BY COUNT
   const trackerIds = trackersData.trackers.map((t) => t.id);
-  const chapterProgressRows =
+  const chapterProgressCounts =
     trackerIds.length > 0
-      ? await db.query.trackerChapterProgress.findMany({
-          where: inArray(trackerChapterProgress.trackerId, trackerIds),
-        })
+      ? await db
+          .select({
+            trackerId: trackerChapterProgress.trackerId,
+            count: sql<number>`count(*)::int`,
+          })
+          .from(trackerChapterProgress)
+          .where(inArray(trackerChapterProgress.trackerId, trackerIds))
+          .groupBy(trackerChapterProgress.trackerId)
       : [];
 
-  const progressCountByTrackerId = chapterProgressRows.reduce<
-    Record<string, number>
-  >((acc, row) => {
-    acc[row.trackerId] = (acc[row.trackerId] || 0) + 1;
-    return acc;
-  }, {});
+  const progressCountByTrackerId: Record<string, number> = {};
+  for (const row of chapterProgressCounts) {
+    progressCountByTrackerId[row.trackerId] = Number(row.count);
+  }
 
   const enrichedTrackers = trackersData.trackers.map((t) => {
     const canon = (t.canon as BibleCanon) || "protestant";
