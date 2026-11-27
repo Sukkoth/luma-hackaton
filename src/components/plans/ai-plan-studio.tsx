@@ -188,7 +188,7 @@ function recalculatePlanMetrics({
 export function AiPlanStudio({
   userId,
   activeTrackerCanon,
-  initialMode = "plan",
+  initialMode = "chat",
   initialConversationId = null,
   initialPrompt,
   initialFolders = [],
@@ -1061,11 +1061,6 @@ export function AiPlanStudio({
           ) : null}
         </div>
       ) : null}
-
-      <p className="px-2 text-center text-[11px] text-muted-foreground">
-        Luma AI is a study assistant — verify verses in Scripture and consult a
-        pastor for personal guidance.
-      </p>
     </form>
   );
 
