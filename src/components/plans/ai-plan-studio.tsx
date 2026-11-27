@@ -203,6 +203,7 @@ export function AiPlanStudio({
   const isBusy = isPlanGenerating || streamingMessageId !== null;
   const planRunIdRef = useRef(0);
   const streamAbortRef = useRef<AbortController | null>(null);
+  const skipNextSyncChatIdRef = useRef<string | null>(null);
 
   const [mode, setMode] = useQueryState(
     "mode",
@@ -280,6 +281,10 @@ export function AiPlanStudio({
   // Load conversation from IndexedDB immediately (SWR), then delta-sync from Postgres
   useEffect(() => {
     if (!activeChatId) return;
+    if (skipNextSyncChatIdRef.current === activeChatId) {
+      skipNextSyncChatIdRef.current = null;
+      return;
+    }
     let cancelled = false;
 
     void (async () => {
@@ -439,6 +444,7 @@ export function AiPlanStudio({
     titleHint?: string;
   }) => {
     let targetConversationId = activeChatId;
+    const isNewConversation = !targetConversationId;
     if (!targetConversationId) {
       const created = await createAiConversationAction({
         mode: turnMode,
@@ -447,7 +453,6 @@ export function AiPlanStudio({
       });
       if (!created.success) return;
       targetConversationId = created.conversation.id;
-      void setChatId(targetConversationId);
     }
 
     const appended = await appendAiTurnAction({
@@ -490,6 +495,10 @@ export function AiPlanStudio({
         messages: merged,
       },
     });
+    if (isNewConversation) {
+      skipNextSyncChatIdRef.current = targetConversationId;
+      void setChatId(targetConversationId);
+    }
     broadcastAiSync({
       type: "conversation-updated",
       userId,
