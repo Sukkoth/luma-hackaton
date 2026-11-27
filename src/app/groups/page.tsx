@@ -4,10 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
-import {
-  getUserGroupsAction,
-  searchPublicGroupsAction,
-} from "@/actions/groups";
+import { getUserGroups, searchPublicGroups } from "@/lib/groups/queries";
 import { syncUserStreak } from "@/lib/streak-service";
 import { GroupsHubView } from "@/components/groups/groups-hub-view";
 
@@ -28,20 +25,12 @@ export default async function GroupsPage() {
     redirect("/login");
   }
 
-  const [trackersData, streak, userGroupsRes, publicGroupsRes] =
-    await Promise.all([
-      getUserTrackersData({ userId: session.user.id }),
-      syncUserStreak({ userId: session.user.id }),
-      getUserGroupsAction(),
-      searchPublicGroupsAction({ limit: 12 }),
-    ]);
-
-  const myGroups =
-    userGroupsRes.success && userGroupsRes.groups ? userGroupsRes.groups : [];
-  const publicGroups =
-    publicGroupsRes.success && publicGroupsRes.groups
-      ? publicGroupsRes.groups
-      : [];
+  const [trackersData, streak, myGroups, publicGroups] = await Promise.all([
+    getUserTrackersData({ userId: session.user.id }),
+    syncUserStreak({ userId: session.user.id }),
+    getUserGroups({ userId: session.user.id }),
+    searchPublicGroups({ userId: session.user.id, limit: 12 }),
+  ]);
 
   return (
     <AppShell

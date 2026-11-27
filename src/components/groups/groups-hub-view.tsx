@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useTransition } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
@@ -30,9 +31,23 @@ import {
   HeaderActions,
   HeaderActionButton,
 } from "@/components/ui/header-action-button";
-import { CreateGroupModal } from "@/components/groups/create-group-modal";
-import { JoinCodeModal } from "@/components/groups/join-code-modal";
 import { cn } from "@/lib/utils";
+
+const CreateGroupModal = dynamic(
+  () =>
+    import("@/components/groups/create-group-modal").then(
+      (mod) => mod.CreateGroupModal
+    ),
+  { ssr: false }
+);
+
+const JoinCodeModal = dynamic(
+  () =>
+    import("@/components/groups/join-code-modal").then(
+      (mod) => mod.JoinCodeModal
+    ),
+  { ssr: false }
+);
 
 export type GroupsHubViewProps = {
   myGroups: ReadonlyArray<UserGroupSummary>;
@@ -816,14 +831,18 @@ export function GroupsHubView({
       </section>
 
       {/* ── Fellowship Modals ── */}
-      <CreateGroupModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-      />
-      <JoinCodeModal
-        isOpen={isJoinCodeOpen}
-        onClose={() => setIsJoinCodeOpen(false)}
-      />
+      {isCreateOpen && (
+        <CreateGroupModal
+          isOpen={isCreateOpen}
+          onClose={() => setIsCreateOpen(false)}
+        />
+      )}
+      {isJoinCodeOpen && (
+        <JoinCodeModal
+          isOpen={isJoinCodeOpen}
+          onClose={() => setIsJoinCodeOpen(false)}
+        />
+      )}
     </div>
   );
 }
