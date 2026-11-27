@@ -6,6 +6,7 @@ import {
   useTransition,
   useSyncExternalStore,
 } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useQueryState, parseAsStringLiteral } from "nuqs";
 import {
@@ -29,9 +30,7 @@ import { authClient } from "@/lib/auth-client";
 import type { UserTrackerSummary } from "@/actions/trackers";
 import { switchTrackerAction } from "@/actions/trackers";
 import { updateUserSettingsAction } from "@/actions/settings";
-import { TrackerCreationModal } from "@/components/trackers/tracker-creation-modal";
 import { TrackerIcon } from "@/components/trackers/tracker-icons";
-import { LogoutConfirmModal } from "@/components/auth/logout-confirm-modal";
 import type { StreakData } from "@/components/streak/streak-detail-modal";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -41,9 +40,36 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { TabsBar, type TabItem } from "@/components/ui/tabs-bar";
-import { ProfileSettingsSection } from "./profile-settings-section";
-import { DataExportTab } from "./data-export-tab";
 import type { BibleCanon } from "@/data/bibleData";
+
+const TrackerCreationModal = dynamic(
+  () =>
+    import("@/components/trackers/tracker-creation-modal").then(
+      (mod) => mod.TrackerCreationModal
+    ),
+  { ssr: false }
+);
+
+const LogoutConfirmModal = dynamic(
+  () =>
+    import("@/components/auth/logout-confirm-modal").then(
+      (mod) => mod.LogoutConfirmModal
+    ),
+  { ssr: false }
+);
+
+const ProfileSettingsSection = dynamic(
+  () =>
+    import("./profile-settings-section").then(
+      (mod) => mod.ProfileSettingsSection
+    ),
+  { ssr: false }
+);
+
+const DataExportTab = dynamic(
+  () => import("./data-export-tab").then((mod) => mod.DataExportTab),
+  { ssr: false }
+);
 import { cn } from "@/lib/utils";
 import {
   requestAndSubscribePush,
@@ -839,24 +865,28 @@ export function SettingsView({
         {activeTab === "export" && <DataExportTab />}
 
         {/* Tracker Creation Modal */}
-        <TrackerCreationModal
-          isOpen={isCreateTrackerOpen}
-          onClose={() => setIsCreateTrackerOpen(false)}
-          onTrackerCreated={(res) => {
-            if (res.success) {
-              toast.success("New tracker created successfully");
-              router.refresh();
-            }
-          }}
-        />
+        {isCreateTrackerOpen && (
+          <TrackerCreationModal
+            isOpen={isCreateTrackerOpen}
+            onClose={() => setIsCreateTrackerOpen(false)}
+            onTrackerCreated={(res) => {
+              if (res.success) {
+                toast.success("New tracker created successfully");
+                router.refresh();
+              }
+            }}
+          />
+        )}
 
         {/* Logout Confirmation Modal */}
-        <LogoutConfirmModal
-          isOpen={isLogoutModalOpen}
-          onClose={() => setIsLogoutModalOpen(false)}
-          onConfirm={handleSignOut}
-          isPending={isSigningOut}
-        />
+        {isLogoutModalOpen && (
+          <LogoutConfirmModal
+            isOpen={isLogoutModalOpen}
+            onClose={() => setIsLogoutModalOpen(false)}
+            onConfirm={handleSignOut}
+            isPending={isSigningOut}
+          />
+        )}
       </div>
     </AppShell>
   );
