@@ -8,6 +8,7 @@ import {
   useCallback,
   useDeferredValue,
 } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
@@ -40,11 +41,32 @@ import {
   deleteFolderAction,
   getSingleNoteAction,
 } from "@/actions/notes";
-import { TiptapEditor } from "./tiptap-editor";
-import { NotesConfirmModal } from "./notes-confirm-modal";
-import { DeleteFolderModal } from "./delete-folder-modal";
-import { CreateFolderModal } from "./create-folder-modal";
 import { FolderCard } from "./folder-card";
+
+const TiptapEditor = dynamic(
+  () => import("./tiptap-editor").then((mod) => mod.TiptapEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[260px] rounded-xl border border-border-subtle bg-surface-elevated/40 animate-pulse" />
+    ),
+  }
+);
+
+const NotesConfirmModal = dynamic(
+  () => import("./notes-confirm-modal").then((mod) => mod.NotesConfirmModal),
+  { ssr: false }
+);
+
+const DeleteFolderModal = dynamic(
+  () => import("./delete-folder-modal").then((mod) => mod.DeleteFolderModal),
+  { ssr: false }
+);
+
+const CreateFolderModal = dynamic(
+  () => import("./create-folder-modal").then((mod) => mod.CreateFolderModal),
+  { ssr: false }
+);
 import { Button } from "@/components/ui/button";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { FilterPills } from "@/components/ui/filter-pills";
@@ -1510,36 +1532,38 @@ export function NotesManager({
       )}
 
       {/* ── Modals & Dialogs ── */}
-      <CreateFolderModal
-        isOpen={showFolderModal}
-        onClose={() => setShowFolderModal(false)}
-        onSubmit={handleCreateNewFolder}
-        isPending={isCreatingFolder}
-      />
+      {showFolderModal && (
+        <CreateFolderModal
+          isOpen={showFolderModal}
+          onClose={() => setShowFolderModal(false)}
+          onSubmit={handleCreateNewFolder}
+          isPending={isCreatingFolder}
+        />
+      )}
 
-      <DeleteFolderModal
-        isOpen={Boolean(folderToDelete)}
-        folder={folderToDelete}
-        onClose={() => setFolderToDelete(null)}
-        onDeleteFolderOnly={handleConfirmDeleteFolderOnly}
-        onDeleteFolderAndNotes={handleConfirmDeleteFolderAndNotes}
-        isPending={isDeletingFolder}
-      />
+      {Boolean(folderToDelete) && (
+        <DeleteFolderModal
+          isOpen={Boolean(folderToDelete)}
+          folder={folderToDelete}
+          onClose={() => setFolderToDelete(null)}
+          onDeleteFolderOnly={handleConfirmDeleteFolderOnly}
+          onDeleteFolderAndNotes={handleConfirmDeleteFolderAndNotes}
+          isPending={isDeletingFolder}
+        />
+      )}
 
-      <NotesConfirmModal
-        isOpen={confirmDialog.isOpen}
-        title={confirmDialog.isOpen ? confirmDialog.title : ""}
-        description={confirmDialog.isOpen ? confirmDialog.description : ""}
-        confirmLabel={
-          confirmDialog.isOpen ? confirmDialog.confirmLabel : "Confirm"
-        }
-        cancelLabel={
-          confirmDialog.isOpen ? confirmDialog.cancelLabel : "Cancel"
-        }
-        variant={confirmDialog.isOpen ? confirmDialog.variant : "warning"}
-        onConfirm={confirmDialog.isOpen ? confirmDialog.onConfirm : () => {}}
-        onCancel={() => setConfirmDialog({ isOpen: false })}
-      />
+      {confirmDialog.isOpen && (
+        <NotesConfirmModal
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          confirmLabel={confirmDialog.confirmLabel}
+          cancelLabel={confirmDialog.cancelLabel}
+          variant={confirmDialog.variant}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog({ isOpen: false })}
+        />
+      )}
     </div>
   );
 }
