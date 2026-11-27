@@ -28,10 +28,7 @@ import {
   type GroupLateJoinPolicy,
   type GroupMembershipStatus,
 } from "@/db/schema";
-import {
-  getUserGroups,
-  searchPublicGroups,
-} from "@/lib/groups/queries";
+import { getUserGroups, searchPublicGroups } from "@/lib/groups/queries";
 import { createNotificationAction } from "@/actions/notifications";
 import { evaluateAndUnlockAchievementsAction } from "@/actions/achievements";
 import {

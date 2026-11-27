@@ -6,10 +6,7 @@ import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
 import { syncUserStreak } from "@/lib/streak-service";
 import { type NoteDetail } from "@/actions/notes";
-import {
-  getUserNotesForUser,
-  getSingleNoteForUser,
-} from "@/lib/notes/queries";
+import { getUserNotesForUser, getSingleNoteForUser } from "@/lib/notes/queries";
 import { NotesManager } from "@/components/notes/notes-manager";
 
 export const instant = false;

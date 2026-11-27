@@ -11,10 +11,7 @@ import {
   trackerChapterProgress,
   unlockedAchievements,
 } from "@/db/schema";
-import {
-  ACHIEVEMENTS,
-  type GroupAchievementStats,
-} from "@/data/achievements";
+import { ACHIEVEMENTS, type GroupAchievementStats } from "@/data/achievements";
 import { syncUserStreak, type UserStreakData } from "@/lib/streak-service";
 import type {
   UserAchievementItem,

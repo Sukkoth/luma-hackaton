@@ -25,10 +25,7 @@ import {
 } from "@/lib/schemas/notes";
 import { PROTESTANT_BIBLE_BOOKS } from "@/data/canons/protestant";
 import { getReadingPlanById } from "@/data/readingPlans";
-import {
-  getUserNotesForUser,
-  getSingleNoteForUser,
-} from "@/lib/notes/queries";
+import { getUserNotesForUser, getSingleNoteForUser } from "@/lib/notes/queries";
 
 export type NoteDetail = {
   id: string;
