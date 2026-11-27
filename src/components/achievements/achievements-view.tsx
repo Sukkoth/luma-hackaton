@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useQueryState, parseAsString, parseAsStringLiteral } from "nuqs";
 import { Award, CheckCircle2, Lock, Flame } from "lucide-react";
 import type {
@@ -9,9 +10,14 @@ import type {
 } from "@/actions/achievements";
 import type { AchievementCategory } from "@/data/achievements";
 import { AchievementCard } from "./achievement-card";
-import { ShareMilestoneModal } from "./share-milestone-modal";
 import { TabsBar } from "@/components/ui/tabs-bar";
 import { FilterPills } from "@/components/ui/filter-pills";
+
+const ShareMilestoneModal = dynamic(
+  () =>
+    import("./share-milestone-modal").then((mod) => mod.ShareMilestoneModal),
+  { ssr: false }
+);
 
 export type StatusFilter = "All" | "Unlocked" | "Locked";
 
