@@ -4,8 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { AppShell } from "@/components/navigation/app-shell";
 import { getUserTrackersData } from "@/actions/trackers";
-import { syncUserStreak } from "@/lib/streak-service";
-import { getUserAchievementsData } from "@/actions/achievements";
+import { getUserAchievementsForUser } from "@/lib/achievements/queries";
 import { AchievementsView } from "@/components/achievements/achievements-view";
 
 export const instant = false;
@@ -28,11 +27,11 @@ export default async function AchievementsPage({}: AchievementsPageProps) {
     redirect("/login?redirect=/achievements");
   }
 
-  const [trackersData, streak, achievementsData] = await Promise.all([
+  const [trackersData, achievementsData] = await Promise.all([
     getUserTrackersData({ userId: session.user.id }),
-    syncUserStreak({ userId: session.user.id }),
-    getUserAchievementsData({ userId: session.user.id }),
+    getUserAchievementsForUser({ userId: session.user.id }),
   ]);
+  const streak = achievementsData.streak;
 
   const userFirstName = session.user.name?.split(" ")[0] || "Reader";
 
